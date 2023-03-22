@@ -1,24 +1,21 @@
 import type { IFieldMeta, IFilter, IRow } from "@kanaries/loa";
-import { CompareTarget, MetricAggregationType } from "../store";
+import type { Aggregator } from "../../../global";
+import { BreakoutMainField } from "../store";
 import { coerceNumber } from "./format";
 
 export type FieldStats = {
-    definition: CompareTarget;
+    definition: BreakoutMainField;
     field: IFieldMeta;
-    stats: { [key in MetricAggregationType]: number };
+    stats: { [key in Aggregator]: number };
 };
 
-export const statDivision = (total: readonly IRow[], data: readonly IRow[], fields: readonly IFieldMeta[], fid: string): { [key in MetricAggregationType]: number } => {
+export const statDivision = (total: readonly IRow[], data: readonly IRow[], fields: readonly IFieldMeta[], fid: string): { [key in Aggregator]: number } => {
     const field = fields.find(f => f.fid === fid);
     if (!field) {
         return {
-            [MetricAggregationType.Average]: NaN,
-            [MetricAggregationType.Sum]: NaN,
-            [MetricAggregationType.Count]: NaN,
-            [MetricAggregationType.WeightedAverage]: NaN,
-            [MetricAggregationType.NumericalRate]: NaN,
-            [MetricAggregationType.C_Rate]: NaN,
-            [MetricAggregationType.C_Count]: NaN,
+            mean: NaN,
+            sum: NaN,
+            count: NaN,
         };
     }
     const isNumerical = field.semanticType === 'quantitative' || field.semanticType === 'temporal';
@@ -38,29 +35,29 @@ export const statDivision = (total: readonly IRow[], data: readonly IRow[], fiel
             sum += coerceNumber(row[fid]);
         }
         return {
-            [MetricAggregationType.Average]: sum / data.length,
-            [MetricAggregationType.Sum]: sum,
-            [MetricAggregationType.Count]: data.length,
-            [MetricAggregationType.WeightedAverage]: NaN,   // TODO:
-            [MetricAggregationType.NumericalRate]: sum / sumT,
-            [MetricAggregationType.C_Rate]: NaN,
-            [MetricAggregationType.C_Count]: NaN,
+            mean: sum / data.length,
+            sum,
+            count: data.length,
+            // [MetricAggregationType.WeightedAverage]: NaN,
+            // [MetricAggregationType.NumericalRate]: sum / sumT,
+            // [MetricAggregationType.C_Rate]: NaN,
+            // [MetricAggregationType.C_Count]: NaN,
         };
     }
     return {
-        [MetricAggregationType.Average]: NaN,
-        [MetricAggregationType.Sum]: NaN,
-        [MetricAggregationType.Count]: NaN,
-        [MetricAggregationType.WeightedAverage]: NaN,
-        [MetricAggregationType.NumericalRate]: NaN,
-        [MetricAggregationType.C_Rate]: NaN,
-        [MetricAggregationType.C_Count]: data.length,
+        mean: NaN,
+        sum: NaN,
+        // [MetricAggregationType.Count]: NaN,
+        // [MetricAggregationType.WeightedAverage]: NaN,
+        // [MetricAggregationType.NumericalRate]: NaN,
+        // [MetricAggregationType.C_Rate]: NaN,
+        count: data.length,
     };
 };
 
-export const statSubgroup = (data: readonly IRow[], fid: string, aggregate: MetricAggregationType): number => {
+export const statSubgroup = (data: readonly IRow[], fid: string, aggregate: Aggregator): number => {
     switch (aggregate) {
-        case MetricAggregationType.Average: {
+        case 'mean': {
             let sum = 0;
             for (const row of data) {
                 const val = coerceNumber(row[fid]);
@@ -71,7 +68,7 @@ export const statSubgroup = (data: readonly IRow[], fid: string, aggregate: Metr
             }
             return sum / data.length;
         }
-        case MetricAggregationType.Sum: {
+        case 'sum': {
             let sum = 0;
             for (const row of data) {
                 const val = coerceNumber(row[fid]);
@@ -82,56 +79,51 @@ export const statSubgroup = (data: readonly IRow[], fid: string, aggregate: Metr
             }
             return sum;
         }
-        case MetricAggregationType.Count: {
+        case 'count': {
             return data.length;
         }
-        case MetricAggregationType.WeightedAverage: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.NumericalRate: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.C_Rate: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.C_Count: {
-            return data.length;
-        }
+        // case MetricAggregationType.WeightedAverage: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.NumericalRate: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.C_Rate: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.C_Count: {
+        //     return data.length;
+        // }
     }
 };
 
-export const impactSubgroupGeneral = (overall: readonly IRow[], selection: readonly IRow[], others: readonly IRow[], fid: string, aggregate: MetricAggregationType): number => {
+export const impactSubgroupGeneral = (overall: readonly IRow[], selection: readonly IRow[], others: readonly IRow[], fid: string, aggregate: Aggregator): number => {
     switch (aggregate) {
-        case MetricAggregationType.Average: {
-            const averOverall = statSubgroup(overall, fid, MetricAggregationType.Average);
-            const averOthers = statSubgroup(others, fid, MetricAggregationType.Average);
+        case 'mean': {
+            const averOverall = statSubgroup(overall, fid, 'mean');
+            const averOthers = statSubgroup(others, fid, 'mean');
             return averOverall - averOthers;
         }
-        case MetricAggregationType.Sum: {
-            return statSubgroup(selection, fid, MetricAggregationType.Sum);
+        case 'sum': {
+            return statSubgroup(selection, fid, 'sum');
         }
-        case MetricAggregationType.Count: {
-            return statSubgroup(selection, fid, MetricAggregationType.Count);
+        case 'count': {
+            return statSubgroup(selection, fid, 'count');
         }
-        case MetricAggregationType.WeightedAverage: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.NumericalRate: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.C_Rate: {
-            const rateOverall = statSubgroup(overall, fid, MetricAggregationType.C_Rate);
-            const rateOthers = statSubgroup(others, fid, MetricAggregationType.C_Rate);
-            return rateOverall - rateOthers;
-        }
-        case MetricAggregationType.C_Count: {
-            return statSubgroup(selection, fid, MetricAggregationType.Count);
-        }
+        // case MetricAggregationType.WeightedAverage: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.NumericalRate: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.C_Rate: {
+        //     const rateOverall = statSubgroup(overall, fid, MetricAggregationType.C_Rate);
+        //     const rateOthers = statSubgroup(others, fid, MetricAggregationType.C_Rate);
+        //     return rateOverall - rateOthers;
+        // }
+        // case MetricAggregationType.C_Count: {
+        //     return statSubgroup(selection, fid, MetricAggregationType.Count);
+        // }
     }
 };
 
@@ -141,48 +133,46 @@ export const impactSubgroupComparison = (
     targetGroup: readonly IRow[],
     compareGroup: readonly IRow[],
     fid: string,
-    aggregate: MetricAggregationType,
+    aggregate: Aggregator,
 ): number => {
     switch (aggregate) {
-        case MetricAggregationType.Average: {
-            const sumSubgroupT2 = statSubgroup(targetGroup, fid, MetricAggregationType.Sum);
-            const sumSubgroupT1 = statSubgroup(compareGroup, fid, MetricAggregationType.Sum);
-            const countOverallT2 = statSubgroup(targetPopulation, fid, MetricAggregationType.Count);
-            const countOverallT1 = statSubgroup(comparePopulation, fid, MetricAggregationType.Count);
+        case 'mean': {
+            const sumSubgroupT2 = statSubgroup(targetGroup, fid, 'sum');
+            const sumSubgroupT1 = statSubgroup(compareGroup, fid, 'sum');
+            const countOverallT2 = statSubgroup(targetPopulation, fid, 'count');
+            const countOverallT1 = statSubgroup(comparePopulation, fid, 'count');
             return sumSubgroupT2 / countOverallT2 - sumSubgroupT1 / countOverallT1;
         }
-        case MetricAggregationType.Sum: {
-            const sumT2 = statSubgroup(targetGroup, fid, MetricAggregationType.Sum);
-            const sumT1 = statSubgroup(compareGroup, fid, MetricAggregationType.Sum);
+        case 'sum': {
+            const sumT2 = statSubgroup(targetGroup, fid, 'sum');
+            const sumT1 = statSubgroup(compareGroup, fid, 'sum');
             return sumT2 - sumT1;
         }
-        case MetricAggregationType.Count: {
-            const countT2 = statSubgroup(targetGroup, fid, MetricAggregationType.Count);
-            const countT1 = statSubgroup(compareGroup, fid, MetricAggregationType.Count);
+        case 'count': {
+            const countT2 = statSubgroup(targetGroup, fid, 'count');
+            const countT1 = statSubgroup(compareGroup, fid, 'count');
             return countT2 - countT1;
         }
-        case MetricAggregationType.WeightedAverage: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.NumericalRate: {
-            // TODO:
-            return NaN;
-        }
-        case MetricAggregationType.C_Rate: {
-            const rateT2 = statSubgroup(targetGroup, fid, MetricAggregationType.C_Rate);
-            const rateT1 = statSubgroup(compareGroup, fid, MetricAggregationType.C_Rate);
-            return rateT2 - rateT1;
-        }
-        case MetricAggregationType.C_Count: {
-            const countT2 = statSubgroup(targetGroup, fid, MetricAggregationType.Count);
-            const countT1 = statSubgroup(compareGroup, fid, MetricAggregationType.Count);
-            return countT2 - countT1;
-        }
+        // case MetricAggregationType.WeightedAverage: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.NumericalRate: {
+        //     return NaN;
+        // }
+        // case MetricAggregationType.C_Rate: {
+        //     const rateT2 = statSubgroup(targetGroup, fid, MetricAggregationType.C_Rate);
+        //     const rateT1 = statSubgroup(compareGroup, fid, MetricAggregationType.C_Rate);
+        //     return rateT2 - rateT1;
+        // }
+        // case MetricAggregationType.C_Count: {
+        //     const countT2 = statSubgroup(targetGroup, fid, MetricAggregationType.Count);
+        //     const countT1 = statSubgroup(compareGroup, fid, MetricAggregationType.Count);
+        //     return countT2 - countT1;
+        // }
     }
 };
 
-export const applyDividers = (dataSource: readonly IRow[], filters: IFilter[]): [readonly IRow[], readonly IRow[]] => {
+export const applyDividers = (dataSource: readonly IRow[], filters: readonly IFilter[]): [readonly IRow[], readonly IRow[]] => {
     if (typeof filters === 'undefined') return [dataSource, []];
     if (filters.length === 0) return [dataSource, []];
     const ans: IRow[] = [];

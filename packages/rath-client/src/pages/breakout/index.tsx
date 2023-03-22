@@ -1,3 +1,4 @@
+import type { IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import styled from "styled-components";
@@ -6,7 +7,7 @@ import { useGlobalStore } from "../../store";
 import ControlPanel from "./components/controlPanel";
 import DataOverview from "./components/dataOverview";
 import DivisionList from "./components/divisionList";
-import { type CompareBase, type CompareTarget, useBreakoutContext } from "./store";
+import { type BreakoutMainField, useBreakoutContext } from "./store";
 
 
 const Outer = styled.div`
@@ -22,25 +23,34 @@ const Content = styled(Card)`
 `;
 
 interface IBreakoutPageProps {
-    defaultCompareTarget?: Readonly<CompareTarget> | null;
-    defaultCompareBase?: Readonly<CompareBase> | null;
+    defaultMainField?: Readonly<BreakoutMainField> | null;
+    defaultMainFieldFilters?: IFilter[];
+    defaultComparisonFilters?: IFilter[];
 }
 
-const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({ defaultCompareTarget, defaultCompareBase }) {
+const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({
+    defaultMainField, defaultMainFieldFilters, defaultComparisonFilters
+}) {
     const { dataSourceStore } = useGlobalStore();
     const BreakoutContext = useBreakoutContext(dataSourceStore);
 
     useEffect(() => {
-        if (defaultCompareTarget !== undefined) {
-            BreakoutContext.value.setCompareTarget(defaultCompareTarget);
+        if (defaultMainField !== undefined) {
+            BreakoutContext.value.setMainField(defaultMainField);
         }
-    }, [defaultCompareTarget, BreakoutContext]);
+    }, [defaultMainField, BreakoutContext]);
 
     useEffect(() => {
-        if (defaultCompareBase !== undefined) {
-            BreakoutContext.value.setCompareBase(defaultCompareBase);
+        if (defaultMainFieldFilters !== undefined) {
+            BreakoutContext.value.setComparisonFilters(defaultMainFieldFilters);
         }
-    }, [defaultCompareBase, BreakoutContext]);
+    }, [defaultMainFieldFilters, BreakoutContext]);
+
+    useEffect(() => {
+        if (defaultComparisonFilters !== undefined) {
+            BreakoutContext.value.setComparisonFilters(defaultComparisonFilters);
+        }
+    }, [defaultComparisonFilters, BreakoutContext]);
 
     return (
         <BreakoutContext.BreakoutProvider>

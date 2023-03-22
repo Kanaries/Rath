@@ -1,5 +1,5 @@
 import type { IFieldMeta, IFilter, IRow } from "@kanaries/loa";
-import { CompareTarget } from "../store";
+import type { BreakoutMainField } from "../store";
 import { applyDividers, impactSubgroupComparison, impactSubgroupGeneral, statSubgroup } from "./stats";
 
 export interface ISubgroupResult {
@@ -20,7 +20,7 @@ const MAX_DEPTH = 3;
 export const analyzeContributions = (
     population: readonly IRow[],
     fields: readonly IFieldMeta[],
-    target: CompareTarget,
+    target: BreakoutMainField,
     compareBase: number,
     path: string[] = [],
 ): ISubgroupResult[] => {
@@ -57,13 +57,13 @@ export const analyzeContributions = (
     const headers: { subgroup: typeof subgroups[number]; value: ISubgroupResult }[] = [];
     for (const subgroup of subgroups) {
         const id = `${subgroup.field.name || subgroup.field.fid} = ${subgroup.filter.values[0]}`;
-        const value = statSubgroup(subgroup.records, target.fid, target.aggregate);
+        const value = statSubgroup(subgroup.records, target.fid, target.aggregator);
         const impact = impactSubgroupGeneral(
             population,
             subgroup.records,
             subgroup.others,
             target.fid,
-            target.aggregate,
+            target.aggregator,
         );
         if (!Number.isFinite(impact) || impact === 0) {
             continue;
@@ -98,7 +98,7 @@ export const analyzeComparisons = (
     targetGroup: readonly IRow[],
     compareGroup: readonly IRow[], 
     fields: readonly IFieldMeta[],
-    target: CompareTarget,
+    target: BreakoutMainField,
     path: string[] = [],
 ): ISubgroupResult[] => {
     const subgroups: { field: IFieldMeta; filter: IFilter & { type: 'set' }; value: unknown; T1: readonly IRow[]; T2: readonly IRow[] }[] = [];
@@ -135,15 +135,15 @@ export const analyzeComparisons = (
     const headers: { subgroup: typeof subgroups[number]; value: ISubgroupResult }[] = [];
     for (const subgroup of subgroups) {
         const id = `${subgroup.field.name || subgroup.field.fid} = ${subgroup.filter.values[0]}`;
-        const value = statSubgroup(subgroup.T2, target.fid, target.aggregate);
-        const compareBase = statSubgroup(subgroup.T1, target.fid, target.aggregate);
+        const value = statSubgroup(subgroup.T2, target.fid, target.aggregator);
+        const compareBase = statSubgroup(subgroup.T1, target.fid, target.aggregator);
         const impact = impactSubgroupComparison(
             subgroup.T2,
             subgroup.T1,
             targetGroup,
             compareGroup,
             target.fid,
-            target.aggregate,
+            target.aggregator,
         );
         if (!Number.isFinite(impact) || impact === 0) {
             continue;

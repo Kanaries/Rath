@@ -1,5 +1,5 @@
 import { Icon } from "@fluentui/react";
-import type { IFieldMeta } from "@kanaries/loa";
+import type { IFieldMeta, IFilter } from "@kanaries/loa";
 import produce from "immer";
 import { toJS } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -8,7 +8,7 @@ import { Fragment } from "react";
 import styled from "styled-components";
 import FilterCreationPill from "../../../components/fieldPill/filterCreationPill";
 import ViewField from "../../megaAutomation/vizOperation/viewField";
-import type { FilterRule, IUniqueFilter } from "../store";
+import type { IUniqueFilter } from "../store";
 
 
 const Container = styled.div`
@@ -20,46 +20,21 @@ const Container = styled.div`
 
 export interface IMetricFilterProps {
     fields: IFieldMeta[];
-    value: FilterRule | null;
-    onChange: (value: FilterRule | null) => void;
+    filters: readonly IFilter[];
+    onChange: (value: IFilter[]) => void;
 }
 
-export const flatFilterRules = (rules: FilterRule | null): IUniqueFilter[] => {
+export const flatFilterRules = (rules: readonly IFilter[]): IUniqueFilter[] => {
     if (!rules) {
         return [];
     }
-    if ('when' in rules) {
-        const res = [rules.when];
-        if ('and' in rules && rules.and) {
-            res.push(...flatFilterRules(rules.and));
-        }
-        return res;
-    }
-    return [];
+    return rules.map(rule => ({
+        ...rule,
+        id: nanoid(),
+    }));
 };
 
-export const mergeFilterRules = (filters: IUniqueFilter[]): FilterRule | null => {
-    if (filters[0]?.type !== 'set') {
-        return null;
-    }
-    const root: { when: IUniqueFilter; and?: FilterRule } = {
-        when: filters[0],
-    };
-    let cursor = root;
-    for (const f of filters.slice(1)) {
-        if (f.type !== 'set') {
-            break;
-        }
-        cursor.and = {
-            when: f,
-        };
-        cursor = cursor.and;
-    }
-    return root;
-};
-
-const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ fields, value, onChange }) {
-    // TODO: not only flat
+const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ fields, filters: value, onChange }) {
     const flatFilters = flatFilterRules(value).reduce<{ field: IFieldMeta; filter: IUniqueFilter }[]>((list, filter) => {
         const field = fields.find(f => f.fid === filter.fid);
         if (field) {
@@ -69,33 +44,11 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
     }, []);
 
     const handleAddFilter = (filter: IUniqueFilter) => {
-        onChange(value ? produce(toJS(value), draft => {
-            if (!('when' in draft)) {
-                return;
-            }
-            let parent: { when: IUniqueFilter; and?: FilterRule } = draft;
-            while (parent.and && 'when' in parent.and) {
-                parent = parent.and;
-            }
-            parent.and = {
-                when: filter,
-            };
-        }) : { when: filter });
+        onChange([...value, filter]);
     };
 
     const submitFlatFilters = (filters: IUniqueFilter[]) => {
-        if (filters.length === 0) {
-            return onChange(null);
-        }
-        const root: { when: IUniqueFilter; and?: FilterRule } = {
-            when: filters[0],
-        };
-        let cursor = root;
-        for (const f of filters.slice(1)) {
-            cursor.and = { when: f };
-            cursor = cursor.and;
-        }
-        onChange(root);
+        onChange(filters);
     };
     
     return (

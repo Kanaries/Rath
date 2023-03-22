@@ -1,14 +1,13 @@
 import { useMemo, useRef } from "react";
 import { ActionButton, Dropdown, Stack } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import produce from "immer";
 import type { IFieldMeta, IFilter } from "@kanaries/loa";
-import { nanoid } from "nanoid";
 import styled from "styled-components";
-import { CategoricalMetricAggregationTypes, CompareTarget, FilterRule, IUniqueFilter, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
+import { CategoricalMetricAggregationTypes, BreakoutMainField, IUniqueFilter, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { coerceNumber } from "../utils/format";
+import type { Aggregator } from "../../../global";
 import ConfigButton, { IConfigButtonRef } from "./configButton";
-import MetricFilter, { flatFilterRules, mergeFilterRules } from "./metricFilter";
+import MetricFilter, { flatFilterRules } from "./metricFilter";
 
 
 const StackTokens = {
@@ -44,14 +43,14 @@ const TargetSelector = styled.div`
     }
 `;
 
-export const resolveCompareTarget = (target: CompareTarget, fields: IFieldMeta[]): { field: IFieldMeta; aggregate: MetricAggregationType; key: string; text: string } | null => {
+export const resolveCompareTarget = (target: BreakoutMainField, fields: IFieldMeta[]): { field: IFieldMeta; aggregate: Aggregator; key: string; text: string } | null => {
     const field = fields.find(f => f.fid === target.fid);
     if (field) {
         return {
             field,
-            aggregate: target.aggregate,
-            key: `${field.name || field.fid}@${target.aggregate}`,
-            text: `${target.aggregate} of "${field.name || field.fid}"`,
+            aggregate: target.aggregator,
+            key: `${field.name || field.fid}@${target.aggregator}`,
+            text: `${target.aggregator} of "${field.name || field.fid}"`,
         };
     }
     return null;
@@ -92,26 +91,25 @@ const mayBePeriod = (field: IFieldMeta): PeriodFlag | null => {
 
 const ControlPanel = observer(function ControlPanel () {
     const context = useBreakoutStore();
-    const { dataSourceStore, compareTarget, compareBase } = context;
+    const { dataSourceStore, mainField, mainFieldFilters, comparisonFilters } = context;
     const { fieldMetas } = dataSourceStore;
 
-    const compareTargetItem = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : undefined;
+    const compareTargetItem = mainField ? resolveCompareTarget(mainField, fieldMetas) : undefined;
     const targetSelectorRef = useRef<IConfigButtonRef>(null);
-    const onSelectTarget = (field: IFieldMeta, aggregate: MetricAggregationType) => {
-        context.setCompareTarget({
+    const onSelectTarget = (field: IFieldMeta, aggregator: Aggregator) => {
+        context.setMainField({
             fid: field.fid,
-            aggregate,
-            metric: null,
+            aggregator,
         });
     };
 
     const validMeasures = fieldMetas.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
 
     const [targetSelectorPeriods, otherFilters] = useMemo<[{ flag: PeriodFlag; filter: IFilter }[], IUniqueFilter[]]>(() => {
-        if (!compareTarget?.metric) {
+        if (mainFieldFilters.length === 0) {
             return [[], []];
         }
-        const filters = flatFilterRules(compareTarget.metric);
+        const filters = flatFilterRules(mainFieldFilters);
         const temporalFilters: { flag: PeriodFlag; filter: IUniqueFilter }[] = [];
         for (const f of filters) {
             const field = fieldMetas.find(which => which.fid === f.fid);
@@ -125,14 +123,14 @@ const ControlPanel = observer(function ControlPanel () {
         }
         const otherFilters = filters.filter(f => !temporalFilters.some(t => t.filter.id === f.id));
         return [temporalFilters, otherFilters];
-    }, [compareTarget, fieldMetas]);
+    }, [mainFieldFilters, fieldMetas]);
 
-    const suggestions = useMemo<{ title: string; rule: FilterRule }[]>(() => {
+    const suggestions = useMemo<{ title: string; rule: IFilter[] }[]>(() => {
         if (targetSelectorPeriods.length === 0) {
             return [];
         }
 
-        const list: { title: string; rule: FilterRule }[] = [];
+        const list: { title: string; rule: IFilter[] }[] = [];
         
         const minFlag = [
             PeriodFlag.Weekday,
@@ -189,20 +187,8 @@ const ControlPanel = observer(function ControlPanel () {
             }
         })();
 
-        const withOthers = (rule: FilterRule) => {
-            const others = mergeFilterRules(otherFilters);
-            if (others) {
-                return produce(others, draft => {
-                    let cursor = draft;
-                    while ('and' in cursor && cursor.and) {
-                        cursor = cursor.and;
-                    }
-                    // @ts-expect-error
-                    cursor.and = rule;
-                });
-            } else {
-                return rule;
-            }
+        const withOthers = (rule: (IFilter | undefined)[]) => {
+            return [...otherFilters, ...rule.filter(Boolean)] as IFilter[];
         };
 
         if (prevPeriod && prevValue !== null) {
@@ -210,44 +196,36 @@ const ControlPanel = observer(function ControlPanel () {
                 case PeriodFlag.Month: {
                     list.push({
                         title: `Same Month Last ${prevPeriod.flag}`,
-                        rule: withOthers({
-                            when: {
+                        rule: withOthers([
+                            {
                                 type: 'set',
-                                id: nanoid(),
                                 fid: minPeriodFilter.fid,
                                 values: [currentValue],
                             },
-                            and: {
-                                when: {
-                                    id: nanoid(),
-                                    type: 'set',
-                                    fid: prevPeriod.filter.fid,
-                                    values: [prevValue],
-                                },
+                            {
+                                type: 'set',
+                                fid: prevPeriod.filter.fid,
+                                values: [prevValue],
                             },
-                        }),
+                        ]),
                     });
                     break;
                 }
                 case PeriodFlag.Season: {
                     list.push({
                         title: `Same Season Last ${prevPeriod.flag}`,
-                        rule: withOthers({
-                            when: {
+                        rule: withOthers([
+                            {
                                 type: 'set',
-                                id: nanoid(),
                                 fid: minPeriodFilter.fid,
                                 values: [currentValue - 1],
                             },
-                            and: {
-                                when: {
-                                    id: nanoid(),
-                                    type: 'set',
-                                    fid: prevPeriod.filter.fid,
-                                    values: [prevValue],
-                                },
+                            {
+                                type: 'set',
+                                fid: prevPeriod.filter.fid,
+                                values: [prevValue],
                             },
-                        }),
+                        ]),
                     });
                     break;
                 }
@@ -261,60 +239,42 @@ const ControlPanel = observer(function ControlPanel () {
             case PeriodFlag.Weekday: {
                 list.push({
                     title: 'Last Week',
-                    rule: withOthers({
-                        when: {
+                    rule: withOthers([
+                        {
                             type: 'set',
-                            id: nanoid(),
                             fid: minPeriodFilter.fid,
                             values: [(currentValue + 6) % 7],
                         },
-                        and: prevPeriod ? {
-                            when: {
-                                ...prevPeriod.filter,
-                                id: nanoid(),
-                            },
-                        } : undefined,
-                    }),
+                        prevPeriod?.filter,
+                    ]),
                 });
                 break;
             }
             case PeriodFlag.Month: {
                 list.push({
                     title: 'Last Month',
-                    rule: withOthers({
-                        when: {
+                    rule: withOthers([
+                        {
                             type: 'set',
-                            id: nanoid(),
                             fid: minPeriodFilter.fid,
                             values: [(currentValue + 11) % 12],
                         },
-                        and: prevPeriod ? {
-                            when: {
-                                ...prevPeriod.filter,
-                                id: nanoid(),
-                            },
-                        } : undefined,
-                    }),
+                        prevPeriod?.filter,
+                    ]),
                 });
                 break;
             }
             case PeriodFlag.Year: {
                 list.push({
                     title: 'Last Year',
-                    rule: withOthers({
-                        when: {
+                    rule: withOthers([
+                        {
                             type: 'set',
-                            id: nanoid(),
                             fid: minPeriodFilter.fid,
                             values: [currentValue - 1],
                         },
-                        and: prevPeriod ? {
-                            when: {
-                                ...prevPeriod.filter,
-                                id: nanoid(),
-                            },
-                        } : undefined,
-                    }),
+                        prevPeriod?.filter,
+                    ]),
                 });
                 break;
             }
@@ -337,12 +297,12 @@ const ControlPanel = observer(function ControlPanel () {
                             </p>
                         )}
                         {validMeasures.map(f => {
-                            const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregate => {
-                                const item: CompareTarget = { fid: f.fid, aggregate, metric: null };
+                            const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregator => {
+                                const item: BreakoutMainField = { fid: f.fid, aggregator };
                                 const target = resolveCompareTarget(item, fieldMetas)!;
                                 return {
                                     key: target.key,
-                                    text: aggregate,
+                                    text: aggregator,
                                     data: item,
                                 };
                             });
@@ -355,7 +315,7 @@ const ControlPanel = observer(function ControlPanel () {
                                     onChange={(_, opt) => {
                                         const item = opt?.data as (typeof options)[number]['data'] | undefined;
                                         if (item) {
-                                            onSelectTarget(f, item.aggregate);
+                                            onSelectTarget(f, item.aggregator);
                                             targetSelectorRef.current?.dismiss();
                                         }
                                     }}
@@ -364,21 +324,19 @@ const ControlPanel = observer(function ControlPanel () {
                         })}
                     </TargetSelector>
                 </ConfigButton>
-                <ConfigButton button={{ iconProps: { iconName: 'Filter' }, disabled: !compareTarget, styles: { root: { padding: '0', minWidth: '32px', borderLeft: 'none' } } }}>
-                    {compareTarget && (
+                <ConfigButton button={{ iconProps: { iconName: 'Filter' }, disabled: !mainField, styles: { root: { padding: '0', minWidth: '32px', borderLeft: 'none' } } }}>
+                    {mainField && (
                         <MetricFilter
                             fields={fieldMetas}
-                            value={compareTarget.metric}
+                            filters={mainFieldFilters}
                             onChange={metric => {
-                                context.setCompareTarget(produce(compareTarget, target => {
-                                    target.metric = metric;
-                                }));
+                                context.setMainFieldFilters(metric);
                             }}
                         />
                     )}
                 </ConfigButton>
             </Stack>
-            {Boolean(compareTarget?.metric) && (
+            {mainFieldFilters.length > 0 && (
                 <ConfigButton button={{ text: 'Compare' }}>
                     {suggestions.length > 0 && (
                         <Stack>
@@ -387,7 +345,7 @@ const ControlPanel = observer(function ControlPanel () {
                                     key={i}
                                     text={sug.title}
                                     onClick={() => {
-                                        context.setCompareBase(sug.rule);
+                                        context.setComparisonFilters(sug.rule);
                                     }}
                                 />
                             ))}
@@ -395,9 +353,9 @@ const ControlPanel = observer(function ControlPanel () {
                     )}
                     <MetricFilter
                         fields={fieldMetas}
-                        value={compareBase}
+                        filters={comparisonFilters}
                         onChange={metric => {
-                            context.setCompareBase(metric);
+                            context.setComparisonFilters(metric);
                         }}
                     />
                 </ConfigButton>

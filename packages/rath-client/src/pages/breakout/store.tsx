@@ -1,61 +1,67 @@
-import type { IFilter, IRow } from "@kanaries/loa";
+import type { IFieldMeta, IFilter, IRow } from "@kanaries/loa";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, memo, useContext, useEffect, useMemo } from "react";
+import type { Aggregator } from "../../global";
 import type { DataSourceStore } from "../../store/dataSourceStore";
 import { resolveCompareTarget } from "./components/controlPanel";
-import { flatFilterRules } from "./components/metricFilter";
 import { applyDividers, FieldStats, statDivision } from "./utils/stats";
 import { analyzeComparisons, analyzeContributions, ISubgroupResult } from "./utils/top-drivers";
 
 
 export type IUniqueFilter = IFilter & { id: string };
-
-export type FilterRule = (
-    | { when: IUniqueFilter }
-    | { not: IUniqueFilter }
-) & (
-    | { and?: FilterRule }
-    | { or?: FilterRule }
-);
-
-export enum MetricAggregationType {
-    Average = "average",
-    Sum = "sum",
-    Count = "count",
-    WeightedAverage = "weighted_average",
-    NumericalRate = "numerical_rate",
-    C_Rate = "c-rate",
-    C_Count = "c-count",
-}
+export type IExportFilter = IFilter & Pick<IFieldMeta, 'name' | 'semanticType' | 'distribution'>;
 
 export const NumericalMetricAggregationTypes = [
-    MetricAggregationType.Average,
-    MetricAggregationType.Sum,
-    MetricAggregationType.Count,
-    MetricAggregationType.WeightedAverage,
-    MetricAggregationType.NumericalRate,
+    'mean',
+    'sum',
+    'count',
+    // MetricAggregationType.WeightedAverage,
+    // MetricAggregationType.NumericalRate,
 ] as const;
 
 export const CategoricalMetricAggregationTypes = [
-    MetricAggregationType.C_Rate,
-    MetricAggregationType.C_Count,
+    // MetricAggregationType.C_Rate,
+    // MetricAggregationType.C_Count,
 ] as const;
 
-export type CompareTarget = {
+export type BreakoutMainField = {
     fid: string;
-    aggregate: MetricAggregationType;
-    metric: FilterRule | null;
+    aggregator: Aggregator;
 };
 
-export type CompareBase = FilterRule;
+export type BreakoutMainFieldExport = BreakoutMainField & Pick<IFieldMeta, 'name' | 'semanticType' | 'distribution'>;
+
+export type BreakoutStoreExports = {
+    mainField: BreakoutMainFieldExport | null;
+    mainFieldFilters: IExportFilter[];
+    comparisonFilters: IExportFilter[];
+};
+
+const exportFilters = (filters: IFilter[], fieldMetas: IFieldMeta[]): IExportFilter[] => {
+    const result: IExportFilter[] = [];
+    for (const filter of filters) {
+        const field = fieldMetas.find(f => f.fid === filter.fid);
+        if (field) {
+            result.push({
+                ...filter,
+                name: field.name,
+                semanticType: field.semanticType,
+                distribution: field.distribution,
+            });
+        }
+    }
+    return result;
+};
 
 export class BreakoutStore {
 
     public readonly dataSourceStore: DataSourceStore;
 
-    public compareTarget: Readonly<CompareTarget> | null;
+    public mainField: Readonly<BreakoutMainField> | null;
 
-    public compareBase: Readonly<CompareBase> | null;
+    public mainFieldFilters: IFilter[];
+    
+    public comparisonFilters: IFilter[];
 
     public get totalData() {
         return this.dataSourceStore.cleanedData;
@@ -72,8 +78,9 @@ export class BreakoutStore {
     
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
-        this.compareTarget = null;
-        this.compareBase = null;
+        this.mainField = null;
+        this.mainFieldFilters = [];
+        this.comparisonFilters = [];
         this.selection = dataSourceStore.cleanedData;
         this.diffGroup = [];
         this.globalStats = null;
@@ -82,7 +89,9 @@ export class BreakoutStore {
         this.generalAnalyses = [];
         this.comparisonAnalyses = [];
         makeAutoObservable(this, {
-            compareTarget: observable.ref,
+            mainField: observable.ref,
+            mainFieldFilters: observable.ref,
+            comparisonFilters: observable.ref,
             selection: observable.ref,
             diffGroup: observable.ref,
             globalStats: observable.ref,
@@ -94,13 +103,17 @@ export class BreakoutStore {
         });
         // TODO: collect effect
         // TODO: use rxjs
-        const updateSelection = (compareTarget: Readonly<CompareTarget> | null, compareBase: Readonly<CompareBase> | null) => {
+        const updateSelection = (
+            mainField: Readonly<BreakoutMainField> | null,
+            mainFieldFilters: Readonly<IFilter[]>,
+            comparisonFilters: Readonly<IFilter[]>,
+        ) => {
             const fieldMetas = this.dataSourceStore.fieldMetas;
-            const targetField = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : null;
+            const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
             let globalStats: typeof this['globalStats'] = null;
-            if (compareTarget && targetField) {
+            if (mainField && targetField) {
                 globalStats = {
-                    definition: compareTarget,
+                    definition: mainField,
                     field: targetField.field,
                     stats: statDivision(this.totalData, this.totalData, fieldMetas, targetField.field.fid),
                 };
@@ -109,63 +122,64 @@ export class BreakoutStore {
                 this.globalStats = globalStats;
             });
             
-            const filters = flatFilterRules(compareTarget?.metric ?? null);
             runInAction(() => {
-                const [filtered] = applyDividers(this.totalData, filters);
+                const [filtered] = applyDividers(this.totalData, mainFieldFilters);
                 this.selection = filtered;
-                const targetField = this.compareTarget ? resolveCompareTarget(this.compareTarget, fieldMetas) : null;
-                if (this.compareTarget && targetField && compareTarget?.metric) {
+                const targetField = this.mainField ? resolveCompareTarget(this.mainField, fieldMetas) : null;
+                if (this.mainField && targetField && mainFieldFilters.length > 0) {
                     this.selectionStats = {
-                        definition: this.compareTarget,
+                        definition: this.mainField,
                         field: targetField.field,
-                        stats: statDivision(this.totalData, filtered, fieldMetas, this.compareTarget.fid),
+                        stats: statDivision(this.totalData, filtered, fieldMetas, this.mainField.fid),
                     };
                 } else {
                     this.selectionStats = null;
                 }
             });
             runInAction(() => {
-                if (!compareTarget || !globalStats) {
+                if (!mainField || !globalStats) {
                     this.generalAnalyses = [];
                     this.comparisonAnalyses = [];
                 } else {
                     this.generalAnalyses = analyzeContributions(
                         this.selection,
                         fieldMetas,
-                        compareTarget,
-                        globalStats.stats[compareTarget.aggregate],
+                        mainField,
+                        globalStats.stats[mainField.aggregator],
                     );
                 }
             });
             runInAction(() => {
-                if (!this.compareTarget || !targetField || !compareBase) {
+                if (!this.mainField || !targetField || comparisonFilters.length === 0) {
                     this.diffGroup = [];
                     this.diffStats = null;
                     this.comparisonAnalyses = [];
                 } else {
-                    const filters = flatFilterRules(compareBase);
-                    const [filtered] = applyDividers(this.totalData, filters);
+                    const [filtered] = applyDividers(this.totalData, comparisonFilters);
                     this.diffGroup = filtered;
                     this.diffStats = {
-                        definition: this.compareTarget,
+                        definition: this.mainField,
                         field: targetField.field,
-                        stats: statDivision(this.totalData, filtered, fieldMetas, this.compareTarget.fid),
+                        stats: statDivision(this.totalData, filtered, fieldMetas, this.mainField.fid),
                     };
                     this.comparisonAnalyses = analyzeComparisons(
                         this.selection,
                         this.diffGroup,
                         fieldMetas,
-                        this.compareTarget,
+                        this.mainField,
                     );
                 }
             });
         };
-        reaction(() => this.compareTarget, compareTarget => {
+        reaction(() => this.mainField, mainField => {
             // FIXME: data & fieldMetas also reactive
-            updateSelection(compareTarget, this.compareBase);
+            updateSelection(mainField, this.mainFieldFilters, this.comparisonFilters);
         });
-        reaction(() => this.compareBase, compareBase => {
-            updateSelection(this.compareTarget, compareBase);
+        reaction(() => this.mainFieldFilters, mainFieldFilters => {
+            updateSelection(this.mainField, mainFieldFilters, this.comparisonFilters);
+        });
+        reaction(() => this.comparisonFilters, comparisonFilters => {
+            updateSelection(this.mainField, this.mainFieldFilters, comparisonFilters);
         });
     }
 
@@ -173,12 +187,31 @@ export class BreakoutStore {
         // TODO: clear side effect
     }
 
-    public setCompareTarget(compareTarget: Readonly<CompareTarget> | null) {
-        this.compareTarget = compareTarget;
+    public export(): BreakoutStoreExports {
+        const { fieldMetas } = this.dataSourceStore;
+        const main = this.mainField ? resolveCompareTarget(this.mainField, fieldMetas) : null;
+        return {
+            mainField: main ? {
+                ...this.mainField!,
+                name: main.field.name,
+                semanticType: main.field.semanticType,
+                distribution: main.field.distribution,
+            } : null,
+            mainFieldFilters: exportFilters(this.mainFieldFilters, fieldMetas),
+            comparisonFilters: exportFilters(this.comparisonFilters, fieldMetas),
+        };
     }
 
-    public setCompareBase(compareBase: Readonly<CompareBase> | null) {
-        this.compareBase = compareBase;
+    public setMainField(mainField: Readonly<BreakoutMainField> | null) {
+        this.mainField = mainField;
+    }
+
+    public setMainFieldFilters(mainFieldFilters: IFilter[]) {
+        this.mainFieldFilters = mainFieldFilters;
+    }
+
+    public setComparisonFilters(comparisonFilters: IFilter[]) {
+        this.comparisonFilters = comparisonFilters;
     }
 
 }

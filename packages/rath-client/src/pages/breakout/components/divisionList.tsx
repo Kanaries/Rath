@@ -272,15 +272,15 @@ export interface IDivisionListProps {
 
 const DivisionList = observer<IDivisionListProps>(function DivisionList () {
     const context = useBreakoutStore();
-    const { generalAnalyses, comparisonAnalyses, compareTarget, compareBase, dataSourceStore } = context;
+    const { generalAnalyses, comparisonAnalyses, mainField, comparisonFilters, dataSourceStore } = context;
     const { fieldMetas } = dataSourceStore;
-    const targetField = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : null;
+    const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
 
     return (
         <div>
-            {compareTarget && targetField && (
+            {mainField && targetField && (
                 <Pivot>
-                    {!compareBase && (
+                    {comparisonFilters.length === 0 && (
                         <PivotItem headerText="General Contribution">
                             <DivisionDetailList
                                 data={generalAnalyses}
@@ -288,7 +288,7 @@ const DivisionList = observer<IDivisionListProps>(function DivisionList () {
                             />
                         </PivotItem>
                     )}
-                    {Boolean(compareBase) && (
+                    {comparisonFilters.length > 0 && (
                         <PivotItem headerText="Comparison Contribution">
                             <DivisionDetailList
                                 data={comparisonAnalyses}

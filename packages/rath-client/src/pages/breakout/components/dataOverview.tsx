@@ -1,7 +1,8 @@
 import { Stack } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
-import { CategoricalMetricAggregationTypes, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
+import { Aggregator } from "../../../global";
+import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
 import { resolveCompareTarget } from "./controlPanel";
@@ -92,27 +93,26 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
 
     const isNumerical = field.semanticType === 'quantitative';
 
-    let list: { key: MetricAggregationType; data: string }[] = isNumerical ? NumericalMetricAggregationTypes.map(key => {
+    let list: { key: Aggregator; data: string }[] = isNumerical ? NumericalMetricAggregationTypes.map(key => {
         const value = features[key];
         return {
             key: key,
-            data: key === MetricAggregationType.NumericalRate ? formatRate(value, 1) : formatNumber(value),
+            data: formatNumber(value),
         };
     }) : CategoricalMetricAggregationTypes.map(key => {
         const value = features[key];
         return {
             key: key,
-            data: key === MetricAggregationType.C_Rate ? formatRate(value, 1) : formatNumber(value),
+            data: formatNumber(value),
         };
     });
 
-    // TODO: hide some unimplemented items
     list = list.filter(item => item.data !== '-');
 
-    const main = list.find(({ key }) => key === definition.aggregate);
+    const main = list.find(({ key }) => key === definition.aggregator);
 
     const diff = compareBase ? (
-        (features[definition.aggregate] - compareBase.stats[definition.aggregate]) / compareBase.stats[definition.aggregate]
+        (features[definition.aggregator] - compareBase.stats[definition.aggregator]) / compareBase.stats[definition.aggregator]
     ) : null;
 
     return (
@@ -121,7 +121,7 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
                 {title}
             </header>
             <dl className="main">
-                <dt>{definition.aggregate}</dt>
+                <dt>{definition.aggregator}</dt>
                 <dd>
                     <span className="data">
                         {main?.data || '-'}
@@ -149,25 +149,25 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
 
 const DataOverview = observer(function DataOverview () {
     const context = useBreakoutStore();
-    const { dataSourceStore, compareTarget, compareBase, globalStats: targetGlobalStats, diffStats, selectionStats: targetSelectionStats } = context;
+    const { dataSourceStore, mainField, mainFieldFilters, comparisonFilters, globalStats, diffStats, selectionStats } = context;
     const { fieldMetas } = dataSourceStore;
-    const targetField = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : null;
+    const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
 
-    const compareStats = compareBase ? diffStats : targetGlobalStats;
+    const compareStats = comparisonFilters.length > 0 ? diffStats : globalStats;
 
-    const showGlobalStats = targetGlobalStats?.definition.metric === null;
-    const showSelectionStats = compareStats && Boolean(targetSelectionStats);
+    const showGlobalStats = globalStats && targetField && mainFieldFilters.length === 0;
+    const showSelectionStats = targetField && compareStats && selectionStats && !showGlobalStats;
 
     return (
         <Stack horizontal tokens={StackTokens} verticalAlign="center">
             {showGlobalStats && (
-                <OverviewCard stats={targetGlobalStats} title={targetField!.text} />
+                <OverviewCard stats={globalStats} title={targetField.text} />
             )}
             {showSelectionStats && (
                 <>
-                    <OverviewCard stats={compareStats} title={targetField!.text} />
+                    <OverviewCard stats={compareStats} title={targetField.text} />
                     <span>vs</span>
-                    <OverviewCard stats={targetSelectionStats!} compareBase={compareStats} title={"Selection"} />
+                    <OverviewCard stats={selectionStats} compareBase={compareStats} title={"Selection"} />
                 </>
             )}
         </Stack>
