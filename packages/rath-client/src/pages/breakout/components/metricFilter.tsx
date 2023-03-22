@@ -1,6 +1,7 @@
 import { Icon } from "@fluentui/react";
 import type { IFieldMeta } from "@kanaries/loa";
 import produce from "immer";
+import { toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { Fragment } from "react";
@@ -48,7 +49,7 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
     }, []);
 
     const handleAddFilter = (filter: IUniqueFilter) => {
-        onChange(value ? produce(value, draft => {
+        onChange(value ? produce(toJS(value), draft => {
             if (!('when' in draft)) {
                 return;
             }
@@ -90,7 +91,7 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
                             type={f.field.analyticType}
                             text={filterDesc}
                             onRemove={() => {
-                                submitFlatFilters(produce(flatFilters.map(f => f.filter), draft => {
+                                submitFlatFilters(produce(toJS(flatFilters).map(f => f.filter), draft => {
                                     draft.splice(i, 1);
                                 }));
                             }}
