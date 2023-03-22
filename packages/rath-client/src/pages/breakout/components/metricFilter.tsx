@@ -8,7 +8,7 @@ import { Fragment } from "react";
 import styled from "styled-components";
 import FilterCreationPill from "../../../components/fieldPill/filterCreationPill";
 import ViewField from "../../megaAutomation/vizOperation/viewField";
-import { FilterRule, IUniqueFilter } from "../store";
+import type { FilterRule, IUniqueFilter } from "../store";
 
 
 const Container = styled.div`
@@ -36,6 +36,26 @@ export const flatFilterRules = (rules: FilterRule | null): IUniqueFilter[] => {
         return res;
     }
     return [];
+};
+
+export const mergeFilterRules = (filters: IUniqueFilter[]): FilterRule | null => {
+    if (filters[0]?.type !== 'set') {
+        return null;
+    }
+    const root: { when: IUniqueFilter; and?: FilterRule } = {
+        when: filters[0],
+    };
+    let cursor = root;
+    for (const f of filters.slice(1)) {
+        if (f.type !== 'set') {
+            break;
+        }
+        cursor.and = {
+            when: f,
+        };
+        cursor = cursor.and;
+    }
+    return root;
 };
 
 const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ fields, value, onChange }) {
@@ -91,7 +111,7 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
                             type={f.field.analyticType}
                             text={filterDesc}
                             onRemove={() => {
-                                submitFlatFilters(produce(toJS(flatFilters).map(f => f.filter), draft => {
+                                submitFlatFilters(produce(flatFilters.map(f => toJS(f.filter)), draft => {
                                     draft.splice(i, 1);
                                 }));
                             }}

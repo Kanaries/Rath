@@ -159,13 +159,14 @@ const DataOverview = observer(function DataOverview () {
     const showSelectionStats = compareStats && Boolean(targetSelectionStats);
 
     return (
-        <Stack horizontal tokens={StackTokens}>
+        <Stack horizontal tokens={StackTokens} verticalAlign="center">
             {showGlobalStats && (
                 <OverviewCard stats={targetGlobalStats} title={targetField!.text} />
             )}
             {showSelectionStats && (
                 <>
                     <OverviewCard stats={compareStats} title={targetField!.text} />
+                    <span>vs</span>
                     <OverviewCard stats={targetSelectionStats!} compareBase={compareStats} title={"Selection"} />
                 </>
             )}

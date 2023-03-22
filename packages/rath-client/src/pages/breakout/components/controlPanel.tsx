@@ -5,10 +5,10 @@ import produce from "immer";
 import type { IFieldMeta, IFilter } from "@kanaries/loa";
 import { nanoid } from "nanoid";
 import styled from "styled-components";
-import { CategoricalMetricAggregationTypes, CompareTarget, FilterRule, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
+import { CategoricalMetricAggregationTypes, CompareTarget, FilterRule, IUniqueFilter, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { coerceNumber } from "../utils/format";
 import ConfigButton, { IConfigButtonRef } from "./configButton";
-import MetricFilter, { flatFilterRules } from "./metricFilter";
+import MetricFilter, { flatFilterRules, mergeFilterRules } from "./metricFilter";
 
 
 const StackTokens = {
@@ -107,12 +107,12 @@ const ControlPanel = observer(function ControlPanel () {
 
     const validMeasures = fieldMetas.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
 
-    const targetSelectorPeriods = useMemo<{ flag: PeriodFlag; filter: IFilter }[]>(() => {
+    const [targetSelectorPeriods, otherFilters] = useMemo<[{ flag: PeriodFlag; filter: IFilter }[], IUniqueFilter[]]>(() => {
         if (!compareTarget?.metric) {
-            return [];
+            return [[], []];
         }
         const filters = flatFilterRules(compareTarget.metric);
-        const temporalFilters: { flag: PeriodFlag; filter: IFilter }[] = [];
+        const temporalFilters: { flag: PeriodFlag; filter: IUniqueFilter }[] = [];
         for (const f of filters) {
             const field = fieldMetas.find(which => which.fid === f.fid);
             if (!field) {
@@ -123,7 +123,8 @@ const ControlPanel = observer(function ControlPanel () {
                 temporalFilters.push({ flag, filter: f });
             }
         }
-        return temporalFilters;
+        const otherFilters = filters.filter(f => !temporalFilters.some(t => t.filter.id === f.id));
+        return [temporalFilters, otherFilters];
     }, [compareTarget, fieldMetas]);
 
     const suggestions = useMemo<{ title: string; rule: FilterRule }[]>(() => {
@@ -188,12 +189,28 @@ const ControlPanel = observer(function ControlPanel () {
             }
         })();
 
+        const withOthers = (rule: FilterRule) => {
+            const others = mergeFilterRules(otherFilters);
+            if (others) {
+                return produce(others, draft => {
+                    let cursor = draft;
+                    while ('and' in cursor && cursor.and) {
+                        cursor = cursor.and;
+                    }
+                    // @ts-expect-error
+                    cursor.and = rule;
+                });
+            } else {
+                return rule;
+            }
+        };
+
         if (prevPeriod && prevValue !== null) {
             switch (minFlag) {
                 case PeriodFlag.Month: {
                     list.push({
                         title: `Same Month Last ${prevPeriod.flag}`,
-                        rule: {
+                        rule: withOthers({
                             when: {
                                 type: 'set',
                                 id: nanoid(),
@@ -208,14 +225,14 @@ const ControlPanel = observer(function ControlPanel () {
                                     values: [prevValue],
                                 },
                             },
-                        },
+                        }),
                     });
                     break;
                 }
                 case PeriodFlag.Season: {
                     list.push({
                         title: `Same Season Last ${prevPeriod.flag}`,
-                        rule: {
+                        rule: withOthers({
                             when: {
                                 type: 'set',
                                 id: nanoid(),
@@ -230,7 +247,7 @@ const ControlPanel = observer(function ControlPanel () {
                                     values: [prevValue],
                                 },
                             },
-                        },
+                        }),
                     });
                     break;
                 }
@@ -244,7 +261,7 @@ const ControlPanel = observer(function ControlPanel () {
             case PeriodFlag.Weekday: {
                 list.push({
                     title: 'Last Week',
-                    rule: {
+                    rule: withOthers({
                         when: {
                             type: 'set',
                             id: nanoid(),
@@ -257,14 +274,14 @@ const ControlPanel = observer(function ControlPanel () {
                                 id: nanoid(),
                             },
                         } : undefined,
-                    },
+                    }),
                 });
                 break;
             }
             case PeriodFlag.Month: {
                 list.push({
                     title: 'Last Month',
-                    rule: {
+                    rule: withOthers({
                         when: {
                             type: 'set',
                             id: nanoid(),
@@ -277,14 +294,14 @@ const ControlPanel = observer(function ControlPanel () {
                                 id: nanoid(),
                             },
                         } : undefined,
-                    },
+                    }),
                 });
                 break;
             }
             case PeriodFlag.Year: {
                 list.push({
                     title: 'Last Year',
-                    rule: {
+                    rule: withOthers({
                         when: {
                             type: 'set',
                             id: nanoid(),
@@ -297,7 +314,7 @@ const ControlPanel = observer(function ControlPanel () {
                                 id: nanoid(),
                             },
                         } : undefined,
-                    },
+                    }),
                 });
                 break;
             }
@@ -307,7 +324,7 @@ const ControlPanel = observer(function ControlPanel () {
         }
 
         return list;
-    }, [targetSelectorPeriods]);
+    }, [targetSelectorPeriods, otherFilters]);
 
     return (
         <Stack horizontal tokens={StackTokens}>

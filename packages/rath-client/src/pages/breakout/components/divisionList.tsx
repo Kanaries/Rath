@@ -45,6 +45,16 @@ const DiffCell = styled.span`
             color: red;
         }
     }
+    .detail {
+        font-size: 0.5rem;
+        margin-left: 1em;
+        ::before {
+            content: "(";
+        }
+        ::after {
+            content: ")";
+        }
+    }
 `;
 
 const ImpactCell = styled.span`
@@ -192,10 +202,23 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
             name: 'Rate',
             minWidth: 200,
             onRender(item: IFlatSubgroupResult | undefined) {
+                const prev = item?.rateBefore;
+                const next = item?.rate;
+                const diff = prev !== undefined && next !== undefined ? (
+                    next - prev
+                ) : null;
                 return (
-                    <span>
-                        {formatRate(item?.rate, 2)}
-                    </span>
+                    <DiffCell>
+                        <span>
+                            {formatRate(next, 2)}
+                        </span>
+                        {diff && (
+                            <span className="detail">
+                                {diff > 0 && `+${formatRate(diff, 2)}`}
+                                {diff < 0 && formatRate(diff, 2)}
+                            </span>
+                        )}
+                    </DiffCell>
                 );
             },
         },
