@@ -212,10 +212,10 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
                         <span>
                             {formatRate(next, 2)}
                         </span>
-                        {diff && (
+                        {Boolean(diff) && (
                             <span className="detail">
-                                {diff > 0 && `+${formatRate(diff, 2)}`}
-                                {diff < 0 && formatRate(diff, 2)}
+                                {diff! > 0 && `+${formatRate(diff, 2)}`}
+                                {diff! < 0 && formatRate(diff, 2)}
                             </span>
                         )}
                     </DiffCell>
