@@ -28,6 +28,7 @@ const VisualInterface: React.FC = (props) => {
             i18nLang={langStore.lang}
             keepAlive
             dark="light"
+            fieldKeyGuard={false}
         />
     );
 };

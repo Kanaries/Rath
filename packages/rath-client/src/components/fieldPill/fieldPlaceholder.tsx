@@ -8,6 +8,7 @@ export const PillPlaceholder = styled.div`
     color: #000;
     -ms-user-select: none;
     -webkit-user-select: none;
+    border-color: rgb(229,231,235);
     /* border-radius: 10px; */
     border-style: dashed;
     border-radius: 10px;
