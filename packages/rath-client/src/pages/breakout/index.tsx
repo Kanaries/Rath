@@ -23,7 +23,7 @@ const Content = styled(Card)`
 
 interface IBreakoutPageProps {
     defaultCompareTarget?: Readonly<CompareTarget> | null;
-    defaultCompareBase?: CompareBase;
+    defaultCompareBase?: Readonly<CompareBase> | null;
 }
 
 const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({ defaultCompareTarget, defaultCompareBase }) {
