@@ -20,6 +20,7 @@ import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 import DataConnection from './pages/dataConnection';
+import BreakoutPage from './pages/breakout';
 
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
                     {appKey === PIVOT_KEYS.connection && <DataConnection />}
+                    {appKey === PIVOT_KEYS.breakout && <BreakoutPage />}
                     <CrInfo />
                 </div>
             </div>

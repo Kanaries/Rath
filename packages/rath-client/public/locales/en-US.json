@@ -71,7 +71,8 @@
         "collection": "Collection",
         "dashboard": "Dashboard",
         "causal": "Causal",
-        "connection": "Data Connections"
+        "connection": "Data Connections",
+        "breakout": "Breakout Analysis"
     },
     "preference": {
         "title": "preference",

@@ -70,7 +70,8 @@
         "collection": "收藏夹",
         "dashboard": "报表",
         "causal": "因果分析",
-        "connection": "数据源连接"
+        "connection": "数据源连接",
+        "breakout": "异变分析"
     },
     "preference": {
         "title": "个人偏好",

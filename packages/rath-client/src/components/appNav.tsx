@@ -61,7 +61,8 @@ const IconMap = {
     [PIVOT_KEYS.collection]: 'Heart',
     [PIVOT_KEYS.dashboard]: 'Presentation',
     [PIVOT_KEYS.causal]: 'Relationship',
-    [PIVOT_KEYS.connection]: 'Database'
+    [PIVOT_KEYS.connection]: 'Database',
+    [PIVOT_KEYS.breakout]: 'Financial',
 } as {
     [key: string]: string;
 };
@@ -75,6 +76,7 @@ const HotKeyMap = {
     L: PIVOT_KEYS.collection,
     B: PIVOT_KEYS.dashboard,
     C: PIVOT_KEYS.causal,
+    K: PIVOT_KEYS.breakout,
 } as const;
 
 function getIcon(k: string): string {
@@ -179,6 +181,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                         // PIVOT_KEYS.dashBoard,
                         PIVOT_KEYS.causal,
                         PIVOT_KEYS.dashBoardDesigner,
+                        PIVOT_KEYS.breakout,
                     ]),
                 },
                 ...getLinks([PIVOT_KEYS.support]),
