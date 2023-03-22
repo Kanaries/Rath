@@ -1,8 +1,10 @@
 import type { IFieldMeta, IFilter, IRow } from "@kanaries/loa";
-import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, runInAction } from "mobx";
 import { createContext, memo, useContext, useEffect, useMemo } from "react";
+import { combineLatest } from "rxjs";
 import type { Aggregator } from "../../global";
 import type { DataSourceStore } from "../../store/dataSourceStore";
+import { toStream } from "../../utils/mobx-utils";
 import { resolveCompareTarget } from "./components/controlPanel";
 import { applyDividers, FieldStats, statDivision } from "./utils/stats";
 import { analyzeComparisons, analyzeContributions, ISubgroupResult } from "./utils/top-drivers";
@@ -63,9 +65,6 @@ export class BreakoutStore {
     
     public comparisonFilters: IFilter[];
 
-    public get totalData() {
-        return this.dataSourceStore.cleanedData;
-    }
     public selection: readonly IRow[];
     public diffGroup: readonly IRow[];
 
@@ -89,6 +88,7 @@ export class BreakoutStore {
         this.generalAnalyses = [];
         this.comparisonAnalyses = [];
         makeAutoObservable(this, {
+            destroy: false,
             mainField: observable.ref,
             mainFieldFilters: observable.ref,
             comparisonFilters: observable.ref,
@@ -101,21 +101,28 @@ export class BreakoutStore {
             comparisonAnalyses: observable.ref,
             dataSourceStore: false,
         });
-        // TODO: collect effect
-        // TODO: use rxjs
-        const updateSelection = (
-            mainField: Readonly<BreakoutMainField> | null,
-            mainFieldFilters: Readonly<IFilter[]>,
-            comparisonFilters: Readonly<IFilter[]>,
-        ) => {
-            const fieldMetas = this.dataSourceStore.fieldMetas;
-            const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
+        const data$ = toStream(() => this.dataSourceStore.cleanedData, true);
+        const fields$ = toStream(() => this.dataSourceStore.fieldMetas, true);
+        const mainField$ = toStream(() => this.mainField, true);
+        const mainFieldFilters$ = toStream(() => this.mainFieldFilters, true);
+        const comparisonFilters$ = toStream(() => this.comparisonFilters, true);
+
+        const inputFlow$ = combineLatest({
+            data: data$,
+            fields: fields$,
+            mainField: mainField$,
+            mainFieldFilters: mainFieldFilters$,
+            comparisonFilters: comparisonFilters$,
+        });
+
+        const calculateReaction = inputFlow$.subscribe(({ data, fields, mainField, mainFieldFilters, comparisonFilters }) => {
+            const targetField = mainField ? resolveCompareTarget(mainField, fields) : null;
             let globalStats: typeof this['globalStats'] = null;
             if (mainField && targetField) {
                 globalStats = {
                     definition: mainField,
                     field: targetField.field,
-                    stats: statDivision(this.totalData, this.totalData, fieldMetas, targetField.field.fid),
+                    stats: statDivision(data, data, fields, targetField.field.fid),
                 };
             }
             runInAction(() => {
@@ -123,14 +130,14 @@ export class BreakoutStore {
             });
             
             runInAction(() => {
-                const [filtered] = applyDividers(this.totalData, mainFieldFilters);
+                const [filtered] = applyDividers(data, mainFieldFilters);
                 this.selection = filtered;
-                const targetField = this.mainField ? resolveCompareTarget(this.mainField, fieldMetas) : null;
+                const targetField = this.mainField ? resolveCompareTarget(this.mainField, fields) : null;
                 if (this.mainField && targetField && mainFieldFilters.length > 0) {
                     this.selectionStats = {
                         definition: this.mainField,
                         field: targetField.field,
-                        stats: statDivision(this.totalData, filtered, fieldMetas, this.mainField.fid),
+                        stats: statDivision(data, filtered, fields, this.mainField.fid),
                     };
                 } else {
                     this.selectionStats = null;
@@ -143,7 +150,7 @@ export class BreakoutStore {
                 } else {
                     this.generalAnalyses = analyzeContributions(
                         this.selection,
-                        fieldMetas,
+                        fields,
                         mainField,
                         globalStats.stats[mainField.aggregator],
                     );
@@ -155,37 +162,29 @@ export class BreakoutStore {
                     this.diffStats = null;
                     this.comparisonAnalyses = [];
                 } else {
-                    const [filtered] = applyDividers(this.totalData, comparisonFilters);
+                    const [filtered] = applyDividers(data, comparisonFilters);
                     this.diffGroup = filtered;
                     this.diffStats = {
                         definition: this.mainField,
                         field: targetField.field,
-                        stats: statDivision(this.totalData, filtered, fieldMetas, this.mainField.fid),
+                        stats: statDivision(data, filtered, fields, this.mainField.fid),
                     };
                     this.comparisonAnalyses = analyzeComparisons(
                         this.selection,
                         this.diffGroup,
-                        fieldMetas,
+                        fields,
                         this.mainField,
                     );
                 }
             });
+        });
+
+        this.destroy = () => {
+            calculateReaction.unsubscribe();
         };
-        reaction(() => this.mainField, mainField => {
-            // FIXME: data & fieldMetas also reactive
-            updateSelection(mainField, this.mainFieldFilters, this.comparisonFilters);
-        });
-        reaction(() => this.mainFieldFilters, mainFieldFilters => {
-            updateSelection(this.mainField, mainFieldFilters, this.comparisonFilters);
-        });
-        reaction(() => this.comparisonFilters, comparisonFilters => {
-            updateSelection(this.mainField, this.mainFieldFilters, comparisonFilters);
-        });
     }
 
-    public destroy() {
-        // TODO: clear side effect
-    }
+    public destroy: () => void = () => {};
 
     public export(): BreakoutStoreExports {
         const { fieldMetas } = this.dataSourceStore;

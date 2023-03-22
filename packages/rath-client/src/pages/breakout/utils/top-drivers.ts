@@ -134,6 +134,9 @@ export const analyzeComparisons = (
     }, []);
     const headers: { subgroup: typeof subgroups[number]; value: ISubgroupResult }[] = [];
     for (const subgroup of subgroups) {
+        if (subgroup.T2.length === targetGroup.length) {
+            continue;
+        }
         const id = `${subgroup.field.name || subgroup.field.fid} = ${subgroup.filter.values[0]}`;
         const value = statSubgroup(subgroup.T2, target.fid, target.aggregator);
         const compareBase = statSubgroup(subgroup.T1, target.fid, target.aggregator);
