@@ -42,7 +42,7 @@ export const MainViewContainer = styled.div`
         .vis{
             overflow-x: auto;
             flex-grow: 1;
-            flex-shink: 1;
+            flex-shrink: 1;
         }
         .spec{
 

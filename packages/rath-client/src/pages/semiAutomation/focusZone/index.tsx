@@ -12,6 +12,7 @@ import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import EditorCore from '../../editor/core/index';
 import type { IReactVegaHandler } from '../../../components/react-vega';
+import VizDesc from '../../../components/vizDesc';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 import NLQ from './nlq';
@@ -78,6 +79,11 @@ const FocusZone: React.FC = () => {
     return (
         <MainViewContainer>
             {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
+            <NLQ
+                onMainViewUpdate={(view) => {
+                    semiAutoStore.updateMainView(view);
+                }}
+            />
             <div className="vis-container">
                 <div className="spec">
                     {mainViewSpecSource === 'custom' && (
@@ -102,7 +108,8 @@ const FocusZone: React.FC = () => {
                 )}
             </div>
             <hr style={{ marginTop: '1em' }} />
-            <NLQ />
+            <div><VizDesc spec={mainViewSpec} /></div>
+            <hr style={{ marginTop: '1em' }} />
             <div className="fields-container">
                 {mainView &&
                     mainView.fields.map((f: IFieldMeta) => (
