@@ -138,10 +138,10 @@ export const analyzeComparisons = (
         const value = statSubgroup(subgroup.T2, target.fid, target.aggregator);
         const compareBase = statSubgroup(subgroup.T1, target.fid, target.aggregator);
         const impact = impactSubgroupComparison(
-            subgroup.T2,
-            subgroup.T1,
             targetGroup,
             compareGroup,
+            subgroup.T2,
+            subgroup.T1,
             target.fid,
             target.aggregator,
         );

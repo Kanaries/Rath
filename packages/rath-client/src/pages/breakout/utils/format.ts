@@ -15,7 +15,7 @@ export const formatNumber = (num: unknown, fractionDigits = 4): string => {
     if (Number.isNaN(content)) {
         return '-';
     }
-    return content.toFixed(fractionDigits).replace(/\.?0+$/, '');
+    return content.toLocaleString(undefined, { maximumFractionDigits: fractionDigits });
 };
 
 export const formatRate = (num: unknown, fractionDigits = 4): string => {

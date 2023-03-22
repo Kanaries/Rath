@@ -227,15 +227,18 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
             name: title,
             minWidth: 200,
             onRender(item: IFlatSubgroupResult | undefined) {
-                const diff = item?.diff ?? 0;
+                const value = formatNumber(item?.value);
+                const diff = item?.diff;
                 return (
                     <DiffCell>
-                        <span>{formatNumber(item?.value)}</span>
-                        <span className={`diff ${diff === 0 ? '' : diff > 0 ? 'up' : 'down'}`}>
-                            {diff === 0 && '-'}
-                            {diff > 0 && `+${formatRate(diff, 2)}`}
-                            {diff < 0 && formatRate(diff, 2)}
-                        </span>
+                        <span>{formatNumber(value)}</span>
+                        {Number.isFinite(diff) && value !== '-' && (
+                            <span className={`diff ${diff === 0 ? '' : diff! > 0 ? 'up' : 'down'}`}>
+                                {diff! === 0 && '-'}
+                                {diff! > 0 && `+${formatRate(diff, 2)}`}
+                                {diff! < 0 && formatRate(diff, 2)}
+                            </span>
+                        )}
                     </DiffCell>
                 );
             },
@@ -266,11 +269,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
     );
 });
 
-export interface IDivisionListProps {
-
-}
-
-const DivisionList = observer<IDivisionListProps>(function DivisionList () {
+const DivisionList = observer(function DivisionList () {
     const context = useBreakoutStore();
     const { generalAnalyses, comparisonAnalyses, mainField, comparisonFilters, dataSourceStore } = context;
     const { fieldMetas } = dataSourceStore;
