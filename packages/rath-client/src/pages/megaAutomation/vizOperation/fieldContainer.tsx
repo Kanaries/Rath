@@ -33,7 +33,8 @@ const FieldContainer: React.FC = (props) => {
                     .map((f) => {
                         return (
                             <ViewField
-                                type="dimension"
+                                analyticType="dimension"
+                                semanticType='nominal'
                                 text={f.name || f.fid}
                                 key={f.fid}
                                 onRemove={() => {
@@ -49,7 +50,8 @@ const FieldContainer: React.FC = (props) => {
                     .map((f, fIndex) => {
                         return (
                             <ViewField
-                                type="measure"
+                                analyticType="measure"
+                                semanticType='quantitative'
                                 text={`${f.name || f.fid}`}
                                 key={f.fid}
                                 onRemove={() => {

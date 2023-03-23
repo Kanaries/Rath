@@ -8,7 +8,6 @@ import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
-import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import EditorCore from '../../editor/core/index';
 import type { IReactVegaHandler } from '../../../components/react-vega';
@@ -101,14 +100,16 @@ const FocusZone: React.FC = () => {
                     )}
                 </div>
                 <div className="vis">{mainView && mainViewSpec && <MainCanvas handler={handler} view={mainView} spec={viewSpec} />}</div>
-                {mainVizSetting.nlg && (
+                {/* {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
                     </div>
-                )}
+                )} */}
             </div>
             <hr style={{ marginTop: '1em' }} />
-            <div><VizDesc spec={mainViewSpec} /></div>
+            {
+                mainVizSetting.nlg && <div><VizDesc spec={mainViewSpec} /></div>
+            }
             <hr style={{ marginTop: '1em' }} />
             <div className="fields-container">
                 {mainView &&
@@ -119,7 +120,8 @@ const FocusZone: React.FC = () => {
                             }}
                             mode={neighborKeys.includes(f.fid) ? 'wildcard' : 'real'}
                             key={f.fid}
-                            type={f.analyticType}
+                            analyticType={f.analyticType}
+                            semanticType={f.semanticType}
                             text={f.name || f.fid}
                             onRemove={() => {
                                 semiAutoStore.removeMainViewField(f.fid);
@@ -139,7 +141,8 @@ const FocusZone: React.FC = () => {
                         return (
                             <ViewField
                                 key={f.fid}
-                                type={targetField.analyticType}
+                                analyticType={targetField.analyticType}
+                                semanticType={targetField.semanticType}
                                 text={filterDesc}
                                 onRemove={() => {
                                     semiAutoStore.removeMainViewFilter(f.fid);
@@ -162,7 +165,8 @@ const FocusZone: React.FC = () => {
                             return (
                                 <ViewField
                                     key={'_'}
-                                    type="measure"
+                                    analyticType='measure'
+                                    semanticType='quantitative'
                                     text="count"
                                     onRemove={() => {
                                         semiAutoStore.removeFieldEncodeFromMainViewPattern(f);
@@ -175,7 +179,8 @@ const FocusZone: React.FC = () => {
                         return (
                             <ViewField
                                 key={f.field}
-                                type={targetField.analyticType}
+                                analyticType={targetField.analyticType}
+                                semanticType={targetField.semanticType}
                                 text={filterDesc}
                                 onRemove={() => {
                                     semiAutoStore.removeFieldEncodeFromMainViewPattern(f);

@@ -15,10 +15,56 @@ const COLORS = {
     white: '#fff'
 }
 
-export const Pill = styled.div<{colType: IFieldMeta['analyticType'], mode: 'real' | 'wildcard'}>`
-  background-color: ${props => props.colType === 'measure' ? COLORS.white : COLORS.black};
-  border-color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
-  color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
+export function getSemanticTypeTextColor(colType: IFieldMeta['semanticType']) {
+    switch (colType) {
+        case 'nominal':
+            return '#5b21b6';
+        case 'ordinal':
+            return '#075985';
+        case 'quantitative':
+            return '#166534';
+        case 'temporal':
+            return '#92400e';
+        default:
+            return '#5b21b6';
+    }
+}
+
+export function getSemanticTypeBackgroundColor(colType: IFieldMeta['semanticType']) {
+    switch (colType) {
+        case 'nominal':
+            return '#ede9fe';
+        case 'ordinal':
+            return '#e0f2fe';
+        case 'quantitative':
+            return '#dcfce7';
+        case 'temporal':
+            return '#ffedd5';
+        default:
+            return '#ede9fe';
+    }
+}
+
+export function getSemanticTypeBorderColor(colType: IFieldMeta['semanticType']) {
+    switch (colType) {
+        case 'nominal':
+            return '#c4b5fd';
+        case 'ordinal':
+            return '#7dd3fc';
+        case 'quantitative':
+            return '#86efac';
+        case 'temporal':
+            return '#fcd34d';
+        default:
+            return '#c4b5fd';
+    }
+}
+
+
+export const Pill = styled.div<{colType: IFieldMeta['semanticType'], mode: 'real' | 'wildcard'}>`
+  background-color: ${props => getSemanticTypeBackgroundColor(props.colType)};
+  border-color: ${props => getSemanticTypeBorderColor(props.colType)};
+  color: ${props => getSemanticTypeTextColor(props.colType)};
   border-style: ${props => props.mode === 'real' ? 'solid' : 'dashed'};
   opacity: ${props => props.mode === 'real' ? 1 : 0.5};
   -ms-user-select: none;
@@ -75,15 +121,16 @@ export const PillPlaceholder = styled.div`
 `
 
 interface ViewFieldProps {
-    type: IFieldMeta['analyticType'];
+    analyticType: IFieldMeta['analyticType'];
+    semanticType: IFieldMeta['semanticType'];
     text: string;
     mode?: 'real' | 'wildcard';
     onRemove?: () => void;
     onDoubleClick?: () => void;
 }
 const ViewField: React.FC<ViewFieldProps> = props => {
-    const { onRemove, text, mode = 'real', type, onDoubleClick } = props;
-    return <Pill mode={mode} colType={type} onDoubleClick={onDoubleClick}>
+    const { onRemove, text, mode = 'real', semanticType, onDoubleClick } = props;
+    return <Pill mode={mode} colType={semanticType} onDoubleClick={onDoubleClick}>
         {onRemove && <Icon className="cancel-icon" iconName="Cancel" onClick={onRemove} />}
         {/* <IconButton iconProps={{ iconName: 'Cancel', style: { fontSize: '8px' } }} /> */}
         {text}

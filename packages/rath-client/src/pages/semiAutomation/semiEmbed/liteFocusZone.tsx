@@ -110,7 +110,8 @@ const LiteFocusZone: React.FC = (props) => {
                         mainView.fields.map((f: IFieldMeta) => (
                             <ViewField
                                 key={f.fid}
-                                type={f.analyticType}
+                                analyticType={f.analyticType}
+                                semanticType={f.semanticType}
                                 mode={neighborKeys.includes(f.fid) ? 'wildcard' : 'real'}
                                 text={f.name || f.fid}
                                 onRemove={() => {
@@ -136,7 +137,8 @@ const LiteFocusZone: React.FC = (props) => {
                             return (
                                 <ViewField
                                     key={f.fid}
-                                    type={targetField.analyticType}
+                                    analyticType={targetField.analyticType}
+                                    semanticType={targetField.semanticType}
                                     text={filterDesc}
                                     onRemove={() => {
                                         semiAutoStore.removeMainViewFilter(f.fid);

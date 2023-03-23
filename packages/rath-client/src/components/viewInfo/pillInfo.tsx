@@ -8,7 +8,7 @@ const Cont = styled.div`
     .chart-desc {
         font-size: 12px;
     }
-    .fields-container{
+    .fields-container {
         display: flex;
         padding: 1em 0em 0em 0em;
         flex-wrap: wrap;
@@ -26,7 +26,7 @@ const PillInfo: React.FC<ViewInfoProps> = (props) => {
         <Cont>
             <div className="fields-container">
                 {fields.map((f: IFieldMeta) => (
-                    <ViewField key={f.fid} type={f.analyticType} text={f.name || f.fid} />
+                    <ViewField key={f.fid} analyticType={f.analyticType} semanticType={f.semanticType} text={f.name || f.fid} />
                 ))}
             </div>
             <div className="fields-container">
@@ -36,7 +36,14 @@ const PillInfo: React.FC<ViewInfoProps> = (props) => {
                         if (!targetField) return null;
                         let filterDesc = `${targetField.name || targetField.fid} ∈ `;
                         filterDesc += f.type === 'range' ? `[${f.range.join(',')}]` : `{${f.values.join(',')}}`;
-                        return <ViewField key={f.fid} type={targetField.analyticType} text={filterDesc} />;
+                        return (
+                            <ViewField
+                                key={f.fid}
+                                analyticType={targetField.analyticType}
+                                semanticType={targetField.semanticType}
+                                text={filterDesc}
+                            />
+                        );
                     })}
             </div>
         </Cont>

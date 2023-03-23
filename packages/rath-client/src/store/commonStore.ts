@@ -44,6 +44,7 @@ interface IWorkspaceSimpleInfo {
 export class CommonStore {
     public appKey: string = PIVOT_KEYS.connection;
     public computationEngine: string = COMPUTATION_ENGINE.webworker;
+    public llmType: 'fast' | 'accurate' = 'accurate';
     public exploreMode: string = EXPLORE_MODE.comprehensive;
     public taskMode: ITaskTestMode = ITaskTestMode.local;
     public showStorageModal: boolean = false;
@@ -78,6 +79,9 @@ export class CommonStore {
     }
     public setAppKey(key: string) {
         this.appKey = key;
+    }
+    public setLLMType(modelType: 'fast' | 'accurate') {
+        this.llmType = modelType;
     }
     public setUseCustomeTheme (use: boolean) {
         this.useCustomTheme = use;

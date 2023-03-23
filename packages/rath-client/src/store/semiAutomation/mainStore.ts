@@ -81,8 +81,8 @@ export class SemiAutomationStore {
                 width: 320,
                 height: 320,
             },
-            nlg: false,
-            excludeScaleZero: false
+            nlg: true,
+            excludeScaleZero: true
         }
         this.settings = {
             vizAlgo: 'strict'

@@ -4,7 +4,45 @@ import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
 import { getInsightExpl } from '../../../services/insights';
 import { InsightDesc } from '../components';
+import { SemiAutomationStore } from '../../../store/semiAutomation/mainStore';
 
+export function useInsightExpl(semiAutoStore: SemiAutomationStore, lang: string) {
+    const { dataSource, mainView } = semiAutoStore;
+    const [explainLoading, setExplainLoading] = useState(false);
+    const requestId = useRef<number>(0);
+    const fieldsInViz = useMemo(() => {
+        return mainView?.fields || [];
+    }, [mainView]);
+    const [viewInfo, setViewInfo] = useState<any[]>([])
+    useEffect(() => {
+        setViewInfo([])
+        setExplainLoading(false);
+    }, [mainView])
+    useEffect(() => {
+        (() => getInsightExpl({
+            requestId,
+            dataSource,
+            fields: fieldsInViz,
+            aggrType: 'mean',
+            langType: lang,
+            setExplainLoading,
+            resolveInsight: setViewInfo
+        }))()
+    }, [dataSource, fieldsInViz, lang])
+    const dataDesc = useMemo<any[]>(() => {
+        if (!viewInfo || viewInfo.length === 0) return []
+        return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0.7).map((k: string) => ({
+            score: viewInfo[0][k].score,
+            type: k,
+            explain: viewInfo[0][k].para.explain
+        }));
+    }, [viewInfo])
+    return {
+        explainLoading,
+        dataDesc,
+        viewInfo
+    }
+}
 
 const Narrative: React.FC = () => {
     const { semiAutoStore, langStore } = useGlobalStore();
@@ -32,7 +70,7 @@ const Narrative: React.FC = () => {
     }, [dataSource, fieldsInViz, langStore.lang])
     const explains = useMemo<any[]>(() => {
         if (!viewInfo || viewInfo.length === 0) return []
-        return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0).map((k: string) => ({
+        return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0.7).map((k: string) => ({
             score: viewInfo[0][k].score,
             type: k,
             explain: viewInfo[0][k].para.explain

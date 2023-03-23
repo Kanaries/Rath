@@ -40,10 +40,23 @@ const AnalysisSettings: React.FC = props => {
         { text: intl.get('dataSource.exploreMode.manual'), key: EXPLORE_MODE.manual }
     ]
     const TASK_MODE_LIST: IDropdownOption[] = [
-        { text: 'local', key: ITaskTestMode.local },
-        { text: 'server', key: ITaskTestMode.server }
+        { text: 'Local', key: ITaskTestMode.local },
+        { text: 'Server', key: ITaskTestMode.server }
+    ]
+    const LLM_OPTIONS: IDropdownOption[] = [
+        { text: 'Fast', key: 'fast' },
+        { text: 'Accurate', key: 'accurate' }
     ]
     return <Stack>
+        <Dropdown
+            options={LLM_OPTIONS}
+            style={{ minWidth: '180px', marginRight: '1em' }}
+            selectedKey={commonStore.llmType}
+            label="LLM type"
+            onChange={(e, item) => {
+                item && commonStore.setLLMType(item.key as 'fast' | 'accurate');
+            }}
+        />
         <Dropdown options={options}
             style={{ minWidth: '180px', marginRight: '1em' }}
             label={intl.get('config.cubeStorageManageMode.title')}
@@ -59,7 +72,7 @@ const AnalysisSettings: React.FC = props => {
             options={exploreOptions}
             label={intl.get('dataSource.exploreMode.title')}
             onChange={(e, item) => {
-            item && commonStore.setExploreMode(item.key as string);
+                item && commonStore.setExploreMode(item.key as string);
             }}
         />
         <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
@@ -72,7 +85,7 @@ const AnalysisSettings: React.FC = props => {
             onRenderLabel={makeRenderLabelHandler(intl.get('config.computationEngine.desc'))}
         />
         <Dropdown
-            label="task test mode"
+            label="Task test mode"
             options={TASK_MODE_LIST}
             selectedKey={commonStore.taskMode}
             onChange={(e, option) => {

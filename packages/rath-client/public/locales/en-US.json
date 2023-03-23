@@ -55,7 +55,10 @@
             "notFound": "No results found"
         },
         "list": "List",
-        "gallery": "Gallery"
+        "gallery": "Gallery",
+        "generate": {
+            "desc": "Generate Descrption"
+        }
     },
     "menu": {
         "dataSource": "DataSource",
@@ -412,13 +415,13 @@
         "bring": "Customize Analysis",
         "exitEditor": "Exit Editor",
         "commandBar": {
-            "painting": "data painter",
-            "editing": "edit chart",
+            "painting": "Data painter",
+            "editing": "Edit chart",
             "editInGW": "Customized Analysis",
             "editInEditor": "Edit in Editor",
-            "associate": "associate views",
-            "constraints": "analysis constraints",
-            "download": "export chart",
+            "associate": "Associate views",
+            "constraints": "Analysis constraints",
+            "download": "Export chart",
             "export": "Export",
             "export_as": "Export As",
             "export_size": "Size",
@@ -455,19 +458,19 @@
     "semiAuto": {
         "main": {
             "mainView": "Main View",
-            "relatePatterns": "related patterns",
-            "relateFeatures": "related features",
-            "explainDiff": "explain diff",
-            "pointInterests": "related subsets",
-            "neighbors": "neighbor views",
-            "pin": "related insights",
-            "compare": "compare",
+            "relatePatterns": "Related patterns",
+            "relateFeatures": "Related features",
+            "explainDiff": "Explain diff",
+            "pointInterests": "Related subsets",
+            "neighbors": "Neighbor views",
+            "pin": "Dive",
+            "compare": "Compare",
             "vizsys": {
-                "title": "visualization recommend system",
+                "title": "Visualization recommend system",
                 "lite": "Lite mode(fast)",
                 "strict": "Strict mode"
             },
-            "loadMore": "load more",
+            "loadMore": "Load more",
             "associate": {
                 "patterns": "Associated Patterns",
                 "features": "Associated Features",

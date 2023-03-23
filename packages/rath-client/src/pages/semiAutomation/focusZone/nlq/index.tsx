@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SearchBox } from '@fluentui/react/lib/SearchBox';
-import { Pivot, PivotItem, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { IFieldMeta, IPattern } from '@kanaries/loa';
 import { useGlobalStore } from '../../../../store';
@@ -11,12 +11,10 @@ interface NLQProps {
 }
 const NLQ: React.FC<NLQProps> = (props) => {
     const { onMainViewUpdate } = props;
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const [augmentedEngineConnected, setAugmentedEngineConnected] = useState(false);
     const [searchContent, setSearchContent] = useState('');
-    // const [searchResult, setSearchResult] = useState<any>('');
-    const [pivotKey, setPivotKey] = useState('search');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -38,6 +36,7 @@ const NLQ: React.FC<NLQProps> = (props) => {
             },
             body: JSON.stringify({
                 query: searchContent,
+                model: commonStore.llmType,
                 metas: fieldMetas.map((m) => ({
                     fid: m.fid,
                     name: m.name,
@@ -49,7 +48,7 @@ const NLQ: React.FC<NLQProps> = (props) => {
             .then((res) => res.json())
             .then((res) => {
                 if (res.success) {
-                    const result = res.data
+                    const result = res.data;
                     // setSearchResult(res.data);
                     if (result instanceof Array) {
                         const patt: IPattern = {
@@ -64,39 +63,29 @@ const NLQ: React.FC<NLQProps> = (props) => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [fieldMetas, searchContent, onMainViewUpdate]);
+    }, [fieldMetas, searchContent, onMainViewUpdate, commonStore.llmType]);
     return (
         <div>
-            <Pivot
-                selectedKey={pivotKey}
-                onLinkClick={(item) => {
-                    setPivotKey(item?.props.itemKey! ?? 'raw');
-                }}
-            >
-                <PivotItem headerText="Search" itemKey="search" />
-                <PivotItem headerText="QA" itemKey="raw" />
-            </Pivot>
-            {pivotKey === 'search' && (
-                <Stack horizontal>
-                    <Stack.Item grow>
-                        <SearchBox
-                            onSearch={(newValue) => {
-                                setSearchContent(newValue);
-                            }}
-                            onChange={(e, newValue) => {
-                                setSearchContent(newValue + '');
-                            }}
-                            disabled={!augmentedEngineConnected}
-                        />
-                    </Stack.Item>
-                    <Stack.Item>
-                        <PrimaryButton disabled={!augmentedEngineConnected} onClick={searchHandler}>
-                            Ask {loading && <Spinner label='Asking' />}
-                        </PrimaryButton>
-                    </Stack.Item>
-                    {/* <div>{JSON.stringify(searchResult, null, 2)}</div> */}
-                </Stack>
-            )}
+            <Stack horizontal>
+                <Stack.Item grow>
+                    <SearchBox
+                        placeholder="Ask a question about your data"
+                        onSearch={(newValue) => {
+                            setSearchContent(newValue);
+                        }}
+                        onChange={(e, newValue) => {
+                            setSearchContent(newValue + '');
+                        }}
+                        disabled={!augmentedEngineConnected}
+                    />
+                </Stack.Item>
+                <Stack.Item>
+                    <PrimaryButton disabled={!augmentedEngineConnected} onClick={searchHandler}>
+                        Ask {loading && <Spinner style={{ marginLeft: '1em' }} />}
+                    </PrimaryButton>
+                </Stack.Item>
+                {/* <div>{JSON.stringify(searchResult, null, 2)}</div> */}
+            </Stack>
         </div>
     );
 };

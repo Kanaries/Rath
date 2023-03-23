@@ -5,14 +5,12 @@ import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../interfaces';
 
 export const PillPlaceholder = styled.div`
-    color: #000;
+    color: #1e293b;
     -ms-user-select: none;
     -webkit-user-select: none;
-    border-color: rgb(229,231,235);
-    /* border-radius: 10px; */
+    border-color: #94a3b8;
     border-style: dashed;
     border-radius: 10px;
-    border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
     cursor: pointer;

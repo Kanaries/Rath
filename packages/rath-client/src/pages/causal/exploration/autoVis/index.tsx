@@ -88,7 +88,8 @@ const AutoVis: FC<IAutoVisProps> = () => {
                     {selectedFields.map((f: IFieldMeta) => (
                         <ViewField
                             key={f.fid}
-                            type={f.analyticType}
+                            analyticType={f.analyticType}
+                            semanticType={f.semanticType}
                             text={f.name || f.fid}
                             onRemove={() => {
                                 viewContext.toggleNodeSelected(f.fid);

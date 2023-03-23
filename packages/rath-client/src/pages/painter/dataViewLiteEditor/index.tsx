@@ -26,7 +26,8 @@ const DataViewLiteEditor: React.FC<DataViewLiteEditorProps> = (props) => {
                     view.fields.map((f: IFieldMeta) => (
                         <ViewField
                             key={f.fid}
-                            type={f.analyticType}
+                            analyticType={f.analyticType}
+                            semanticType={f.semanticType}
                             text={f.name || f.fid}
                             onRemove={() => {
                                 onRemoveViewField && onRemoveViewField(f.fid);
@@ -46,7 +47,8 @@ const DataViewLiteEditor: React.FC<DataViewLiteEditorProps> = (props) => {
                         return (
                             <ViewField
                                 key={f.fid}
-                                type={targetField.analyticType}
+                                analyticType={targetField.analyticType}
+                                semanticType={targetField.semanticType}
                                 text={filterDesc}
                                 onRemove={() => {
                                     onRemoveFilter && onRemoveFilter(f.fid);

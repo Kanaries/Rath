@@ -9,6 +9,7 @@ import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
 import { useAsyncViews } from './utils';
+import { FieldBadge } from './fieldBadge';
 
 const PattSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -69,12 +70,13 @@ const PattSegment: React.FC = () => {
                         />
                     </div>
                     <div className="chart-desc">
-                        { pattViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
-                        { pattViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
+                        { pattViews.views[i].fields?.map(f => <FieldBadge semanticType={f.semanticType} key={f.fid}>{f.name || f.fid}</FieldBadge>)} <br />
                         { pattViews.views[i].filters?.map(f => {
                             const meta = fieldMetas.find(m => m.fid === f.fid);
                             if (!meta) return '';
-                            return `${meta.name || meta.fid} = ${f.type === 'set' ? f.values.join(',') : `[${f.range.join(',')}]`}`
+                            return <FieldBadge key={`filter-${f.fid}`} semanticType={meta.semanticType}>
+                                {meta.name || meta.fid} = {f.type === 'set' ? f.values.join(',') : `[${f.range.join(',')}]`}
+                            </FieldBadge>
                         })}
                     </div>
                 </div>)
