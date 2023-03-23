@@ -214,6 +214,12 @@ export class BreakoutStore {
             global$.subscribe(({ globalStats }) => {
                 this.updateGlobalStats(globalStats);
             }),
+            // reset comparison filters
+            mainFieldFilters$.subscribe(filters => {
+                if (filters.length === 0) {
+                    this.setComparisonFilters([]);
+                }
+            }),
             // update main group stats
             mainGroup$.subscribe(({ stats }) => {
                 this.updateMainGroupStats(stats);

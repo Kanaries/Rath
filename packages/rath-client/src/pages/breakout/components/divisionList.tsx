@@ -118,10 +118,12 @@ const groupSubgroupResults = (data: readonly ISubgroupResult[]): IFlatSubgroupRe
 interface IDivisionDetailListProps {
     data: ISubgroupResult[];
     title: string;
+    /** @default false */
+    action?: 'setMainFilter' | 'setComparisonFilter' | false;
 }
 
 const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetailList ({
-    data, title,
+    data, title, action = false,
 }) {
     const [list, setList] = useState<IFlatSubgroupResult[]>([]);
     const [openedPaths, setOpenedPaths] = useState<string[][]>([]);
@@ -270,12 +272,23 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
             }
         };
 
+        const handleClick = () => {
+            if (!item) {
+                return;
+            }
+            if (action === 'setMainFilter') {
+                context.setMainFieldFilters([item.filter]);
+            } else if (action === 'setComparisonFilter') {
+                context.setComparisonFilters([item.filter]);
+            }
+        };
+
         return (
-            <div onMouseOver={handleHover}>
+            <div onMouseOver={handleHover} onClick={handleClick} style={{ cursor: action ? 'pointer' : 'default' }}>
                 {defaultRenderer?.(props)}
             </div>
         );
-    }, [context]);
+    }, [context, action]);
 
     return (
         <DetailsList
@@ -289,7 +302,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
 
 const DivisionList = observer(function DivisionList () {
     const context = useBreakoutStore();
-    const { generalAnalyses, comparisonAnalyses, mainField, comparisonFilters, fields } = context;
+    const { generalAnalyses, comparisonAnalyses, mainField, mainFieldFilters, comparisonFilters, fields } = context;
     const targetField = mainField ? resolveCompareTarget(mainField, fields) : null;
 
     return (
@@ -301,6 +314,7 @@ const DivisionList = observer(function DivisionList () {
                             <DivisionDetailList
                                 data={generalAnalyses}
                                 title={targetField.text}
+                                action={mainFieldFilters.length ? 'setComparisonFilter' : 'setMainFilter'}
                             />
                         </PivotItem>
                     )}
