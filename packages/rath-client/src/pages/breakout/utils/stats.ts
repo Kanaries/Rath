@@ -186,7 +186,7 @@ export const applyDividers = (dataSource: readonly IRow[], filters: readonly IFi
     const lookupValueSet: Map<string, Set<any>> = new Map();
     for (let filter of effectFilters) {
         if (filter.type === 'set') {
-            lookupValueSet.set(filter.fid, new Set(filter.values))
+            lookupValueSet.set(filter.fid, new Set(filter.values.map(dismissCases)))
         }
     }
     for (let i = 0; i < dataSource.length; i++) {

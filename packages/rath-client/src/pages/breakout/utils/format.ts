@@ -33,5 +33,5 @@ export const formatFilterRule = (rule: IFilter, field: IFieldMeta): string => {
     if (rule.type === 'set') {
         return `${fieldName} = ${rule.values.join(',')}`;
     }
-    return `${fieldName || field.fid} ∈ ${rule.range.join(',')}]`;
+    return `${rule.range[0]} <= ${fieldName} <= ${rule.range[1]}`;
 };

@@ -100,7 +100,7 @@ const WaterfallChart = observer(function WaterfallChart() {
                     "field": "label",
                     "type": "ordinal",
                     "sort": { "field": "index" },
-                    "axis": { "labelAngle": 0, "title": "Months" }
+                    "axis": { "labelAngle": 0, "title": "Subgroups" }
                 }
             },
             "layer": [
@@ -110,7 +110,7 @@ const WaterfallChart = observer(function WaterfallChart() {
                         "y": {
                             "field": "previous_sum",
                             "type": "quantitative",
-                            "title": "Amount"
+                            "title": "Value"
                         },
                         "y2": { "field": "sum" },
                         "color": {
@@ -143,21 +143,21 @@ const WaterfallChart = observer(function WaterfallChart() {
                     "mark": { "type": "text", "dy": -4, "baseline": "bottom" },
                     "encoding": {
                         "y": { "field": "sum_inc", "type": "quantitative" },
-                        "text": { "field": "sum_inc", "type": "nominal" }
+                        "text": { "field": "sum_inc", "type": "nominal", "format": ".2f" }
                     }
                 },
                 {
                     "mark": { "type": "text", "dy": 4, "baseline": "top" },
                     "encoding": {
                         "y": { "field": "sum_dec", "type": "quantitative" },
-                        "text": { "field": "sum_dec", "type": "nominal" }
+                        "text": { "field": "sum_dec", "type": "nominal", "format": ".2f" }
                     }
                 },
                 {
                     "mark": { "type": "text", "fontWeight": "bold", "baseline": "middle" },
                     "encoding": {
                         "y": { "field": "center", "type": "quantitative" },
-                        "text": { "field": "text_amount", "type": "nominal" },
+                        "text": { "field": "text_amount", "type": "nominal", "format": ".2f" },
                         "color": {
                             "condition": [
                                 {
