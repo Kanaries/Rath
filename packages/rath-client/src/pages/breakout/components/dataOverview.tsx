@@ -278,6 +278,7 @@ const DataOverview = observer(function DataOverview () {
                         stats={compareStats}
                         filters={comparisonFilters}
                         title={targetField.text}
+                        onRemove={() => context.setComparisonFilters([])}
                         actions={<CompareGroupSelector />}
                     />
                     <span>vs</span>
@@ -286,6 +287,7 @@ const DataOverview = observer(function DataOverview () {
                         filters={mainFieldFilters}
                         compareBase={compareStats}
                         title={"Selection"}
+                        onRemove={() => context.setMainField(null)}
                         actions={<ConfigButton button={{ text: 'Change' }}><MainFieldSelector /></ConfigButton>}
                     />
                     {comparisonFilters.length > 0 && (
