@@ -21,6 +21,7 @@ type IFieldShort = Pick<Required<NonNullable<IFieldMeta>>, 'fid' | 'name' | 'sem
 interface ISearchAIPayload {
     metas: IFieldShort[];
     query: string;
+    model: 'accuracy';
 }
 
 const searchAIApiUrl = 'https://enhanceai.kanaries.net/api/rootcausal';
@@ -315,6 +316,7 @@ export class BreakoutStore {
                 geoRole: 'none',
             })),
             query,
+            model: 'accuracy',
         };
         const res = await fetch(searchAIApiUrl, {
             method: 'POST',

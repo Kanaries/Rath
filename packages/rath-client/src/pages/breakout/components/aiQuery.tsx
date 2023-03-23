@@ -23,7 +23,16 @@ const SearchBoxContainer = styled.div`
     transition: width 0.2s ease-in-out;
 `;
 
-const safeFilters = (filters: IFilter[]): IFilter[] => {
+type IFilterLike = {
+    type: IFilter['type'];
+    fid: IFilter['fid'];
+    range?: unknown;
+    values?: unknown;
+    minValue?: unknown;
+    maxValue?: unknown;
+};
+
+const safeFilters = (filters: IFilterLike[]): IFilter[] => {
     return filters.reduce<IFilter[]>((list, f) => {
         if (f.type === 'range') {
             if (Array.isArray(f.range)) {
@@ -34,10 +43,18 @@ const safeFilters = (filters: IFilter[]): IFilter[] => {
                     fid: f.fid,
                     range: [min, max],
                 });
-            } else if (Array.isArray((f as unknown as IFilter & { type: 'set' }).values)) {
-                const values = (f as unknown as IFilter & { type: 'set' }).values;
+            } else if (Array.isArray(f.values)) {
+                const values = f.values;
                 const min = coerceNumber(values[0]);
                 const max = coerceNumber(values[1]);
+                list.push({
+                    type: 'range',
+                    fid: f.fid,
+                    range: [min, max],
+                });
+            } else if ('minValue' in f && 'maxValue' in f) {
+                const min = coerceNumber(f.minValue);
+                const max = coerceNumber(f.maxValue);
                 list.push({
                     type: 'range',
                     fid: f.fid,
@@ -46,7 +63,11 @@ const safeFilters = (filters: IFilter[]): IFilter[] => {
             }
         } else if (f.type === 'set') {
             if (Array.isArray(f.values)) {
-                list.push(f);
+                list.push({
+                    type: 'set',
+                    fid: f.fid,
+                    values: f.values,
+                });
             }
         }
         return list;

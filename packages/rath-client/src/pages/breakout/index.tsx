@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { Card } from "../../components/card";
 import { useGlobalStore } from "../../store";
 import AIQuery from "./components/aiQuery";
-import ControlPanel from "./components/controlPanel";
 import DataOverview from "./components/dataOverview";
 import DivisionList from "./components/divisionList";
 import { type BreakoutMainField, useBreakoutContext } from "./store";
@@ -59,7 +58,6 @@ const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({
             <Outer>
                 <Content>
                     <AIQuery />
-                    <ControlPanel />
                     <DataOverview />
                     <DivisionList />
                 </Content>

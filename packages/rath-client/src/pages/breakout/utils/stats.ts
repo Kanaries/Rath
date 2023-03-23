@@ -172,6 +172,11 @@ export const impactSubgroupComparison = (
     }
 };
 
+const dismissCases = <T>(input: T): T => {
+    if (typeof input === 'string') return input.toLocaleLowerCase() as T;
+    return input;
+};
+
 export const applyDividers = (dataSource: readonly IRow[], filters: readonly IFilter[]): [readonly IRow[], readonly IRow[]] => {
     if (typeof filters === 'undefined') return [dataSource, []];
     if (filters.length === 0) return [dataSource, []];
@@ -187,10 +192,11 @@ export const applyDividers = (dataSource: readonly IRow[], filters: readonly IFi
     for (let i = 0; i < dataSource.length; i++) {
         const row = dataSource[i];
         let keep = effectFilters.every(f => {
-            if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
+            const val = dismissCases(row[f.fid]);
+            if (f.type === 'range') return f.range[0] <= val && val <= f.range[1];
             if (f.type === 'set') return (
-                lookupValueSet.get(f.fid)!.has(row[f.fid])
-                || lookupValueSet.get(f.fid)!.has(Number(row[f.fid]))
+                lookupValueSet.get(f.fid)!.has(val)
+                || lookupValueSet.get(f.fid)!.has(Number(val))
             )
             return false;
         })

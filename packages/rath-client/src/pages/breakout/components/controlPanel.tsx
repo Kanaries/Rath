@@ -10,18 +10,12 @@ import ConfigButton, { IConfigButtonRef } from "./configButton";
 import MetricFilter, { flatFilterRules } from "./metricFilter";
 
 
-const StackTokens = {
-    childrenGap: 10,
-};
-
 const TargetSelector = styled.div`
-    margin: 1rem;
-    max-height: 30rem;
-    overflow-y: auto;
+    margin: 1rem 0;
 
     .ms-Dropdown-container {
         margin-block: 1rem;
-        padding-inline: 1rem;
+        padding-inline: 0.2rem;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -89,9 +83,9 @@ const mayBePeriod = (field: IFieldMeta): PeriodFlag | null => {
     return null;
 };
 
-const ControlPanel = observer(function ControlPanel () {
+export const MainFieldSelector = observer(function MainFieldSelector () {
     const context = useBreakoutStore();
-    const { fields, mainField, mainFieldFilters, comparisonFilters } = context;
+    const { fields, mainField } = context;
 
     const compareTargetItem = mainField ? resolveCompareTarget(mainField, fields) : undefined;
     const targetSelectorRef = useRef<IConfigButtonRef>(null);
@@ -104,6 +98,50 @@ const ControlPanel = observer(function ControlPanel () {
 
     const validMeasures = fields.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
 
+    return (
+        <TargetSelector>
+            {validMeasures.length === 0 && (
+                <p>
+                    No valid measure field found.
+                </p>
+            )}
+            {validMeasures.map(f => {
+                const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregator => {
+                    const item: BreakoutMainField = { fid: f.fid, aggregator };
+                    const target = resolveCompareTarget(item, fields)!;
+                    return {
+                        key: target.key,
+                        text: aggregator,
+                        data: item,
+                    };
+                });
+                if (options.length === 0) {
+                    return null;
+                }
+                return (
+                    <Dropdown
+                        key={f.fid}
+                        options={options}
+                        label={f.name || f.fid}
+                        selectedKey={compareTargetItem?.key}
+                        onChange={(_, opt) => {
+                            const item = opt?.data as (typeof options)[number]['data'] | undefined;
+                            if (item) {
+                                onSelectTarget(f, item.aggregator);
+                                targetSelectorRef.current?.dismiss();
+                            }
+                        }}
+                    />
+                );
+            })}
+        </TargetSelector>
+    );
+});
+
+export const CompareGroupSelector = observer(function CompareGroupSelector () {
+    const context = useBreakoutStore();
+    const { fields, mainFieldFilters, comparisonFilters } = context;
+    
     const [targetSelectorPeriods, otherFilters] = useMemo<[{ flag: PeriodFlag; filter: IFilter }[], IUniqueFilter[]]>(() => {
         if (mainFieldFilters.length === 0) {
             return [[], []];
@@ -286,82 +324,27 @@ const ControlPanel = observer(function ControlPanel () {
     }, [targetSelectorPeriods, otherFilters]);
 
     return (
-        <Stack horizontal tokens={StackTokens}>
-            <Stack horizontal>
-                <ConfigButton button={{ text: compareTargetItem?.text ?? 'Select a target' }} ref={targetSelectorRef}>
-                    <TargetSelector>
-                        {validMeasures.length === 0 && (
-                            <p>
-                                No valid measure field found.
-                            </p>
-                        )}
-                        {validMeasures.map(f => {
-                            const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregator => {
-                                const item: BreakoutMainField = { fid: f.fid, aggregator };
-                                const target = resolveCompareTarget(item, fields)!;
-                                return {
-                                    key: target.key,
-                                    text: aggregator,
-                                    data: item,
-                                };
-                            });
-                            return (
-                                <Dropdown
-                                    key={f.fid}
-                                    options={options}
-                                    label={f.name || f.fid}
-                                    selectedKey={compareTargetItem?.key}
-                                    onChange={(_, opt) => {
-                                        const item = opt?.data as (typeof options)[number]['data'] | undefined;
-                                        if (item) {
-                                            onSelectTarget(f, item.aggregator);
-                                            targetSelectorRef.current?.dismiss();
-                                        }
-                                    }}
-                                />
-                            );
-                        })}
-                    </TargetSelector>
-                </ConfigButton>
-                <ConfigButton button={{ iconProps: { iconName: 'Filter' }, disabled: !mainField, styles: { root: { padding: '0', minWidth: '32px', borderLeft: 'none' } } }}>
-                    {mainField && (
-                        <MetricFilter
-                            fields={fields}
-                            filters={mainFieldFilters}
-                            onChange={metric => {
-                                context.setMainFieldFilters(metric);
+        <ConfigButton button={{ text: 'Compare' }}>
+            {suggestions.length > 0 && (
+                <Stack>
+                    {suggestions.map((sug, i) => (
+                        <ActionButton
+                            key={i}
+                            text={sug.title}
+                            onClick={() => {
+                                context.setComparisonFilters(sug.rule);
                             }}
                         />
-                    )}
-                </ConfigButton>
-            </Stack>
-            {mainFieldFilters.length > 0 && (
-                <ConfigButton button={{ text: 'Compare' }}>
-                    {suggestions.length > 0 && (
-                        <Stack>
-                            {suggestions.map((sug, i) => (
-                                <ActionButton
-                                    key={i}
-                                    text={sug.title}
-                                    onClick={() => {
-                                        context.setComparisonFilters(sug.rule);
-                                    }}
-                                />
-                            ))}
-                        </Stack>
-                    )}
-                    <MetricFilter
-                        fields={fields}
-                        filters={comparisonFilters}
-                        onChange={metric => {
-                            context.setComparisonFilters(metric);
-                        }}
-                    />
-                </ConfigButton>
+                    ))}
+                </Stack>
             )}
-        </Stack>
+            <MetricFilter
+                fields={fields}
+                filters={comparisonFilters}
+                onChange={metric => {
+                    context.setComparisonFilters(metric);
+                }}
+            />
+        </ConfigButton>
     );
 });
-
-
-export default ControlPanel;

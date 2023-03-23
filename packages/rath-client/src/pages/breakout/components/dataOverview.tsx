@@ -1,13 +1,15 @@
-import { Stack } from "@fluentui/react";
+import { IconButton, Stack } from "@fluentui/react";
 import type { IFieldMeta, IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import styled from "styled-components";
 import { Aggregator } from "../../../global";
 import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { formatFilterRule, formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
-import { resolveCompareTarget } from "./controlPanel";
+import ConfigButton from "./configButton";
+import { CompareGroupSelector, MainFieldSelector, resolveCompareTarget } from "./controlPanel";
+import MetricFilter from "./metricFilter";
 import WaterfallChart from "./waterfallChart";
 
 
@@ -16,10 +18,22 @@ const OverviewCardContainer = styled.div`
     border-radius: 1rem;
     padding: 1rem;
     align-self: stretch;
+    max-height: 360px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     header {
-        font-size: 1rem;
-        font-weight: 600;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        > span {
+            flex-grow: 1;
+            flex-shrink: 1;
+            margin-right: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
     }
 
     .filters {
@@ -100,11 +114,29 @@ const OverviewCardContainer = styled.div`
             }
         }
     }
+
+    .scroll-container {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow-y: auto;
+        margin-block: 1rem;
+    }
 `;
 
 const StackTokens = { childrenGap: 20 };
 
-const OverviewCard = observer(function OverviewCard ({ filters, stats, compareBase, title }: { filters: readonly IFilter[]; stats: FieldStats; compareBase?: FieldStats; title: string }) {
+interface IOverviewCardProps {
+    filters: readonly IFilter[];
+    stats: FieldStats;
+    compareBase?: FieldStats;
+    title: string;
+    onRemove?: () => void;
+    actions?: ReactNode;
+}
+
+const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
+    filters, stats, compareBase, title, onRemove, actions,
+}) {
     const { field, definition, stats: features } = stats;
     const { fields } = useBreakoutStore();
 
@@ -145,7 +177,16 @@ const OverviewCard = observer(function OverviewCard ({ filters, stats, compareBa
     return (
         <OverviewCardContainer>
             <header>
-                {title}
+                <span>
+                    {title}
+                </span>
+                {actions}
+                {onRemove && (
+                    <IconButton
+                        iconProps={{ iconName: 'Clear' }}
+                        onClick={onRemove}
+                    />
+                )}
             </header>
             <div className="filters">
                 {filtersWithField.map(({ field, filter }, i) => (
@@ -195,14 +236,58 @@ const DataOverview = observer(function DataOverview () {
 
     return (
         <Stack horizontal tokens={StackTokens} verticalAlign="center" style={{ minHeight: '360px' }}>
+            {!showGlobalStats && !showSelectionStats && (
+                <OverviewCardContainer>
+                    <header>
+                        <span>Select A Target</span>
+                    </header>
+                    <div className="scroll-container">
+                        <MainFieldSelector />
+                    </div>
+                </OverviewCardContainer>
+            )}
             {showGlobalStats && (
-                <OverviewCard stats={globalStats} filters={[]} title={targetField.text} />
+                <>
+                    <OverviewCard
+                        stats={globalStats}
+                        filters={[]}
+                        title={targetField.text}
+                        onRemove={() => context.setMainField(null)}
+                    />
+                    {mainField && mainFieldFilters.length === 0 && (
+                        <OverviewCardContainer>
+                            <header>
+                                <span>Select A Subgroup</span>
+                            </header>
+                            <div className="scroll-container">
+                                <MetricFilter
+                                    fields={fields}
+                                    filters={mainFieldFilters}
+                                    onChange={metric => {
+                                        context.setMainFieldFilters(metric);
+                                    }}
+                                />
+                            </div>
+                        </OverviewCardContainer>
+                    )}
+                </>
             )}
             {showSelectionStats && (
                 <>
-                    <OverviewCard stats={compareStats} filters={comparisonFilters} title={targetField.text} />
+                    <OverviewCard
+                        stats={compareStats}
+                        filters={comparisonFilters}
+                        title={targetField.text}
+                        actions={<CompareGroupSelector />}
+                    />
                     <span>vs</span>
-                    <OverviewCard stats={selectionStats} filters={mainFieldFilters} compareBase={compareStats} title={"Selection"} />
+                    <OverviewCard
+                        stats={selectionStats}
+                        filters={mainFieldFilters}
+                        compareBase={compareStats}
+                        title={"Selection"}
+                        actions={<ConfigButton button={{ text: 'Change' }}><MainFieldSelector /></ConfigButton>}
+                    />
                     {comparisonFilters.length > 0 && (
                         <WaterfallChart />
                     )}
