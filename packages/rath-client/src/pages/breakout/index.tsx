@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import styled from "styled-components";
 import { Card } from "../../components/card";
 import { useGlobalStore } from "../../store";
+import AIQuery from "./components/aiQuery";
 import ControlPanel from "./components/controlPanel";
 import DataOverview from "./components/dataOverview";
 import DivisionList from "./components/divisionList";
@@ -22,7 +23,7 @@ const Content = styled(Card)`
     }
 `;
 
-interface IBreakoutPageProps {
+export interface IBreakoutPageProps {
     defaultMainField?: Readonly<BreakoutMainField> | null;
     defaultMainFieldFilters?: IFilter[];
     defaultComparisonFilters?: IFilter[];
@@ -57,6 +58,7 @@ const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({
         <BreakoutContext.BreakoutProvider>
             <Outer>
                 <Content>
+                    <AIQuery />
                     <ControlPanel />
                     <DataOverview />
                     <DivisionList />

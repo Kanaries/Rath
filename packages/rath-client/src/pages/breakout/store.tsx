@@ -7,12 +7,23 @@ import { toStream } from "../../utils/mobx-utils";
 import { resolveCompareTarget } from "./components/controlPanel";
 import { applyDividers, FieldStats, statDivision } from "./utils/stats";
 import { analyzeComparisons, analyzeContributions, ISubgroupResult } from "./utils/top-drivers";
+import type { IBreakoutPageProps } from ".";
 
 
 type Observed<T> = T extends Observable<infer U> ? U : never;
 
 export type IUniqueFilter = IFilter & { id: string };
 export type IExportFilter = IFilter & Pick<IFieldMeta, 'name' | 'semanticType'>;
+
+
+type IFieldShort = Pick<Required<NonNullable<IFieldMeta>>, 'fid' | 'name' | 'semanticType' | 'analyticType' | 'geoRole'>;
+
+interface ISearchAIPayload {
+    metas: IFieldShort[];
+    query: string;
+}
+
+const searchAIApiUrl = 'https://enhanceai.kanaries.net/api/rootcausal';
 
 export const NumericalMetricAggregationTypes = [
     'mean',
@@ -65,9 +76,6 @@ export class BreakoutStore {
     
     public comparisonFilters: IFilter[];
 
-    public selection: readonly IRow[];
-    public diffGroup: readonly IRow[];
-
     public globalStats: FieldStats | null;
     public selectionStats: FieldStats | null;
     public diffStats: FieldStats | null;
@@ -80,8 +88,6 @@ export class BreakoutStore {
         this.mainField = null;
         this.mainFieldFilters = [];
         this.comparisonFilters = [];
-        this.selection = data;
-        this.diffGroup = [];
         this.globalStats = null;
         this.selectionStats = null;
         this.diffStats = null;
@@ -93,8 +99,6 @@ export class BreakoutStore {
             mainField: observable.ref,
             mainFieldFilters: observable.ref,
             comparisonFilters: observable.ref,
-            selection: observable.ref,
-            diffGroup: observable.ref,
             globalStats: observable.ref,
             selectionStats: observable.ref,
             diffStats: observable.ref,
@@ -208,16 +212,16 @@ export class BreakoutStore {
                 this.updateGlobalStats(globalStats);
             }),
             // update main group stats
-            mainGroup$.subscribe(({ data, stats }) => {
-                this.updateMainGroupStats(data, stats);
+            mainGroup$.subscribe(({ stats }) => {
+                this.updateMainGroupStats(stats);
             }),
             // analyze contributions
             generalAnalyses$.subscribe(analysis => {
                 this.updateGeneralAnalyses(analysis);
             }),
             // update comparison group stats
-            compareGroup$.subscribe(({ data, stats }) => {
-                this.updateComparisonGroupStats(data, stats);
+            compareGroup$.subscribe(({ stats }) => {
+                this.updateComparisonGroupStats(stats);
             }),
             // update comparison group analyses
             comparisonAnalyses$.subscribe(analyses => {
@@ -248,7 +252,14 @@ export class BreakoutStore {
     }
 
     public setMainField(mainField: Readonly<BreakoutMainField> | null) {
-        this.mainField = mainField;
+        if (!mainField) {
+            this.mainField = null;
+        } else {
+            this.mainField = {
+                fid: mainField.fid,
+                aggregator: (['sum', 'mean', 'count'] as const).find(a => a === mainField.aggregator) ?? 'mean',
+            };
+        }
     }
 
     public setMainFieldFilters(mainFieldFilters: IFilter[]) {
@@ -263,8 +274,7 @@ export class BreakoutStore {
         this.globalStats = stats;
     }
 
-    protected updateMainGroupStats(data: readonly IRow[], stats: FieldStats | null) {
-        this.selection = data;
+    protected updateMainGroupStats(stats: FieldStats | null) {
         this.selectionStats = stats;
     }
 
@@ -272,13 +282,51 @@ export class BreakoutStore {
         this.generalAnalyses = analysis;
     }
 
-    protected updateComparisonGroupStats(data: readonly IRow[], stats: FieldStats | null) {
-        this.diffGroup = data;
+    protected updateComparisonGroupStats(stats: FieldStats | null) {
         this.diffStats = stats;
     }
 
     protected updateComparisonAnalyses(analysis: ISubgroupResult[]) {
         this.comparisonAnalyses = analysis;
+    }
+
+    public async searchAI(query: string): Promise<IBreakoutPageProps | null> {
+        const payload: ISearchAIPayload = {
+            metas: this.fields.map(f => ({
+                fid: f.fid,
+                name: f.name || f.fid,
+                semanticType: f.semanticType,
+                analyticType: f.analyticType,
+                geoRole: 'none',
+            })),
+            query,
+        };
+        const res = await fetch(searchAIApiUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        try {
+            const data = await res.json() as (
+                | {
+                    success: true;
+                    data: IBreakoutPageProps;
+                }
+                | {
+                    success: false;
+                    message: string;
+                }
+            );
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+            return data.data;
+        } catch (error) {
+            console.error(error);
+        }
+        return null;
     }
 
 }
