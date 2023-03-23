@@ -9,6 +9,7 @@ import styled from "styled-components";
 import FilterCreationPill from "../../../components/fieldPill/filterCreationPill";
 import ViewField from "../../megaAutomation/vizOperation/viewField";
 import type { IUniqueFilter } from "../store";
+import { formatFilterRule } from "../utils/format";
 
 
 const Container = styled.div`
@@ -55,14 +56,12 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
         <Container>
             {/* applied filters (flattened) */}
             {flatFilters.map((f, i) => {
-                let filterDesc = `${f.field.name || f.field.fid} ∈ `;
-                filterDesc += f.filter.type === 'range' ? `[${f.filter.range.join(',')}]` : `{${f.filter.values.join(',')}}`;
                 return (
                     <Fragment key={i}>
                         <span />
                         <ViewField
                             type={f.field.analyticType}
-                            text={filterDesc}
+                            text={formatFilterRule(f.filter, f.field)}
                             onRemove={() => {
                                 submitFlatFilters(produce(flatFilters.map(f => toJS(f.filter)), draft => {
                                     draft.splice(i, 1);

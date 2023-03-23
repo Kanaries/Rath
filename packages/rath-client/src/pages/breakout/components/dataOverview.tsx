@@ -1,9 +1,11 @@
 import { Stack } from "@fluentui/react";
+import type { IFieldMeta, IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
+import { useMemo } from "react";
 import styled from "styled-components";
 import { Aggregator } from "../../../global";
 import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
-import { formatNumber, formatRate } from "../utils/format";
+import { formatFilterRule, formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
 import { resolveCompareTarget } from "./controlPanel";
 import WaterfallChart from "./waterfallChart";
@@ -13,10 +15,23 @@ const OverviewCardContainer = styled.div`
     border: 1px solid #8882;
     border-radius: 1rem;
     padding: 1rem;
+    align-self: stretch;
 
     header {
         font-size: 1rem;
         font-weight: 600;
+    }
+
+    .filters {
+        display: flex;
+        flex-direction: column;
+        :not(:empty) {
+            margin-block: 0.4em;
+        }
+        small {
+            font-size: 0.6rem;
+            opacity: 0.6;
+        }
     }
 
     .main {
@@ -89,8 +104,9 @@ const OverviewCardContainer = styled.div`
 
 const StackTokens = { childrenGap: 20 };
 
-const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title }: { stats: FieldStats; compareBase?: FieldStats; title: string }) {
+const OverviewCard = observer(function OverviewCard ({ filters, stats, compareBase, title }: { filters: readonly IFilter[]; stats: FieldStats; compareBase?: FieldStats; title: string }) {
     const { field, definition, stats: features } = stats;
+    const { fields } = useBreakoutStore();
 
     const isNumerical = field.semanticType === 'quantitative';
 
@@ -116,11 +132,30 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
         (features[definition.aggregator] - compareBase.stats[definition.aggregator]) / compareBase.stats[definition.aggregator]
     ) : null;
 
+    const filtersWithField = useMemo(() => {
+        return filters.reduce<{ filter: IFilter; field: IFieldMeta }[]>((list, filter) => {
+            const field = fields.find(field => field.fid === filter.fid);
+            if (field) {
+                list.push({ filter, field });
+            }
+            return list;
+        }, []);
+    }, [filters, fields]);
+
     return (
         <OverviewCardContainer>
             <header>
                 {title}
             </header>
+            <div className="filters">
+                {filtersWithField.map(({ field, filter }, i) => (
+                    <small key={i}>
+                        {formatFilterRule(filter, field)}
+                    </small>
+                ))}
+            </div>
+            <small>
+            </small>
             <dl className="main">
                 <dt>{definition.aggregator}</dt>
                 <dd>
@@ -161,13 +196,13 @@ const DataOverview = observer(function DataOverview () {
     return (
         <Stack horizontal tokens={StackTokens} verticalAlign="center" style={{ minHeight: '360px' }}>
             {showGlobalStats && (
-                <OverviewCard stats={globalStats} title={targetField.text} />
+                <OverviewCard stats={globalStats} filters={[]} title={targetField.text} />
             )}
             {showSelectionStats && (
                 <>
-                    <OverviewCard stats={compareStats} title={targetField.text} />
+                    <OverviewCard stats={compareStats} filters={comparisonFilters} title={targetField.text} />
                     <span>vs</span>
-                    <OverviewCard stats={selectionStats} compareBase={compareStats} title={"Selection"} />
+                    <OverviewCard stats={selectionStats} filters={mainFieldFilters} compareBase={compareStats} title={"Selection"} />
                     {comparisonFilters.length > 0 && (
                         <WaterfallChart />
                     )}
