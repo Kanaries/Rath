@@ -789,7 +789,8 @@
             "base": "Base Group",
             "selection": "Current Group",
             "id": "Subgroup",
-            "rate": "Rate"
+            "rate": "Rate",
+            "others": "Others"
         }
     }
 }

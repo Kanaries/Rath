@@ -36,7 +36,7 @@ const WaterfallChart = observer(function WaterfallChart() {
         const others = (curValue - prevValue) - topDiversSum;
         if (Math.abs(others) >= 1e-6) {
             topDivers.push({
-                "id": "Others",
+                "id": intl.get('breakout.others'),
                 "impact": others,
             });
         }

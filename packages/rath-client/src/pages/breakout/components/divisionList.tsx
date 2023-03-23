@@ -187,7 +187,11 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
                             {item?.hasChildren && (
                                 <IconButton
                                     iconProps={{ iconName: expanded ? "ChevronDownMed" : "ChevronRightMed" }}
-                                    onClick={() => togglePathExpanded(nextPath)}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        togglePathExpanded(nextPath);
+                                        context.focusSubgroup(item.field.fid);
+                                    }}
                                 />
                             )}
                             {!item?.hasChildren && (
@@ -262,16 +266,10 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
                 );
             },
         },
-    ], [openedPaths, title, togglePathExpanded]);
+    ], [openedPaths, title, togglePathExpanded, context]);
 
     const onRenderRow = useCallback<IRenderFunction<IDetailsRowProps>>((props, defaultRenderer) => {
         const item = props?.item as IFlatSubgroupResult | undefined;
-
-        const handleHover = () => {
-            if (item) {
-                context.focusSubgroup(item.field.fid);
-            }
-        };
 
         const handleClick = () => {
             if (!item) {
@@ -285,7 +283,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
         };
 
         return (
-            <div onMouseOver={handleHover} onClick={handleClick} style={{ cursor: action ? 'pointer' : 'default' }}>
+            <div onClick={handleClick} style={{ cursor: action ? 'pointer' : 'default' }}>
                 {defaultRenderer?.(props)}
             </div>
         );
