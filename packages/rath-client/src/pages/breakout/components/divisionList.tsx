@@ -1,4 +1,4 @@
-import { DetailsList, IColumn, IconButton, Pivot, PivotItem, SelectionMode } from "@fluentui/react";
+import { DetailsList, IColumn, IconButton, IDetailsRowProps, IRenderFunction, Pivot, PivotItem, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -125,6 +125,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
 }) {
     const [list, setList] = useState<IFlatSubgroupResult[]>([]);
     const [openedPaths, setOpenedPaths] = useState<string[][]>([]);
+    const context = useBreakoutStore();
 
     useEffect(() => {
         setList(groupSubgroupResults(data));
@@ -260,11 +261,28 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
         },
     ], [openedPaths, title, togglePathExpanded]);
 
+    const onRenderRow = useCallback<IRenderFunction<IDetailsRowProps>>((props, defaultRenderer) => {
+        const item = props?.item as IFlatSubgroupResult | undefined;
+
+        const handleHover = () => {
+            if (item) {
+                context.focusSubgroup(item.field.fid);
+            }
+        };
+
+        return (
+            <div onMouseOver={handleHover}>
+                {defaultRenderer?.(props)}
+            </div>
+        );
+    }, [context]);
+
     return (
         <DetailsList
             items={displayList}
             columns={columns}
             selectionMode={SelectionMode.none}
+            onRenderRow={onRenderRow}
         />
     );
 });

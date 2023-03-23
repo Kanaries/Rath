@@ -65,7 +65,7 @@ export const analyzeContributions = (
             target.fid,
             target.aggregator,
         );
-        if (!Number.isFinite(impact) || impact === 0) {
+        if (!Number.isFinite(impact) || impact === 0 || subgroup.records.length === 0) {
             continue;
         }
         headers.push({
@@ -134,7 +134,7 @@ export const analyzeComparisons = (
     }, []);
     const headers: { subgroup: typeof subgroups[number]; value: ISubgroupResult }[] = [];
     for (const subgroup of subgroups) {
-        if (subgroup.T2.length === targetGroup.length) {
+        if (subgroup.T2.length === targetGroup.length || subgroup.T2.length === 0) {
             continue;
         }
         const id = `${subgroup.field.name || subgroup.field.fid} = ${subgroup.filter.values[0]}`;

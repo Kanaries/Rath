@@ -6,6 +6,7 @@ import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, use
 import { formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
 import { resolveCompareTarget } from "./controlPanel";
+import WaterfallChart from "./waterfallChart";
 
 
 const OverviewCardContainer = styled.div`
@@ -158,7 +159,7 @@ const DataOverview = observer(function DataOverview () {
     const showSelectionStats = targetField && compareStats && selectionStats && !showGlobalStats;
 
     return (
-        <Stack horizontal tokens={StackTokens} verticalAlign="center">
+        <Stack horizontal tokens={StackTokens} verticalAlign="center" style={{ minHeight: '360px' }}>
             {showGlobalStats && (
                 <OverviewCard stats={globalStats} title={targetField.text} />
             )}
@@ -167,6 +168,9 @@ const DataOverview = observer(function DataOverview () {
                     <OverviewCard stats={compareStats} title={targetField.text} />
                     <span>vs</span>
                     <OverviewCard stats={selectionStats} compareBase={compareStats} title={"Selection"} />
+                    {comparisonFilters.length > 0 && (
+                        <WaterfallChart />
+                    )}
                 </>
             )}
         </Stack>

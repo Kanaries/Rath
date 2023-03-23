@@ -82,6 +82,8 @@ export class BreakoutStore {
 
     public generalAnalyses: ISubgroupResult[];
     public comparisonAnalyses: ISubgroupResult[];
+
+    public focusedSubgroupFid: string;
     
     constructor(data: IRow[], fields: IFieldMeta[]) {
         this.fields = fields;
@@ -93,6 +95,7 @@ export class BreakoutStore {
         this.diffStats = null;
         this.generalAnalyses = [];
         this.comparisonAnalyses = [];
+        this.focusedSubgroupFid = '';
         makeAutoObservable(this, {
             destroy: false,
             fields: false,
@@ -270,6 +273,10 @@ export class BreakoutStore {
         this.comparisonFilters = comparisonFilters;
     }
 
+    public focusSubgroup(fieldId: string) {
+        this.focusedSubgroupFid = fieldId;
+    }
+
     protected updateGlobalStats(stats: FieldStats | null) {
         this.globalStats = stats;
     }
@@ -288,6 +295,8 @@ export class BreakoutStore {
 
     protected updateComparisonAnalyses(analysis: ISubgroupResult[]) {
         this.comparisonAnalyses = analysis;
+        const firstFirstClassSubgroup = analysis.find(a => !a.path?.length);
+        this.focusedSubgroupFid = firstFirstClassSubgroup?.field.fid ?? '';
     }
 
     public async searchAI(query: string): Promise<IBreakoutPageProps | null> {
