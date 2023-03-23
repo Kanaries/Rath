@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { useMemo, useRef } from "react";
 import { ActionButton, Dropdown, Stack } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
@@ -44,7 +45,7 @@ export const resolveCompareTarget = (target: BreakoutMainField, fields: IFieldMe
             field,
             aggregate: target.aggregator,
             key: `${field.name || field.fid}@${target.aggregator}`,
-            text: `${target.aggregator} of "${field.name || field.fid}"`,
+            text: `${intl.get(`common.stat.${target.aggregator}`)}: ${field.name || field.fid}`,
         };
     }
     return null;

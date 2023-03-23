@@ -777,6 +777,19 @@
             "CausalInsight": "CausalInsight",
             "GraphicWalker": "GraphicWalker",
             "predict": "predict"
+        },
+        "breakout": {
+            "query": "Query",
+            "search": "Search",
+            "select_a_group": "Select a group",
+            "general_contribution": "General Contribution",
+            "comparison_contribution": "Comparison Contribution",
+            "subgroups": "Subgroups",
+            "impact": "Impact",
+            "base": "Base Group",
+            "selection": "Current Group",
+            "id": "Subgroup",
+            "rate": "Rate"
         }
     }
 }

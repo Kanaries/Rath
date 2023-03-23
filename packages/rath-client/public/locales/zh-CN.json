@@ -789,5 +789,18 @@
             "GraphicWalker": "可视化自助分析",
             "predict": "模型预测"
         }
+    },
+    "breakout": {
+        "query": "查询",
+        "search": "搜索",
+        "select_a_group": "选择一个分组",
+        "general_contribution": "指标贡献度",
+        "comparison_contribution": "对比分析",
+        "subgroups": "子群体",
+        "impact": "贡献值",
+        "base": "基准组",
+        "selection": "当前组",
+        "id": "子群体",
+        "rate": "占比"
     }
 }

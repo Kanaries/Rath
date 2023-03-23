@@ -1,4 +1,5 @@
 import { IconButton, Stack } from "@fluentui/react";
+import intl from 'react-intl-universal';
 import type { IFieldMeta, IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
 import { ReactNode, useMemo } from "react";
@@ -7,8 +8,8 @@ import { Aggregator } from "../../../global";
 import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { formatFilterRule, formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
-import ConfigButton from "./configButton";
-import { CompareGroupSelector, MainFieldSelector, resolveCompareTarget } from "./controlPanel";
+// import ConfigButton from "./configButton";
+import { /*CompareGroupSelector, MainFieldSelector, */resolveCompareTarget } from "./controlPanel";
 import MetricFilter from "./metricFilter";
 import WaterfallChart from "./waterfallChart";
 
@@ -215,7 +216,7 @@ const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
             <div className="features">
                 {list.map(({ key, data }) => (
                     <dl key={key}>
-                        <dt>{key}</dt>
+                        <dt>{intl.get(`common.stat.${key}`)}</dt>
                         <dd>{data}</dd>
                     </dl>
                 ))}
@@ -236,7 +237,7 @@ const DataOverview = observer(function DataOverview () {
 
     return (
         <Stack horizontal tokens={StackTokens} verticalAlign="center" style={{ minHeight: '360px' }}>
-            {!showGlobalStats && !showSelectionStats && (
+            {/* {!showGlobalStats && !showSelectionStats && (
                 <OverviewCardContainer>
                     <header>
                         <span>Select A Target</span>
@@ -245,7 +246,7 @@ const DataOverview = observer(function DataOverview () {
                         <MainFieldSelector />
                     </div>
                 </OverviewCardContainer>
-            )}
+            )} */}
             {showGlobalStats && (
                 <>
                     <OverviewCard
@@ -257,7 +258,7 @@ const DataOverview = observer(function DataOverview () {
                     {mainField && mainFieldFilters.length === 0 && (
                         <OverviewCardContainer>
                             <header>
-                                <span>Select A Subgroup</span>
+                                <span>{intl.get('breakout.select_a_group')}</span>
                             </header>
                             <div className="scroll-container">
                                 <MetricFilter
@@ -277,18 +278,18 @@ const DataOverview = observer(function DataOverview () {
                     <OverviewCard
                         stats={compareStats}
                         filters={comparisonFilters}
-                        title={targetField.text}
-                        onRemove={() => context.setComparisonFilters([])}
-                        actions={<CompareGroupSelector />}
+                        title={`[${intl.get('breakout.base')}] ${targetField.text}`}
+                        // onRemove={() => context.setComparisonFilters([])}
+                        // actions={<CompareGroupSelector />}
                     />
-                    <span>vs</span>
+                    <span>{'->'}</span>
                     <OverviewCard
                         stats={selectionStats}
                         filters={mainFieldFilters}
                         compareBase={compareStats}
-                        title={"Selection"}
-                        onRemove={() => context.setMainField(null)}
-                        actions={<ConfigButton button={{ text: 'Change' }}><MainFieldSelector /></ConfigButton>}
+                        title={`[${intl.get('breakout.selection')}] ${targetField.text}`}
+                        // onRemove={() => context.setMainField(null)}
+                        // actions={<ConfigButton button={{ text: 'Change' }}><MainFieldSelector /></ConfigButton>}
                     />
                     {comparisonFilters.length > 0 && (
                         <WaterfallChart />

@@ -1,4 +1,5 @@
 import { DetailsList, IColumn, IconButton, IDetailsRowProps, IRenderFunction, Pivot, PivotItem, SelectionMode } from "@fluentui/react";
+import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -170,7 +171,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
     const columns = useMemo<IColumn[]>(() => [
         {
             key: 'id',
-            name: 'ID',
+            name: intl.get('breakout.id'),
             minWidth: 200,
             onRender(item: IFlatSubgroupResult | undefined) {
                 const path = item?.path ?? [];
@@ -202,7 +203,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
         },
         {
             key: 'rate',
-            name: 'Rate',
+            name: intl.get('breakout.rate'),
             minWidth: 200,
             onRender(item: IFlatSubgroupResult | undefined) {
                 const prev = item?.rateBefore;
@@ -248,7 +249,7 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
         },
         {
             key: 'impact',
-            name: 'Impact',
+            name: intl.get('breakout.impact'),
             minWidth: 200,
             onRender(item: IFlatSubgroupResult | undefined) {
                 const impact = item?.impact ?? 0;
@@ -310,7 +311,7 @@ const DivisionList = observer(function DivisionList () {
             {mainField && targetField && (
                 <Pivot>
                     {comparisonFilters.length === 0 && (
-                        <PivotItem headerText="General Contribution">
+                        <PivotItem headerText={intl.get('breakout.general_contribution')}>
                             <DivisionDetailList
                                 data={generalAnalyses}
                                 title={targetField.text}
@@ -319,7 +320,7 @@ const DivisionList = observer(function DivisionList () {
                         </PivotItem>
                     )}
                     {comparisonFilters.length > 0 && (
-                        <PivotItem headerText="Comparison Contribution">
+                        <PivotItem headerText={intl.get('breakout.comparison_contribution')}>
                             <DivisionDetailList
                                 data={comparisonAnalyses}
                                 title={targetField.text}

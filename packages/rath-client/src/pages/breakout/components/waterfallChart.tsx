@@ -1,4 +1,5 @@
 import type { IRow } from "@kanaries/loa";
+import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import styled from "styled-components";
@@ -42,22 +43,25 @@ const WaterfallChart = observer(function WaterfallChart() {
         return topDivers;
     }, [comparisonAnalyses, focusedSubgroupFid, selectionStats, diffStats, mainField]);
 
+    const LabelBase = intl.get('breakout.base');
+    const LabelCur = intl.get('breakout.selection');
+
     const data = useMemo<IRow[]>(() => {
         if (!mainField || !diffStats) {
             return [];
         }
         return [
-            { "label": "Base", "amount": diffStats.stats[mainField.aggregator] },
+            { "label": LabelBase, "amount": diffStats.stats[mainField.aggregator] },
             ...firstClassSubgroups.map(subgroup => ({
                 "label": subgroup.id,
                 "amount": subgroup.impact,
             })),
-            { "label": "Selection", "amount": 0 }
+            { "label": LabelCur, "amount": 0 }
         ].map((item, i) => ({
             ...item,
             index: i,
         }));
-    }, [diffStats, mainField, firstClassSubgroups]);
+    }, [diffStats, mainField, firstClassSubgroups, LabelBase, LabelCur]);
 
     const spec = useMemo(() => {
         return {
@@ -74,15 +78,15 @@ const WaterfallChart = observer(function WaterfallChart() {
                     "as": "lead"
                 },
                 {
-                    "calculate": "datum.label === 'Selection' ? 0 : datum.sum - datum.amount",
+                    "calculate": `datum.label === '${LabelCur}' ? 0 : datum.sum - datum.amount`,
                     "as": "previous_sum"
                 },
                 {
-                    "calculate": "datum.label === 'Selection' ? datum.sum : datum.amount",
+                    "calculate": `datum.label === '${LabelCur}' ? datum.sum : datum.amount`,
                     "as": "amount"
                 },
                 {
-                    "calculate": "(datum.label !== 'Base' && datum.label !== 'Selection' && datum.amount > 0 ? '+' : '') + datum.amount",
+                    "calculate": `(datum.label !== '${LabelBase}' && datum.label !== '${LabelCur}' && datum.amount > 0 ? '+' : '') + datum.amount`,
                     "as": "text_amount"
                 },
                 { "calculate": "(datum.sum + datum.previous_sum) / 2", "as": "center" },
@@ -100,7 +104,7 @@ const WaterfallChart = observer(function WaterfallChart() {
                     "field": "label",
                     "type": "ordinal",
                     "sort": { "field": "index" },
-                    "axis": { "labelAngle": 0, "title": "Subgroups" }
+                    "axis": { "labelAngle": 0, "title": intl.get("breakout.subgroups") }
                 }
             },
             "layer": [
@@ -110,13 +114,13 @@ const WaterfallChart = observer(function WaterfallChart() {
                         "y": {
                             "field": "previous_sum",
                             "type": "quantitative",
-                            "title": "Value"
+                            "title": intl.get("breakout.value")
                         },
                         "y2": { "field": "sum" },
                         "color": {
                             "condition": [
                                 {
-                                    "test": "datum.label === 'Begin' || datum.label === 'End'",
+                                    "test": `datum.label === '${LabelBase}' || datum.label === '${LabelCur}'`,
                                     "value": "#f7e0b6"
                                 },
                                 { "test": "datum.sum < datum.previous_sum", "value": "#f78a64" }
@@ -150,7 +154,7 @@ const WaterfallChart = observer(function WaterfallChart() {
                     "mark": { "type": "text", "dy": 4, "baseline": "top" },
                     "encoding": {
                         "y": { "field": "sum_dec", "type": "quantitative" },
-                        "text": { "field": "sum_dec", "type": "nominal", "format": ".2f" }
+                        "text": { "field": "sum_dec", "type": "nominal" }
                     }
                 },
                 {
@@ -161,7 +165,7 @@ const WaterfallChart = observer(function WaterfallChart() {
                         "color": {
                             "condition": [
                                 {
-                                    "test": "datum.label === 'Begin' || datum.label === 'End'",
+                                    "test": `datum.label === '${LabelBase}' || datum.label === '${LabelCur}'`,
                                     "value": "#725a30"
                                 }
                             ],
@@ -172,7 +176,7 @@ const WaterfallChart = observer(function WaterfallChart() {
             ],
             "config": { "text": { "fontWeight": "bold", "color": "#404040" } }
         };
-    }, []);
+    }, [LabelBase, LabelCur]);
 
     return (
         <Container>

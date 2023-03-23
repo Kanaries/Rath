@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { DefaultButton, Label, SearchBox, Spinner, Stack } from "@fluentui/react";
+import intl from 'react-intl-universal';
+import { PrimaryButton, SearchBox, Spinner, Stack } from "@fluentui/react";
 import styled from "styled-components";
 import type { IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
@@ -19,7 +20,6 @@ const Container = styled.div`
 const SearchBoxContainer = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
-    margin-right: 10px;
     transition: width 0.2s ease-in-out;
 `;
 
@@ -100,20 +100,18 @@ const AIQuery = observer(function AIQuery() {
 
     return (
         <Stack horizontal tokens={StackTokens}>
-            <Label>
-                Query
-            </Label>
             <Container>
                 <SearchBoxContainer>
                     <SearchBox
                         value={query}
+                        placeholder={intl.get('breakout.query')}
                         onChange={(_, newValue) => setQuery(newValue ?? "")}
                     />
                 </SearchBoxContainer>
-                <DefaultButton onClick={onSearch}>
-                    Search
-                </DefaultButton>
-                {busy && <Spinner />}
+                <PrimaryButton onClick={onSearch}>
+                    {intl.get('breakout.search')}
+                    {busy && <Spinner />}
+                </PrimaryButton>
             </Container>
         </Stack>
     );
