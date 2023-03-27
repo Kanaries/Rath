@@ -1,6 +1,5 @@
 import type { IFilter } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
 import styled from "styled-components";
 import { Card } from "../../components/card";
 import { useGlobalStore } from "../../store";
@@ -8,6 +7,7 @@ import AIQuery from "./components/aiQuery";
 import DataOverview from "./components/dataOverview";
 import DivisionList from "./components/divisionList";
 import { type BreakoutMainField, useBreakoutContext } from "./store";
+import { useDefaultConfigs } from "./utils";
 
 
 const Outer = styled.div`
@@ -28,30 +28,12 @@ export interface IBreakoutPageProps {
     defaultComparisonFilters?: IFilter[];
 }
 
-const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({
-    defaultMainField, defaultMainFieldFilters, defaultComparisonFilters
-}) {
+const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage (props) {
     const { dataSourceStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const BreakoutContext = useBreakoutContext(cleanedData, fieldMetas);
 
-    useEffect(() => {
-        if (defaultMainField !== undefined) {
-            BreakoutContext.value.setMainField(defaultMainField);
-        }
-    }, [defaultMainField, BreakoutContext]);
-
-    useEffect(() => {
-        if (defaultMainFieldFilters !== undefined) {
-            BreakoutContext.value.setComparisonFilters(defaultMainFieldFilters);
-        }
-    }, [defaultMainFieldFilters, BreakoutContext]);
-
-    useEffect(() => {
-        if (defaultComparisonFilters !== undefined) {
-            BreakoutContext.value.setComparisonFilters(defaultComparisonFilters);
-        }
-    }, [defaultComparisonFilters, BreakoutContext]);
+    useDefaultConfigs(BreakoutContext.value, props);
 
     return (
         <BreakoutContext.BreakoutProvider>

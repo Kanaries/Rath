@@ -802,6 +802,17 @@
         "selection": "当前组",
         "id": "子群体",
         "rate": "占比",
-        "others": "其他"
+        "others": "其他",
+        "measure_empty": "没有有效的度量",
+        "compare": "对比",
+        "period": {
+            "Week": "周",
+            "Day": "日",
+            "Month": "月",
+            "Season": "季度",
+            "Year": "年"
+        },
+        "SPLX": "上一{X}本{P}同比",
+        "LP": "上一{P}环比"
     }
 }

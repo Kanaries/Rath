@@ -777,20 +777,31 @@
             "CausalInsight": "CausalInsight",
             "GraphicWalker": "GraphicWalker",
             "predict": "predict"
-        },
-        "breakout": {
-            "query": "Query",
-            "search": "Search",
-            "select_a_group": "Select a group",
-            "general_contribution": "General Contribution",
-            "comparison_contribution": "Comparison Contribution",
-            "subgroups": "Subgroups",
-            "impact": "Impact",
-            "base": "Base Group",
-            "selection": "Current Group",
-            "id": "Subgroup",
-            "rate": "Rate",
-            "others": "Others"
         }
+    },
+    "breakout": {
+        "query": "Query",
+        "search": "Search",
+        "select_a_group": "Select a group",
+        "general_contribution": "General Contribution",
+        "comparison_contribution": "Comparison Contribution",
+        "subgroups": "Subgroups",
+        "impact": "Impact",
+        "base": "Base Group",
+        "selection": "Current Group",
+        "id": "Subgroup",
+        "rate": "Rate",
+        "others": "Others",
+        "measure_empty": "No valid measure field found.",
+        "compare": "Compare",
+        "period": {
+            "Week": "Week",
+            "Day": "Day",
+            "Month": "Month",
+            "Season": "Season",
+            "Year": "Year"
+        },
+        "SPLX": "Same {P} last {X}",
+        "LP": "Last {P}"
     }
 }

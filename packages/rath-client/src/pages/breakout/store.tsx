@@ -26,18 +26,16 @@ interface ISearchAIPayload {
 
 const searchAIApiUrl = 'https://enhanceai.kanaries.net/api/rootcausal';
 
-export const NumericalMetricAggregationTypes = [
+export const NumericalMetricAggregationTypes: readonly Aggregator[] = [
     'mean',
     'sum',
     'count',
-    // MetricAggregationType.WeightedAverage,
-    // MetricAggregationType.NumericalRate,
-] as const;
+];
 
-export const CategoricalMetricAggregationTypes = [
+export const CategoricalMetricAggregationTypes: readonly Aggregator[] = [
     // MetricAggregationType.C_Rate,
     // MetricAggregationType.C_Count,
-] as const;
+];
 
 export type BreakoutMainField = {
     fid: string;
@@ -67,7 +65,7 @@ const exportFilters = (filters: IFilter[], fieldMetas: IFieldMeta[]): IExportFil
     return result;
 };
 
-export class BreakoutStore {
+class BreakoutStore {
 
     public readonly fields: IFieldMeta[];
 
@@ -246,7 +244,7 @@ export class BreakoutStore {
         };
     }
 
-    public destroy: () => void = () => {};
+    public readonly destroy: () => void;
 
     public export(): BreakoutStoreExports {
         const main = this.mainField ? resolveCompareTarget(this.mainField, this.fields) : null;
@@ -348,6 +346,9 @@ export class BreakoutStore {
 
 }
 
+/* Do not export the constructor */
+export type { BreakoutStore };
+
 const BreakoutContext = createContext<BreakoutStore>(null!);
 
 export const useBreakoutContext = (data: IRow[], fields: IFieldMeta[]) => {
@@ -372,6 +373,7 @@ export const useBreakoutContext = (data: IRow[], fields: IFieldMeta[]) => {
     }), [store, context]);
 };
 
+/** Make sure you have wrapped the component with a provider returned by `useBreakoutContext()`. */
 export const useBreakoutStore = () => {
     const store = useContext(BreakoutContext);
     return store;

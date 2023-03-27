@@ -1,18 +1,18 @@
 import intl from 'react-intl-universal';
-import { useMemo, useRef } from "react";
-import { ActionButton, Dropdown, Stack } from "@fluentui/react";
+import { useRef } from "react";
+import { Dropdown } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import type { IFieldMeta, IFilter } from "@kanaries/loa";
+import type { IFieldMeta } from "@kanaries/loa";
 import styled from "styled-components";
-import { CategoricalMetricAggregationTypes, BreakoutMainField, IUniqueFilter, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
-import { coerceNumber } from "../utils/format";
+import { CategoricalMetricAggregationTypes, BreakoutMainField, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import type { Aggregator } from "../../../global";
 import ConfigButton, { IConfigButtonRef } from "./configButton";
-import MetricFilter, { flatFilterRules } from "./metricFilter";
+import MetricFilter from "./metricFilter";
 
 
 const TargetSelector = styled.div`
     margin: 1rem 0;
+    padding: 1rem;
 
     .ms-Dropdown-container {
         margin-block: 1rem;
@@ -32,7 +32,7 @@ const TargetSelector = styled.div`
             width: 10rem;
             opacity: 0;
         }
-        :hover > div {
+        :hover > div, &.current > div {
             opacity: 1;
         }
     }
@@ -47,39 +47,6 @@ export const resolveCompareTarget = (target: BreakoutMainField, fields: IFieldMe
             key: `${field.name || field.fid}@${target.aggregator}`,
             text: `${intl.get(`common.stat.${target.aggregator}`)}: ${field.name || field.fid}`,
         };
-    }
-    return null;
-};
-
-export enum PeriodFlag {
-    Weekday = 'Week',
-    Day = 'Day',
-    Month = 'Month',
-    Season = 'Season',
-    Year = 'Year',
-}
-
-const mayBePeriod = (field: IFieldMeta): PeriodFlag | null => {
-    if (field.semanticType === 'nominal') {
-        if (field.distribution.length <= 7 && field.name?.match(/week/i)) {
-            return PeriodFlag.Weekday;
-        }
-    } else if (field.semanticType === 'ordinal' || field.semanticType === 'temporal') {
-        if (field.distribution.length <= 7 && field.name?.match(/week/i)) {
-            return PeriodFlag.Weekday;
-        }
-        if (field.distribution.length <= 31 && field.name?.match(/day/i)) {
-            return PeriodFlag.Day;
-        }
-        if (field.distribution.length <= 12 && field.name?.match(/month/i)) {
-            return PeriodFlag.Month;
-        }
-        if (field.distribution.length <= 4 && field.name?.match(/season/i)) {
-            return PeriodFlag.Season;
-        }
-        if (field.name?.match(/year/i)) {
-            return PeriodFlag.Year;
-        }
     }
     return null;
 };
@@ -103,10 +70,11 @@ export const MainFieldSelector = observer(function MainFieldSelector () {
         <TargetSelector>
             {validMeasures.length === 0 && (
                 <p>
-                    No valid measure field found.
+                    {intl.get('breakout.measure_empty')}
                 </p>
             )}
             {validMeasures.map(f => {
+                const isCurrent = mainField?.fid === f.fid;
                 const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregator => {
                     const item: BreakoutMainField = { fid: f.fid, aggregator };
                     const target = resolveCompareTarget(item, fields)!;
@@ -125,6 +93,7 @@ export const MainFieldSelector = observer(function MainFieldSelector () {
                         options={options}
                         label={f.name || f.fid}
                         selectedKey={compareTargetItem?.key}
+                        className={isCurrent ? 'current' : ''}
                         onChange={(_, opt) => {
                             const item = opt?.data as (typeof options)[number]['data'] | undefined;
                             if (item) {
@@ -141,204 +110,10 @@ export const MainFieldSelector = observer(function MainFieldSelector () {
 
 export const CompareGroupSelector = observer(function CompareGroupSelector () {
     const context = useBreakoutStore();
-    const { fields, mainFieldFilters, comparisonFilters } = context;
-    
-    const [targetSelectorPeriods, otherFilters] = useMemo<[{ flag: PeriodFlag; filter: IFilter }[], IUniqueFilter[]]>(() => {
-        if (mainFieldFilters.length === 0) {
-            return [[], []];
-        }
-        const filters = flatFilterRules(mainFieldFilters);
-        const temporalFilters: { flag: PeriodFlag; filter: IUniqueFilter }[] = [];
-        for (const f of filters) {
-            const field = fields.find(which => which.fid === f.fid);
-            if (!field) {
-                continue;
-            }
-            const flag = mayBePeriod(field);
-            if (flag) {
-                temporalFilters.push({ flag, filter: f });
-            }
-        }
-        const otherFilters = filters.filter(f => !temporalFilters.some(t => t.filter.id === f.id));
-        return [temporalFilters, otherFilters];
-    }, [mainFieldFilters, fields]);
-
-    const suggestions = useMemo<{ title: string; rule: IFilter[] }[]>(() => {
-        if (targetSelectorPeriods.length === 0) {
-            return [];
-        }
-
-        const list: { title: string; rule: IFilter[] }[] = [];
-        
-        const minFlag = [
-            PeriodFlag.Weekday,
-            PeriodFlag.Day,
-            PeriodFlag.Month,
-            PeriodFlag.Season,
-            PeriodFlag.Year,
-        ].find(flag => targetSelectorPeriods.some(f => f.flag === flag));
-
-        const minPeriodFilters = targetSelectorPeriods.filter(f => f.flag === minFlag);
-
-        if (!minFlag || minPeriodFilters.length !== 1) {
-            return [];
-        }
-
-        const minPeriodFilter = minPeriodFilters[0].filter;
-        const prevLevels = {
-            [PeriodFlag.Weekday]: [],
-            [PeriodFlag.Day]: [PeriodFlag.Weekday, PeriodFlag.Month],
-            [PeriodFlag.Month]: [PeriodFlag.Season, PeriodFlag.Year],
-            [PeriodFlag.Season]: [PeriodFlag.Year],
-            [PeriodFlag.Year]: [],
-        }[minFlag] as PeriodFlag[];
-
-        if (minPeriodFilter.type !== 'set') {
-            return [];
-        }
-
-        const currentValue = coerceNumber((minPeriodFilter.values as [number | string])[0]);
-        let prevPeriod: typeof targetSelectorPeriods[number] | null = null;
-        for (const flag of prevLevels) {
-            const filters = targetSelectorPeriods.filter(f => f.flag === flag);
-            if (filters.length === 1 && filters[0].filter.type === 'set') {
-                prevPeriod = filters[0];
-                break;
-            }
-        }
-
-        const prevValue = ((): number | null => {
-            if (!prevPeriod || prevPeriod.filter.type !== 'set') {
-                return null;
-            }
-            const cur = coerceNumber((prevPeriod.filter.values as [number | string])[0]);
-            switch (prevPeriod.flag) {
-                case PeriodFlag.Season: {
-                    return (cur + 3) % 4;
-                }
-                case PeriodFlag.Year: {
-                    return cur - 1;
-                }
-                default: {
-                    return null;
-                }
-            }
-        })();
-
-        const withOthers = (rule: (IFilter | undefined)[]) => {
-            return [...otherFilters, ...rule.filter(Boolean)] as IFilter[];
-        };
-
-        if (prevPeriod && prevValue !== null) {
-            switch (minFlag) {
-                case PeriodFlag.Month: {
-                    list.push({
-                        title: `Same Month Last ${prevPeriod.flag}`,
-                        rule: withOthers([
-                            {
-                                type: 'set',
-                                fid: minPeriodFilter.fid,
-                                values: [currentValue],
-                            },
-                            {
-                                type: 'set',
-                                fid: prevPeriod.filter.fid,
-                                values: [prevValue],
-                            },
-                        ]),
-                    });
-                    break;
-                }
-                case PeriodFlag.Season: {
-                    list.push({
-                        title: `Same Season Last ${prevPeriod.flag}`,
-                        rule: withOthers([
-                            {
-                                type: 'set',
-                                fid: minPeriodFilter.fid,
-                                values: [currentValue - 1],
-                            },
-                            {
-                                type: 'set',
-                                fid: prevPeriod.filter.fid,
-                                values: [prevValue],
-                            },
-                        ]),
-                    });
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        }
-
-        switch (minFlag) {
-            case PeriodFlag.Weekday: {
-                list.push({
-                    title: 'Last Week',
-                    rule: withOthers([
-                        {
-                            type: 'set',
-                            fid: minPeriodFilter.fid,
-                            values: [(currentValue + 6) % 7],
-                        },
-                        prevPeriod?.filter,
-                    ]),
-                });
-                break;
-            }
-            case PeriodFlag.Month: {
-                list.push({
-                    title: 'Last Month',
-                    rule: withOthers([
-                        {
-                            type: 'set',
-                            fid: minPeriodFilter.fid,
-                            values: [(currentValue + 11) % 12],
-                        },
-                        prevPeriod?.filter,
-                    ]),
-                });
-                break;
-            }
-            case PeriodFlag.Year: {
-                list.push({
-                    title: 'Last Year',
-                    rule: withOthers([
-                        {
-                            type: 'set',
-                            fid: minPeriodFilter.fid,
-                            values: [currentValue - 1],
-                        },
-                        prevPeriod?.filter,
-                    ]),
-                });
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-
-        return list;
-    }, [targetSelectorPeriods, otherFilters]);
+    const { fields, comparisonFilters } = context;
 
     return (
-        <ConfigButton button={{ text: 'Compare' }}>
-            {suggestions.length > 0 && (
-                <Stack>
-                    {suggestions.map((sug, i) => (
-                        <ActionButton
-                            key={i}
-                            text={sug.title}
-                            onClick={() => {
-                                context.setComparisonFilters(sug.rule);
-                            }}
-                        />
-                    ))}
-                </Stack>
-            )}
+        <ConfigButton button={{ label: intl.get('breakout.compare'), iconProps: { iconName: 'Settings' } }}>
             <MetricFilter
                 fields={fields}
                 filters={comparisonFilters}

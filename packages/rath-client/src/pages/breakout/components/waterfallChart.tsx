@@ -18,6 +18,8 @@ const Container = styled.div`
     justify-content: center;
 `;
 
+const NEW_GROUP_THRESHOLD = 1e-6;
+
 const WaterfallChart = observer(function WaterfallChart() {
     const { commonStore } = useGlobalStore();
     const { themeConfig } = commonStore;
@@ -34,7 +36,7 @@ const WaterfallChart = observer(function WaterfallChart() {
         const curValue = selectionStats.stats[mainField.aggregator];
         const topDiversSum = topDivers.reduce((sum, subgroup) => sum + subgroup.impact, 0);
         const others = (curValue - prevValue) - topDiversSum;
-        if (Math.abs(others) >= 1e-6) {
+        if (Math.abs(others) >= NEW_GROUP_THRESHOLD) {
             topDivers.push({
                 "id": intl.get('breakout.others'),
                 "impact": others,

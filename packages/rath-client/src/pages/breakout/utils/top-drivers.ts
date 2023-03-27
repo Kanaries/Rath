@@ -14,7 +14,7 @@ export interface ISubgroupResult {
     impact: number;
 }
 
-const MAX_SUBGROUPS = 5;
+const MAX_SUBGROUPS = 10;
 const MAX_DEPTH = 3;
 
 export const analyzeContributions = (

@@ -1,4 +1,4 @@
-import { Callout, DefaultButton, type IButtonProps, type ICalloutProps } from "@fluentui/react";
+import { Callout, DefaultButton, IconButton, type IButtonProps, type ICalloutProps } from "@fluentui/react";
 import { useBoolean, useId } from "@fluentui/react-hooks";
 import { observer } from "mobx-react-lite";
 import { forwardRef, useImperativeHandle } from "react";
@@ -7,6 +7,7 @@ import { forwardRef, useImperativeHandle } from "react";
 export interface IConfigButtonProps {
     button: Omit<IButtonProps, 'children'>;
     callout?: Omit<ICalloutProps, 'children'>;
+    /** Content of callout */
     children?: any;
 }
 
@@ -22,9 +23,11 @@ const ConfigButton = observer(forwardRef<IConfigButtonRef, IConfigButtonProps>(f
         dismiss,
     }));
 
+    const Button = button.title ? DefaultButton : IconButton;
+
     return (
         <>
-            <DefaultButton
+            <Button
                 {...button}
                 onClick={toggleIsCalloutVisible}
                 id={buttonId}

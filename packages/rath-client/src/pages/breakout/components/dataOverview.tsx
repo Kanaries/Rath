@@ -8,8 +8,8 @@ import { Aggregator } from "../../../global";
 import { CategoricalMetricAggregationTypes, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { formatFilterRule, formatNumber, formatRate } from "../utils/format";
 import { type FieldStats } from "../utils/stats";
-// import ConfigButton from "./configButton";
-import { /*CompareGroupSelector, MainFieldSelector, */resolveCompareTarget } from "./controlPanel";
+import ConfigButton from "./configButton";
+import { CompareGroupSelector, MainFieldSelector, resolveCompareTarget } from "./controlPanel";
 import MetricFilter from "./metricFilter";
 import WaterfallChart from "./waterfallChart";
 
@@ -46,44 +46,6 @@ const OverviewCardContainer = styled.div`
         small {
             font-size: 0.6rem;
             opacity: 0.6;
-        }
-    }
-
-    .main {
-        padding-block: 1rem;
-        border-bottom: 1px solid #8882;
-        dt {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-        dd {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            .data {
-                font-weight: 600;
-                font-size: 1.5rem;
-            }
-            .diff {
-                font-size: 0.8rem;
-                margin-left: 1em;
-                padding: 0.1em 0.4em;
-                background-color: #8882;
-                border-radius: 0.33em;
-                &.up {
-                    color: green;
-                }
-                &.down {
-                    color: red;
-                }
-            }
         }
     }
 
@@ -124,10 +86,51 @@ const OverviewCardContainer = styled.div`
     }
 `;
 
+const Info = styled.dl`
+    padding-block: 1rem;
+    border-bottom: 1px solid #8882;
+    dt {
+        /* sr-only */
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+    dd {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .data {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        .diff {
+            font-size: 0.8rem;
+            margin-left: 1em;
+            padding: 0.1em 0.4em;
+            background-color: #8882;
+            border-radius: 0.33em;
+            &.up {
+                color: green;
+            }
+            &.down {
+                color: red;
+            }
+        }
+    }
+`;
+
 const StackTokens = { childrenGap: 20 };
+const StackStyle = { minHeight: '360px' };
 
 interface IOverviewCardProps {
-    filters: readonly IFilter[];
+    /** @default [] */
+    filters?: readonly IFilter[];
     stats: FieldStats;
     compareBase?: FieldStats;
     title: string;
@@ -136,7 +139,7 @@ interface IOverviewCardProps {
 }
 
 const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
-    filters, stats, compareBase, title, onRemove, actions,
+    filters = [], stats, compareBase, title, onRemove, actions,
 }) {
     const { field, definition, stats: features } = stats;
     const { fields } = useBreakoutStore();
@@ -161,8 +164,11 @@ const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
 
     const main = list.find(({ key }) => key === definition.aggregator);
 
+    const curVal = features[definition.aggregator];
+    const prevVal = compareBase ? compareBase.stats[definition.aggregator] : NaN;
+
     const diff = compareBase ? (
-        (features[definition.aggregator] - compareBase.stats[definition.aggregator]) / compareBase.stats[definition.aggregator]
+        (curVal - prevVal) / prevVal
     ) : null;
 
     const filtersWithField = useMemo(() => {
@@ -196,9 +202,7 @@ const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
                     </small>
                 ))}
             </div>
-            <small>
-            </small>
-            <dl className="main">
+            <Info>
                 <dt>{definition.aggregator}</dt>
                 <dd>
                     <span className="data">
@@ -212,7 +216,7 @@ const OverviewCard = observer<IOverviewCardProps>(function OverviewCard ({
                         </span>
                     )}
                 </dd>
-            </dl>
+            </Info>
             <div className="features">
                 {list.map(({ key, data }) => (
                     <dl key={key}>
@@ -236,7 +240,7 @@ const DataOverview = observer(function DataOverview () {
     const showSelectionStats = targetField && compareStats && selectionStats && !showGlobalStats;
 
     return (
-        <Stack horizontal tokens={StackTokens} verticalAlign="center" style={{ minHeight: '360px' }}>
+        <Stack horizontal tokens={StackTokens} verticalAlign="center" style={StackStyle}>
             {/* {!showGlobalStats && !showSelectionStats && (
                 <OverviewCardContainer>
                     <header>
@@ -251,7 +255,6 @@ const DataOverview = observer(function DataOverview () {
                 <>
                     <OverviewCard
                         stats={globalStats}
-                        filters={[]}
                         title={targetField.text}
                         onRemove={() => context.setMainField(null)}
                     />
@@ -280,16 +283,16 @@ const DataOverview = observer(function DataOverview () {
                         filters={comparisonFilters}
                         title={`[${intl.get('breakout.base')}] ${targetField.text}`}
                         // onRemove={() => context.setComparisonFilters([])}
-                        // actions={<CompareGroupSelector />}
+                        actions={<CompareGroupSelector />}
                     />
-                    <span>{'->'}</span>
+                    <span>{'\u2192'}</span>
                     <OverviewCard
                         stats={selectionStats}
                         filters={mainFieldFilters}
                         compareBase={compareStats}
                         title={`[${intl.get('breakout.selection')}] ${targetField.text}`}
                         // onRemove={() => context.setMainField(null)}
-                        // actions={<ConfigButton button={{ text: 'Change' }}><MainFieldSelector /></ConfigButton>}
+                        actions={<ConfigButton button={{ iconProps: { iconName: 'Settings' } }}><MainFieldSelector /></ConfigButton>}
                     />
                     {comparisonFilters.length > 0 && (
                         <WaterfallChart />

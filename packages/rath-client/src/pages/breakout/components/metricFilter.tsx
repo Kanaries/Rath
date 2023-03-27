@@ -36,7 +36,7 @@ export const flatFilterRules = (rules: readonly IFilter[]): IUniqueFilter[] => {
 };
 
 const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ fields, filters: value, onChange }) {
-    const flatFilters = flatFilterRules(value).reduce<{ field: IFieldMeta; filter: IUniqueFilter }[]>((list, filter) => {
+    const flatFilters = value.reduce<{ field: IFieldMeta; filter: IFilter }[]>((list, filter) => {
         const field = fields.find(f => f.fid === filter.fid);
         if (field) {
             list.push({ field, filter });
@@ -44,15 +44,22 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
         return list;
     }, []);
 
-    const handleAddFilter = (filter: IUniqueFilter) => {
+    const handleAddFilter = (filter: IFilter) => {
         onChange([...value, filter]);
     };
 
-    const submitFlatFilters = (filters: IUniqueFilter[]) => {
+    const submitFlatFilters = (filters: IFilter[]) => {
         onChange(filters);
+    };
+
+    const handleRemoveFilter = (index: number) => {
+        submitFlatFilters(produce(flatFilters.map(f => toJS(f.filter)), draft => {
+            draft.splice(index, 1);
+        }));
     };
     
     return (
+        // grid n_cols = 2
         <Container>
             {/* applied filters (flattened) */}
             {flatFilters.map((f, i) => {
@@ -62,22 +69,16 @@ const MetricFilter = observer<IMetricFilterProps>(function MetricFilter ({ field
                         <ViewField
                             type={f.field.analyticType}
                             text={formatFilterRule(f.filter, f.field)}
-                            onRemove={() => {
-                                submitFlatFilters(produce(flatFilters.map(f => toJS(f.filter)), draft => {
-                                    draft.splice(i, 1);
-                                }));
-                            }}
+                            onRemove={() => handleRemoveFilter(i)}
                         />
                     </Fragment>
                 );
             })}
             {/* new filter */}
-            <Icon
-                iconName="Add"
-            />
+            <Icon iconName="Add" />
             <FilterCreationPill
                 fields={fields}
-                onFilterSubmit={(_, filter) => handleAddFilter({ ...filter, id: nanoid() })}
+                onFilterSubmit={(_, filter) => handleAddFilter(filter)}
             />
         </Container>
     );
