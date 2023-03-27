@@ -151,5 +151,20 @@ h2, h3 {
 }
 
 hr{
-  border-color: #efefef;
+  border: none;
+  border-top: 1px solid #efefef;
+}
+
+h1 {
+  font-weight: 400;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }

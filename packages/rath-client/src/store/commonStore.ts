@@ -72,7 +72,8 @@ export class CommonStore {
     }
     public getTheme(themeKey: string): VegaThemeConfig | undefined {
         if (this.useCustomTheme) return this.customThemeConfig;
-        if (themeKey === THEME_KEYS.default) return undefined;
+        // if (themeKey === THEME_KEYS.default) return undefined;
+        if (themeKey === THEME_KEYS.default) return this.themes[THEME_KEYS.g2];
         return this.themes[themeKey];
     }
     public setAppKey(key: string) {

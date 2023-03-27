@@ -1,4 +1,4 @@
-import { SearchBox, IconButton, Panel, TextField, DefaultButton, PrimaryButton } from '@fluentui/react';
+import { SearchBox, IconButton, Panel, TextField, DefaultButton, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
@@ -26,6 +26,8 @@ const collectionConfig = [
     { key: COLLECT_CONFIG.TITLE, title: COLLECT_CONFIG.TITLE },
     { key: COLLECT_CONFIG.DESC, title: COLLECT_CONFIG.DESC },
 ];
+
+const buttonGroupToken = { childrenGap: 10 };
 
 const Collection: React.FC = (props) => {
     const { collectionStore, dataSourceStore, commonStore } = useGlobalStore();
@@ -96,10 +98,9 @@ const Collection: React.FC = (props) => {
                         closeButtonAriaLabel="Close"
                         onRenderFooterContent={() => {
                             return (
-                                <div className="flex justify-end">
+                                <Stack horizontal horizontalAlign="end" tokens={buttonGroupToken}>
                                     <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
                                     <PrimaryButton
-                                        className="ml-2"
                                         onClick={() => {
                                             const newCollectionList = collectionList.map((item) => {
                                                 if (item.viewId === openKey) {
@@ -116,7 +117,7 @@ const Collection: React.FC = (props) => {
                                     >
                                         Submit
                                     </PrimaryButton>
-                                </div>
+                                </Stack>
                             );
                         }}
                         isFooterAtBottom

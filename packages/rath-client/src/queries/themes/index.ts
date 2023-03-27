@@ -7,6 +7,7 @@ import { default as VIS_POWERBI_THEME } from './theme-powerbi';
 import { default as VIS_538_THEME } from './theme-fivethreeeight'
 import { default as VIS_EXCEL_THEME } from './theme-excel';
 import { default as VIS_LATIMES_THEME } from './theme-latimes'
+import { default as VIS_G2_THEME } from './theme-g2';
 
 export enum THEME_KEYS {
     googlecharts = 'googlecharts',
@@ -16,7 +17,8 @@ export enum THEME_KEYS {
     powerbi = 'powerbi',
     fivethreeeight = '538',
     excel = 'excel',
-    latimes = 'latimes'
+    latimes = 'latimes',
+    g2 = 'g2',
 }
 
 export const prebuiltThemes: Readonly<Record<string, VegaThemeConfig>> = {
@@ -27,4 +29,5 @@ export const prebuiltThemes: Readonly<Record<string, VegaThemeConfig>> = {
     [THEME_KEYS.excel]: VIS_EXCEL_THEME,
     [THEME_KEYS.fivethreeeight]: VIS_538_THEME,
     [THEME_KEYS.latimes]: VIS_LATIMES_THEME,
+    [THEME_KEYS.g2]: VIS_G2_THEME,
 };
