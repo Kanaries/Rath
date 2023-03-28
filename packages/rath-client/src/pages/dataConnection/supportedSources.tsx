@@ -43,9 +43,11 @@ const OptionCard = styled.div`
         display: flex;
         justify-content: center;
         transition: transform 80ms;
+        max-width: 100%;
         > img {
             /* width: 64px; */
             /* width: 10rem; */
+            max-width: 100%;
         }
         > .logo-icon {
             /* width: 3rem; */
