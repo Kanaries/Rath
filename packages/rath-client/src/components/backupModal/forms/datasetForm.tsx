@@ -195,6 +195,8 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         />
                         <TextField
                             label={intl.get('storage.desc', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
+                            multiline
+                            resizable={false}
                             value={datasetComment}
                             autoComplete="off"
                             onChange={(_, val) => setDatasetComment(val ?? '')}
