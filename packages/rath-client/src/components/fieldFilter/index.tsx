@@ -25,15 +25,26 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const { rawDataStorage, rawDataMetaInfo } = dataSourceStore;
 
-    const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
-        fid,
-        type: 'range',
-        range: [0, 0],
-    } : {
-        fid,
-        type: 'set',
-        values: []
-    })
+    const getInitFilter = useCallback((): IFilter => {
+        if (meta?.semanticType === 'quantitative') {
+            return {
+                fid,
+                type: 'range',
+                range: [0, 0],
+            };
+        }
+        return {
+            fid,
+            type: 'set',
+            values: [],
+        };
+    }, [fid, meta?.semanticType]);
+
+    const [filter, setFilter] = useState<IFilter>(getInitFilter);
+
+    useEffect(() => {
+        setFilter(getInitFilter);
+    }, [getInitFilter]);
 
     const [fieldRange, setFieldRange] = useState<[number, number]>([0, 0])
     const filterType = filter.type;
