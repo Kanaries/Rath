@@ -422,13 +422,23 @@ export default class UserStore {
             }
             const writer = new TextWriter();
             const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
-            await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
+            const { meta } = dataset;
             const dataSource = await this.fetchDataSource(workspaceName, dataSourceId, true);
             if (dataSource && organizationName) {
                 this.setCloudDataSource(dataSource, organizationName, workspaceName);
                 const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
                 if (cloudMeta) {
                     this.setCloudDataset(cloudMeta);
+                    // comment is mutable only in the cloud data
+                    for (const item of cloudMeta.meta) {
+                        const f = meta.mutFields.find(f => f.fid === item.fid);
+                        if (f) {
+                            f.comment = item.comment;
+                        }
+                    }
+                    await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
+                } else {
+                    throw new Error('Cloud dataset not found');
                 }
             }
             return true;
