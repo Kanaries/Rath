@@ -1,6 +1,7 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import { IRow, Specification } from "visual-insights"
+import { Specification } from "@kanaries/graphic-walker/dist/interfaces";
+import { IRow } from "visual-insights"
 import { IVegaSubset } from "../interfaces"
 
 dayjs.extend(customParseFormat);
@@ -82,5 +83,12 @@ export function transVegaSubset2Schema (vegaSpec: IVegaSubset): Specification {
             schema[channel] = [vegaSpec.encoding[channel]!.field]
         }
     })
+    const hasAgg = Boolean(Object.values(vegaSpec.encoding).find(encoding => {
+        if (encoding && encoding.aggregate) {
+            return true
+        }
+        return false
+    }))
+    schema.aggregate = hasAgg;
     return schema
 }

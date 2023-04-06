@@ -67,6 +67,7 @@ export class SemiAutomationStore {
     }
     public init () {
         this.mainViewSpecSource = 'default';
+        this.mainView = null;
         this.autoAsso = {
             pattViews: true,
             featViews: true,

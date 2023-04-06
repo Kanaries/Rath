@@ -53,7 +53,7 @@ const Content = styled.div<{ open: boolean }>`
 `;
 
 const DataConnection: React.FC<DataConnectionProps> = (props) => {
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore, commonStore, megaAutoStore, semiAutoStore } = useGlobalStore();
     const { loading } = dataSourceStore;
     // const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, toggleLoadingAnimation } = props;
 
@@ -66,13 +66,15 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
 
     const onSelectDataLoaded = useCallback(
         (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
+            megaAutoStore.init();
+            semiAutoStore.init();
             dataSourceStore.loadDataWithInferMetas(dataSource, fields);
             if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
                 setDataStorage(name, fields, dataSource, tag, withHistory);
             }
         },
-        [dataSourceStore]
+        [dataSourceStore, megaAutoStore, semiAutoStore]
     );
 
     const onSelectStartLoading = useCallback(() => {
@@ -174,6 +176,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                     <DefaultButton
                         style={{ margin: '1em 0em' }}
                         text={intl.get('common.return')}
+                        iconProps={{ iconName: 'Back' }}
                         onClick={() => {
                             setDataSourceType(null);
                         }}

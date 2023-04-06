@@ -24,7 +24,7 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 interface DataSourceBoardProps {}
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, megaAutoStore, semiAutoStore } = useGlobalStore();
 
     const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
         dataSourceStore;
@@ -52,13 +52,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
     const onSelectDataLoaded = useCallback(
         (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
+            megaAutoStore.init();
+            semiAutoStore.init();
             dataSourceStore.loadDataWithInferMetas(dataSource, fields, tag);
             if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
                 setDataStorage(name, fields, dataSource, tag, withHistory);
             }
         },
-        [dataSourceStore]
+        [dataSourceStore, megaAutoStore, semiAutoStore]
     );
 
     const onSelectStartLoading = useCallback(() => {
