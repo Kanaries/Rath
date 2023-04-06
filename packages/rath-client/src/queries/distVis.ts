@@ -59,7 +59,8 @@ export function distVis(props: BaseVisProps): IVegaSubset {
         data: { name: 'dataSource' },
         mark: {
             type: markType as any,
-            opacity: markType === 'circle' ? 0.66 : 0.88
+            opacity: markType === 'circle' ? 0.66 : 0.88,
+            tooltip: true
         },
         encoding: enc
     };
