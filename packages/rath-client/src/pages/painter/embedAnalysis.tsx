@@ -27,6 +27,7 @@ const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
         hideDataSourceConfig
         keepAlive
         dark="light"
+        fieldKeyGuard={false}
     />
 }
 

@@ -214,6 +214,7 @@ const Exploration = forwardRef<{
                             i18nLang={langStore.lang}
                             keepAlive={false}
                             dark="light"
+                            fieldKeyGuard={false}
                         />
                     ),
                     [ExplorationKey.PREDICT]: (
