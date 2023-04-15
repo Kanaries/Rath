@@ -16,8 +16,10 @@ import {
 import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
-import { Item, ScenegraphEvent } from 'vega';
+import { Item, ScenegraphEvent, renderModule } from 'vega';
 import intl from 'react-intl-universal';
+//@ts-ignore
+import { WebGLModule } from 'vega-scenegraph'
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
@@ -32,6 +34,9 @@ import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
 import CanvasContainer from './canvasContainer';
+import testConfig from './testConfig';
+
+renderModule('webgl', WebGLModule);
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -157,6 +162,7 @@ const Painter: React.FC = (props) => {
             // @ts-ignore
             embed(container.current, painterSpec, {
                 actions: painterMode === PAINTER_MODE.MOVE,
+                renderer: testConfig.useRenderer,
             }).then((res) => {
                 res.view.change(
                     'dataSource',

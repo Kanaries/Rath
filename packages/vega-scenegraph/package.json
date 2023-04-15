@@ -19,11 +19,18 @@
     "prepublishOnly": "yarn test && yarn build"
   },
   "dependencies": {
+    "d3-color": "^3.1.0",
     "d3-path": "^3.0.1",
     "d3-shape": "^3.1.0",
+    "extrude-polyline": "^1.0.6",
+    "parse-svg-path": "^0.1.2",
+    "simplify-path": "^1.1.0",
+    "svg-path-contours": "^2.0.0",
+    "triangulate-contours": "^1.0.2",
     "vega-canvas": "^1.2.5",
     "vega-loader": "^4.4.0",
     "vega-scale": "^7.2.0",
+    "vega-typings": "^0.24.0",
     "vega-util": "^1.15.2"
   },
   "gitHead": "7eafbbd4d53d0ce9f08e74ff96c90d411b1bb80a",

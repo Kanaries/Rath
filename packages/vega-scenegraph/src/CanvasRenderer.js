@@ -14,6 +14,7 @@ export default function CanvasRenderer(loader) {
   this._redraw = false;
   this._dirty = new Bounds();
   this._tempb = new Bounds();
+  this._dirty_list = [];
 }
 
 const base = Renderer.prototype;
@@ -96,6 +97,7 @@ inherits(CanvasRenderer, Renderer, {
       g = g.mark.group;
     }
 
+    this._dirty_list[item.datum?._label_index] = item;
     this._dirty.union(b);
   },
 
@@ -113,7 +115,12 @@ inherits(CanvasRenderer, Renderer, {
       ? (this._redraw = false, vb.expand(1))
       : clipToBounds(g, vb.intersect(db), o);
 
+    if (false) { // printLog
+      let dl = this._dirty_list.slice();
+      console.log("dirty=", dl);
+    }
     this.clear(-o[0], -o[1], w, h);
+    this._dirty_list = [];
 
     // render
     this.draw(g, scene, b);

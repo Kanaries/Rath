@@ -15,6 +15,7 @@ export {default as CanvasRenderer} from './src/CanvasRenderer';
 export {default as SVGHandler} from './src/SVGHandler';
 export {default as SVGRenderer} from './src/SVGRenderer';
 export {default as SVGStringRenderer} from './src/SVGStringRenderer';
+export {WebGLHandler, WebGLRenderer, WebGLModule} from './src/webgl';
 export {RenderType, renderModule} from './src/modules';
 export {intersect} from './src/intersect';
 
