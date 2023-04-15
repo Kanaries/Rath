@@ -22,7 +22,8 @@ interface BatchMutInCircleProps {
     datum: IRow;
     indexKey: string;
     limitFields: string[];
-    painterMode?: PAINTER_MODE
+    painterMode?: PAINTER_MODE;
+    newColor?: string;
 }
 export function batchMutInCircle (props: BatchMutInCircleProps) {
     const {
@@ -37,7 +38,8 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
         indexKey,
         datum,
         painterMode = PAINTER_MODE.COLOR,
-        limitFields = []
+        limitFields = [],
+        newColor = '#000000',
     } = props;
     const mutIndices = new Set();
     const mutValues: IRow[] = [];
@@ -47,23 +49,28 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
     }
     for (let i = 0; i < mutData.length; i++) {
         if (((mutData[i][fields[0]] - point[0]) ** 2) / (a ** 2) + ((mutData[i][fields[1]] - point[1]) ** 2) / (b ** 2) <= (r ** 2)) {
-            let drop = false;
-            for (let lf of limitFields) {
-                if (limitValueMap.get(lf) !== mutData[i][lf]) {
-                    drop = true;
-                    break;
-                }
-            }
-            if (drop) continue;
+            // let drop = false;
+            // for (let lf of limitFields) {
+            //     if (limitValueMap.get(lf) !== mutData[i][lf]) {
+            //         drop = true;
+            //         break;
+            //     }
+            // }
+            // if (drop) continue;
+            if (mutData[i]['DEL_VALUE']) continue;
             if (painterMode === PAINTER_MODE.COLOR) {
                 if (mutData[i][key] !== value) {
                     mutData[i][key] = value;
                     mutValues.push(mutData[i])
                     mutIndices.add(mutData[i][indexKey])
+                    mutData[i]['UPD_VALUE'] = value;
+                    mutData[i]['fill'] = newColor;
                 }
             } else if (painterMode === PAINTER_MODE.ERASE) {
                 mutValues.push(mutData[i])
                 mutIndices.add(mutData[i][indexKey])
+                mutData[i]['DEL_VALUE'] = true;
+                mutData[i]['fill'] = '#ffffff';
             }
         }
     }
@@ -82,6 +89,8 @@ interface BatchMutInCatRangeProps {
     key: string;
     value: any;
     indexKey: string;
+    painterMode?: PAINTER_MODE;
+    newColor?: string;
 }
 export function batchMutInCatRange (props: BatchMutInCatRangeProps) {
     const {
@@ -92,16 +101,27 @@ export function batchMutInCatRange (props: BatchMutInCatRangeProps) {
         range,
         key,
         value,
-        indexKey
+        indexKey,
+        painterMode = PAINTER_MODE.COLOR,
+        newColor = '#000000',
     } = props;
     const mutIndices = new Set();
     const mutValues: IRow[] = [];
     for (let i = 0; i < mutData.length; i++) {
         if (mutData[i][fields[0]] === point[0]) {
+            if (mutData[i]['DEL_VALUE']) continue;
             if (Math.abs(mutData[i][fields[1]] - point[1]) < r * Math.sqrt(range)) {
                 if (mutData[i][key] !== value) {
                     mutData[i][key] = value;
                     mutValues.push(mutData[i])
+                    if (painterMode === PAINTER_MODE.COLOR) {
+                        mutData[i]['UPD_VALUE'] = value;
+                        mutData[i]['fill'] = newColor;
+                    }
+                    else {
+                        mutData[i]['DEL_VALUE'] = true;
+                        mutData[i]['fill'] = '#ffffff'
+                    }
                     mutIndices.add(mutData[i][indexKey])
                 }
             }

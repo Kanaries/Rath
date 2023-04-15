@@ -31,7 +31,8 @@
     "vega-loader": "^4.4.0",
     "vega-scale": "^7.2.0",
     "vega-typings": "^0.24.0",
-    "vega-util": "^1.15.2"
+    "vega-util": "^1.15.2",
+    "@kanaries/rath-utils": "file:../utils"
   },
   "gitHead": "7eafbbd4d53d0ce9f08e74ff96c90d411b1bb80a",
   "devDependencies": {

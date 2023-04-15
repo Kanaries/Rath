@@ -5,12 +5,15 @@ import SVGRenderer from './SVGRenderer';
 import SVGStringRenderer from './SVGStringRenderer';
 import WebGLHandler from './webgl/WebGLHandler';
 import WebGLRenderer from './webgl/WebGLRenderer';
+import PainterHandler from './painter/PainterHandler';
+import PainterRenderer from './painter/PainterRenderer';
 
 const Canvas = 'canvas';
 const PNG = 'png';
 const SVG = 'svg';
 const None = 'none';
 const WebGL = 'webgl';
+const Painter = 'painter';
 
 export const RenderType = {
   Canvas: Canvas,
@@ -18,6 +21,7 @@ export const RenderType = {
   SVG:    SVG,
   None:   None,
   WebGL:  WebGL,
+  Painter: Painter
 };
 
 const modules = {};
@@ -38,6 +42,12 @@ modules[WebGL] = {
   renderer: WebGLRenderer,
   headless: WebGLRenderer,
   handler:  WebGLHandler
+};
+
+modules[Painter] = {
+  renderer: PainterRenderer,
+  headless: PainterRenderer,
+  handler:  PainterHandler
 };
 
 modules[None] = {};

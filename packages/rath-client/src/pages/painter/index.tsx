@@ -19,7 +19,8 @@ import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent, renderModule } from 'vega';
 import intl from 'react-intl-universal';
 //@ts-ignore
-import { WebGLModule } from 'vega-scenegraph'
+import { PainterModule, WebGLModule } from 'vega-scenegraph'
+import { testConfig } from '@kanaries/rath-utils';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
@@ -34,8 +35,8 @@ import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
 import CanvasContainer from './canvasContainer';
-import testConfig from './testConfig';
 
+renderModule('painter', PainterModule);
 renderModule('webgl', WebGLModule);
 
 const Cont = styled.div`
@@ -164,15 +165,27 @@ const Painter: React.FC = (props) => {
                 actions: painterMode === PAINTER_MODE.MOVE,
                 renderer: testConfig.useRenderer,
             }).then((res) => {
+                let changes = vega.changeset();
+                let removes = new Set();
                 res.view.change(
                     'dataSource',
-                    vega
-                        .changeset()
+                    changes
                         .remove(() => true)
                         .insert(viewData)
-                );
+
+                ).runAsync().then((view) => {
+                    if (testConfig.printLog) {
+                        window.console.log("changes =", changes);
+                    }
+                })
                 setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
+                if(testConfig.printLog) {
+                    res.view.addDataListener('dataSource', (name, value) => {
+                        window.console.log("dataListener", name, value);
+                        window.console.log(testConfig);
+                    })
+                }
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;
@@ -184,53 +197,98 @@ const Painter: React.FC = (props) => {
                     const xRange = getRange(viewData.map((r) => r[xField]));
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                    // const hdr = (e: ScenegraphEvent | any) => { // r: typeof PainterModule.renderer) => {
                         e.stopPropagation();
                         e.preventDefault();
                         // @ts-ignore
                         if (!isPainting.current && e.vegaType !== 'touchmove') return;
+                        // const datum = { [xField]: e._x || e.offsetX, [yField]: e._y || e.offsetY };
+                        // const renderer = e._renderer;
+                        // const canvas = e._canvas;
+                        // const mat = renderer.matrix;
+                        // function matmul(m: number[], v: number[]) { return multiply(m, v).slice(0, 4); }
+                        // window.console.log("projX =", matmul(mat, [e.x, e.y, -1, 1]));
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCircle({
                                 mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
+                                // point: [datum[xField], datum[yField]],
                                 a: xRange[1] - xRange[0],
                                 b: yRange[1] - yRange[0],
                                 r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
+                                // datum,
                                 datum: item.datum,
                                 painterMode,
-                                limitFields
+                                limitFields,
+                                newColor: COLOR_CELLS[mutFeatIndex].color
                             });
+                            
                             if (painterMode === PAINTER_MODE.COLOR) {
+                                // TODO: directly setting 'fill' of scenegraph
+
+                                changes = testConfig.useIndexUpdate ?
+                                    changes.modify(mutValues) :
+                                    changes.remove((r: any) => mutIndices.has(r[LABEL_INDEX])).insert(mutValues)
                                 linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes
+                                        )
+                                        .runAsync();
+                                    changes = vega.changeset();
+                                }
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                changes = testConfig.useIndexUpdate ?
+                                    changes.remove(mutValues) :
+                                    changes.remove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                    for (let i of mutIndices) removes.add(i);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes
+                                        )
+                                        .runAsync();
+                                    changes = vega.changeset();
+                                    maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                }
                             }
                         }
                     };
                     res.view.addEventListener('mousedown', () => {
                         isPainting.current = true;
+                        changes = vega.changeset();
+                        removes = new Set();
                     });
                     res.view.addEventListener('mouseup', () => {
                         isPainting.current = false;
+                        if (testConfig.useRenderer === 'painter') {
+                            res.view.change('dataSource', changes).runAsync().then((view) => {
+                                maintainViewDataRemove((r: any) => removes.has(r[LABEL_INDEX]));
+                            })
+                        }
                     });
+                    // res.view.addEventListener('gl_mousemove', (...props) => {
+                    //     window.console.log('gl_mousemove', ...props)
+                    //     hdr(...props);
+                    // });
+                    // TODO: use renderer to check nearest points
+                    // res.view.addEventListener('gl_mousemove', hdr);
+                    // res.view.addEventListener('gl_touchmove', hdr);
                     res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
@@ -250,34 +308,56 @@ const Painter: React.FC = (props) => {
                                 range: yRange[1] - yRange[0],
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
+                                newColor: COLOR_CELLS[mutFeatIndex].color,
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
+                                changes = testConfig.useIndexUpdate ?
+                                    changes.modify(mutValues) :
+                                    changes
+                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                        .insert(mutValues)
                                 linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes
+                                        )
+                                        .runAsync();
+                                    changes = vega.changeset();
+                                }
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                changes = changes.remove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                    for (let i of mutIndices) removes.add(i);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes
+                                        )
+                                        .runAsync();
+                                    changes = vega.changeset();
+                                    maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                }
                             }
                         }
                     };
                     res.view.addEventListener('mousedown', () => {
                         isPainting.current = true;
+                        changes = vega.changeset();
+                        removes = new Set();
                     });
                     res.view.addEventListener('mouseup', () => {
                         isPainting.current = false;
+                        maintainViewDataRemove((r: any) => removes.has(r[LABEL_INDEX]));
                     });
                     res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
@@ -297,35 +377,55 @@ const Painter: React.FC = (props) => {
                                 range: xRange[1] - xRange[0],
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
+                                painterMode: painterMode,
                                 value: mutFeatValues[mutFeatIndex],
+                                newColor: COLOR_CELLS[mutFeatIndex].color,
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
+                                changes = testConfig.useIndexUpdate ?
+                                    changes.modify(mutValues) :
+                                    changes
+                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                        .insert(mutValues)
                                 linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes
+                                        )
+                                        .runAsync();
+                                }
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                if (testConfig.useRenderer === 'painter') {
+                                    const renderer = (res.view as any)._renderer;
+                                    renderer._render((res.view as any)._scenegraph.root);
+                                    for (let i of mutIndices) removes.add(i);
+                                }
+                                else {
+                                    res.view
+                                        .change(
+                                            'dataSource',
+                                            changes.remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                        )
+                                        .runAsync();
+                                    maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                }
                             }
                         }
                     };
                     res.view.addEventListener('mousedown', () => {
                         isPainting.current = true;
+                        changes = vega.changeset();
+                        removes = new Set();
                     });
                     res.view.addEventListener('mouseup', () => {
                         isPainting.current = false;
+                        maintainViewDataRemove((r: any) => removes.has(r[LABEL_INDEX]));
                     });
                     res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
