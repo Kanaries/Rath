@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "dist",
+    "sourceMap": true,
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": "./",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+    "allowJs": true
+  },
+  "include": ["src/**/*", "index.js"],
+  "exclude": ["node_modules", "dist"]
+}

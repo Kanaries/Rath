@@ -24,6 +24,7 @@ interface BatchMutInCircleProps {
     limitFields: string[];
     painterMode?: PAINTER_MODE
 }
+/** @deprecated to {import('vega-painter-renderer').paint} */
 export function batchMutInCircle (props: BatchMutInCircleProps) {
     const {
         mutData,
@@ -83,6 +84,7 @@ interface BatchMutInCatRangeProps {
     value: any;
     indexKey: string;
 }
+/** @deprecated to {import('vega-painter-renderer').paint} */
 export function batchMutInCatRange (props: BatchMutInCatRangeProps) {
     const {
         mutData,
