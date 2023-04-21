@@ -20,14 +20,14 @@ import { Item, ScenegraphEvent, renderModule } from 'vega';
 import intl from 'react-intl-universal';
 //@ts-ignore
 import { PainterModule, paint, startPaint, stopPaint } from 'vega-painter-renderer';
-import { testConfig } from '@kanaries/rath-utils';
+// import { testConfig } from '@kanaries/rath-utils';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { viewSampling } from '../../lib/stat/sampling';
 import { Card } from '../../components/card';
-import { clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
+import { isContinuous, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
@@ -171,37 +171,36 @@ const Painter: React.FC = (props) => {
                     changes
                         .remove(() => true)
                         .insert(viewData)
-
                 ).runAsync().then((view) => {
-                    if (testConfig.printLog) {
-                        window.console.log("changes =", changes);
-                    }
-                })
+                    // if (testConfig.printLog) { window.console.log("changes =", changes); }
+                });
+
+                
                 setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
-                if(testConfig.printLog) {
-                    res.view.addDataListener('dataSource', (name, value) => {
-                        window.console.log("dataListener", name, value);
-                        window.console.log(testConfig);
-                    })
-                }
-                let xField = painterSpec.encoding.x.field;
-                let yField = painterSpec.encoding.y.field;
-                let xFieldType = painterSpec.encoding.x.type as ISemanticType;
-                let yFieldType = painterSpec.encoding.y.type as ISemanticType;
+                // if(testConfig.printLog) {
+                //     res.view.addDataListener('dataSource', (name, value) => {
+                //         window.console.log("dataListener", name, value);
+                //         window.console.log(testConfig);
+                //     })
+                // }
+                const xField = painterSpec.encoding.x.field;
+                const yField = painterSpec.encoding.y.field;
+                const xFieldType = painterSpec.encoding.x.type as ISemanticType;
+                const yFieldType = painterSpec.encoding.y.type as ISemanticType;
+                const isContX = isContinuous(xFieldType), isContY = isContinuous(yFieldType);
                 const limitFields: string[] = [];
                 if (painterSpec.encoding.column) limitFields.push(painterSpec.encoding.column.field);
                 if (painterSpec.encoding.row) limitFields.push(painterSpec.encoding.row.field);
-                if (xFieldType !== 'quantitative') {
-                    [xField, yField] = [yField, xField];
-                    [xFieldType, yFieldType] = [yFieldType, xFieldType];
-                }
+
+                const [rotXField, rotYField] = !isContX ? [yField, xField] : [xField, yField];
+                const [rotIsContX, rotIsContY] = !isContX ? [isContY, isContX] : [isContX, isContY];
                 let hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
-                    window.console.warn('hdr case', [xFieldType, yField], 'not implemented');
+                    // window.console.warn('hdr case', [xFieldType, yField], 'not implemented');
                 };
-                if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
-                    const xRange = getRange(viewData.map((r) => r[xField]));
-                    const yRange = getRange(viewData.map((r) => r[yField]));
+                if (rotIsContX && rotIsContY) {
+                    const xRange = getRange(viewData.map((r) => r[rotXField]));
+                    const yRange = getRange(viewData.map((r) => r[rotYField]));
                     hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -209,18 +208,16 @@ const Painter: React.FC = (props) => {
                         if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         startPaint(res.view);
                         if (painting && item && item.datum) {
-                            let limits = {};
+                            let limits: { [key: string]: any } = {};
                             for (let f of limitFields) {
-                                limits = {
-                                    ...limits,
-                                    [f]: item.datum[f],
-                                };
+                                limits[f] = item.datum[f];
                             }
+                            /** directly setting 'fill' of scenegraph */
                             const result = paint({
                                 view: res.view,
                                 painterMode,
-                                fields: [xField, yField],
-                                point: [item.datum[xField], item.datum[yField]],
+                                fields: [rotXField, rotYField],
+                                point: [item.datum[rotXField], item.datum[rotYField]],
                                 radius: painterSize / 2,
                                 range: [xRange[1] - xRange[0], yRange[1] - yRange[0]],
                                 limits: limits,
@@ -231,7 +228,6 @@ const Painter: React.FC = (props) => {
                             const { mutIndices, mutValues, view } = result;
                             res.view = view;
                             if (painterMode === PAINTER_MODE.COLOR) {
-                                // TODO: directly setting 'fill' of scenegraph
                                 changes = changes
                                     .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
                                     .insert(mutValues)
@@ -242,8 +238,8 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
-                    const xRange = getRange(viewData.map((r) => r[xField]));
+                } else if (rotIsContX && !rotIsContY) {
+                    const xRange = getRange(viewData.map((r) => r[rotXField]));
                     hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -254,8 +250,8 @@ const Painter: React.FC = (props) => {
                             const { mutIndices, mutValues, view } = paint({
                                 view: res.view,
                                 painterMode,
-                                fields: [xField, yField],
-                                point: [item.datum[xField], item.datum[yField]],
+                                fields: [rotXField, rotYField],
+                                point: [item.datum[rotXField], item.datum[rotYField]],
                                 radius: painterSize / 2,
                                 range: xRange[1] - xRange[0],
                                 groupValue: mutFeatValues[mutFeatIndex],
@@ -274,6 +270,7 @@ const Painter: React.FC = (props) => {
                         }
                     };
                 }
+                // else { /** !rotIsContX && !rotIsContY */ }
                 res.view.addEventListener('mousedown', (e) => {
                     isPainting.current = true;
                     startPaint(res.view);

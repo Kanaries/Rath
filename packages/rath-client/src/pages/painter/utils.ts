@@ -1,6 +1,11 @@
 import produce from 'immer';
+import { type ISemanticType } from '@kanaries/loa';
 import { IRow, IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { LABEL_FIELD_KEY, LABEL_INDEX } from './constants';
+
+export function isContinuous (fieldType: ISemanticType) {
+    return fieldType === 'quantitative' || fieldType === 'temporal';
+}
 
 export function batchMutInRange (mutData: IRow, field: string, range: [number, number], key: string, value: any) {
     for (let i = 0; i < mutData.length; i++) {
