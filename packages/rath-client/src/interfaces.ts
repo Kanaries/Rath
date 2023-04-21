@@ -9,9 +9,29 @@ export interface IRow {
     [key: string]: any
 }
 
-export interface ICol<T> {
+/**
+ * Virtual Array Interface. \
+ * You should always use `a.at(i)` instead of `a[i]`.
+ */
+type IVArray<T> = Pick<Array<T>, "at" | "length" | "map" | "concat"> & {
+        [Symbol.iterator]: () => IterableIterator<T>;
+    }
+// export interface IVArray<T> extends Partial<Array<T>> {
+//     at (n: number): T | undefined;
+//     get length (): number;
+//     [Symbol.iterator]: () => IterableIterator<T>;
+//     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): IVArray<U>;
+//     /**
+//     * Combines two or more arrays.
+//     * This method returns a new array without modifying any existing arrays.
+//     * @param items Additional arrays and/or items to add to the end of the array.
+//     */
+//     concat(...items: Partial<Array<ConcatArray<T | undefined>>>): T[];
+// }
+
+export interface ICol<T, VT = IVArray<T>> {
     fid: string;
-    data: Array<T>;
+    data: VT;
 }
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';

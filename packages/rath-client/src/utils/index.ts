@@ -35,7 +35,7 @@ export function rowFromICol(from: Map<string, ICol<any>>, fields: string[] | IFi
     for (let fid of fieldIds) {
         let col = from.get(fid) as ICol<any>;
         for (let i = 0; i < col.data.length; ++i) {
-            row[i][fid] = col.data[i];
+            row[i][fid] = col.data.at(i);
         }
     }
     return row;

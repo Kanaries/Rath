@@ -26,8 +26,8 @@ export function applyFilters (dataSource: IRow[],
             return false;
         })
         && effectExtFilters.every(f => {
-            if (f.type === 'range') return f.range[0] <= extFields.get(f.fid)!.data[i] && extFields.get(f.fid)!.data[i] <= f.range[1];
-            if (f.type === 'set') return f.values.includes(extFields.get(f.fid)!.data[i]);
+            if (f.type === 'range') return f.range[0] <= extFields.get(f.fid)!.data.at(i) && extFields.get(f.fid)!.data.at(i) <= f.range[1];
+            if (f.type === 'set') return f.values.includes(extFields.get(f.fid)!.data.at(i));
             return false;
         })
         if (keep) {
