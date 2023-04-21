@@ -9,9 +9,18 @@ export interface IRow {
     [key: string]: any
 }
 
-export interface ICol<T> {
+/**
+ * Virtual Array Interface. \
+ * You should always use `a.at(i)` instead of `a[i]`.
+ */
+type IVArray<T> = Pick<Array<T>, "at" | "length" | "map" | "concat"> & {
+    // [n: number]: T | undefined;
+    [Symbol.iterator]: () => IterableIterator<T>;
+}
+
+export interface ICol<T, VT = IVArray<T>> {
     fid: string;
-    data: Array<T>;
+    data: VT;
 }
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';

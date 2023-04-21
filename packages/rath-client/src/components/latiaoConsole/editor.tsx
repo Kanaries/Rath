@@ -99,7 +99,7 @@ const LaTiaoEditor = observer(forwardRef<HTMLDivElement, LaTiaoEditorProps>(({
         return rawData.map((row, i) => Object.fromEntries(
             mutFields.map<[string, string | number]>(({ fid }) => {
                 const col = extData.get(fid);
-                return [fid, col ? col.data[i] : row[fid]];
+                return [fid, col ? col.data.at(i) : row[fid]];
             })
         ));
     }, [rawData, extData, mutFields]);
