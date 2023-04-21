@@ -1,0 +1,1 @@
+export {testConfig} from './testConfig'

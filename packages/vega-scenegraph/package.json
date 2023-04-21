@@ -4,8 +4,8 @@
   "description": "Vega scenegraph and renderers.",
   "license": "BSD-3-Clause",
   "author": "Jeffrey Heer (http://idl.cs.washington.edu)",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "build/index.js",
+  "module": "build/index.module.js",
   "unpkg": "build/vega-scenegraph.min.js",
   "repository": "vega/vega",
   "scripts": {
