@@ -227,11 +227,11 @@
             "sources": {
                 "file": {
                     "name": "File",
-                    "desc": "Upload a file to load data. Supported file formats: CSV, JSON, Excel, SQL, and Parquet."
+                    "desc": "Upload a file to load data. Supported file formats: CSV, JSON and Excel."
                 },
                 "restful": {
                     "name": "From URL",
-                    "desc": "Load data from a URL. Supported file formats: CSV, JSON, Excel, SQL, and Parquet."
+                    "desc": "Load data from a URL (JSON format)."
                 },
                 "database": {
                     "name": "Database",

@@ -77,7 +77,7 @@ Get started with RATH now!
 
 ### Import data from online databases or CSV/JSON files.
 
-[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/data-source-feature.png)](https://docs.kanaries.net/data-profiling#import-your-data)
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/ds-create.png)](https://docs.kanaries.net/data-profiling#import-your-data)
 
 
 ### View statistics from your data source
