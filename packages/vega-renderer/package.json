@@ -6,7 +6,6 @@
   "module": "dist/vega-painter-renderer.module.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "postinstall": "yarn build",
     "dev": "rollup -cw",
     "build": "rm -rf dist && rollup -c"
   },

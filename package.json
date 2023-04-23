@@ -4,8 +4,11 @@
   "version": "1.1.0",
   "description": "![](https://img.shields.io/github/license/Kanaries/Rath)",
   "scripts": {
-    "build:scene": "yarn workspace vega-scenegraph build",
-    "build": "yarn workspace rath-client build",
+    "build:utils": "yarn workspace vega-scenegraph build",
+    "build:scenegraph": "yarn workspace vega-scenegraph build",
+    "build:renderer": "yarn workspace vega-painter-renderer build",
+    "build:client": "yarn workspace rath-client build",
+    "build": "npm run build:utils && npm run build:scenegraph && npm run build:renderer && npm run build:client",
     "test": "yarn workspace rath-client test",
     "ui": "npm run test && npm run build && node start.js",
     "devfront": "yarn workspace rath-client start",
