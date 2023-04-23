@@ -79,7 +79,7 @@
     "typescript": "^4.7.4"
   },
   "scripts": {
-    "build:utils": "yarn workspace vega-scenegraph build",
+    "build:utils": "yarn workspace @kanaries/rath-utils build",
     "build:scenegraph": "yarn workspace vega-scenegraph build",
     "build:renderer": "yarn workspace vega-painter-renderer build",
     "start": "react-app-rewired start",
