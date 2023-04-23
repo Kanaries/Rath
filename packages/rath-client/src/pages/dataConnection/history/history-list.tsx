@@ -25,7 +25,7 @@ import HistoryListItem from './history-list-item';
 const Group = styled.div`
     display: flex;
     flex-direction: column;
-    overflow: hidden auto;
+    /* overflow: hidden auto; */
     > * {
         flex-grow: 0;
         flex-shrink: 0;
@@ -36,13 +36,13 @@ const Group = styled.div`
 const List = styled.div`
     margin: 1em 0;
     min-height: 8em;
-    overflow: hidden auto;
+    /* overflow: hidden auto; */
     display: grid;
     gap: 0.4em;
     grid-auto-rows: max-content;
 `;
 
-const ITEM_MIN_WIDTH = 200;
+const ITEM_MIN_WIDTH = 360;
 const MAX_HISTORY_SIZE = 64;
 
 export enum HistoryRecentTag {
@@ -73,9 +73,11 @@ export interface IHistoryListProps {
     search?: string;
     /** @default false */
     groupByPeriod?: boolean;
+    appearance: "filled" | "outline";
 }
 
-const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search, groupByPeriod = false }) => {
+const HistoryList: FC<IHistoryListProps> = props => {
+    const { onDataLoaded, onClose, onLoadingFailed, is, search, groupByPeriod = false, appearance } = props;
     const [localDataList, setLocalDataList] = useState<IDBMeta[]>([]);
     const prevList = useRef(localDataList);
     prevList.current = localDataList;
@@ -190,6 +192,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
                             <List role="grid" aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
                                 {group.list.map((file, i) => (
                                     <HistoryListItem
+                                        appearance={appearance}
                                         key={i}
                                         file={file}
                                         rowIndex={Math.floor(i / colCount) + 1}
@@ -207,6 +210,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
                 <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
                     {list.map((file, i) => (
                         <HistoryListItem
+                            appearance={appearance}
                             key={i}
                             file={file}
                             rowIndex={Math.floor(i / colCount) + 1}

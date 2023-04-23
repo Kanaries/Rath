@@ -15,68 +15,44 @@
 
 import React from 'react';
 import intl from 'react-intl-universal';
-import styled from 'styled-components';
-import { Icon } from '@fluentui/react';
+import { Button, Card, CardHeader, makeStyles, shorthands, tokens, Text, Caption1 } from '@fluentui/react-components';
+import { MoreHorizontal20Filled } from '@fluentui/react-icons';
 import { IDataSourceType } from '../../global';
 
-const CardGrid = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    /* display: grid; */
-    /* grid-template-columns: repeat(2, minmax(0, 1fr)); */
-`;
-
-const OptionCard = styled.div`
-    background-color: #fff;
-    /* padding: 12px; */
-    margin: 6px;
-    /* display: flex; */
-    border: 1px solid #f0f0f0;
-    border-radius: 8px;
-    /* box-shadow: rgba(50, 50, 105, 0.08) 0px 2px 5px 0px, rgba(0, 0, 0, 0.02) 0px 1px 1px 0px; */
-    margin-right: 1em;
-    padding: 1em 2em;
-    > .op-logo {
-        /* flex-grow: 0;
-        flex-shrink: 0; */
-        width: 5rem;
-        display: flex;
-        justify-content: center;
-        transition: transform 80ms;
-        max-width: 100%;
-        > img {
-            /* width: 64px; */
-            /* width: 10rem; */
-            max-width: 100%;
-        }
-        > .logo-icon {
-            /* width: 3rem; */
-            font-size: 2rem;
-        }
-    }
-    .op-content {
-        /* flex-grow: 1;
-        flex-shrink: 1; */
-        margin-top: 1em;
-        text-align: center;
-        /* display: flex; */
-        /* align-items: center; */
-    }
-    filter: saturate(0.9);
-    transition: filter 80ms, background-color 80ms;
-    :not([aria-disabled="true"]):hover {
-        background-color: transparent;
-        filter: saturate(1.2);
-        > .op-logo {
-            transform: scale(1.1);
-        }
-    }
-    cursor: pointer;
-    &[aria-disabled="true"] {
-        filter: opacity(0.6);
-        cursor: not-allowed;
-    }
-`;
+const useStyles = makeStyles({
+    main: {
+      ...shorthands.gap("22px"),
+      display: "flex",
+      flexWrap: "wrap",
+    },
+  
+    title: {
+      ...shorthands.margin(0, 0, "12px"),
+    },
+  
+    description: {
+      ...shorthands.margin(0, 0, "12px"),
+    },
+  
+    card: {
+      width: "480px",
+      maxWidth: "100%"
+    },
+  
+    caption: {
+      color: tokens.colorNeutralForeground3,
+    },
+  
+    logo: {
+      ...shorthands.borderRadius("4px"),
+      width: "48px",
+      height: "48px",
+    },
+  
+    text: {
+      ...shorthands.margin(0),
+    },
+  });
 
 interface SupportedSourceProps {
     onSelected: (key: string | number) => void;
@@ -87,64 +63,59 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`);
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
-    const historyText = intl.get('common.history');
 
     const options = [
-        {
-            key: IDataSourceType.LOCAL,
-            text: historyText,
-            iconProps: { iconName: 'History' },
-            iconImage: () => <img src="/assets/icons/usb-drive.svg" alt="" />,
-        },
         {
             key: IDataSourceType.FILE,
             text: fileText,
             iconProps: { iconName: 'FabricUserFolder' },
             // iconImage: () => <FolderIcon />,
-            iconImage: () => <img src="/assets/icons/folders.svg" alt="" />,
+            iconImage: () => <img className={styles.logo} src="/assets/icons/folders.svg" alt="" />,
         },
         {
             key: IDataSourceType.DEMO,
             text: demoText,
             iconProps: { iconName: 'FileTemplate' },
-            iconImage: () => <img src="/assets/icons/joystick.svg" alt="" />,
+            iconImage: () => <img className={styles.logo} src="/assets/icons/joystick.svg" alt="" />,
         },
-        {
-            key: IDataSourceType.CLOUD,
-            text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
-            iconProps: { iconName: 'CloudDownload' },
-            iconImage: () => <img src="/assets/icons/cloud-folder.svg" alt="" />,
-        },
+        // {
+        //     key: IDataSourceType.CLOUD,
+        //     text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
+        //     iconProps: { iconName: 'CloudDownload' },
+        //     iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-folder.svg" alt="" />,
+        // },
         {
             key: IDataSourceType.DATABASE,
             text: dbText,
             iconProps: { iconName: 'Database' },
-            iconImage: () => <img src="/assets/icons/data-server.svg" alt="" />,
+            iconImage: () => <img className={styles.logo} src="/assets/icons/data-server.svg" alt="" />,
         },
         {
             key: IDataSourceType.AIRTABLE,
             text: 'AirTable',
             iconProps: { iconName: 'Table' },
-            iconImage: () => <img src="/assets/icons/airtable.svg" alt="" />,
+            iconImage: () => <img className={styles.logo} src="/assets/icons/airtable.svg" alt="" />,
             disabled: false,
         },
         {
             key: IDataSourceType.RESTFUL,
             text: restfulText,
             iconProps: { iconName: 'Cloud' },
-            iconImage: () => <img src="/assets/icons/cloud-computing.svg" alt="" />,
+            iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-computing.svg" alt="" />,
         },
-        {
-            key: IDataSourceType.OLAP,
-            text: 'OLAP',
-            iconProps: { iconName: 'TripleColumn' },
-            iconImage: () => <img src="/assets/icons/cloud-computing_1.svg" alt="" />,
-            disabled: true,
-        },
+        // {
+        //     key: IDataSourceType.OLAP,
+        //     text: 'OLAP',
+        //     iconProps: { iconName: 'TripleColumn' },
+        //     iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-computing_1.svg" alt="" />,
+        //     disabled: true,
+        // },
     ];
+    const styles = useStyles();
+
     return (
-        <div>
-            <CardGrid>
+        <div className={styles.main}>
+            {/* <CardGrid>
                 {options.map((op) => (
                     <OptionCard
                         key={op.key}
@@ -164,7 +135,30 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
                         <div className="op-content">{op.text}</div>
                     </OptionCard>
                 ))}
-            </CardGrid>
+            </CardGrid> */}
+            {options.map((op) => (
+                <Card
+                    key={op.key}
+                    {...props}
+                    className={styles.card}
+                    onClick={() => {
+                        if (!op.disabled) {
+                            onSelected(op.key);
+                        }
+                    }}
+                >
+                    <CardHeader
+                        image={op.iconImage && op.iconImage()}
+                        header={<Text weight="semibold">{op.text}</Text>}
+                        description={<Caption1 className={styles.caption}>Developer</Caption1>}
+                        action={<Button appearance="transparent" icon={<MoreHorizontal20Filled />} aria-label="More options" />}
+                    />
+
+                    <p className={styles.text}>
+                        {intl.get(`dataSource.importData.sources.${op.key}.desc`)}
+                    </p>
+                </Card>
+            ))}
         </div>
     );
 };

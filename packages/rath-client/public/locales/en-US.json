@@ -60,11 +60,11 @@
     "menu": {
         "dataSource": "DataSource",
         "eda": "Exploratory Data Analysis",
-        "editor": "Manual Exploration",
+        "editor": "Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
-        "megaAuto": "Mega-auto Exploration",
-        "semiAuto": "Semi-auto Exploration",
+        "megaAuto": "Data Autopilot",
+        "semiAuto": "Data Copilot",
         "devCollection": "Insiders(α)",
         "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter",
@@ -179,13 +179,13 @@
         "sizeInfo": "{nCols} fields, {nRows} rows",
         "demoDataset": {
             "CARS": { "title": "Cars", "description": "Origin, product name and physical attributes of cars." },
-            "STUDENTS": { "title": "Students", "description": "" },
-            "BTC_GOLD": { "title": "BTC - Gold", "description": "" },
-            "CAR_SALES": { "title": "Car Sales", "description": "" },
-            "COLLAGE": { "title": "Collage", "description": "" },
-            "TITANIC": { "title": "Titanic", "description": "" },
-            "KEPLER": { "title": "Kepler", "description": "" },
-            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
+            "STUDENTS": { "title": "Students", "description": "What influence students' performance on exams?" },
+            "BTC_GOLD": { "title": "BTC - Gold", "description": "History data of bitcoin and gold price." },
+            "CAR_SALES": { "title": "Car Sales", "description": "Sales data of cars." },
+            "COLLAGE": { "title": "College", "description": "Public indicators of colleges." },
+            "TITANIC": { "title": "Titanic", "description": "Titanic shipwreck." },
+            "KEPLER": { "title": "Kepler", "description": "Kelper telescope data." },
+            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "Bike renting data." }
         },
         "btn": {
             "use_table": "Load this table (up to 100 rows)",
@@ -223,6 +223,41 @@
                 "demo": "Demo",
                 "database": "Database",
                 "kanaries_cloud": "Cloud"
+            },
+            "sources": {
+                "file": {
+                    "name": "File",
+                    "desc": "Upload a file to load data. Supported file formats: CSV, JSON and Excel."
+                },
+                "restful": {
+                    "name": "From URL",
+                    "desc": "Load data from a URL (JSON format)."
+                },
+                "database": {
+                    "name": "Database",
+                    "desc": "Connect to a database to load data. Supported databases: MySQL, PostgreSQL, Oracle, SQL Server, and SQLite."
+                },
+                "demo": {
+                    "name": "Demo",
+                    "desc": "Load a demo dataset to get started. It helps you to learn RATH's features and workflow."
+                },
+                "kanaries_cloud": {
+                    "name": "Cloud",
+                    "desc": "Load data from Kanaries Cloud."
+                },
+                "airtable": {
+                    "name": "Airtable",
+                    "desc": "Load tables from Airtable."
+                },
+                "local": {
+                    "name": "History",
+                    "desc": "Load data from your analysis history."
+                },
+                "olap": {
+                    "name": "OLAP",
+                    "desc": "Load data from OLAP."
+                
+                }
             },
             "cloud": {
                 "notebook": "Notebook",
