@@ -18,6 +18,7 @@ import { FC, useCallback, useMemo, useRef } from 'react';
 import { useId } from "@fluentui/react-hooks";
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
+import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
 import { logDataImport } from '../../loggers/dataImport';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../constants';
@@ -92,54 +93,7 @@ const List = styled.div`
     grid-auto-rows: max-content;
 `;
 
-const ListItem = styled.div`
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    height: 100%;
-    padding: 1.2em 1em 1em 1.4em;
-    border-radius: 2px;
-    position: relative;
-    box-shadow: inset 0 0 2px #8881;
-    > .head {
-        display: flex;
-        align-items: flex-start;
-        > i {
-            flex-grow: 0;
-            flex-shrink: 0;
-            width: 2em;
-            height: 2em;
-            margin-right: 0.8em;
-            user-select: none;
-        }
-        > div {
-            flex-grow: 1;
-            flex-shrink: 1;
-            flex-basis: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            > header {
-                font-size: 0.8rem;
-                line-height: 1.2em;
-                font-weight: 550;
-                color: #111;
-                margin-bottom: 0.4em;
-            }
-            > span {
-                word-break: break-all;
-                line-height: 1.2em;
-                margin: 0.12em 0;
-            }
-        }
-    }
-    :hover {
-        background-color: #8881;
-    }
-    cursor: pointer;
-`;
-
-const ITEM_MIN_WIDTH = 240;
+const ITEM_MIN_WIDTH = 320;
 
 const DemoData: FC<DemoDataProps> = props => {
     const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
@@ -175,29 +129,21 @@ const DemoData: FC<DemoDataProps> = props => {
             <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
                 {options.map((demo, i) => {
                     return (
-                        <ListItem
-                            key={i}
-                            role="gridcell"
-                            aria-rowindex={Math.floor(i / colCount) + 1}
-                            aria-colindex={(i % colCount) + 1}
-                            tabIndex={0}
-                            onClick={() => loadDemo(demo)}
+                        <Card
+                        role="gridcell"
+                        aria-rowindex={Math.floor(i / colCount) + 1}
+                        aria-colindex={(i % colCount) + 1}
+                        tabIndex={0}
+                        onClick={() => loadDemo(demo)}
+                            appearance="outline"
                         >
-                            <div className="head">
-                                <Icon iconName={getFileIcon('')} />
-                                <div>
-                                    <header>
-                                        <span>{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</span>
-                                    </header>
-                                    <span className="state-description">
-                                        {intl.get(`dataSource.demoDataset.${demo.key}.description`)}
-                                    </span>
-                                    <span className="state-description">
-                                        {intl.get(`dataSource.sizeInfo`, demo)}
-                                    </span>
-                                </div>
-                            </div>
-                        </ListItem>
+                            <CardHeader
+                                image={<Icon iconName={getFileIcon('')} />}
+                                header={<Text weight="semibold">{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</Text>}
+                                description={<Caption1>{intl.get(`dataSource.sizeInfo`, demo)}</Caption1>}
+                            />
+                            <p>{intl.get(`dataSource.demoDataset.${demo.key}.description`)}</p>
+                        </Card>
                     );
                 })}
             </List>

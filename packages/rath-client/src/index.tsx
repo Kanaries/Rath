@@ -10,13 +10,14 @@ import ReactDOM from 'react-dom';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 import { ThemeProvider } from '@fluentui/react';
 import { inject } from '@vercel/analytics';
+
 import 'office-ui-fabric-core/dist/css/fabric.css';
 import './index.css';
-
+import { FluentProvider } from '@fluentui/react-components';
 // @ts-ignore
 // eslint-disable-next-line import/first
 import App from './App';
-import { mainTheme } from './theme';
+import { customLightTheme, mainTheme } from './theme';
 
 inject();
 
@@ -27,7 +28,9 @@ initializeIcons();
 
 ReactDOM.render(
     <ThemeProvider theme={mainTheme}>
-        <App />
+        <FluentProvider theme={customLightTheme}>
+            <App />
+        </FluentProvider>
     </ThemeProvider>,
     document.getElementById('root')
 );

@@ -104,8 +104,8 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     key: p,
                     name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${hotkeyAccess ? ` (${hotkeyAccess})` : ''}`,
                     forceAnchor: true,
-                    iconProps: { iconName: getIcon(p) },
-                    // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
+                    // iconProps: { iconName: getIcon(p) },
+                    iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
                     onClick(e: any) {
                         e.preventDefault();
                         commonStore.setAppKey(p);
@@ -187,7 +187,13 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                         PIVOT_KEYS.dashBoardDesigner,
                     ]),
                 },
-                ...getLinks([PIVOT_KEYS.support]),
+                // ...getLinks([PIVOT_KEYS.support]),
+                {
+                    key: 'support',
+                    name: intl.get('menu.support'),
+                    url: 'https://docs.kanaries.net',
+                    target: '_blank',
+                }
             ],
         },
     ];
