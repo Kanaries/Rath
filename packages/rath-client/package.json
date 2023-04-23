@@ -30,7 +30,6 @@
     "buffer": "^6.0.3",
     "dayjs": "^1.11.6",
     "immer": "^9.0.6",
-    "jsesc": "^3.0.2",
     "localforage": "^1.10.0",
     "mobx": "^6.6.2",
     "mobx-react-lite": "^3.4.0",
@@ -80,8 +79,8 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "GENERATE_SOURCEMAP=false react-app-rewired build --max_old_space_size=4096 build",
-    "build2": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=4096 build",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build --max_old_space_size=8000 build",
+    "build2": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8000 build",
     "buildForAnalysis": "react-app-rewired build",
     "test": "jest -c ./jest.config.js --passWithNoTests --no-cache",
     "eject": "react-app-rewired eject",
