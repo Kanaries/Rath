@@ -7,7 +7,6 @@ import { useGlobalStore, StoreWrapper } from './store/index';
 import VisualInterface from './pages/manualControl';
 import DataSourceBoard from './pages/dataSource/index';
 import PatternPage from './pages/semiAutomation/index';
-import SupportPage from './pages/support/index';
 import LTSPage from './pages/megaAutomation';
 import AppNav from './components/appNav';
 import { destroyRathWorker, initRathWorker } from './services/index';
@@ -64,7 +63,6 @@ function App() {
                 <div className="main-app-content">
                     {appKey === PIVOT_KEYS.dataSource && <DataSourceBoard />}
                     {appKey === PIVOT_KEYS.editor && <VisualInterface />}
-                    {appKey === PIVOT_KEYS.support && <SupportPage />}
                     {appKey === PIVOT_KEYS.megaAuto && <LTSPage />}
                     {appKey === PIVOT_KEYS.semiAuto && <PatternPage />}
                     {appKey === PIVOT_KEYS.painter && <Painter />}
