@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
-import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, Spinner } from '@fluentui/react';
+import { Stack, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
+import { Button, Tab, TabList } from '@fluentui/react-components';
+import { AppsListDetail24Regular, DataBarVertical24Regular, Database24Regular, TableFreezeRow24Regular } from '@fluentui/react-icons';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
-import { Card } from '../../components/card';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import BackupModal from '../../components/backupModal';
 import { notify } from '../../components/error';
@@ -19,6 +20,7 @@ import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
 import DataInfo from './dataInfo';
 
+
 const MARGIN_LEFT = { marginLeft: '1em' };
 
 interface DataSourceBoardProps {}
@@ -26,25 +28,7 @@ interface DataSourceBoardProps {}
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const { dataSourceStore, megaAutoStore, semiAutoStore } = useGlobalStore();
 
-    const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
-        dataSourceStore;
-
-    const dataImportButton = useCallback(
-        (text: string, dataSourceIsEmpty: boolean) => {
-            let UsedButton = dataSourceIsEmpty ? PrimaryButton : DefaultButton;
-            return (
-                <UsedButton
-                    style={MARGIN_LEFT}
-                    iconProps={{ iconName: 'SearchData' }}
-                    text={text}
-                    onClick={() => {
-                        dataSourceStore.setShowDataImportSelection(true);
-                    }}
-                />
-            );
-        },
-        [dataSourceStore]
-    );
+    const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } = dataSourceStore;
 
     const onSelectPannelClose = useCallback(() => {
         dataSourceStore.setShowDataImportSelection(false);
@@ -94,22 +78,22 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card fitContainer>
+            <div>
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />
                 <Stack horizontal>
                     <MainActionButton />
-                    {dataImportButton(intl.get('dataSource.importData.buttonName'), rawDataMetaInfo.length === 0)}
-                    {/* <IconButton
-                        style={MARGIN_LEFT}
-                        title={intl.get('function.importStorage.title')}
-                        ariaLabel={intl.get('function.importStorage.title')}
-                        iconProps={{ iconName: 'CloudUpload' }}
+                    <Button
+                        appearance={rawDataMetaInfo.length === 0 ? 'primary' : 'secondary'}
                         onClick={() => {
-                            commonStore.setShowStorageModal(true);
+                            dataSourceStore.setShowDataImportSelection(true);
                         }}
-                    /> */}
+                        style={MARGIN_LEFT}
+                        icon={<Database24Regular />}
+                    >
+                        {intl.get('dataSource.importData.buttonName')}
+                    </Button>
 
                     {dataPrepProgressTag !== IDataPrepProgressTag.none && (
                         <Spinner style={MARGIN_LEFT} label={dataPrepProgressTag} ariaLive="assertive" labelPosition="right" />
@@ -127,25 +111,20 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     />
                 </Stack>
                 <hr style={{ margin: '1em 0em 0em 0em' }} />
-                <Pivot
-                    style={{ marginBottom: '6px' }}
-                    selectedKey={dataPreviewMode}
-                    onLinkClick={(item) => {
-                        item && dataSourceStore.setDataPreviewMode(item.props.itemKey as IDataPreviewMode);
-                    }}
-                >
-                    <PivotItem itemKey={IDataPreviewMode.data} headerText={intl.get('dataSource.dataView')} itemIcon="Table" />
-                    <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
-                    <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
-                </Pivot>
+                <TabList selectedValue={dataPreviewMode} onTabSelect={(e, item) => {
+                    item.value && dataSourceStore.setDataPreviewMode(item.value as IDataPreviewMode);
+                }}>
+                    <Tab value={IDataPreviewMode.data} icon={<TableFreezeRow24Regular />}>{intl.get('dataSource.dataView')}</Tab>
+                    <Tab value={IDataPreviewMode.meta} icon={<AppsListDetail24Regular />}>{intl.get('dataSource.metaView')}</Tab>
+                    <Tab value={IDataPreviewMode.stat} icon={<DataBarVertical24Regular />}>{intl.get('dataSource.statView')}</Tab>
+                </TabList>
                 {rawDataMetaInfo.length > 0 && <DataOperations />}
                 <DataInfo />
                 {rawDataMetaInfo.length > 0 && <Advice />}
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
-
-            </Card>
+            </div>
         </div>
     );
 };
