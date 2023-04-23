@@ -31,9 +31,7 @@
     "parse-svg-path": "^0.1.2",
     "simplify-path": "^1.1.0",
     "svg-path-contours": "^2.0.0",
-    "triangulate-contours": "^1.0.2"
-  },
-  "peerDependencies": {
+    "triangulate-contours": "^1.0.2",
     "d3-color": "*",
     "d3-shape": "*",
     "vega-scenegraph": "*",
