@@ -18,7 +18,7 @@ import { getFileTypeIconProps, initializeFileTypeIcons } from '@fluentui/react-f
 initializeFileTypeIcons();
 
 const getFileIcon = (fileName: string): string => {
-    const iconProps = getFileTypeIconProps({ extension: /\.(.+)/i.exec(fileName)?.[1], imageFileType: 'png', size: 16 });
+    const iconProps = getFileTypeIconProps({ extension: /\.(.+)/i.exec(fileName)?.[1], imageFileType: 'png', size: 32 });
     return iconProps.iconName;
 };
 

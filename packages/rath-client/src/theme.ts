@@ -1,4 +1,15 @@
 import { createTheme } from '@fluentui/react';
+import { webLightTheme, Theme } from '@fluentui/react-components';
+
+const HOVER_PINK = '#e43ba6';
+export const customLightTheme: Theme = {
+    ...webLightTheme,
+    colorBrandBackground: '#0f0f0f',
+    colorBrandBackgroundHover: HOVER_PINK,
+    lineHeightBase200: '1em',
+    colorCompoundBrandStroke: '#0f0f0f',
+    colorCompoundBrandStrokeHover: HOVER_PINK,
+};
 
 export const RATH_DARK_PALETTE = {
     themePrimary: '#38fcff',
@@ -60,7 +71,7 @@ export const mainTheme = createTheme({
         inputBorder: '#e6e6e6',
         inputIcon: '#e6e6e6',
         focusBorder: 'red',
-        smallInputBorder: '#666'
+        smallInputBorder: '#666',
     },
 });
 
@@ -70,8 +81,8 @@ export const RATH_THEME_CONFIG = {
     dimensionColor: '#1890ff',
     measureColor: '#13c2c2',
     disableColor: '#9e9e9e',
-    previewColor: '#faad14'
-}
+    previewColor: '#faad14',
+};
 // #3371D7
 // export function applyThemeForSideEffects () {
 //     document.getElementsByTagName("body")[0]!.

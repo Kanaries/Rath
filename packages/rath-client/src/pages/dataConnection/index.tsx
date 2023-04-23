@@ -14,28 +14,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { useCallback, useState } from 'react';
-import { Breadcrumb, DefaultButton, IBreadcrumbItem, ProgressIndicator } from '@fluentui/react';
+import { IBreadcrumbItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import styled from 'styled-components';
+import { Button } from '@fluentui/react-components';
+import { Add24Filled, HomeDatabase24Regular } from '@fluentui/react-icons';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
-import DataLoadingStatus from '../dataSource/dataLoadingStatus';
 import { useGlobalStore } from '../../store';
-import { Card } from '../../components/card';
 import { PIVOT_KEYS } from '../../constants';
-import DatabaseConnector from '../dataSource/selection/database';
 import { notify } from '../../components/error';
-import FileData from './file';
-import DemoData from './demo';
-// import RestfulData from './restful';
-import JSONAPI from './jsonAPI';
-import OLAPData from './olap';
 import HistoryPanel from './history';
-import AirTableSource from './airtable';
-import SupportedSources from './supportedSources';
-import KanariesCloud from './cloud';
+import ConnectionCreation from './create';
 
 interface DataConnectionProps {
     // show: boolean;
@@ -47,16 +38,15 @@ interface DataConnectionProps {
     // onDataLoading: (p: number) => void;
     // toggleLoadingAnimation: (on: boolean) => void;
 }
-
-const Content = styled.div<{ open: boolean }>`
-    min-height: ${({ open }) => open ? '60vh' : 'unset'};
-`;
+enum DS_PAGE_KEYS {
+    display = 'display',
+    create = 'create',
+}
 
 const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const { dataSourceStore, commonStore, megaAutoStore, semiAutoStore } = useGlobalStore();
-    const { loading } = dataSourceStore;
     // const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, toggleLoadingAnimation } = props;
-
+    const [dsPageKey, setDsPageKey] = useState<DS_PAGE_KEYS>(DS_PAGE_KEYS.display);
     const [dataSourceType, setDataSourceType] = useState<IDataSourceType | null>(null);
 
     const onSelectPannelClose = useCallback(() => {
@@ -77,10 +67,6 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         [dataSourceStore, megaAutoStore, semiAutoStore]
     );
 
-    const onSelectStartLoading = useCallback(() => {
-        dataSourceStore.setLoading(true);
-    }, [dataSourceStore]);
-
     const onLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
@@ -93,70 +79,15 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         [dataSourceStore]
     );
 
-    const toggleLoadingAnimation = useCallback(
-        (on: boolean) => {
-            dataSourceStore.setLoading(on);
-        },
-        [dataSourceStore]
-    );
-
-    const onDataLoading = useCallback(
-        (p: number) => {
-            dataSourceStore.setLoadingDataProgress(Math.floor(p * 100) / 100);
-        },
-        [dataSourceStore]
-    );
-
-    const formMap: Record<IDataSourceType, JSX.Element> = {
-        [IDataSourceType.CLOUD]: <KanariesCloud setLoadingAnimation={toggleLoadingAnimation} />,
-        [IDataSourceType.FILE]: (
-            <FileData
-                onDataLoading={onDataLoading}
-                onClose={onSelectPannelClose}
-                onDataLoaded={onSelectDataLoaded}
-                onLoadingFailed={onLoadingFailed}
-                toggleLoadingAnimation={toggleLoadingAnimation}
-            />
-        ),
-        [IDataSourceType.DEMO]: (
-            <DemoData
-                onClose={onSelectPannelClose}
-                onDataLoaded={onSelectDataLoaded}
-                onLoadingFailed={onLoadingFailed}
-                onStartLoading={onSelectStartLoading}
-            />
-        ),
-        [IDataSourceType.OLAP]: <OLAPData onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} />,
-        [IDataSourceType.RESTFUL]: (
-            <JSONAPI
-                onClose={onSelectPannelClose}
-                onDataLoaded={onSelectDataLoaded}
-                onLoadingFailed={onLoadingFailed}
-                onStartLoading={onSelectStartLoading}
-            />
-            // <RestfulData onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onSelectStartLoading} />
-        ),
-        [IDataSourceType.LOCAL]: <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />,
-        [IDataSourceType.DATABASE]: (
-            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} />
-        ),
-        [IDataSourceType.AIRTABLE]: (
-            <AirTableSource
-                onClose={onSelectPannelClose}
-                onDataLoaded={onSelectDataLoaded}
-                onLoadingFailed={onLoadingFailed}
-                onStartLoading={onSelectStartLoading}
-            />
-        ),
-    };
-
     const _onBreadcrumbItemClicked = useCallback((ev?: React.MouseEvent<HTMLElement>, item?: IBreadcrumbItem) => {
         if (item && item.key === 'connection') {
             setDataSourceType(null);
         }
     }, []);
 
-    const items: IBreadcrumbItem[] = [{ text: intl.get('dataSource.dataSourceConnection.types'), key: 'connection', onClick: _onBreadcrumbItemClicked }];
+    const items: IBreadcrumbItem[] = [
+        { text: intl.get('dataSource.dataSourceConnection.types'), key: 'connection', onClick: _onBreadcrumbItemClicked },
+    ];
 
     if (dataSourceType !== null) {
         items.push({ text: intl.get(`dataSource.importData.type.${dataSourceType}`), key: dataSourceType, onClick: _onBreadcrumbItemClicked });
@@ -164,38 +95,35 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
 
     return (
         <div className="content-container">
-            <Card fitContainer={Boolean(dataSourceType)}>
-                <Breadcrumb
-                    items={items}
-                    maxDisplayedItems={10}
-                    ariaLabel="Breadcrumb with items rendered as buttons"
-                    overflowAriaLabel="More links"
-                />
-                { dataSourceType !== null && <hr style={{ marginTop: '1em' }} /> }
-                {dataSourceType !== null && (
-                    <DefaultButton
-                        style={{ margin: '1em 0em' }}
-                        text={intl.get('common.return')}
-                        iconProps={{ iconName: 'Back' }}
-                        onClick={() => {
-                            setDataSourceType(null);
-                        }}
-                    />
-                )}
-                <Content open={Boolean(dataSourceType)}>
-                    {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
-                    {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
-                    {dataSourceType && formMap[dataSourceType]}
-                </Content>
-            </Card>
             <div>
-            {dataSourceType === null && (
-                        <SupportedSources
-                            onSelected={(k) => {
-                                setDataSourceType(k as IDataSourceType);
-                            }}
-                        />
-                    )}
+                {dsPageKey === DS_PAGE_KEYS.display && (
+                    <Button
+                        appearance="primary"
+                        onClick={() => {
+                            setDsPageKey(DS_PAGE_KEYS.create);
+                        }}
+                        icon={<Add24Filled />}
+                    >
+                        Create DataSource
+                    </Button>
+                )}
+                {dsPageKey === DS_PAGE_KEYS.create && (
+                    <Button
+                        appearance="primary"
+                        onClick={() => {
+                            setDsPageKey(DS_PAGE_KEYS.display);
+                        }}
+                        icon={<HomeDatabase24Regular />}
+                    >
+                        My Data
+                    </Button>
+                )}
+            </div>
+            <div>
+                {dsPageKey === DS_PAGE_KEYS.display && (
+                    <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />
+                )}
+                {dsPageKey === DS_PAGE_KEYS.create && <ConnectionCreation />}
             </div>
         </div>
     );

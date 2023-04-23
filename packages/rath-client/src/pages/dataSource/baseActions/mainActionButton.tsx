@@ -1,9 +1,12 @@
-import { IContextualMenuItem, IContextualMenuProps, PrimaryButton } from '@fluentui/react';
+import { IContextualMenuItem, IContextualMenuProps } from '@fluentui/react';
 import { observer, useObserver } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
+import { Menu, MenuButtonProps, MenuItem, MenuList, MenuPopover, MenuTrigger, SplitButton } from '@fluentui/react-components';
+import { Poll24Regular } from '@fluentui/react-icons';
 import { EXPLORE_MODE, PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
+
 
 export const useActionModes = function () {
     const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
@@ -85,16 +88,33 @@ const MainActionButton: React.FC = () => {
     const { satisfyAnalysisCondition, startMode, analysisOptions } = useActionModes();
 
     return (
-        <PrimaryButton
-            split
-            disabled={!satisfyAnalysisCondition}
-            iconProps={{ iconName: 'BarChart4' }}
-            text={intl.get(`${startMode.key}`)}
-            menuProps={analysisOptions}
-            onClick={() => {
-                startMode.onClick && startMode.onClick();
-            }}
-        />
+        <Menu positioning="below-end">
+            <MenuTrigger disableButtonEnhancement>
+                {(triggerProps: MenuButtonProps) => (
+                    <SplitButton
+                        disabled={!satisfyAnalysisCondition}
+                        primaryActionButton={{ onClick: () => startMode.onClick && startMode.onClick() }}
+                        menuButton={triggerProps}
+                        appearance="primary"
+                        icon={<Poll24Regular />}
+                    >
+                        {intl.get(`${startMode.key}`)}
+                    </SplitButton>
+                )}
+            </MenuTrigger>
+
+            <MenuPopover>
+                <MenuList>
+                    {analysisOptions.items.map((item) => {
+                        return (
+                            <MenuItem key={item.key} onClick={item.onClick}>
+                                {item.text}
+                            </MenuItem>
+                        );
+                    })}
+                </MenuList>
+            </MenuPopover>
+        </Menu>
     );
 };
 
