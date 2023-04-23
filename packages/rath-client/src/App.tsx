@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import va from '@vercel/analytics';
 import './normalize.css';
 import './App.css';
 import { useGlobalStore, StoreWrapper } from './store/index';
@@ -25,6 +26,10 @@ import DataConnection from './pages/dataConnection';
 function App() {
     const { langStore, commonStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
+
+    useEffect(() => {
+        va.track('rath-visit')
+    }, [])
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
