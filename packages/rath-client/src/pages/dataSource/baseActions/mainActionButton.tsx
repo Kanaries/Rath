@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { Menu, MenuButtonProps, MenuItem, MenuList, MenuPopover, MenuTrigger, SplitButton } from '@fluentui/react-components';
 import { Poll24Regular } from '@fluentui/react-icons';
+import va from '@vercel/analytics';
 import { EXPLORE_MODE, PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
 
@@ -86,6 +87,13 @@ export const useActionModes = function () {
 
 const MainActionButton: React.FC = () => {
     const { satisfyAnalysisCondition, startMode, analysisOptions } = useActionModes();
+    const { userStore } = useGlobalStore();
+
+    const startHandler = useCallback(() => {
+        startMode.onClick && startMode.onClick()
+        va.track('start_analysis', { userName: userStore.userName, mode: startMode.key })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [startMode]);
 
     return (
         <Menu positioning="below-end">
@@ -93,7 +101,7 @@ const MainActionButton: React.FC = () => {
                 {(triggerProps: MenuButtonProps) => (
                     <SplitButton
                         disabled={!satisfyAnalysisCondition}
-                        primaryActionButton={{ onClick: () => startMode.onClick && startMode.onClick() }}
+                        primaryActionButton={{ onClick: startHandler }}
                         menuButton={triggerProps}
                         appearance="primary"
                         icon={<Poll24Regular />}
