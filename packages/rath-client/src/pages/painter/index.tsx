@@ -20,7 +20,6 @@ import { Item, ScenegraphEvent, renderModule } from 'vega';
 import intl from 'react-intl-universal';
 //@ts-ignore
 import { PainterModule, paint, startPaint, stopPaint } from 'vega-painter-renderer';
-// import { testConfig } from '@kanaries/rath-utils';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
