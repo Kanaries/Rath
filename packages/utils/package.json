@@ -12,7 +12,7 @@
   "devDependencies": {
     "typescript": "^4.7.4"
   },
-  "dependencies": {
+  "peerDependencies": {
     "localforage": "^1.10.0"
   }
 }
