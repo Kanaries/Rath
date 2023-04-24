@@ -43,8 +43,11 @@
 
 **RATH** is not just an open-source alternative to Data Analysis and Visualization tools such as Tableau, but it automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
-<a href="https://kanaries.net"><img src="https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/demo.gif
-" alt="RATH features demo"></a>
+
+
+https://user-images.githubusercontent.com/22167673/234015510-d3816d60-a056-4fd9-8b66-c6857830d5c2.mp4
+
+
 
 ## Get started
 
@@ -96,11 +99,15 @@ Augmented analytic engine for discovering patterns, insights, and causals. A ful
 
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/autopilot.gif)](https://docs.kanaries.net/rath/explore-data/automated-data-insight)
 
-### Use RATH as your Copilot in Data Analysis
+### Use RATH as your Copilot in Data Exploration
 
 RATH will work as your copilot in data science, learn your intends and generate relevant recommendations.
 
-[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/copilot.gif)](https://docs.kanaries.net/rath/explore-data/data-exploration-copilot)
+
+
+https://user-images.githubusercontent.com/22167673/234018034-c7441549-e83b-4f5e-94c7-f772527a7094.mp4
+
+
 
 ### Ask about your data
 
