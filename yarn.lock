@@ -1138,6 +1138,13 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.18.6"
 
+"@babel/plugin-syntax-jsx@^7.21.4":
+  version "7.21.4"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-jsx/-/plugin-syntax-jsx-7.21.4.tgz#f264ed7bf40ffc9ec239edabc17a50c4f5b6fea2"
+  integrity sha512-5hewiLct5OKyh6PLKEYaFclcqtIgCb6bmELouxjF6up5q3Sov7rOayW4RwhbaBL0dit8rA80GNfY+UuDp2mBbQ==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.20.2"
+
 "@babel/plugin-syntax-logical-assignment-operators@^7.10.4", "@babel/plugin-syntax-logical-assignment-operators@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-logical-assignment-operators/-/plugin-syntax-logical-assignment-operators-7.10.4.tgz#ca91ef46303530448b906652bac2e9fe9941f699"
@@ -1200,6 +1207,13 @@
   integrity sha512-mAWAuq4rvOepWCBid55JuRNvpTNf2UGVgoz4JV0fXEKolsVZDzsa4NqCef758WZJj/GDu0gVGItjKFiClTAmZA==
   dependencies:
     "@babel/helper-plugin-utils" "^7.18.6"
+
+"@babel/plugin-syntax-typescript@^7.20.0":
+  version "7.21.4"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-typescript/-/plugin-syntax-typescript-7.21.4.tgz#2751948e9b7c6d771a8efa59340c15d4a2891ff8"
+  integrity sha512-xz0D39NvhQn4t4RNsHmDnnsaQizIlUkdtYvLs8La1BlfjQ6JEwxkJGeqJMW2tAXx+q6H+WFuUTXNdYVpEya0YA==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.20.2"
 
 "@babel/plugin-transform-arrow-functions@^7.18.6":
   version "7.18.6"
@@ -1638,6 +1652,16 @@
     "@babel/helper-plugin-utils" "^7.19.0"
     "@babel/plugin-syntax-typescript" "^7.18.6"
 
+"@babel/plugin-transform-typescript@^7.21.3":
+  version "7.21.3"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-typescript/-/plugin-transform-typescript-7.21.3.tgz#316c5be579856ea890a57ebc5116c5d064658f2b"
+  integrity sha512-RQxPz6Iqt8T0uw/WsJNReuBpWpBqs/n7mNo18sKLoTbMp+UrEekhH+pKSVC7gWz+DNjo9gryfV8YzCiT45RgMw==
+  dependencies:
+    "@babel/helper-annotate-as-pure" "^7.18.6"
+    "@babel/helper-create-class-features-plugin" "^7.21.0"
+    "@babel/helper-plugin-utils" "^7.20.2"
+    "@babel/plugin-syntax-typescript" "^7.20.0"
+
 "@babel/plugin-transform-unicode-escapes@^7.18.10":
   version "7.18.10"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-unicode-escapes/-/plugin-transform-unicode-escapes-7.18.10.tgz#1ecfb0eda83d09bbcb77c09970c2dd55832aa246"
@@ -1826,7 +1850,7 @@
     "@babel/types" "^7.4.4"
     esutils "^2.0.2"
 
-"@babel/preset-react@^7.12.5", "@babel/preset-react@^7.16.0":
+"@babel/preset-react@^7.12.5", "@babel/preset-react@^7.14.5", "@babel/preset-react@^7.16.0":
   version "7.18.6"
   resolved "https://registry.yarnpkg.com/@babel/preset-react/-/preset-react-7.18.6.tgz#979f76d6277048dc19094c217b507f3ad517dd2d"
   integrity sha512-zXr6atUmyYdiWRVLOZahakYmOBHtWc2WGCkP8PYTgZi0iJXDY2CN180TdrIW4OGOAdLc7TifzDIvtx6izaRIzg==
@@ -1837,6 +1861,17 @@
     "@babel/plugin-transform-react-jsx" "^7.18.6"
     "@babel/plugin-transform-react-jsx-development" "^7.18.6"
     "@babel/plugin-transform-react-pure-annotations" "^7.18.6"
+
+"@babel/preset-typescript@^7.15.0":
+  version "7.21.4"
+  resolved "https://registry.yarnpkg.com/@babel/preset-typescript/-/preset-typescript-7.21.4.tgz#b913ac8e6aa8932e47c21b01b4368d8aa239a529"
+  integrity sha512-sMLNWY37TCdRH/bJ6ZeeOH1nPuanED7Ai9Y/vH31IPqalioJ6ZNFUWONsakhv4r4n+I6gm5lmoE0olkgib/j/A==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.20.2"
+    "@babel/helper-validator-option" "^7.21.0"
+    "@babel/plugin-syntax-jsx" "^7.21.4"
+    "@babel/plugin-transform-modules-commonjs" "^7.21.2"
+    "@babel/plugin-transform-typescript" "^7.21.3"
 
 "@babel/preset-typescript@^7.16.0":
   version "7.18.6"
@@ -3985,7 +4020,7 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@rollup/plugin-babel@^5.2.0", "@rollup/plugin-babel@^5.3.1":
+"@rollup/plugin-babel@^5.2.0", "@rollup/plugin-babel@^5.3.0", "@rollup/plugin-babel@^5.3.1":
   version "5.3.1"
   resolved "https://registry.npmmirror.com/@rollup/plugin-babel/-/plugin-babel-5.3.1.tgz#04bc0608f4aa4b2e4b1aebf284344d0f68fda283"
   integrity sha512-WFfdLWU/xVWKeRQnKmIAQULUI7Il0gZnBIH/ZFO069wYIfPu+8zrfp/KMW0atmELoRDq8FbiP3VCss9MhCut7Q==
@@ -4022,6 +4057,18 @@
     "@types/resolve" "1.17.1"
     builtin-modules "^3.1.0"
     deepmerge "^4.2.2"
+    is-module "^1.0.0"
+    resolve "^1.19.0"
+
+"@rollup/plugin-node-resolve@^13.0.4":
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.3.0.tgz#da1c5c5ce8316cef96a2f823d111c1e4e498801c"
+  integrity sha512-Lus8rbUo1eEcnS4yTFKLZrVumLPY+YayBdWXgFSHYhTT2iJbMhoaaBL3xl5NCdeRytErGr8tZ0L71BMRmnlwSw==
+  dependencies:
+    "@rollup/pluginutils" "^3.1.0"
+    "@types/resolve" "1.17.1"
+    deepmerge "^4.2.2"
+    is-builtin-module "^3.1.0"
     is-module "^1.0.0"
     resolve "^1.19.0"
 
@@ -6591,10 +6638,12 @@ d3-array@3.1.1:
   dependencies:
     internmap "1 - 2"
 
-d3-color@*, "d3-color@1 - 3", d3-color@^3.0.1:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-3.1.0.tgz#395b2833dfac71507f12ac2f7af23bf819de24e2"
-  integrity sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==
+d3-array@^3.2.2:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-3.2.3.tgz#39f1f4954e4a09ff69ac597c2d61906b04e84740"
+  integrity sha512-JRHwbQQ84XuAESWhvIPaUV4/1UYTBOLiOPGWqgFDHZS1D5QN9c57FbH3QpEnQMYiOXNzKUQyGTZf+EVO7RT5TQ==
+  dependencies:
+    internmap "1 - 2"
 
 d3-color@1:
   version "1.4.1"
@@ -6735,6 +6784,13 @@ d3-shape@^3.1.0:
   dependencies:
     d3-path "1 - 3"
 
+d3-shape@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/d3-shape/-/d3-shape-3.2.0.tgz#a1a839cbd9ba45f28674c69d7f855bcf91dfc6a5"
+  integrity sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA==
+  dependencies:
+    d3-path "^3.1.0"
+
 "d3-time-format@2 - 4", d3-time-format@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/d3-time-format/-/d3-time-format-4.1.0.tgz#7ab5257a5041d11ecb4fe70a5c7d16a195bb408a"
@@ -6746,6 +6802,13 @@ d3-shape@^3.1.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/d3-time/-/d3-time-3.0.0.tgz#65972cb98ae2d4954ef5c932e8704061335d4975"
   integrity sha512-zmV3lRnlaLI08y9IMRXSDshQb5Nj77smnfpnd2LrBa/2K281Jijactokeak14QacHs/kKq0AQ121nidNYlarbQ==
+  dependencies:
+    d3-array "2 - 3"
+
+d3-time@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/d3-time/-/d3-time-3.1.0.tgz#9310db56e992e3c0175e1ef385e545e48a9bb5c7"
+  integrity sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q==
   dependencies:
     d3-array "2 - 3"
 
@@ -7553,7 +7616,7 @@ estree-walker@^1.0.1:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-1.0.1.tgz#31bc5d612c96b704106b477e6dd5d8aa138cb700"
   integrity sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==
 
-estree-walker@^2.0.1, estree-walker@^2.0.2:
+estree-walker@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
@@ -7821,7 +7884,7 @@ finalhandler@1.2.0:
     statuses "2.0.1"
     unpipe "~1.0.0"
 
-find-cache-dir@^3.3.1:
+find-cache-dir@^3.3.1, find-cache-dir@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/find-cache-dir/-/find-cache-dir-3.3.2.tgz#b30c5b6eff0730731aea9bbd9dbecbd80256d64b"
   integrity sha512-wXZV5emFEjrridIgED11OoUKLxiYjAcqot/NJdAkOhlJ+vGzwhOAfcG5OX1jP+S0PcjEn8bdMJv+g2jwQ3Onig==
@@ -12471,6 +12534,11 @@ rollup-plugin-bundle-size@^1.0.3:
     chalk "^1.1.3"
     maxmin "^2.1.0"
 
+rollup-plugin-peer-deps-external@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-peer-deps-external/-/rollup-plugin-peer-deps-external-2.2.4.tgz#8a420bbfd6dccc30aeb68c9bf57011f2f109570d"
+  integrity sha512-AWdukIM1+k5JDdAqV/Cxd+nejvno2FVLVeZ74NKggm3Q5s9cbbcOgUPGdbxPi4BXu7xGaZ8HG12F+thImYu/0g==
+
 rollup-plugin-terser@^7.0.0, rollup-plugin-terser@^7.0.2:
   version "7.0.2"
   resolved "https://registry.npmmirror.com/rollup-plugin-terser/-/rollup-plugin-terser-7.0.2.tgz#e8fbba4869981b2dc35ae7e8a502d5c6c04d324d"
@@ -12481,7 +12549,18 @@ rollup-plugin-terser@^7.0.0, rollup-plugin-terser@^7.0.2:
     serialize-javascript "^4.0.0"
     terser "^5.0.0"
 
-rollup@^2.43.1, rollup@^2.79.1:
+rollup-plugin-typescript2@^0.34.1:
+  version "0.34.1"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-typescript2/-/rollup-plugin-typescript2-0.34.1.tgz#c457f155a71d133c142689213fce78694e30d0be"
+  integrity sha512-P4cHLtGikESmqi1CA+tdMDUv8WbQV48mzPYt77TSTOPJpERyZ9TXdDgjSDix8Fkqce6soYz3+fa4lrC93IEkcw==
+  dependencies:
+    "@rollup/pluginutils" "^4.1.2"
+    find-cache-dir "^3.3.2"
+    fs-extra "^10.0.0"
+    semver "^7.3.7"
+    tslib "^2.4.0"
+
+rollup@^2.43.1, rollup@^2.56.4:
   version "2.79.1"
   resolved "https://registry.npmmirror.com/rollup/-/rollup-2.79.1.tgz#bedee8faef7c9f93a2647ac0108748f497f081c7"
   integrity sha512-uKxbd0IhMZOhjAiD5oAFp7BqvkA4Dv47qpOCtaNvng4HBwdbWtdOh8f5nZNuk2rp51PMGk3bzfWu5oayNEuYnw==
@@ -13915,6 +13994,11 @@ vega-canvas@^1.2.5, vega-canvas@^1.2.6:
   resolved "https://registry.yarnpkg.com/vega-canvas/-/vega-canvas-1.2.6.tgz#55e032ce9a62acd17229f6bac66d99db3d6879cd"
   integrity sha512-rgeYUpslYn/amIfnuv3Sw6n4BGns94OjjZNtUc9IDji6b+K8LGS/kW+Lvay8JX/oFqtulBp8RLcHN6QjqPLA9Q==
 
+vega-canvas@^1.2.7:
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/vega-canvas/-/vega-canvas-1.2.7.tgz#cf62169518f5dcd91d24ad352998c2248f8974fb"
+  integrity sha512-OkJ9CACVcN9R5Pi9uF6MZBF06pO6qFpDYHWSKBJsdHP5o724KrsgR6UvbnXFH82FdsiTOff/HqjuaG8C7FL+9Q==
+
 vega-crossfilter@~4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/vega-crossfilter/-/vega-crossfilter-4.1.0.tgz#b6c5a728ce987f2514074adb22cf86b9bc63e0c8"
@@ -14004,6 +14088,17 @@ vega-format@^1.0.4, vega-format@^1.1.0, vega-format@~1.1.0:
     vega-time "^2.0.3"
     vega-util "^1.15.2"
 
+vega-format@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/vega-format/-/vega-format-1.1.1.tgz#92e4876e18064e7ad54f39045f7b24dede0030b8"
+  integrity sha512-Rll7YgpYbsgaAa54AmtEWrxaJqgOh5fXlvM2wewO4trb9vwM53KBv4Q/uBWCLK3LLGeBXIF6gjDt2LFuJAUtkQ==
+  dependencies:
+    d3-array "^3.2.2"
+    d3-format "^3.1.0"
+    d3-time-format "^4.1.0"
+    vega-time "^2.1.1"
+    vega-util "^1.17.1"
+
 vega-functions@^5.12.1, vega-functions@^5.13.0, vega-functions@~5.13.0:
   version "5.13.0"
   resolved "https://registry.yarnpkg.com/vega-functions/-/vega-functions-5.13.0.tgz#c9ab8c6eedbf39f75b424cca6776b1d0b8c74b32"
@@ -14086,6 +14181,17 @@ vega-loader@^4.3.2, vega-loader@^4.4.0, vega-loader@~4.5.0:
     vega-format "^1.1.0"
     vega-util "^1.16.0"
 
+vega-loader@^4.5.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/vega-loader/-/vega-loader-4.5.1.tgz#b85262b3cb8376487db0c014a8a13c3a5e6d52ad"
+  integrity sha512-qy5x32SaT0YkEujQM2yKqvLGV9XWQ2aEDSugBFTdYzu/1u4bxdUSRDREOlrJ9Km3RWIOgFiCkobPmFxo47SKuA==
+  dependencies:
+    d3-dsv "^3.0.1"
+    node-fetch "^2.6.7"
+    topojson-client "^3.1.0"
+    vega-format "^1.1.1"
+    vega-util "^1.17.1"
+
 vega-parser@~6.1.4:
   version "6.1.4"
   resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-6.1.4.tgz#4868e41af2c9645b6d7daeeb205cfad06b9d465c"
@@ -14134,45 +14240,28 @@ vega-scale@^7.0.3, vega-scale@^7.1.1, vega-scale@^7.2.0, vega-scale@~7.2.0:
     vega-time "^2.1.0"
     vega-util "^1.17.0"
 
-vega-scenegraph@^4.10.0:
-  version "4.10.1-kanaries-patch"
+vega-scale@^7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/vega-scale/-/vega-scale-7.3.0.tgz#02b83435a892c6d91a87ee7d3d350fac987f464b"
+  integrity sha512-pMOAI2h+e1z7lsqKG+gMfR6NKN2sTcyjZbdJwntooW0uFHwjLGjMSY7kSd3nSEquF0HQ8qF7zR6gs1eRwlGimw==
   dependencies:
-    d3-path "^3.0.1"
-    d3-shape "^3.1.0"
-    vega-canvas "^1.2.5"
-    vega-loader "^4.4.0"
-    vega-scale "^7.2.0"
-    vega-util "^1.15.2"
+    d3-array "^3.2.2"
+    d3-interpolate "^3.0.1"
+    d3-scale "^4.0.2"
+    vega-time "^2.1.1"
+    vega-util "^1.17.1"
 
-vega-scenegraph@^4.9.2:
-  version "4.10.1-kanaries-patch"
+vega-scenegraph@^4.10.0, vega-scenegraph@^4.9.2, vega-scenegraph@^4.9.3, vega-scenegraph@~4.10.1:
+  version "4.10.2"
+  resolved "https://registry.yarnpkg.com/vega-scenegraph/-/vega-scenegraph-4.10.2.tgz#3ae9ad8e99bbf75e2a4f3ebf2c1f9dee7562d245"
+  integrity sha512-R8m6voDZO5+etwNMcXf45afVM3XAtokMqxuDyddRl9l1YqSJfS+3u8hpolJ50c2q6ZN20BQiJwKT1o0bB7vKkA==
   dependencies:
-    d3-path "^3.0.1"
-    d3-shape "^3.1.0"
-    vega-canvas "^1.2.5"
-    vega-loader "^4.4.0"
-    vega-scale "^7.2.0"
-    vega-util "^1.15.2"
-
-vega-scenegraph@^4.9.3:
-  version "4.10.1-kanaries-patch"
-  dependencies:
-    d3-path "^3.0.1"
-    d3-shape "^3.1.0"
-    vega-canvas "^1.2.5"
-    vega-loader "^4.4.0"
-    vega-scale "^7.2.0"
-    vega-util "^1.15.2"
-
-vega-scenegraph@~4.10.1:
-  version "4.10.1-kanaries-patch"
-  dependencies:
-    d3-path "^3.0.1"
-    d3-shape "^3.1.0"
-    vega-canvas "^1.2.5"
-    vega-loader "^4.4.0"
-    vega-scale "^7.2.0"
-    vega-util "^1.15.2"
+    d3-path "^3.1.0"
+    d3-shape "^3.2.0"
+    vega-canvas "^1.2.7"
+    vega-loader "^4.5.1"
+    vega-scale "^7.3.0"
+    vega-util "^1.17.1"
 
 vega-schema-url-parser@^2.2.0:
   version "2.2.0"
@@ -14208,6 +14297,15 @@ vega-time@^2.0.3, vega-time@^2.1.0, vega-time@~2.1.0:
     d3-array "^3.1.1"
     d3-time "^3.0.0"
     vega-util "^1.15.2"
+
+vega-time@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/vega-time/-/vega-time-2.1.1.tgz#0f1fb4e220dd5ed57401b58fb2293241f049ada0"
+  integrity sha512-z1qbgyX0Af2kQSGFbApwBbX2meenGvsoX8Nga8uyWN8VIbiySo/xqizz1KrP6NbB6R+x5egKmkjdnyNThPeEWA==
+  dependencies:
+    d3-array "^3.2.2"
+    d3-time "^3.1.0"
+    vega-util "^1.17.1"
 
 vega-tooltip@^0.28.0:
   version "0.28.0"

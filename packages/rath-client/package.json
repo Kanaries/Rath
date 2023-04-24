@@ -84,7 +84,7 @@
     "build:renderer": "yarn workspace vega-painter-renderer build",
     "start": "react-app-rewired start",
     "build": "npm run build:utils && npm run build:scenegraph && npm run build:renderer && npm run build:client",
-    "build:client": "GENERATE_SOURCEMAP=false react-app-rewired build --max_old_space_size=8000 build",
+    "build:client": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8000 build",
     "buildForAnalysis": "react-app-rewired build",
     "test": "jest -c ./jest.config.js --passWithNoTests --no-cache",
     "eject": "react-app-rewired eject",
