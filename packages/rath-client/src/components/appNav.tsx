@@ -202,7 +202,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         <NavContainer>
             <LogoBar>
                 <a
-                    href={`${window.location.protocol}//rath.${window.location.host.split('.').slice(-2).join('.')}/`}
+                    href={`${window.location.protocol}//${window.location.host.split('.').slice(-2).join('.')}/`}
                     target="_blank"
                     rel="noreferrer"
                 >
