@@ -59,6 +59,8 @@ Get started with RATH now!
 
 - 🛠 [Copilot for Data Exploration](https://docs.kanaries.net/rath/explore-data/data-exploration-copilot): RATH will work as your copilot in data science, learn your intends and generate relevant recommendations.
 
+- Natural Language interface: Ask questions in natural language to get answers/visualizations from your data.
+
 + AutoVis: Auto-generated multi-dimensional data visualization based on the effectiveness score.
 
 - 👓 [Data Wrangler](https://docs.kanaries.net/rath/prepare-data/extract-text-patterns): Automated data wrangler for generating summary of the data and data transformation.
@@ -82,20 +84,29 @@ Get started with RATH now!
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/data-profiling-readme.gif)](https://docs.kanaries.net/rath/prepare-data/data-profiling#data-profiling-with-rath)
 
 ### Data Preparation
+
 RATH support data preparation with black magic like predictive transformation operations. It will automatically generate suggestions of transformations and cleaning, etc.
 
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/text-pattern-general.gif)](https://docs.kanaries.net/rath/prepare-data/data-transformation)
 
 ### One-click automated data analysis with visualizations
 
+Augmented analytic engine for discovering patterns, insights, and causals. A fully-automated way to explore and visualize dataset with one click.
+
 
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/autopilot.gif)](https://docs.kanaries.net/rath/explore-data/automated-data-insight)
 
-### Use RATH as your AI Copilot in Data Analysis
+### Use RATH as your Copilot in Data Analysis
 
-Assisted with AI, RATH can help you with your data analysis. Just provide RATH with some input and it will learn about your interests and suggest analysis directions to take.
+RATH will work as your copilot in data science, learn your intends and generate relevant recommendations.
 
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/copilot.gif)](https://docs.kanaries.net/rath/explore-data/data-exploration-copilot)
+
+### Ask about your data
+
+Ask questions about your data, RATH integrates with GPT to generate answers and visualizations.
+
+![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/ask-rath.gif)
 
 ### Manually explore your data with drag and drop:
 
