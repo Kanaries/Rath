@@ -49,7 +49,7 @@
 ## Get started
 
 Get started with RATH now!
-- 🚀 [Online RATH / Demo](https://rath.kanaries.net)
+- 🚀 [Sandbox demo for parts of features](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
 - [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
