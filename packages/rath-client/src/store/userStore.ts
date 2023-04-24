@@ -1,5 +1,6 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
+import va from '@vercel/analytics';
 import { DataSourceType, IAccessPageKeys, ICreateDashboardConfig, ICreateDatasetPayload, ICreateDatasetResult, ICreateDataSourcePayload, ICreateDataSourceResult, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
@@ -202,7 +203,12 @@ export default class UserStore {
     public async updateAuthStatus() {
         try {
             const url = getMainServiceAddress('/api/loginStatus');
-            const res = await request.get<{}, { loginStatus: boolean; userName: string }>(url);
+            const res = await request.get<{}, { loginStatus: boolean; userName: string; userId: string }>(url);
+            va.track('login_status', {
+                loginStatus: res.loginStatus,
+                userName: res.userName,
+                userId: res.userId,
+            })
             return res.loginStatus;
         } catch (error) {
             notify({

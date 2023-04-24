@@ -16,15 +16,17 @@ import {
 import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
-import { Item, ScenegraphEvent } from 'vega';
+import { Item, ScenegraphEvent, renderModule } from 'vega';
 import intl from 'react-intl-universal';
+//@ts-ignore
+import { PainterModule, paint, startPaint, stopPaint } from 'vega-painter-renderer';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { viewSampling } from '../../lib/stat/sampling';
 import { Card } from '../../components/card';
-import { batchMutInCatRange, batchMutInCircle, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
+import { isContinuous, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
@@ -32,6 +34,8 @@ import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
 import CanvasContainer from './canvasContainer';
+
+renderModule('painter', PainterModule);
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -157,173 +161,135 @@ const Painter: React.FC = (props) => {
             // @ts-ignore
             embed(container.current, painterSpec, {
                 actions: painterMode === PAINTER_MODE.MOVE,
+                renderer: 'painter',
             }).then((res) => {
+                let changes = vega.changeset();
+                let removes = new Set();
                 res.view.change(
                     'dataSource',
-                    vega
-                        .changeset()
+                    changes
                         .remove(() => true)
                         .insert(viewData)
-                );
+                ).runAsync().then((view) => {
+                    // if (testConfig.printLog) { window.console.log("changes =", changes); }
+                });
+
+                
                 setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
+                // if(testConfig.printLog) {
+                //     res.view.addDataListener('dataSource', (name, value) => {
+                //         window.console.log("dataListener", name, value);
+                //         window.console.log(testConfig);
+                //     })
+                // }
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;
                 const yFieldType = painterSpec.encoding.y.type as ISemanticType;
+                const isContX = isContinuous(xFieldType), isContY = isContinuous(yFieldType);
                 const limitFields: string[] = [];
                 if (painterSpec.encoding.column) limitFields.push(painterSpec.encoding.column.field);
                 if (painterSpec.encoding.row) limitFields.push(painterSpec.encoding.row.field);
-                if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
-                    const xRange = getRange(viewData.map((r) => r[xField]));
-                    const yRange = getRange(viewData.map((r) => r[yField]));
-                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+
+                const [rotXField, rotYField] = !isContX ? [yField, xField] : [xField, yField];
+                const [rotIsContX, rotIsContY] = !isContX ? [isContY, isContX] : [isContX, isContY];
+                let hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                    // window.console.warn('hdr case', [xFieldType, yField], 'not implemented');
+                };
+                if (rotIsContX && rotIsContY) {
+                    const xRange = getRange(viewData.map((r) => r[rotXField]));
+                    const yRange = getRange(viewData.map((r) => r[rotYField]));
+                    hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
                         // @ts-ignore
                         if (!isPainting.current && e.vegaType !== 'touchmove') return;
+                        startPaint(res.view);
                         if (painting && item && item.datum) {
-                            const { mutIndices, mutValues } = batchMutInCircle({
-                                mutData: viewData,
-                                fields: [xField, yField],
-                                point: [item.datum[xField], item.datum[yField]],
-                                a: xRange[1] - xRange[0],
-                                b: yRange[1] - yRange[0],
-                                r: painterSize / 2,
-                                key: LABEL_FIELD_KEY,
-                                indexKey: LABEL_INDEX,
-                                value: mutFeatValues[mutFeatIndex],
-                                datum: item.datum,
+                            let limits: { [key: string]: any } = {};
+                            for (let f of limitFields) {
+                                limits[f] = item.datum[f];
+                            }
+                            /** directly setting 'fill' of scenegraph */
+                            const result = paint({
+                                view: res.view,
                                 painterMode,
-                                limitFields
-                            });
-                            if (painterMode === PAINTER_MODE.COLOR) {
-                                linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
-                            } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
-                            }
-                        }
-                    };
-                    res.view.addEventListener('mousedown', () => {
-                        isPainting.current = true;
-                    });
-                    res.view.addEventListener('mouseup', () => {
-                        isPainting.current = false;
-                    });
-                    res.view.addEventListener('mousemove', hdr);
-                    res.view.addEventListener('touchmove', hdr);
-                } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
-                    const yRange = getRange(viewData.map((r) => r[yField]));
-                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        // @ts-ignore
-                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
-                        if (painting && item && item.datum) {
-                            const { mutIndices, mutValues } = batchMutInCatRange({
-                                mutData: viewData,
-                                fields: [xField, yField],
-                                point: [item.datum[xField], item.datum[yField]],
-                                r: painterSize / 2,
-                                key: LABEL_FIELD_KEY,
-                                range: yRange[1] - yRange[0],
+                                fields: [rotXField, rotYField],
+                                point: [item.datum[rotXField], item.datum[rotYField]],
+                                radius: painterSize / 2,
+                                range: [xRange[1] - xRange[0], yRange[1] - yRange[0]],
+                                limits: limits,
+                                groupValue: mutFeatValues[mutFeatIndex],
                                 indexKey: LABEL_INDEX,
-                                value: mutFeatValues[mutFeatIndex],
+                                newColor:  COLOR_CELLS[mutFeatIndex].color,
                             });
+                            const { mutIndices, mutValues, view } = result;
+                            res.view = view;
                             if (painterMode === PAINTER_MODE.COLOR) {
-                                linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
+                                changes = changes
+                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    .insert(mutValues)
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                changes = changes
+                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                for (let i of mutIndices) removes.add(i);
                             }
                         }
                     };
-                    res.view.addEventListener('mousedown', () => {
-                        isPainting.current = true;
-                    });
-                    res.view.addEventListener('mouseup', () => {
-                        isPainting.current = false;
-                    });
-                    res.view.addEventListener('mousemove', hdr);
-                    res.view.addEventListener('touchmove', hdr);
-                } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
-                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                } else if (rotIsContX && !rotIsContY) {
+                    const xRange = getRange(viewData.map((r) => r[rotXField]));
+                    hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
                         // @ts-ignore
                         if (!isPainting.current && e.vegaType !== 'touchmove') return;
+                        startPaint(res.view);
                         if (painting && item && item.datum) {
-                            const xRange = getRange(viewData.map((r) => r[xField]));
-                            const { mutIndices, mutValues } = batchMutInCatRange({
-                                mutData: viewData,
-                                fields: [yField, xField],
-                                point: [item.datum[yField], item.datum[xField]],
-                                r: painterSize / 2,
+                            const { mutIndices, mutValues, view } = paint({
+                                view: res.view,
+                                painterMode,
+                                fields: [rotXField, rotYField],
+                                point: [item.datum[rotXField], item.datum[rotYField]],
+                                radius: painterSize / 2,
                                 range: xRange[1] - xRange[0],
-                                key: LABEL_FIELD_KEY,
+                                groupValue: mutFeatValues[mutFeatIndex],
                                 indexKey: LABEL_INDEX,
-                                value: mutFeatValues[mutFeatIndex],
+                                newColor: COLOR_CELLS[mutFeatIndex].color,
                             });
+                            res.view = view;
                             if (painterMode === PAINTER_MODE.COLOR) {
-                                linkNearViz();
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega
-                                            .changeset()
-                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                            .insert(mutValues)
-                                    )
-                                    .runAsync();
+                                changes = changes
+                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                        .insert(mutValues)
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view
-                                    .change(
-                                        'dataSource',
-                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    )
-                                    .runAsync();
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                changes = changes.remove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                                for (let i of mutIndices) removes.add(i);
                             }
                         }
                     };
-                    res.view.addEventListener('mousedown', () => {
-                        isPainting.current = true;
-                    });
-                    res.view.addEventListener('mouseup', () => {
-                        isPainting.current = false;
-                    });
-                    res.view.addEventListener('mousemove', hdr);
-                    res.view.addEventListener('touchmove', hdr);
                 }
+                // else { /** !rotIsContX && !rotIsContY */ }
+                res.view.addEventListener('mousedown', (e) => {
+                    isPainting.current = true;
+                    startPaint(res.view);
+                });
+                res.view.addEventListener('mouseup', () => {
+                    isPainting.current = false;
+                    stopPaint(res.view);
+                    const curRemoves = removes, curChanges = changes;
+                    removes = new Set();
+                    changes = vega.changeset();
+                    res.view.change('dataSource', curChanges).runAsync().then((view) => {
+                        linkNearViz();
+                        maintainViewDataRemove((r: any) => curRemoves.has(r[LABEL_INDEX]));
+                    })
+                });
+                // TODO: use renderer to check nearest points
+                // res.view.addEventListener('gl_mousemove', hdr);
+                // res.view.addEventListener('gl_touchmove', hdr);
+                res.view.addEventListener('mousemove', hdr);
+                res.view.addEventListener('touchmove', hdr);
                 res.view.resize();
                 res.view.runAsync();
             });

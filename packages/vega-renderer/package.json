@@ -1,0 +1,40 @@
+{
+  "name": "vega-painter-renderer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/vega-painter-renderer.js",
+  "module": "dist/vega-painter-renderer.module.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "rollup -cw",
+    "build": "rm -rf dist && rollup -c"
+  },
+  "license": "",
+  "devDependencies": {
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.19.3",
+    "@babel/plugin-transform-runtime": "^7.19.1",
+    "@babel/preset-env": "^7.19.3",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "rollup": "^2.79.1",
+    "ts-lib": "^0.0.5",
+    "typescript": "^5.0.4",
+    "vega-typings": "^0.24.0"
+  },
+  "dependencies": {
+    "@babel/runtime-corejs3": "^7.19.4",
+    "@kanaries/rath-utils": "1.0.0",
+    "d3-color": "*",
+    "d3-shape": "*",
+    "extrude-polyline": "^1.0.6",
+    "parse-svg-path": "^0.1.2",
+    "simplify-path": "^1.1.0",
+    "svg-path-contours": "^2.0.0",
+    "triangulate-contours": "^1.0.2",
+    "vega-scenegraph": "4.10.1-kanaries-patch"
+  },
+  "browserslist": "> 0.25%, not dead"
+}
