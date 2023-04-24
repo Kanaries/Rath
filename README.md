@@ -1,4 +1,4 @@
-![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/rath-main-banner.png)
+![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/rath-main-banner2.png)
 
 <div id="header" align="center">
   <div id="badges">
@@ -61,7 +61,7 @@ Get started with RATH now!
 
 - Natural Language interface: Ask questions in natural language to get answers/visualizations from your data.
 
-+ AutoVis: Auto-generated multi-dimensional data visualization based on the effectiveness score.
++ AutoVis: RATH will generate the best visualization for the data you selected. It makes you focus on data and variables, not how to make a visualization.
 
 - 👓 [Data Wrangler](https://docs.kanaries.net/rath/prepare-data/extract-text-patterns): Automated data wrangler for generating summary of the data and data transformation.
 
