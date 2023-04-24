@@ -79,7 +79,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "GENERATE_SOURCEMAP=false react-app-rewired build --max_old_space_size=8000 build",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8000 build",
     "build2": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8000 build",
     "buildForAnalysis": "react-app-rewired build",
     "test": "jest -c ./jest.config.js --passWithNoTests --no-cache",
