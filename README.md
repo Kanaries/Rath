@@ -41,7 +41,7 @@
 
 ## Introduction
 
-[**RATH**](https://kanaries.net) is a cutting-edge software solution designed to enhance your data analysis and visualization capabilities, providing an open-source alternative to tools like Tableau. With its powerful Augmented Analytic engine, RATH automates your exploratory data analysis workflow by identifying patterns, insights, and causal relationships, and presenting these insights through advanced multi-dimensional data visualization. Say goodbye to tedious manual data analysis and hello to faster, more insightful decision-making with RATH.
+**RATH** is not just an open-source alternative to Data Analysis and Visualization tools such as Tableau, but it automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
 <a href="https://kanaries.net"><img src="https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/demo.gif
 " alt="RATH features demo"></a>
@@ -54,24 +54,20 @@ Get started with RATH now!
 - [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
-## Table of contents
-
-[Feature highlights](#features) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Project Status](#project-status) | [Community](#community) | [Contributions](#contributions) 
-
 ## Features
-+ 🤖 [AutoPilot](https://docs.kanaries.net/rath/explore-data/automated-data-insight): Augmented analytic engine for discovering patterns, insights, and causals. Autopilot is a fully-automated way to explore your data set and visualize your data with one click.
++ 🤖 [AutoPilot for Data Exploration](https://docs.kanaries.net/rath/explore-data/automated-data-insight): Get Insights with One Click! Augmented analytic engine for discovering patterns, insights, and causals. A fully-automated way to explore and visualize dataset with one click.
+
+- 🛠 [Copilot for Data Exploration](https://docs.kanaries.net/rath/explore-data/data-exploration-copilot): RATH will work as your copilot in data science, learn your intends and generate relevant recommendations.
 
 + AutoVis: Auto-generated multi-dimensional data visualization based on the effectiveness score.
 
-- 👓 [Data Wrangler](https://docs.kanaries.net/rath/connect-your-data): Automated data wrangler for generating summary of the data and data transformation.
-
-- 🛠 [Copilot](https://docs.kanaries.net/rath/explore-data/data-exploration-copilot): Combines automated data exploration and manual exploration. RATH will work as your copilot in data science, learn your interests and uses augmented analytics engine to generate relevant recommendations for you.
+- 👓 [Data Wrangler](https://docs.kanaries.net/rath/prepare-data/extract-text-patterns): Automated data wrangler for generating summary of the data and data transformation.
 
 - 🎨 [Data Painter](https://docs.kanaries.net/rath/explore-data/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. Watch [this video](https://youtu.be/djqePNyhz7w) demonstrating about how to discover data insights with Data Painter.
 
 - :bar_chart: Dashboard: build a beautiful interactive data dashboard (including a automated dashboard designer which can provide suggestions to your dashboard).
 
-- :construction: Causal Analysis: Provide causal discovery and explanations for complex relation analysis.
+- Causal Analysis: Identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
 
 
 ## Walkthroughs
@@ -162,7 +158,7 @@ RATH software is in open alpha stage. We are working on improving its code and d
 
 If you are using RATH for your project(s), please let us know what are you using it for by emailing us at  [support@kanaries.org](support@kanaries.org). Feedbacks are also welcomed. If you find a bug or have a feature request, please create an issue.
 
-We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. RATH Docs are scripted and maintained by technical writers and editors who collectively follow a standardized [style guide](https://docs.kanaries.net/community/documentation-style-guide) to produce clear and consistent documentation.
+We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. 
 
 ## Project Status
 
@@ -202,9 +198,7 @@ Thanks to all contributors :heart:
 </a>
 
 ## LICENSE (AGPL)
-Rath is an automated data analysis and visualization tool (auto-EDA).
-
-See LICENSE and LICENSE2 for details.
+Rath is an automated data analysis and visualization tool (auto-EDA). It is a free and open-source software licensed under the AGPL.
 
 ---
 
