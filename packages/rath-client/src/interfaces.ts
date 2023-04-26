@@ -57,6 +57,7 @@ export type FieldExtSuggestion = {
 interface IFieldBase {
     fid: string;
     name?: string;
+    comment?: string;
     analyticType: IAnalyticType;
     semanticType: ISemanticType;
     geoRole: IGeoRole;
@@ -325,6 +326,7 @@ export interface IDatasetFieldMeta {
     analyticType: IAnalyticType;
     geoRole: IGeoRole;
     features: IFieldMeta['features'];
+    comment?: string;
 }
 
 export interface IDataSourceMeta {
@@ -352,6 +354,7 @@ export type ICreateDatasetPayload = {
     /** bytes */
     size: number;
     totalCount: number;
+    comment?: string;
     meta: IDatasetFieldMeta[];
 };
 
@@ -367,6 +370,7 @@ export type IDatasetMeta = {
     type: CloudAccessModifier;
     size: number;
     totalCount: number;
+    comment?: string;
     meta: IDatasetFieldMeta[];
     datasource: {
         id: string;

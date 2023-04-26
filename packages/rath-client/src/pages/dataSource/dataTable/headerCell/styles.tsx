@@ -78,6 +78,17 @@ export const HeaderCellContainer = styled.div`
             flex-grow: 0;
         }
     }
+    .comment-row {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        color: #666666aa;
+        line-height: 1.5em;
+        height: 1.5em;
+        padding-inline: 0.1em;
+        margin-bottom: 0.6em;
+    }
     .checkbox-container {
         display: flex;
         align-items: center;

@@ -246,6 +246,7 @@ const DataTable: React.FC = (props) => {
                 <HeaderCell
                     disable={Boolean(f.disable)}
                     name={f.name || f.fid}
+                    comment={f.comment ?? ''}
                     code={f.fid}
                     meta={fm || null}
                     onChange={updateFieldInfo}

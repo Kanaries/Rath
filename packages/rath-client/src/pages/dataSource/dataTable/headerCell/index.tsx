@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { IconButton } from '@fluentui/react';
+import { DirectionalHint, IconButton, TooltipHost } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../../metaView/distChart';
 import DropdownSelect from '../../../../components/dropDownSelect';
@@ -25,6 +25,7 @@ interface HeaderCellProps {
     name: string;
     code: string;
     disable: boolean;
+    comment: string;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
     meta: IFieldMeta | null;
     extSuggestions: FieldExtSuggestion[];
@@ -75,7 +76,7 @@ function useFocus() {
 
 const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const { dataSourceStore, commonStore, semiAutoStore } = getGlobalStore();
-    const { name, code, meta, disable, onChange, extSuggestions, isExt, colType } = props;
+    const { name, code, meta, disable, onChange, extSuggestions, isExt, colType, comment } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const { focus, endFocus, startFocus, toggleFocus, setFocus } = useFocus();
     const optionsOfBIFieldType = useBIFieldTypeOptions();
@@ -154,12 +155,21 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                             </>
                         )}
                     </div>
+                    <TooltipHost content={comment} directionalHint={DirectionalHint.bottomLeftEdge}>
+                        <p className="comment-row">
+                            {comment}
+                        </p>
+                    </TooltipHost>
                     <ColNameEditor
                         defaultName={name}
                         setShowNameEditor={setShowNameEditor}
                         showNameEditor={showNameEditor}
                         onNameUpdate={(newName) => {
                             onChange && onChange(code, 'name', newName);
+                        }}
+                        defaultComment={comment}
+                        onCommentUpdate={(newComment) => {
+                            onChange && onChange(code, 'comment', newComment);
                         }}
                     />
                 </div>
