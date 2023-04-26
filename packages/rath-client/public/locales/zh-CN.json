@@ -55,7 +55,8 @@
             "notFound": "未找到匹配结果"
         },
         "list": "列表",
-        "gallery": "预览"
+        "gallery": "预览",
+        "aggregation": "聚合"
     },
     "menu": {
         "dataSource": "数据准备",
