@@ -100,7 +100,7 @@ const EncodeCreationPill: React.FC<EncodeCreationPillProps> = (props) => {
                             </Stack.Item>
                             <Stack.Item>
                                 <Dropdown
-                                    label='聚合方式'
+                                    label={intl.get('common.aggregation')}
                                     options={aggregatorOptions}
                                     selectedKey={encode.aggregate}
                                     onChange={(e, op) => {

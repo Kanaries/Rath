@@ -55,7 +55,8 @@
             "notFound": "No results found"
         },
         "list": "List",
-        "gallery": "Gallery"
+        "gallery": "Gallery",
+        "aggregation": "Aggregation"
     },
     "menu": {
         "dataSource": "DataSource",
