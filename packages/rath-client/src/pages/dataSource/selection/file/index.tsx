@@ -88,7 +88,11 @@ const FileData: FC<FileDataProps> = (props) => {
     const [excelRange, setExcelRange] = useState<[[number, number], [number, number]]>([[0, 0], [0, 0]]);
 
     useEffect(() => {
-        setSelectedSheetIdx(-1);
+        if (excelFile && excelFile.SheetNames.length > 0) {
+            setSelectedSheetIdx(0)
+        } else {
+            setSelectedSheetIdx(-1);
+        }
     }, [excelFile]);
 
     const filePreviewPendingRef = useRef<Promise<unknown>>();
@@ -102,7 +106,7 @@ const FileData: FC<FileDataProps> = (props) => {
             setPreviewOfFull(null);
             setPreviewOfFile(null);
             setExcelFile(false);
-            toggleLoadingAnimation(true);
+            // toggleLoadingAnimation(true);
             if (isExcelFile(preview)) {
                 const p = parseExcelFile(preview);
                 filePreviewPendingRef.current = p;
@@ -114,7 +118,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 }).catch(() => {
                     inputRef.current?.reset();
                 }).finally(() => {
-                    toggleLoadingAnimation(false);
+                    // toggleLoadingAnimation(false);
                 });
                 return;
             }
@@ -141,7 +145,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 onLoadingFailed(reason);
                 inputRef.current?.reset();
             }).finally(() => {
-                toggleLoadingAnimation(false);
+                // toggleLoadingAnimation(false);
             });
         } else {
             setPreviewOfRaw(null);
@@ -161,7 +165,7 @@ const FileData: FC<FileDataProps> = (props) => {
             setExcelRef(rangeRef);
             setExcelRange(rangeRef);
             filePreviewPendingRef.current = undefined;
-            toggleLoadingAnimation(true);
+            // toggleLoadingAnimation(true);
             const p = Promise.allSettled([
                 loadExcelRaw(excelFile, selectedSheetIdx, 4096, 64, 128),
                 loadExcelFile(excelFile, selectedSheetIdx, charset),
@@ -177,7 +181,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 onLoadingFailed(reason);
                 inputRef.current?.reset();
             }).finally(() => {
-                toggleLoadingAnimation(false);
+                // toggleLoadingAnimation(false);
             });
         }
     }, [excelFile, onLoadingFailed, selectedSheetIdx, toggleLoadingAnimation, charset]);
@@ -186,7 +190,7 @@ const FileData: FC<FileDataProps> = (props) => {
         if (excelFile && previewOfFull) {
             setPreviewOfFile(null);
             filePreviewPendingRef.current = undefined;
-            toggleLoadingAnimation(true);
+            // toggleLoadingAnimation(true);
             const p = loadExcelFile(excelFile, selectedSheetIdx, charset, excelRange);
             filePreviewPendingRef.current = p;
             p.then(res => {
@@ -197,7 +201,7 @@ const FileData: FC<FileDataProps> = (props) => {
             }).catch(reason => {
                 onLoadingFailed(reason);
             }).finally(() => {
-                toggleLoadingAnimation(false);
+                // toggleLoadingAnimation(false);
             });
         }
     }, [charset, excelFile, excelRange, onLoadingFailed, previewOfFull, selectedSheetIdx, toggleLoadingAnimation]);
@@ -271,16 +275,16 @@ const FileData: FC<FileDataProps> = (props) => {
                 previewOfFile={previewOfFile}
                 onFileUpload={handleFileLoad}
             />
-            {preview ? (
-                previewOfFile && (
-                    <div className="action">
-                        <PrimaryButton
-                            text={intl.get('dataSource.importData.load')}
-                            onClick={handleFileSubmit}
-                        />
-                    </div>
-                )
-            ) : (
+            {preview && (
+                <div className="action">
+                    <PrimaryButton
+                        text={intl.get('dataSource.importData.load')}
+                        disabled={!previewOfFile}
+                        onClick={handleFileSubmit}
+                    />
+                </div>
+            )}
+            {!preview && (
                 <>
                     <header>{intl.get('dataSource.upload.history')}</header>
                     <HistoryList
