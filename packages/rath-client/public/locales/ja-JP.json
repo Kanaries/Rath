@@ -1,0 +1,816 @@
+{
+    "common": {
+        "dimension": "ディメンション",
+        "measure": "メジャー",
+        "name": "名前",
+        "home": "ホーム",
+        "settings": "設定",
+        "history": "履歴",
+        "hide": "非表示",
+        "expand": "拡張",
+        "filter": "絞り込み",
+        "preview": "プレビュー",
+        "source": "データ源",
+        "submit": "完了",
+        "cancel": "キャンセル",
+        "apply": "適用",
+        "applied": "適用済み",
+        "run": "実行",
+        "edit": "編集",
+        "suggestions": "提案",
+        "showMore": "続きを表示",
+        "return": "もどる",
+        "semanticType": {
+            "nominal": "文字列",
+            "ordinal": "序数",
+            "temporal": "時間型",
+            "quantitative": "数値"
+        },
+        "analyticType": {
+            "dimension": "ディメンション",
+            "measure": "メジャー"
+        },
+        "vistheme": "可視化テーマ",
+        "addVar": "新規要素",
+        "addFilter": "新規フィルター",
+        "addEncode": "新規計算",
+        "field": "要素",
+        "star": "お気に入り",
+        "stat": {
+            "unique": "ユニーク",
+            "min": "最小値",
+            "max": "最大値",
+            "mean": "平均",
+            "median": "中央値",
+            "stdev": "標準偏差",
+            "count": "カウント",
+            "sum": "合計",
+            "qt_25": "第25パーセンタイル",
+            "qt_75": "第75パーセンタイル",
+            "qt_50": "中央値"
+        },
+        "search": {
+            "searchViews": "ビューを検索",
+            "searchFields": "変数を検索",
+            "notFound": "該当結果なし"
+        },
+        "list": "リスト",
+        "gallery": "ギャラリー"
+    },
+    "menu": {
+        "dataSource": "データソース",
+        "eda": "探索的データ分析",
+        "editor": "データ探索",
+        "vizPipe": "インタラクティブ パイプライン",
+        "support": "サポート",
+        "megaAuto": "データ オートーパイロット",
+        "semiAuto": "データ コーパイロット",
+        "devCollection": "インサイダー(α)",
+        "dashBoardDesigner": "ダッシュボード デザイナー",
+        "painter": "データ ペインター",
+        "collection": "コレクション",
+        "dashboard": "ダッシュボード",
+        "causal": "因果分析",
+        "connection": "データ接続"
+    },
+    "preference": {
+        "title": "環境設定",
+        "config": "コンフィグ"
+    },
+    "support": {
+        "title": "How to Get Support",
+        "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
+    },
+    "config": {
+        "computationEngine": {
+            "title": "計算エンジン",
+            "desc": "分析任務の実行先を決める。データセットのサイズが 100MB 以下の場合は Web Worker モードがおすすめです。反対に ClickHouse モードを試してください。",
+            "clickhouse": "ClickHouse",
+            "webworker": "ブラウザ（Web Worker）",
+            "notCompatible": "データソースと互換性がありません"
+        },
+        "analysisConfig": "分析設定",
+        "cubeStorageManageMode": {
+            "title": "キューブのストレージ管理モード",
+            "desc": "キューブがキュボイドをどのように格納するか。"
+        }
+    },
+    "function": {
+        "confirm": "確認",
+        "cancel": "キャンセル",
+        "analysis": {
+            "start": "解析を開始する",
+            "checkResult": "既存の結果を確認する",
+            "pattern": "セミオート探索",
+            "manual": "マニュアル探索",
+            "causal": "因果分析"
+        },
+        "importStorage": {
+            "title": "履歴ストレージをインポートする",
+            "desc": "Rath からエクスポートされた Rath 履歴記録を含む Rath ストレージファイルをインポートします。",
+            "type": {
+                "file": "ファイル",
+                "indexdb": "ローカルストレージ"
+            },
+            "storageColumns": {
+                "name": "名前",
+                "createTime": "作成日時",
+                "size": "サイズ",
+                "operation": "操作"
+            }
+        },
+        "exportStorage": {
+            "title": "Rathストレージのエクスポート",
+            "type": {
+                "file": "ファイル",
+                "indexdb": "インデックスDB"
+            }
+        },
+        "save": {
+            "title": "保存"
+        },
+        "upload": "アップロード"
+    },
+    "dataSource": {
+        "dataSourceConnection": {
+            "types": "データソースタイプ"
+        },
+        "extractInsight": "インサイト分析",
+        "extractInsightOld": "インサイト分析（デバッグ）",
+        "cleanMethod": "クリーン方法",
+        "useField": "使用フィールド",
+        "viewMode": "ビューモード",
+        "metaView": "メタ",
+        "dataView": "テーブル",
+        "statView": "統計",
+        "charset": "文字エンコーディング",
+        "separator": "セパレーター",
+        "databaseType": "データベースを選択",
+        "connectUri": "コネクションURI",
+        "databaseName": "データベース",
+        "schemaName": "スキーマ",
+        "tableName": "テーブル",
+        "editName": "名前の編集",
+        "preview": "データのプレビュー",
+        "query": "SQLクエリ",
+        "connectorConfig": "コネクタの設定",
+        "connectorService": "コネクタサービスURL（オプション）",
+        "connectorOffline": "コネクタはオフラインです。再試行するか、別のサービスを選択してください。",
+        "connectorEmpty": "有効なコネクタが設定されていません。",
+        "req_err": "リクエストに失敗しました",
+        "query_monaco": "クエリ",
+        "query_diagram": "ダイアグラム",
+        "explorer": "エクスプローラー",
+        "apply": "適用してテスト",
+        "textPattern": {
+            "knowledge": "知識",
+            "generalize": "一般化",
+            "specific": "マッチを抽出",
+            "nlp": "セマンティック",
+            "currentPattern": "現在のパターン"
+        },
+        "statViewInfo": {
+            "title": "統計情報ビュー",
+            "desc": "統計情報ビューはデータについて感覚をつかむためのクイックな方法です。データセット内の各フィールドの分布を表示します。フィールド名をクリックすると、フィールドの分布を詳細に表示できます。",
+            "explore": "データセット内で調べる",
+            "originStatTable": "元のデータの統計情報",
+            "selectionStatTable": "Selection Data Statistics"
+        },
+        "sizeInfo": "{nCols} fields, {nRows} rows",
+        "demoDataset": {
+            "CARS": { "title": "Cars", "description": "Origin, product name and physical attributes of cars." },
+            "STUDENTS": { "title": "Students", "description": "What influence students' performance on exams?" },
+            "BTC_GOLD": { "title": "BTC - Gold", "description": "History data of bitcoin and gold price." },
+            "CAR_SALES": { "title": "Car Sales", "description": "Sales data of cars." },
+            "COLLAGE": { "title": "College", "description": "Public indicators of colleges." },
+            "TITANIC": { "title": "Titanic", "description": "Titanic shipwreck." },
+            "KEPLER": { "title": "Kepler", "description": "Kelper telescope data." },
+            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "Bike renting data." }
+        },
+        "btn": {
+            "use_table": "Load this table (up to 100 rows)",
+            "connect": "Connect",
+            "reset": "Back and Reset",
+            "connectFailed": "Failed to connect",
+            "query": "Submit Query",
+            "new_connector": "Press Enter or click on the Plus button to add and use a new connector"
+        },
+        "advice": {
+            "lackData": "Lack of Data",
+            "lackDimension": "It seems you don't have dimensions in your dataset. (part of functions of mega-automation maybe influenced.)",
+            "lackMeasure": "It seems you don't have measures in your dataset. (part of functions of mega-automation maybe influenced.)",
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommendation.",
+            "forceAnalysis": "Force Analysis",
+            "upload_file_too_large": "This file is too large. Use a smaller subset or transform it into CSV file to apply sampling."
+        },
+        "meta": {
+            "uniqueValue": "Unique Value",
+            "analyticType": "analytic type",
+            "semanticType": "semantic Type",
+            "disable": {
+                "title": "Disable Column",
+                "on": "able",
+                "off": "disable"
+            }
+        },
+        "importData": {
+            "buttonName": "Import Data",
+            "load": "データの読み込み",
+            "type": {
+                "file": "ファイル",
+                "restful": "URLから",
+                "mysql": "MySQL",
+                "demo": "デモ",
+                "database": "データベース",
+                "kanaries_cloud": "クラウド"
+            },
+            "sources": {
+                "file": {
+                    "name": "ファイル",
+                    "desc": "データを読み込むには、ファイルをアップロードしてください。サポートされるファイル形式：CSV、JSON、およびExcel。"
+                },
+                "restful": {
+                    "name": "URLから",
+                    "desc": "URL（JSON形式）からデータを読み込みます。"
+                },
+                "database": {
+                    "name": "データベース",
+                    "desc": "データを読み込むためにデータベースに接続します。サポートされるデータベース：MySQL、PostgreSQL、Oracle、SQL Server、およびSQLite。"
+                },
+                "demo": {
+                    "name": "デモ",
+                    "desc": "学習に役立つデモデータセットを読み込んで、RATHの機能とワークフローを理解します。"
+                },
+                "kanaries_cloud": {
+                    "name": "クラウド",
+                    "desc": "Kanaries Cloudからデータを読み込みます。"
+                },
+                "airtable": {
+                    "name": "Airtable",
+                    "desc": "Airtableからテーブルを読み込みます。"
+                },
+                "local": {
+                    "name": "履歴",
+                    "desc": "解析履歴からデータを読み込みます。"
+                },
+                "olap": {
+                    "name": "OLAP",
+                    "desc": "OLAPからデータを読み込みます。"
+
+                }
+            },
+            "cloud": {
+                "notebook": "ノートブック",
+                "dataset": "データセット",
+                "dashboard": "ダッシュボード",
+                "dashboard_template": "ダッシュボードテンプレート",
+                "total": "総数"
+            },
+            "demo": {
+                "available": "利用可能なデータセット"
+            },
+            "restful": {
+                "requestData": "データを要求する",
+                "exampleDataStruct": "例：データ構造",
+                "loadHistoryAPI": "履歴から読み込み",
+                "detectedDataStruct": "パースルール（自動検出）",
+                "confirm": "確認",
+                "clear": "クリア",
+                "format": {
+                    "array": "配列",
+                    "array_with_meta": "メタデータを含む配列",
+                    "others": "その他"
+                }
+            }
+        },
+        "table": {
+            "edit": "フィールド名を編集",
+            "fieldName": "フィールド名"
+        },
+        "sampling": {
+            "none": "なし",
+            "reservoir": "固定のサンプルサイズ"
+        },
+        "methods": {
+            "dropNull": "nullレコードを削除",
+            "useMode": "nullを最頻値で置き換える",
+            "simpleClean": "ゼロまたはnullを使用する",
+            "none": "なし（元のデータを使用する）"
+        },
+        "tip": "分析前にフィールドの種類とクリーニング戦略を調整することを忘れないでください。",
+        "recordCount": "レコード数 {count}",
+        "rowsInViews": "元： {originCols} 列 × {origin} 行 / 選択： {selectCols} 列 × {select} 行 / クリーン： {clean} 行",
+        "selection": {
+            "title": "高速選択設定",
+            "desc": "量子化に基づいてフィルタリングして、データの主要部分を取得してください。",
+            "syncMode": "同期モード"
+        },
+        "upload": {
+            "title": "データを接続してください",
+            "fileTypes": "Excelワークブックやテキストベースのファイル（JSON、CSVなど）がサポートされています。",
+            "uniqueIdIssue": "フィールドに一意のIDを追加してください",
+            "show_more": "その他のオプション",
+            "sampling": "サンプリング",
+            "percentSize": "サンプルサイズ（行数）",
+            "excel_range": "セルの範囲",
+            "upload": "アップロード",
+            "change": "参照",
+            "lastOpen": "最後に開いたもの",
+            "firstOpen": "最初に作成したもの",
+            "history": "最近開いたもの",
+            "history_time": {
+                "1d": "今日",
+                "1w": "先週",
+                "1mo": "先月",
+                "3mo": "過去3ヶ月",
+                "6mo": "過去半年",
+                "1yr": "去年"
+            },
+            "new": "新しいファイル",
+            "sheet": "シート",
+            "preview_parsed": "プレビュー",
+            "preview_full": "完全",
+            "preview_raw": "生データ",
+            "data_is_empty": "このデータセットにはデータがありません",
+            "separator": {
+                "comma": "カンマ",
+                "semicolon": "セミコロン",
+                "tab": "タブ",
+                "other": "その他..."
+            }
+        },
+        "exploreMode": {
+            "title": "探索モード",
+            "firstTime": "データに初めて会う",
+            "familiar": "データに慣れる",
+            "comprehensive": "網羅的",
+            "manual": "特定の目的を持ったマニュアル"
+        },
+        "fastSelection": {
+            "title": "高速選択"
+        },
+        "downloadData": {
+            "title": "データのエクスポート",
+            "downloadCSV": "CSVをダウンロード",
+            "downloadJSON": "JSONをダウンロード",
+            "downloadJSONMeta": "メタ付きJSONをダウンロード",
+            "downloadRATHDS": "RATHのデータセットをダウンロード"
+        },
+        "extend": {
+            "title": "拡張情報",
+            "manual": "カスタマイズ可能な計算",
+            "editor": "エディター",
+            "autoExtend": "{ count } 件の存在するフィールドから、より多くのフィールドが生成でき、分析や探索を強化できます。",
+            "notDecided": "{ count }件のフィールドが未定です。",
+            "findThem": "次を検索",
+            "checkThem": "チェック",
+            "empty": "列がエクスポートされていません。",
+            "apply": "適用する",
+            "cancel": "キャンセル",
+            "auto": "変換",
+            "suggestion": {
+                "regex_selection": "パターンの発見と抽出|テキストフィールドからパターンを抽出し、抽出されたパターンに一致する新しいフィールドを生成します。",
+                "dateTimeExpand": "時間単位で日付をグループ化します。|時間属性が年や月など、さまざまなスケールでグループ化されるため、時系列データはより規則的または相関する場合があります。",
+                "oneHot": "カテゴリカルフィールドのワンホットエンコーディング｜ワンホットエンコーディングは、カテゴリカル変数をバイナリベクトルとして表現する方法です。これにより、カテゴリカルデータの表現がより表現力豊かになります。",
+                "wordTFIDF": "テキストフィールドから単語を抽出します(スコア：tf-idf)｜TF-IDFは、コレクションまたはコーパス中の文書において、単語の重要性を反映するように意図された数字の統計量です。",
+                "wordTF": "テキストフィールドから単語を抽出します(スコア：tf)｜文書で最も頻度の高い用語を使用します。",
+                "reGroupByFreq": "頻度による再グループ分け｜頻度によってフィールドを再グループ分けし、最も頻度の高い値を保持します。",
+                "outlierIForest": "外れ値による再グループ化(Isolation Forest)|アウトライヤーによってフィールドを再グループ化し、アウトライヤーグループと非アウトライヤーグループを作成します。アウトライヤー検出アルゴリズムとしてIsolation Forestを使用します。"
+            }
+        },
+        "filter": {
+            "title": "フィルタ設定",
+            "active": "フィルター",
+            "enabled": "有効にする",
+            "disabled": "無効にする",
+            "key": "フィルタリングの条件:",
+            "range": "値の範囲でフィルタリング",
+            "set": "値のセットでフィルタリング",
+            "submit": "送信",
+            "cancel": "キャンセル"
+        },
+        "operations": {
+            "title": "操作",
+            "selectAll": "すべてのフィールドを有効にする",
+            "disableAll": "すべてのフィールドを無効にする",
+            "backup": "クラウドに保存"
+        }
+    },
+    "storage": {
+        "upload": "クラウドに保存",
+        "upload_desc": "{mode}をバックアップする。",
+        "components": {
+            "data": "生データ({size} 行)",
+            "meta": "メタデータ({size} フィールド)",
+            "collection": "コレクション({size} アイテム)",
+            "causal": "因果モデル",
+            "dashboard": "ダッシュボード({size} ドキュメント)"
+        },
+        "download": "ロード",
+        "createdAt": "作成日",
+        "refresh": "更新",
+        "name": "{mode}の名前",
+        "default_name": "Rath {mode} {date}",
+        "desc": "{mode}の説明",
+        "data_source_name": "データソース名",
+        "upload_data_source": "データソースにバインドする",
+        "cover": "カバー",
+        "bind_dataset": "データセットにバインドする",
+        "field_desc": "フィールドの説明",
+        "size": "サイズ",
+        "apply": "アップロード",
+        "public": "公開",
+        "publish_template": "テンプレートを公開する",
+        "overwrite": "上書き",
+        "auto_save": "自動保存"
+    },
+    "meta": {
+        "title": "メタ設定",
+        "save": "保存",
+        "dimension": "次元",
+        "measure": "尺度"
+    },
+    "megaAuto": {
+        "autoAnalysis": "オートアナリシス",
+        "reRun": "再実行タスク",
+        "computing": "計算",
+        "title": "ビジュアルインサイト",
+        "hintMain": "RATHによって見つかった興味深いパターンとインサイトのいくつかを紹介します。興味がある場合は、「編集チャート」を使用して現在のビューの詳細を確認し、「関連付ける」を使用して関連するインサイトを探索してください。",
+        "summary": "サマリー",
+        "associate": "関連付ける",
+        "analysis": "分析",
+        "asso": {
+            "T1": "関連尺度",
+            "T2": "関連する次元",
+            "hint": "関連尺度は、同じ次元を保ち、相関する尺度を見つけることを指します。関連する次元は、同じ尺度を保ち、相関する次元を見つけることを指します。"
+        },
+        "bring": "カスタマイズ分析",
+        "exitEditor": "エディターを終了する",
+        "commandBar": {
+            "painting": "データペインター",
+            "editing": "チャートを編集する",
+            "editInGW": "カスタマイズした分析",
+            "editInEditor": "エディターで編集する",
+            "associate": "ビューを関連付ける",
+            "constraints": "分析の制約",
+            "download": "チャートをエクスポートする",
+            "export": "エクスポート",
+            "export_as": "エクスポートする形式",
+            "export_size": "サイズ",
+            "lock_aspect": "アスペクト比をロック",
+            "export_bg": "背景色",
+            "err_msg_invalid_size": "サイズは{min}〜{max}の間でなければなりません"
+        },
+        "constraints": {
+            "exclude": "フィールドを除外する",
+            "auto": "存在するインサイトを含める場合は含める",
+            "include": "強制的に含める"
+        },
+        "commonVis": {
+            "text": "統計"
+        },
+        "subinsights": "サブインサイト",
+        "orderBy": {
+            "title": "結果の順序",
+            "default": "デフォルト",
+            "field_num": "フィールド番号",
+            "cardinality": "要素数"
+        },
+        "operation": {
+            "debug": "デバッグ",
+            "zoom": "インタラクティブ",
+            "resize": "リサイズモード",
+            "resizeMode": {
+                "resizable": "サイズ調節可能",
+                "none": "なし"
+            },
+            "excludeScaleZero": "スケールゼロを除外する"
+        }
+    },
+    "semiAuto": {
+        "main": {
+            "mainView": "メインビュー",
+            "relatePatterns": "関連するパターン",
+            "relateFeatures": "関連する特徴",
+            "explainDiff": "差異を説明する",
+            "pointInterests": "関連するサブセット",
+            "neighbors": "関連するビュー",
+            "pin": "関連する知見",
+            "compare": "比較",
+            "vizsys": {
+                "title": "可視化推奨システム",
+                "lite": "ライトモード（高速）",
+                "strict": "ストリクトモード"
+            },
+            "loadMore": "さらに読み込む",
+            "associate": {
+                "patterns": "関連するパターン",
+                "features": "関連する特徴",
+                "filters": "関連するサブセット",
+                "neighbors": "関連する近傍"
+            },
+            "associateShorthand": {
+                "patterns": "パターン",
+                "features": "特徴",
+                "filters": "サブセット",
+                "neighbors": "近接オブジェクト"
+            }
+        },
+        "embed": {
+            "insight_discovery": "洞察の発見",
+            "insights": "知見"
+        }
+    },
+    "desc": {
+        "dataViewInfo": "{dimensions}からのパターンを{measures}で表す。{filters}。"
+    },
+    "collection": {
+        "title": "コレクション",
+        "desc": "これは、すべてのセグメントでお気に入りのビューのコレクションです。",
+        "viewMode": {
+            "card": "カード",
+            "list": "リスト"
+        }
+    },
+    "painter": {
+        "samplePercent": "サンプルパーセント（％）",
+        "brushSize": "ブラシサイズ",
+        "useOriginalDist": "元の分布を使用",
+        "clearPainting": "塗りつぶしをクリア",
+        "syncData": "データ同期",
+        "search": "検索",
+        "explore": "探索",
+        "autoSearch": "オートサーチ",
+        "last": "前",
+        "next": "次",
+        "addLabel": "ラベルの追加",
+        "newField": "フィールドの塗りつぶし",
+        "tools": {
+            "move": "移動",
+            "color": "色",
+            "clean": "消しゴム",
+            "create": "作成"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "キーワード",
+            "operator": "オペレーター",
+            "fid": "フィールド"
+        },
+        "keyword": {
+            "out": "データのフィールドに追加します。"
+        },
+        "op": {
+            "$set": "フィールドを新しい列として序数に変換します。",
+            "$vec": "フィールドを新しい列として計算可能数値に変換します。",
+            "$text": "フィールドを新しい列として文字列に変換します。",
+            "$bool": "フィールドを0または1に変換して、新しい列とします。",
+            "$id": "自動的に増加するIDフィールドを生成し、1から開始します。",
+            "$order": "対象の数値フィールドでソートされたデータのランクインデックスを、1から開始して返します。",
+            "$dict": "ターゲット文字列フィールドでソートされたデータのランクインデックスを1から返します。",
+            "$isNaN": "数値を文字列\"1\"に変換し、数値がNaNの場合は新しい列として文字列\"0\"に変換します。",
+            "$isZero": "数値を文字列\"1\"に変換し、数値がゼロの場合は新しい列として文字列\"0\"に変換します。",
+            "$toDate": "時間単位でスライスできる活用的な日付オブジェクトのセットにフィールドを変換します。",
+            "$isValidDate": "日付オブジェクトを文字列\"1\"に変換し、オブジェクトが有効でない場合は新しい列として文字列\"0\"に変換します。",
+            "$normalize": "フィールドを新しい列として正規化します。",
+            "$inset": "フィールドを新しい列として-1〜+1の範囲にスケーリングします。",
+            "$bound": "フィールドを新しい列として0〜1の範囲にスケーリングします。",
+            "$log": "フィールドを新しい列としてx-> log(x)でプロジェクト化します（ベースはデフォルトでEに設定されています）。",
+            "$log2": "フィールドを新しい列としてx-> log[2](x)でプロジェクト化します。",
+            "$log1p": "フィールドを新しい列としてx-> log(x + 1)でプロジェクト化します。",
+            "$log10": "フィールドを新しい列としてx-> log[10](x)でプロジェクト化します。",
+            "$map": "各値を新しい列として同じ型の新しい値にマップします。",
+            "$test": "各値を0（false）または1（true）にマップし、新しい列として追加します。",
+            "$ReLU": "フィールドを新しい列としてx-> max(0、x)でプロジェクト化します。",
+            "$match": "正規表現を使用して、各テキストコンテンツのマッチ部分を見つけ、新しい列として追加します。",
+            "$replace": "正規表現を使用して、テキストの一致する部分を指定された文字列に置き換え、新しい列として追加します。",
+            "$concat": "すべてのフィールドの2つ以上のテキストコンテンツをマージして新しい列として追加します。",
+            "$sigmoid": "x -> (1 + e^-x)^-1 によってフィールドをプロジェクトして、新しい列として追加します。",
+            "$boxClip": "ボックスプロットによるオーバーフロー値をドメインにマップし、新しい列として追加します。",
+            "$meanClip": "指定されたドメインによるオーバーフロー値を、他のすべての値の平均値にマップし、新しい列として追加します。",
+            "$nearestClip": "指定されたドメインによるオーバーフロー値をドメインにマップし、新しい列として追加します。",
+            "$zeroFill": "無限大またはNaNを0にマップし、新しい列として追加します。",
+            "$meanFill": "無限大またはNaNを他のすべての値の平均値にマップし、新しい列として追加します。",
+            "$partition": "ブール式によって各値を2つの新しい列に分割します。"
+        }
+    },
+    "causal_direction": {
+        "_": "リンクのタイプ",
+        "none": "関係なし",
+        "directed": "直接リンク",
+        "reversed": "リンク元",
+        "weakDirected": "弱い直接リンク",
+        "weakReversed": "弱いリンク元",
+        "undirected": "双方向関係なしの非直接リンク",
+        "weakUndirected": "弱い双方向関係なしの非直接リンク",
+        "bidirected": "双方向リンク"
+    },
+    "causal_direction_desc": {
+        "none": "AはBに関係ありません。",
+        "directed": "AがBに影響を与えます。",
+        "reversed": "AはBに影響を受けます。",
+        "weakDirected": "場合によっては、AがBに影響を与えます。",
+        "weakReversed": "場合によっては、AはBに影響を受けます。",
+        "undirected": "AはBに関係がありますが、方向が決まっていません。",
+        "weakUndirected": "異なる場合に、AまたはBはお互いに関連しています。",
+        "bidirected": "AとBの両方がお互いに影響し合います。"
+    },
+    "time_format": {
+        "langKey": "ja-JP",
+        "dateTime": "%x %X",
+        "date": "%Y/%-m/%-d",
+        "time": "%p%-I:%M:%S",
+        "periods": ["午前", "午後"],
+        "days": ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"],
+        "shortDays": ["日", "月", "火", "水", "木", "金", "土"],
+        "months": ["１月", "２月", "３月", "４月", "５月", "６月", "７月", "８月", "９月", "１０月", "１１月", "１２月"],
+        "shortMonths": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    },
+    "login": {
+        "configKeys": {
+            "basic": "基本",
+            "design": "デザイン",
+            "analysis": "データ解析"
+        },
+        "design": {
+            "createCustomTheme": "独自のテーマ作成",
+            "syncFromSelectedTheme": "選択されたテーマから同期する",
+            "useCustomTheme": "カスタムテーマを使用する"
+        },
+        "clickLogin": "ログイン",
+        "haveSent": "すでに送信されました",
+        "signIn": "サインアップ",
+        "signOut": "ログアウト",
+        "my_account": "私のアカウント",
+        "preferences": "設定",
+        "phoneCert": "電話",
+        "emailCert": "メール",
+        "passwordLog": "パスワード",
+        "account": "アカウント",
+        "header": "ヘッドポートレート",
+        "info": "情報",
+        "setting": "設定",
+        "login": "ログイン",
+        "loginAndRegister": "ログイン/登録",
+        "getCertCode": "証明書コードを送信する",
+        "upload": "カスタムアバターをアップロードする",
+        "AvatarImage": "アバター画像",
+        "phone": {
+            "phoneNo": "電話番号",
+            "certCode": "認証コード"
+        },
+        "email": {
+            "title": "メール",
+            "certCode": "認証コード",
+            "errEmail": "メールタイプがサポートされていません"
+        },
+        "password": {
+            "userName": "ユーザー名",
+            "password": "パスワード"
+        }
+    },
+    "user": {
+        "organization": "組織",
+        "workspace": "ワークスペース"
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "電子メールが正常に送信されました",
+                "content": "Eメールが{email} に送信されました。確認コードを取得するには、メールを確認してください。"
+            },
+            "error": {
+                "title": "メールの送信に失敗しました"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "SMSが正常に送信されました",
+                "content": "SMSが{phone} に送信されました。確認コードを取得するには、携帯電話を確認してください。"
+            },
+            "error": {
+                "title": "SMSの送信に失敗しました"
+            }
+        }
+    },
+    "causal": {
+        "dataset": {
+            "extend": "拡張",
+            "field": "フィールド",
+            "extInfo": "拡張元",
+            "distinct_count": "重複カウント",
+            "no_filter": "（フィルタなし）",
+            "origin_size": "元のサイズ：{size} 行、",
+            "filtered_size": "サブセットサイズ：{size} 行",
+            "sample_rate": "サンプリングレート",
+            "sample_size": "サンプルサイズ：{size}行",
+            "choose_fields": "分析する選択したフィールド",
+            "dist": "分布",
+            "stat": "統計"
+        },
+        "actions": {
+            "clear_fields": "すべてのフィールドのクリア",
+            "causal_discover": "因果関係の発見",
+            "relayout": "リレイアウト",
+            "zoom_canvas": "キャンバスのズーム",
+            "modify_constraints": "制約の変更",
+            "display_limit": "リンク表示制限",
+            "filter_by_weights": "重みによるフィルター処理",
+            "one_click": "ワンクリック",
+            "use_ext_diagram": "フィールド情報の拡張による生成",
+            "import_effect": "制約のロード",
+            "auto_detect": "自動検出",
+            "preview": "プレビュー",
+            "edit_view": "ビューの編集",
+            "compute": "計算",
+            "export_diagram": "ダイアグラムとしてエクスポート",
+            "save_model": "因果モデルの保存",
+            "load_model": "因果モデルのロード",
+            "prev_step": "前のステップ",
+            "continue": "次"
+        },
+        "analyze": {
+            "cause": "原因",
+            "corr": "相関",
+            "effect": "効果",
+            "corr_atoms": "関連するフィールド",
+            "vis": "可視化",
+            "single_dim": "シングルフィールドの分析",
+            "main_field": "メインフィールド",
+            "service": "サービス環境",
+            "diff_mode": "Diffモード",
+            "other": "その他",
+            "full": "フル",
+            "diff_two": "2つのグループ",
+            "index_key": "インデックスキー",
+            "not_chosen": "なし",
+            "aggregation_type": "集計タイプ",
+            "foreground_group": "前景グループ",
+            "background_group": "背景グループ",
+            "insight": "インサイト",
+            "why_query": "なぜこのクエリーか",
+            "no_more_hints": "ヒントはこれ以上ありません。",
+            "normalize_stack": "スタックの正規化",
+            "global_dist": "グローバル分布",
+            "diff_dist": "Diff分布",
+            "feature": "フィーチャー",
+            "target": "ターゲット",
+            "name": "名前",
+            "model": "モデル",
+            "analyze_space": "分析空間",
+            "prediction": "予測",
+            "diff_title": "Diff",
+            "run_idx": "ID",
+            "accuracy": "精度",
+            "clear_records": "レコードのクリア",
+            "model_config": "モデル構成",
+            "predict_result": "予測結果",
+            "clear_all": "すべてクリア",
+            "link_mode": "リンクを作成するには",
+            "def_to_effect": "効果",
+            "def_to_not_effect": "効果がない",
+            "def_to_be_relevant": "関連する",
+            "def_to_be_not_relevant": "関連しない",
+            "click_link_mode": "クリックしてリンクを表示するには",
+            "forbid_link": "禁止する",
+            "delete_link": "削除する",
+            "dbl_click_node_mode": "ノードをダブルクリックして",
+            "def_forbid_as_cause": "原因とならないように禁止する",
+            "def_forbid_as_effect": "効果とならないように禁止する",
+            "overwrite-only": "上書きのみ",
+            "fill-only": "ただ埋める",
+            "fully replace": "完全に置換する",
+            "mutual_info": "相互情報量",
+            "conditional_mutual_info": "条件付き相互情報量",
+            "causal_discover": "因果関係の発見",
+            "matrix": "行列",
+            "diagram": "ダイアグラム",
+            "circle": "サークル",
+            "square": "スクエア",
+            "view": "ビュータイプ",
+            "mark": "マークタイプ",
+            "my_models": "マイモデル",
+            "model_list": "モデルリスト",
+            "dataset_config": {
+                "title": "データセットを構成する",
+                "help": "解析するために完全なデータセットからデータサブセットとフィールドを選択してください。"
+            },
+            "fd_config": {
+                "title": "機能的な依存関係を定義する",
+                "help": "バックグラウンド知識に基づいて機能的な依存関係を設定してください。"
+            },
+            "causal_model": {
+                "title": "因果モデル",
+                "help": "アルゴリズムを使用して因果関係の発見を適用し、因果図を変更し、その結果をより詳しく調べる。"
+            }
+        },
+        "exploration": {
+            "AutoVis": "AutoVis",
+            "CrossFilter": "CrossFilter",
+            "CausalInsight": "CausalInsight",
+            "GraphicWalker": "GraphicWalker",
+            "predict": "predict"
+        }
+    }
+}
