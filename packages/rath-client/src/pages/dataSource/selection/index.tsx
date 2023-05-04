@@ -14,7 +14,6 @@ import OLAPData from './olap';
 import HistoryPanel from './history';
 import DatabaseConnector from './database';
 import AirTableSource from './airtable';
-import KanariesCloud from './cloud';
 
 interface SelectionProps {
     show: boolean;
@@ -30,13 +29,13 @@ interface SelectionProps {
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, setLoadingAnimation } = props;
 
-    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.LOCAL);
+    const [dataSourceType, setDataSourceType] = useState<Exclude<IDataSourceType, IDataSourceType.CLOUD>>(IDataSourceType.LOCAL);
     const dsTypeOptions = useDataSourceTypeOptions();
 
-    const formMap: Record<IDataSourceType, JSX.Element> = {
-        [IDataSourceType.CLOUD]: (
-            <KanariesCloud setLoadingAnimation={setLoadingAnimation} />
-        ),
+    const formMap: Record<Exclude<IDataSourceType, IDataSourceType.CLOUD>, JSX.Element> = {
+        // [IDataSourceType.CLOUD]: (
+        //     <KanariesCloud setLoadingAnimation={setLoadingAnimation} />
+        // ),
         [IDataSourceType.FILE]: (
             <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} toggleLoadingAnimation={setLoadingAnimation} />
         ),
@@ -73,7 +72,7 @@ const Selection: React.FC<SelectionProps> = props => {
                     selectedKey={dataSourceType}
                     onChange={(ev, option) => {
                         if (option) {
-                            setDataSourceType(option.key as IDataSourceType);
+                            setDataSourceType(option.key as Exclude<IDataSourceType, IDataSourceType.CLOUD>);
                         }
                     }}
                 />

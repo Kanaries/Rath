@@ -19,7 +19,7 @@ const overflowProps: IButtonProps = {
 const overflowItems: ICommandBarItemProps[] = []
 
 const DataOperations: React.FC = () => {
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore/*, commonStore*/ } = useGlobalStore();
     const { mutFields, cleanMethod, showCustomizeComputationModal } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
@@ -130,14 +130,14 @@ const DataOperations: React.FC = () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
-            {
-                key: 'backup',
-                text: intl.get('dataSource.operations.backup'),
-                iconProps: { iconName: 'CloudUpload' },
-                onClick: () => {
-                    commonStore.setShowBackupModal(true);
-                },
-            },
+            // {
+            //     key: 'backup',
+            //     text: intl.get('dataSource.operations.backup'),
+            //     iconProps: { iconName: 'CloudUpload' },
+            //     onClick: () => {
+            //         commonStore.setShowBackupModal(true);
+            //     },
+            // },
         ];
     }, [
         cleanMethod,
@@ -148,7 +148,7 @@ const DataOperations: React.FC = () => {
         exportDataAsJson,
         mutFields.length,
         exportDataAsRATHDS,
-        commonStore,
+        // commonStore,
     ]);
     return (
         <Cont>

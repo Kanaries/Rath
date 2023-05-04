@@ -1,41 +1,30 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import va from '@vercel/analytics';
-import { DataSourceType, IAccessPageKeys, ICreateDashboardConfig, ICreateDatasetPayload, ICreateDatasetResult, ICreateDataSourcePayload, ICreateDataSourceResult, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
+import {
+    DataSourceType,
+    type ICreateDashboardConfig,
+    type ICreateDatasetPayload,
+    type ICreateDatasetResult,
+    type ICreateDataSourcePayload,
+    type ICreateDataSourceResult,
+    type IDatasetData,
+    type IDatasetMeta,
+    type IDataSourceMeta,
+    type IDashboardDocumentInfo,
+    type ILoginForm,
+    type INotebook,
+    type IOrganization,
+    type IUserInfo,
+    type IWorkspace,
+} from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
 import { KanariesDatasetFilenameCloud } from '../constants';
 import { IKRFComponents, IParseMapItem } from '../utils/download';
-import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
+export * from '../interfaces';
 
-export interface ILoginForm {
-    userName: string;
-    password: string;
-    email: string;
-}
-
-export interface INotebook {
-    readonly id: string;
-    readonly name: string;
-    readonly size: number;
-    readonly createAt: number;
-    readonly downLoadURL: string;
-}
-
-export interface IWorkspace {
-    readonly id: string;
-    readonly name: string;
-    datasets?: readonly IDatasetMeta[] | null | undefined;
-    notebooks?: readonly INotebook[] | null | undefined;
-}
-
-export interface IOrganization {
-    readonly name: string;
-    readonly id: string;
-    workspaces?: readonly IWorkspace[] | null | undefined;
-}
 
 interface ISignUpForm {
     userName: string;
@@ -47,19 +36,13 @@ interface ISignUpForm {
     invCode: string;
 }
 
-interface IUserInfo {
-    userName: string;
-    email: string;
-    eduEmail: string;
-    phone: string;
-    avatarURL: string;
-    organizations?: readonly IOrganization[] | undefined;
-}
-
 export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
+    public initialized = false;
+    public isLoggedIn = false;
     public info: IUserInfo | null = null;
+    public planLoading = false;
     public saving = false;
     public get loggedIn() {
         return this.info !== null;
@@ -87,15 +70,15 @@ export default class UserStore {
         return this.organization?.workspaces?.find(wsp => wsp.name === this.currentWspName) ?? null;
     }
 
+    protected effects: (() => void)[] = [];
+
     constructor() {
-        this.init()
         makeAutoObservable(this, {
             uploadDataSource: observable.ref,
             // @ts-expect-error non-public fields
-            autoSaveTimer: false,
-            waitList: false,
-            disposers: false,
+            effects: false,
         });
+        this.init();
     }
     public init() {
         this.login = {
@@ -113,128 +96,36 @@ export default class UserStore {
             invCode: '',
         }
         this.info = null;
+        this.effects = [];
     }
     public destroy () {
         this.info = null;
+        this.initialized = false;
+        this.effects.splice(0, this.effects.length).forEach(disposer => disposer());
     }
 
-    public updateForm(formKey: IAccessPageKeys, fieldKey: keyof ILoginForm | keyof ISignUpForm, value: string) {
-        if (fieldKey in this[formKey]) {
-            // @ts-ignore
-            this[formKey][fieldKey] = value;
-        }
+    public logout() {
+        this.destroy();
+        this.init();
     }
 
-    public async liteAuth(certMethod: 'email' | 'phone') {
-        const url = getMainServiceAddress('/api/liteAuth');
-        const { certCode, phone, email } = this.signup;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                certCode,
-                certMethod,
-                certAddress: certMethod === 'email' ? email : phone,
-            }),
-        });
-        const result = await res.json() as (
-            | { success: true; data: boolean }
-            | { success: false; message: string }
-        );
-        if (result.success) {
-            notify({
-                type: 'success',
-                content: 'Login succeeded',
-                title: 'Success',
-            });
-            return result.data;
-        } else {
-            notify({
-                type: 'error',
-                content: `${result.message}`,
-                title: 'Error',
-            });
-            throw new Error(`${result.message}`);
-        }
-    }
-
-    public async commitLogin() {
-        try {
-            const res = await commitLoginService(this.login);
-            return res;
-        } catch (error) {
-            notify({
-                title: 'Login error',
-                type: 'error',
-                content: `[/api/login] ${error}`,
-            });
-        }
-    }
-
-    /** @deprecated this method won't work because Rath cannot change the cookie set by Kanaries Home */
-    public async commitLogout() {
-        try {
-            const url = getMainServiceAddress('/api/logout');
-            const res = await fetch(url, {
-                method: 'GET',
-            });
-            if (res) {
-                runInAction(() => {
-                    this.info = null;
-                });
-                notify({
-                    title: 'Logout',
-                    type: 'success',
-                    content: 'Logout success!',
-                });
-            }
-        } catch (error) {
-            notify({
-                title: 'logout error',
-                type: 'error',
-                content: `[/api/logout] ${error}`,
-            });
-        }
-    }
-
-    public async updateAuthStatus() {
-        try {
-            const url = getMainServiceAddress('/api/loginStatus');
-            const res = await request.get<{}, { loginStatus: boolean; userName: string; userId: string }>(url);
-            va.track('login_status', {
-                loginStatus: res.loginStatus,
-                userName: res.userName,
-                userId: res.userId,
-            })
-            return res.loginStatus;
-        } catch (error) {
-            notify({
-                title: '[/api/loginStatus]',
-                type: 'error',
-                content: `${error}`,
-            });
-            return false;
-        }
-    }
-
-    public async getPersonalInfo() {
+    public async getPersonalInfo(): Promise<IUserInfo | null> {
         const url = getMainServiceAddress('/api/ce/personal');
         try {
             const result = await request.get<{}, IUserInfo>(url);
             if (result !== null) {
+                const userInfo = {
+                    userName: result.userName,
+                    eduEmail: result.eduEmail,
+                    email: result.email,
+                    phone: result.phone,
+                    avatarURL: result.avatarURL,
+                };
                 runInAction(() => {
-                    this.info = {
-                        userName: result.userName,
-                        eduEmail: result.eduEmail,
-                        email: result.email,
-                        phone: result.phone,
-                        avatarURL: result.avatarURL,
-                    };
+                    this.info = userInfo;
                     this.getOrganizations();
                 });
+                return userInfo;
             }
         } catch (error) {
             notify({
@@ -243,6 +134,7 @@ export default class UserStore {
                 content: `${error}`,
             });
         }
+        return null;
     }
 
     protected async getOrganizations() {
@@ -412,7 +304,7 @@ export default class UserStore {
         }
     }
 
-    public async loadDataset(
+    protected async loadDataset(
         body: ReadableStream<Uint8Array> | File,
         organizationName: string | null,
         workspaceName: string,
@@ -481,7 +373,7 @@ export default class UserStore {
         }
     }
 
-    public async fetchDataset(workspaceName: string, datasetId: string): Promise<IDatasetMeta | null> {
+    protected async fetchDataset(workspaceName: string, datasetId: string): Promise<IDatasetMeta | null> {
         const dataSourceApiUrl = getMainServiceAddress('/api/ce/dataset');
         try {
             const dataSourceDetail = await request.get<{
@@ -518,7 +410,7 @@ export default class UserStore {
         }
     }
 
-    public async loadNotebook(body: ReadableStream<Uint8Array> | File) {
+    protected async loadNotebook(body: ReadableStream<Uint8Array> | File) {
         try {
             const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
             const result = await zipReader.getEntries();
@@ -699,10 +591,6 @@ export default class UserStore {
             });
             return false;
         }
-    }
-
-    public setSaving(saving: boolean) {
-        this.saving = saving;
     }
 
     public async saveDataSourceOnCloudOfflineMode(
@@ -905,13 +793,13 @@ export default class UserStore {
         }
     }
 
-    public setOrgName(orgName: string | null): boolean {
-        const org = this.info?.organizations?.find(which => which.name === orgName);
+    public setOrgId(orgId: string | null): boolean {
+        const org = this.info?.organizations?.find(which => which.id === orgId);
         if (!org) {
             this.currentOrgName = null;
             return false;
         }
-        this.currentOrgName = orgName;
+        this.currentOrgName = org.name;
         const wsp = org.workspaces?.find(which => which.name === this.currentWspName);
         if (!wsp) {
             this.currentWspName = null;

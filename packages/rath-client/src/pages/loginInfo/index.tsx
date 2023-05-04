@@ -1,12 +1,9 @@
 import { FC, useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, INavLinkGroup, Nav, Persona, PersonaSize } from '@fluentui/react';
+import { Dialog, INavLinkGroup, Icon, Nav } from '@fluentui/react';
 import styled from 'styled-components';
-import { useGlobalStore } from '../../store';
-import Account from './account';
 import Setup from './setup';
-import { LoginButton } from './components/loginButton';
 
 export enum PreferencesType {
     Account = 'account',
@@ -70,28 +67,26 @@ const Container = styled.div`
 `;
 
 const LoginInfo: FC = () => {
-    const { commonStore, userStore } = useGlobalStore();
-    const { navMode } = commonStore;
-    const { info } = userStore;
     const [showUserPanel, setShowUserPanel] = useState(false);
-    const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
+    const [tab, setTab] = useState<PreferencesType>(PreferencesType.Setting);
 
     const settingMenuList = useMemo<INavLinkGroup[]>(() => {
         return [
             {
                 links: [
-                    {
-                        url: `#preference/${PreferencesType.Account}`,
-                        key: PreferencesType.Account,
-                        name: PreferencesType.Account,
-                        icon: 'Home',
-                        forceAnchor: true,
-                        iconProps: { iconName: 'Home' },
-                        onClick(e: any) {
-                            e.preventDefault();
-                            setTab(PreferencesType.Account);
-                        },
-                    },
+                    // Account no more supported.
+                    // {
+                    //     url: `#preference/${PreferencesType.Account}`,
+                    //     key: PreferencesType.Account,
+                    //     name: PreferencesType.Account,
+                    //     icon: 'Home',
+                    //     forceAnchor: true,
+                    //     iconProps: { iconName: 'Home' },
+                    //     onClick(e: any) {
+                    //         e.preventDefault();
+                    //         setTab(PreferencesType.Account);
+                    //     },
+                    // },
                     {
                         url: `#preference/${PreferencesType.Setting}`,
                         key: PreferencesType.Setting,
@@ -129,7 +124,7 @@ const LoginInfo: FC = () => {
                         <Nav selectedKey={tab} groups={settingMenuList} />
                     </div>
                     <div className="nav-content">
-                        {tab === PreferencesType.Account && <Account />}
+                        {/* {tab === PreferencesType.Account && <Account />} */}
                         {tab === PreferencesType.Setting && <Setup />}
                     </div>
                 </Container>
@@ -140,14 +135,9 @@ const LoginInfo: FC = () => {
                     setShowUserPanel(true);
                 }}
             >
-                {info && (
-                    <Persona
-                        text={navMode === 'text' ? info.userName : ''}
-                        imageUrl={info.avatarURL}
-                        size={PersonaSize.size32}
-                    />
-                )}
-                {!info && navMode === 'text' && <LoginButton text={intl.get('login.clickLogin')} />}
+                <Icon
+                    iconName="PlayerSettings"
+                />
             </div>
         </LoginInfoDiv>
     );
