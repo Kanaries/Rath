@@ -237,12 +237,6 @@ export enum IAccessPageKeys {
     LOGIN = "login",
     SIGNUP = "signup",
 }
-
-export interface IResponse<T = void> {
-    success: boolean;
-    data: T;
-    message?: string;
-}
 export interface IteratorStorageMetaInfo {
     versionCode: number;
     length: number;
@@ -484,3 +478,100 @@ export type ICreateDashboardConfig = {
         cover?: File;
     };
 };
+
+export interface ILoginForm {
+    userName: string;
+    password: string;
+    email: string;
+}
+
+export interface INotebook {
+    readonly id: string;
+    readonly name: string;
+    readonly size: number;
+    readonly createAt: number;
+    readonly downLoadURL: string;
+}
+
+export interface IWorkspace {
+    readonly id: string;
+    readonly name: string;
+    datasets?: readonly IDatasetMeta[] | null | undefined;
+    notebooks?: readonly INotebook[] | null | undefined;
+}
+
+export interface IOrganization {
+    readonly name: string;
+    readonly id: string;
+    /** `0` stands for personal organization */
+    readonly organizationType: number;
+    readonly userType: number;
+    workspaces?: readonly IWorkspace[] | null | undefined;
+}
+
+export interface IUserInfo {
+    userName: string;
+    email: string;
+    eduEmail: string;
+    phone: string;
+    avatarURL: string;
+    organizations?: readonly IOrganization[] | undefined;
+}
+
+export enum PlanRuleType {
+    Trueness = 1,
+    AmountLimited = 2,
+    SizeLimited = 3,
+}
+
+export type IPlanRule<RuleType extends PlanRuleType = PlanRuleType> = {
+    /** Rule ID, differs in different server area */
+    ruleId: string;
+    /** Rule name, keeps the same in different server area */
+    ruleName: string;
+    /**
+     * Display content.
+     * 
+     * May has a `"{limit}"` placeholder, which will be replaced by the `ruleLimit` field formatted according to the `ruleType`.
+     */
+    ruleDescription: string;
+} & (
+    RuleType extends PlanRuleType.Trueness ? {
+        /** @deprecated This field makes no sense */
+        ruleLimit: number;
+        /** This rule has no "limit" field */
+        ruleType: PlanRuleType.Trueness;
+    } : RuleType extends PlanRuleType.AmountLimited ? {
+        /** Amount limit of this rule, integer */
+        ruleLimit: number;
+        /** This rule has a countable "limit" field */
+        ruleType: PlanRuleType.AmountLimited;
+    } : RuleType extends PlanRuleType.SizeLimited ? {
+        /** Size limit of this rule in **byte**, integer */
+        ruleLimit: number;
+        /** This rule has a sizeable "limit" field */
+        ruleType: PlanRuleType.SizeLimited;
+    } : never
+);
+
+export interface IPlan {
+    planId: string;
+    /** Name to display */
+    name: string;
+    /**
+     * Subscriber cannot downgrade the plan.
+     * It can also be used to sort plan items in an ascending order.
+     */
+    planLevel: number;
+    currency: "usd" | string;
+    interval: "month";
+    intervalCount: number;
+    /**
+     * Origin price. Amount in cent (1/100), integer.
+     * 
+     * When `price` equals to -1, it means a "custom" price and should display a 'contact us' action button.
+     */
+    price: number;
+    /** Available features */
+    rules: IPlanRule[];
+}

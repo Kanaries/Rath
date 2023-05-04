@@ -8,7 +8,7 @@ import { ContextualMenu, DefaultButton, Dropdown, Icon, IContextualMenuItem, IDr
 import databaseOptions from '../config';
 import type { SupportedDatabaseType } from '../type';
 import { renderDropdownItem, renderDropdownTitle } from '../custom-dropdown';
-import useLocalStorage from '../../../../../hooks/use-local-storage';
+import useCachedState from '../../../../../hooks/use-cached-state';
 
 
 const InputGroupStackToken = { childrenGap: 10 };
@@ -165,7 +165,14 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
 
     const uriInputId = useId();
 
-    const [storedUri, setStoredUri] = useLocalStorage<Partial<Record<string, string[]>>>(UriStorageKey, {});
+    const [storedUriRaw, setStoredUri] = useCachedState<string>(UriStorageKey, '{}');
+    const storedUri = useMemo(() => {
+        try {
+            return JSON.parse(storedUriRaw) as Partial<Record<string, string[]>>;
+        } catch {
+            return {};
+        }
+    }, [storedUriRaw]);
 
     const storedList = storedUri[sourceType] ?? [];
 
@@ -201,7 +208,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
             return;
         }
         markAsReady(true);
-        setStoredUri(produce(storedUri, draft => {
+        setStoredUri(JSON.stringify(produce(storedUri, draft => {
             if (!(sourceType in draft)) {
                 draft[sourceType] = [];
             }
@@ -209,7 +216,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                 draft[sourceType]!.unshift(connectUri);
             }
             draft[sourceType] = draft[sourceType]!.slice(0, MAX_STORE_SIZE);
-        }));
+        })));
     };
 
     const SubmitButton = nextStepEnabled ? DefaultButton : PrimaryButton;
@@ -224,9 +231,9 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
     }));
 
     const deleteStoreItem = (key: string) => {
-        setStoredUri(produce(storedUri, draft => {
+        setStoredUri(JSON.stringify(produce(storedUri, draft => {
             draft[sourceType] = (draft[sourceType] ?? []).filter(data => data !== key);
-        }));
+        })));
     };
 
     return (

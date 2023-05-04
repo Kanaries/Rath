@@ -20,10 +20,11 @@ import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 import DataConnection from './pages/dataConnection';
+import AppEntry from './entry';
 
 
 function App() {
-    const { langStore, commonStore, userStore } = useGlobalStore();
+    const { langStore, commonStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
 
     useEffect(() => {
@@ -32,14 +33,6 @@ function App() {
             destroyRathWorker();
         };
     }, [commonStore]);
-    
-    useEffect(() => {
-        userStore.updateAuthStatus().then((res) => {
-            if (res) {
-                userStore.getPersonalInfo();
-            }
-        });
-    }, [userStore]);
 
     const [showPerformanceWindow, setShowPerformanceWindow] = useState(false);
     useHotKey({
@@ -84,7 +77,9 @@ const OBApp = observer(App);
 export default function WrappedApp(): JSX.Element {
     return (
         <StoreWrapper>
-            <OBApp />
+            <AppEntry>
+                <OBApp />
+            </AppEntry>
         </StoreWrapper>
     );
 }

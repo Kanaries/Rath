@@ -20,7 +20,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "src/global.d.ts"
+    ],
   },
   "include": [
     "src"
