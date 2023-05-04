@@ -27,11 +27,11 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: demoText,
                 iconProps: { iconName: "FileTemplate" },
             },
-            {
-                key: IDataSourceType.CLOUD,
-                text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
-                iconProps: { iconName: "CloudDownload" },
-            },
+            // {
+            //     key: IDataSourceType.CLOUD,
+            //     text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
+            //     iconProps: { iconName: "CloudDownload" },
+            // },
             {
                 key: IDataSourceType.DATABASE,
                 text: dbText,

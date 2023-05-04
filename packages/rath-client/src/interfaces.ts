@@ -227,16 +227,6 @@ export interface IDataFrame {
     [key: string]: any[]
 }
 
-export enum IAccessMethod {
-    PHONE = "phone",
-    EMAIL = "email",
-    PASSWORD = "password",
-}
-
-export enum IAccessPageKeys {
-    LOGIN = "login",
-    SIGNUP = "signup",
-}
 export interface IteratorStorageMetaInfo {
     versionCode: number;
     length: number;

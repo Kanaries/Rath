@@ -2,7 +2,7 @@ import intl from 'react-intl-universal';
 import { Dropdown, Stack } from "@fluentui/react";
 import styled from 'styled-components';
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useGlobalStore } from "../../store";
 
 
@@ -12,9 +12,9 @@ const StyledDropdown = styled(Dropdown)`
 
 const WorkspaceRole = observer(function WorkspaceRole () {
     const { userStore } = useGlobalStore();
-    const { info, loggedIn, currentWspName, organization } = userStore;
+    const { loggedIn, currentWspName, organization } = userStore;
     
-    const organizations = useMemo(() => info?.organizations ?? [], [info?.organizations]);
+    // const organizations = useMemo(() => info?.organizations ?? [], [info?.organizations]);
     const workspaces = organization?.workspaces ?? [];
     const isWorkspaceListNotFetched = !organization?.workspaces;
 
@@ -33,12 +33,13 @@ const WorkspaceRole = observer(function WorkspaceRole () {
     
     return (
         <Stack>
-            <StyledDropdown
+            {/* The user has to decide the organization to continue with Rath so changing another organization is not supported */}
+            {/* <StyledDropdown
                 label={intl.get('user.organization')}
                 options={organizations.map(org => ({ key: org.name, text: org.name }))}
                 selectedKey={organization?.name}
                 onChange={(_, opt) => opt && userStore.setOrgName(opt.key as string)}
-            />
+            /> */}
             <StyledDropdown
                 label={intl.get('user.workspace')}
                 options={workspaces.map(wsp => ({ key: wsp.name, text: wsp.name }))}
