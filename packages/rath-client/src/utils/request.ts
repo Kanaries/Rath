@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import { notify } from '../components/error';
-import type { IRow } from '../interfaces';
+import type { IRow, IResponse } from '../interfaces';
 
 export function errorCodeHandler (res: Response) {
     if (res.status === 200) return;
@@ -21,7 +21,7 @@ async function getRequest<T extends IRow = IRow, R = void>(path: string, payload
         credentials: 'include',
     });
     errorCodeHandler(res);
-    const result = (await res.json()) as ApiResult<R>;
+    const result = (await res.json()) as IResponse<R>;
     if (result.success) {
         return result.data;
     } else {
@@ -41,7 +41,7 @@ async function postRequest<T extends IRow = IRow, R = void>(path: string, payloa
         body: JSON.stringify(payload),
     });
     errorCodeHandler(res);
-    const result = (await res.json()) as ApiResult<R>;
+    const result = (await res.json()) as IResponse<R>;
     if (result.success) {
         return result.data;
     } else {
@@ -86,7 +86,7 @@ const initHeaders = (headers: Headers | undefined): Headers => {
 
 async function getRequestV1<P = never, R = void>(
     ...params: FetchParams<P>
-): Promise<ApiResult<R>> {
+): Promise<IResponse<R>> {
     const [url, payload, headers] = params;
 
     const search = payload ? encodeReqBody(payload, 'application/x-www-form-urlencoded') : '';
@@ -102,7 +102,7 @@ async function getRequestV1<P = never, R = void>(
 
 async function postRequestV1<P = never, R = void>(
     ...params: FetchParams<P>
-): Promise<ApiResult<R>> {
+): Promise<IResponse<R>> {
     const [url, payload, headers] = params;
     const contentType = headers?.['Content-Type'] ?? 'application/json';
 
@@ -120,7 +120,7 @@ async function postRequestV1<P = never, R = void>(
 
 export class ApiError extends Error {
     constructor(
-        public code: NonNullable<Extract<ApiResult<unknown>, { success: false }>['error']>['code'] | undefined,
+        public code: NonNullable<Extract<IResponse<unknown>, { success: false }>['error']>['code'] | undefined,
         public message: string,
         public options?: Record<string, string>,
     ) {
@@ -128,7 +128,7 @@ export class ApiError extends Error {
     }
 }
 
-function unwrap<T>(result: ApiResult<T>): T {
+function unwrap<T>(result: IResponse<T>): T {
     if (result.success) {
         return result.data;
     }
@@ -138,7 +138,7 @@ function unwrap<T>(result: ApiResult<T>): T {
     throw new Error(result.message);
 }
 
-function collectError<T>(result: ApiResult<T>): [T, null] | [null, ApiError] {
+function collectError<T>(result: IResponse<T>): [T, null] | [null, ApiError] {
     if (result.success) {
         return [result.data, null];
     }

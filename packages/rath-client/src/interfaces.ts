@@ -227,6 +227,21 @@ export interface IDataFrame {
     [key: string]: any[]
 }
 
+export type IResponse<T> = (
+    | {
+        success: true;
+        data: T;
+    }
+    | {
+        success: false;
+        message: string;
+        error?: {
+            code: `ERR_${Uppercase<string>}`;
+            options?: Record<string, string>;
+        };
+    }
+);
+
 export interface IteratorStorageMetaInfo {
     versionCode: number;
     length: number;

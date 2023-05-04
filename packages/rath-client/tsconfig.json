@@ -22,8 +22,7 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "typeRoots": [
-      "node_modules/@types",
-      "src/global.d.ts"
+      "node_modules/@types"
     ],
   },
   "include": [
