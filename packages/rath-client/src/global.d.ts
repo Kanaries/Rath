@@ -4,9 +4,6 @@ declare global {
     
         interface ProcessEnv {
             REACT_APP_VERCEL_ENV: 'preview' | 'production';
-            REACT_APP_VERCEL_GIT_COMMIT_MESSAGE?: string;
-            /** git branch name */
-            REACT_APP_VERCEL_GIT_COMMIT_REF?: string;
             SERVER_ORIGIN?: string;
             HOME_ORIGIN?: string;
         }

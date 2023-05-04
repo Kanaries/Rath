@@ -20,7 +20,6 @@ import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 import DataConnection from './pages/dataConnection';
-import AppEntry from './entry';
 
 
 function App() {
@@ -77,9 +76,7 @@ const OBApp = observer(App);
 export default function WrappedApp(): JSX.Element {
     return (
         <StoreWrapper>
-            <AppEntry>
-                <OBApp />
-            </AppEntry>
+            <OBApp />
         </StoreWrapper>
     );
 }
