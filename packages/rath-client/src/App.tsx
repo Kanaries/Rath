@@ -23,7 +23,7 @@ import DataConnection from './pages/dataConnection';
 
 
 function App() {
-    const { langStore, commonStore, userStore } = useGlobalStore();
+    const { langStore, commonStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
 
     useEffect(() => {
@@ -32,14 +32,6 @@ function App() {
             destroyRathWorker();
         };
     }, [commonStore]);
-    
-    useEffect(() => {
-        userStore.updateAuthStatus().then((res) => {
-            if (res) {
-                userStore.getPersonalInfo();
-            }
-        });
-    }, [userStore]);
 
     const [showPerformanceWindow, setShowPerformanceWindow] = useState(false);
     useHotKey({

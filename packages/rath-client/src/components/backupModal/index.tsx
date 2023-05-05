@@ -4,7 +4,6 @@ import { observer } from 'mobx-react-lite';
 import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
-import { LoginPanel } from '../../pages/loginInfo/account';
 import { notify } from '../error';
 import { CloudItemType } from '../../pages/dataSource/selection/cloud/spaceList';
 import NotebookForm from './forms/notebookForm';
@@ -70,23 +69,7 @@ const BackupModal: FC = (props) => {
     };
 
     if (!loggedIn) {
-        return (
-            <Modal
-                isOpen={showBackupModal}
-                onDismiss={() => commonStore.setShowBackupModal(false)}
-                isBlocking={false}
-                containerClassName="modal-container"
-            >
-                <Cont>
-                    <div className="login">
-                        <div className="modal-header">
-                            <h3>{intl.get('login.login')}</h3>
-                        </div>
-                        <LoginPanel />
-                    </div>
-                </Cont>
-            </Modal>
-        );
+        return null;
     }
 
     const commonProps = {

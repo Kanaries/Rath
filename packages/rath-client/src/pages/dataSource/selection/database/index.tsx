@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
@@ -6,7 +6,7 @@ import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
 import { DataSourceTag } from '../../../../utils/storage';
 import useAsyncState from '../../../../hooks/use-async-state';
-import useLocalStorage from '../../../../hooks/use-local-storage';
+import useCachedState from '../../../../hooks/use-cached-state';
 import { notify } from '../../../../components/error';
 import { useGlobalStore } from '../../../../store';
 import { logDataImport } from '../../../../loggers/dataImport';
@@ -75,7 +75,18 @@ export const defaultServers: readonly string[] = [
 const MAX_SERVER_COUNT = 5;
 
 const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => {
-    const [servers, setServers] = useLocalStorage<string[]>('database_connector_server', []);
+    const [serversRaw, setServers] = useCachedState<string>('database_connector_server', '[]');
+    const servers = useMemo<string[]>(() => {
+        try {
+            const list = JSON.parse(serversRaw);
+            if (!Array.isArray(list) || list.some(s => typeof s !== 'string')) {
+                return [];
+            }
+            return list as string[];
+        } catch (e) {
+            return [];
+        }
+    }, [serversRaw]);
     const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
         () => [...servers, ...defaultServers].map(target => ({ target, status: 'unknown', lag: 0 })),
         {
@@ -84,7 +95,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     );
     useEffect(() => {
         if (servers.length > MAX_SERVER_COUNT) {
-            setServers(servers.slice(0, MAX_SERVER_COUNT));
+            setServers(JSON.stringify(servers.slice(0, MAX_SERVER_COUNT)));
         }
     }, [servers, setServers]);
     const { userStore } = useGlobalStore();
@@ -160,7 +171,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     };
 
     const updateServersList = (next: readonly string[]) => {
-        setServers(next.filter(s => !defaultServers.includes(s)));
+        setServers(JSON.stringify(next.filter(s => !defaultServers.includes(s))));
         setServerList(list => next.map(target => {
             const prev = list.find(which => which.target === target);
             return {

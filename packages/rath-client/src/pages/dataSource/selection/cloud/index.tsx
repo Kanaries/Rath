@@ -2,7 +2,6 @@ import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { observer } from "mobx-react-lite";
 import { useGlobalStore } from '../../../../store';
-import { LoginPanel } from '../../../loginInfo/account';
 import KanariesCloudSpace from './space';
 
 
@@ -30,14 +29,7 @@ const KanariesCloud = observer<{ setLoadingAnimation: (on: boolean) => void }>(f
     return (
         <Container>
             <header>{loggedIn ? intl.get('storage.download') : intl.get('login.login')}</header>
-            {loggedIn && (
-                <KanariesCloudSpace setLoadingAnimation={setLoadingAnimation} />
-            )}
-            {!loggedIn && (
-                <div>
-                    <LoginPanel />
-                </div>
-            )}
+            <KanariesCloudSpace setLoadingAnimation={setLoadingAnimation} />
         </Container>
     );
 });
