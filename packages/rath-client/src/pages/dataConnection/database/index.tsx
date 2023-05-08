@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
+import va from '@vercel/analytics';
 import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
@@ -182,6 +183,10 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 name,
                 fields,
                 dataSource: dataSource.slice(0, 10),
+                size: dataSource.length,
+            });
+            va.track('database_connector_import', {
+                databaseType,
                 size: dataSource.length,
             });
             userStore.saveDataSourceOnCloudOnlineMode({

@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
+import va from '@vercel/analytics';
 import produce from 'immer';
 import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
@@ -138,6 +139,10 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             );
             const { dataSource, fields } = data;
 
+            va.track('database_connector_import', {
+                databaseType: sourceType,
+                size: dataSource.length,
+            });
             userStore.saveDataSourceOnCloudOnlineMode({
                 name,
                 datasourceType: DataSourceType.Database,
