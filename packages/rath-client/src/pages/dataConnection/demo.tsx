@@ -130,11 +130,12 @@ const DemoData: FC<DemoDataProps> = props => {
                 {options.map((demo, i) => {
                     return (
                         <Card
-                        role="gridcell"
-                        aria-rowindex={Math.floor(i / colCount) + 1}
-                        aria-colindex={(i % colCount) + 1}
-                        tabIndex={0}
-                        onClick={() => loadDemo(demo)}
+                            role="gridcell"
+                            aria-rowindex={Math.floor(i / colCount) + 1}
+                            aria-colindex={(i % colCount) + 1}
+                            tabIndex={0}
+                            key={i}
+                            onClick={() => loadDemo(demo)}
                             appearance="outline"
                         >
                             <CardHeader
