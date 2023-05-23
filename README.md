@@ -56,6 +56,24 @@ Get started with RATH now!
 - [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
+## Installation
+
+In order to deploy RATH on your server/local machine
+
+1. Clone the repository and step into it using the command 
+
+	`git clone https://github.com/Kanaries/Rath.git && cd Rath`
+
+2. Verify you have the last versions of npm, nodejs and yarn [(instructions on Ubuntu)](https://codex.so/how-to-install-the-latest-node-js-npm-and-yarn).
+
+3. Install the required npm libraries,
+`npm run build:utils && npm run build:scenegraph && npm run build:renderer && npm run start`
+
+4. Run `yarn install` to download the remaining packages required for RATH to run properly.
+
+5. To deploy RATH (by default on port 3000) use the command `yarn workspace rath-client start`. Note that running this command first time might take some time.
+
+
 ## Features
 + 🤖 [AutoPilot for Data Exploration](https://docs.kanaries.net/rath/explore-data/automated-data-insight): Get Insights with One Click! Augmented analytic engine for discovering patterns, insights, and causals. A fully-automated way to explore and visualize dataset with one click.
 
