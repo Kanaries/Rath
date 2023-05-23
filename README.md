@@ -43,6 +43,8 @@
 
 **RATH** is not just an open-source alternative to Data Analysis and Visualization tools such as Tableau, but it automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
+**RATH generates/recommends visualizations based on minimize visual perception error of information in visualizations.**
+
 
 https://user-images.githubusercontent.com/22167673/234053551-24e0f1c9-1efb-4250-a2f8-dbf148f5f4d0.mp4
 
@@ -172,6 +174,13 @@ If you want to add support for more database types or data engines, feel free to
 ## Developer Documentation
 
 RATH software is in open alpha stage. We are working on improving its code and documentation.
+
+build script for client parts
+```bash
+yarn install
+
+yarn workspace rath-client build
+```
 
 If you are using RATH for your project(s), please let us know what are you using it for by emailing us at  [support@kanaries.org](support@kanaries.org). Feedbacks are also welcomed. If you find a bug or have a feature request, please create an issue.
 
