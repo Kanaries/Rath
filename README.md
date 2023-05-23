@@ -43,7 +43,7 @@
 
 **RATH** is not just an open-source alternative to Data Analysis and Visualization tools such as Tableau, but it automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
-**RATH generates/recommends visualizations based on minimize visual perception error of information in visualizations.**
+> RATH generates/recommends visualizations based on minimize visual perception error of information in visualizations.
 
 
 https://user-images.githubusercontent.com/22167673/234053551-24e0f1c9-1efb-4250-a2f8-dbf148f5f4d0.mp4
