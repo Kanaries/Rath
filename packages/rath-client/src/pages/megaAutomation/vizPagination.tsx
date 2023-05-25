@@ -1,6 +1,5 @@
 import { Icon, SearchBox, Spinner } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
-import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -14,6 +13,7 @@ import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
 import { ILazySearchInfoBase, searchFilterView } from '../../utils';
 import { labDistVisService } from '../../services';
+import { usePagination } from '../../components/pagination/hooks';
 
 const VizCard = styled.div<{ selected?: boolean }>`
     /* width: 140px; */
@@ -123,8 +123,6 @@ const VizPagination: React.FC = (props) => {
 
     const { items } = usePagination({
         count: searchedInsightViews.length,
-        showFirstButton: false,
-        showLastButton: false,
         siblingCount: 1,
         page: pageIndex + 1,
         onChange: updatePage,

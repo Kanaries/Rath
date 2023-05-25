@@ -1,6 +1,5 @@
 import React, { useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -10,6 +9,7 @@ import { PIVOT_KEYS } from '../../constants';
 import EditorCore from '../editor/core';
 import type { IReactVegaHandler } from '../../components/react-vega';
 import { Card } from '../../components/card';
+import Divider from '../../components/divider';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';

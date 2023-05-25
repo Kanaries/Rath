@@ -3,8 +3,8 @@ import { observer } from 'mobx-react-lite';
 import React, { useState, useEffect } from 'react';
 import { Pivot, PivotItem } from '@fluentui/react'
 import intl from 'react-intl-universal';
-import { Pagination } from '@material-ui/core';
 import { useGlobalStore } from '../../../store';
+import Pagination from '../../../components/pagination';
 import Association from './assCharts';
 
 const PAGE_SIZE = 7;
@@ -34,7 +34,7 @@ const ObservableAssociation: React.FC = props => {
             <PivotItem headerText={`${intl.get('megaAuto.asso.T1')}(${assoListT1.length})`} itemKey="T1" />
             <PivotItem headerText={`${intl.get('megaAuto.asso.T2')}(${assoListT2.length})`} itemKey="T2" />
         </Pivot>
-        <Pagination count={Math.floor(assoShownFullList.length / PAGE_SIZE) + 1} page={assoIndex + 1} onChange={(e, v) => {
+        <Pagination pageCount={Math.floor(assoShownFullList.length / PAGE_SIZE) + 1} pageIdx={assoIndex + 1} onChange={v => {
             setAssoIndex(Math.max(v - 1, 0));
         }} />
         <Association

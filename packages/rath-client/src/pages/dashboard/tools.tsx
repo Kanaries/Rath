@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, forwardRef } from 'react';
 import { IconButton } from '@fluentui/react';
-import { Divider } from '@material-ui/core';
 import type { DashboardCard } from '../../store/dashboardStore';
+import Divider from '../../components/divider';
 
 const ToolGroup = styled.div`
     margin: 0 0 0 0.6em;
