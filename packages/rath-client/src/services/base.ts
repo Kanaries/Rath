@@ -195,7 +195,7 @@ function getTestServerUrl(): URL | null {
 }
 
 export function getTestServerAPI(api: string): string {
-    const url = new URL(window.location.href).searchParams.get('server') || 'https://gateway.kanaries.cn:2280';
+    const url = new URL(window.location.href).searchParams.get('server') || 'https://gateway.kanaries.net';
     let surl = new URL(url);
     surl.pathname = api;
     return surl.href;
