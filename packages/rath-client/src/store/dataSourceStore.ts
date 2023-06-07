@@ -444,6 +444,13 @@ export class DataSourceStore {
         }
         this.filters = [...this.filters]
     }
+    public removeFilter (fid: string) {
+        const filterIndex = this.filters.findIndex(f => f.fid === fid);
+        if (filterIndex > -1) {
+            this.filters.splice(filterIndex, 1);
+        }
+        this.filters = [...this.filters]
+    }
     public async createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
         const { rawDataStorage } = this;
         const data = await rawDataStorage.getAll();
