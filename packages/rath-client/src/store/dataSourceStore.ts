@@ -170,6 +170,7 @@ export class DataSourceStore {
                     dataStorage: this.rawDataStorage,
                     resultStorage: this.filteredDataStorage,
                     extData: toJS(extData),
+                    fields: toJS(this.mutFields),
                     filters: toJS(filters)
                 }).then(r => {
                     return this.filteredDataStorage.syncMetaInfoFromStorage();

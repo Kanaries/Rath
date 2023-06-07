@@ -150,12 +150,14 @@ export type FilterServiceProps = {
     computationMode: 'inline';
     dataSource: IRow[];
     extData: Map<string, ICol<any>>;
+    fields: readonly IRawField[];
     filters: IFilter[];
 } | {
     computationMode: 'offline';
     dataStorage: IteratorStorage;
     resultStorage: IteratorStorage;
     extData: Map<string, ICol<any>>;
+    fields: readonly IRawField[];
     filters: IFilter[];
 }
 /**

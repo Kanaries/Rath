@@ -175,6 +175,7 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
                                     left={filter.range[0]}
                                     right={filter.range[1]}
                                     onValueChange={onRangeValueChange}
+                                    type={curField.semanticType === 'temporal' ? 'time' : 'number'}
                                 />
                             )}
                             <Stack.Item>

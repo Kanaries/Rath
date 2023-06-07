@@ -1,14 +1,22 @@
 import { Slider } from '@fluentui/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 interface RangeSelectionProps {
     range: [number, number];
     left: number;
     right: number;
     onValueChange: (range: [number, number]) => void;
+    type: 'number' | 'time';
 }
 const RangeSelection: React.FC<RangeSelectionProps> = (props) => {
-    const { range, left, right, onValueChange } = props;
+    const { range, left, right, onValueChange, type } = props;
+
+    const formatter = useCallback((v: number) => {
+        if (type === 'time') {
+            return new Date(v).toLocaleString();
+        }
+        return `${v}`;
+    }, [type]);
 
     return (
         <Slider
@@ -17,6 +25,7 @@ const RangeSelection: React.FC<RangeSelectionProps> = (props) => {
             max={range[1]}
             value={right}
             lowerValue={left}
+            valueFormat={formatter}
             ranged
             onChange={(_v, r) => {
                 r && onValueChange(r);

@@ -9,7 +9,7 @@ import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
-import { getOriginalRange } from './originalRange';
+import { getOriginalDateTimeRange, getOriginalRange } from './originalRange';
 
 interface FieldFilterProps {
     fid: string;
@@ -54,12 +54,16 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
             setFieldRange([0, 0]);
         } else if (filterType !== 'range') {
             setFieldRange([0, 0]);
+        } else if (meta?.semanticType === 'temporal') {
+            getOriginalDateTimeRange(rawDataStorage, fid).then(r => {
+                setFieldRange(r)
+            });
         } else {
             getOriginalRange(rawDataStorage, fid).then(r => {
                 setFieldRange(r)
             })
         }
-    }, [fid, filterType, rawDataStorage, rawDataMetaInfo.versionCode])
+    }, [fid, meta?.semanticType, filterType, rawDataStorage, rawDataMetaInfo.versionCode])
     useEffect(resetRange, [resetRange])
 
 
@@ -176,6 +180,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                         left={filter.range[0]}
                         right={filter.range[1]}
                         onValueChange={onRangeValueChange}
+                        type={meta.semanticType === 'temporal' ? 'time' : 'number'}
                     />
                 }
                 <Stack horizontal tokens={{ childrenGap: '1em' }}>
