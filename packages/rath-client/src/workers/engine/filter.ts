@@ -1,4 +1,12 @@
-import { ICol, IFilter, IRow } from "../../interfaces";
+import { ICol, IFilter, IRawField, IRow } from "../../interfaces";
+
+const resolveNumericValue = (row: IRow, f: IRawField): number => {
+    const val = row[f.fid];
+    if (f.semanticType === 'temporal') {
+        return new Date(val).getTime();
+    }
+    return typeof val === 'number' ? val : Number(val);
+};
 
 /**
  * @deprecated
@@ -6,6 +14,7 @@ import { ICol, IFilter, IRow } from "../../interfaces";
  * kyusho, 7 days ago   (November 22nd, 2022 11:46 PM) 
  */
 export function applyFilters (dataSource: IRow[],
+    fields: IRawField[],
     extFields: Map<string, ICol<any>>,
     filters: IFilter[]) {
     const ans: IRow[] = [];
@@ -21,7 +30,12 @@ export function applyFilters (dataSource: IRow[],
     for (let i = 0; i < dataSource.length; i++) {
         const row = dataSource[i];
         let keep = effectFilters.every(f => {
-            if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
+            if (f.type === 'range') {
+                const field = fields.find(field => field.fid === f.fid);
+                if (!field) return false;
+                const val = resolveNumericValue(row, field);
+                return f.range[0] <= val && val <= f.range[1];
+            }
             if (f.type === 'set') return f.values.includes(row[f.fid]);
             return false;
         })

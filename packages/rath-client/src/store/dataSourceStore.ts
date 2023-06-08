@@ -170,6 +170,7 @@ export class DataSourceStore {
                     dataStorage: this.rawDataStorage,
                     resultStorage: this.filteredDataStorage,
                     extData: toJS(extData),
+                    fields: toJS(this.mutFields),
                     filters: toJS(filters)
                 }).then(r => {
                     return this.filteredDataStorage.syncMetaInfoFromStorage();
@@ -441,6 +442,13 @@ export class DataSourceStore {
             this.filters.push({
                 ...filter
             })
+        }
+        this.filters = [...this.filters]
+    }
+    public removeFilter (fid: string) {
+        const filterIndex = this.filters.findIndex(f => f.fid === fid);
+        if (filterIndex > -1) {
+            this.filters.splice(filterIndex, 1);
         }
         this.filters = [...this.filters]
     }

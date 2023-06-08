@@ -6,10 +6,10 @@ import { timer } from './timer';
 
 const filterService = (e) => {
     try {
-        const { dataSource, dataStorage, computationMode, extData, filters, resultStorage } = e.data;
+        const { dataSource, dataStorage, computationMode, extData, filters, resultStorage, fields } = e.data;
 
         if (computationMode === 'inline') {
-            const res = applyFilters(dataSource, extData, filters);
+            const res = applyFilters(dataSource, fields, extData, filters);
             self.postMessage({
                 success: true,
                 data: {
@@ -21,7 +21,7 @@ const filterService = (e) => {
             const storage = new IteratorStorage(dataStorage)
             const resSto = new IteratorStorage(resultStorage)
             storage.getAll().then(data => {
-                return applyFilters(data, extData, filters);
+                return applyFilters(data, fields, extData, filters);
             }).then(data => {
                 return resSto.setAll(data);
             }).then(() => {

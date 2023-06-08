@@ -82,6 +82,7 @@ export default class CausalDatasetStore {
                     dataSource: dataSourceStore.cleanedData,
                     extData: new Map<string, ICol<any>>(),
                     filters: toJS(filters) as IFilter[],
+                    fields: this.allFields,
                 }).then(r => {
                     return this.filteredData.setAll(r.rows);
                 }).then(() => {
