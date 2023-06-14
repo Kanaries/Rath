@@ -3785,10 +3785,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@^0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@kanaries/graphic-walker/-/graphic-walker-0.2.18.tgz#5e47afb59500f36e1ed41ad317098e3fd8437e60"
-  integrity sha512-d0PcGppdXL+sNB/wDUydxkVwnOe+a6UQVZaGHWscWJ7gF1xJ9yvwovQGWKfuqtpogaUuZHdPbBPee3T6bcEx/w==
+"@kanaries/graphic-walker@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.3.7.tgz#41600d9b7825a69f6c7664173ab7b37380b11eca"
+  integrity sha512-bThrbrXbgh1QRUfbsnf8VpeeLWYttQwnsf4rrtwqXltUHuUN0OjkNnDMMOxd7ewKNqpxNTGL+9yLExGZ75Df6g==
   dependencies:
     "@headlessui/react" "^1.7.12"
     "@heroicons/react" "^2.0.8"
@@ -3800,6 +3800,7 @@
     immer "^9.0.15"
     mobx "^6.3.3"
     mobx-react-lite "^3.2.1"
+    nanoid "^4.0.2"
     postcss "^8.3.7"
     postinstall-postinstall "^2.1.0"
     re-resizable "^6.9.8"
@@ -4744,7 +4745,7 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@^17.0.1", "@types/react-dom@^17.x":
+"@types/react-dom@^17.0.1":
   version "17.0.19"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.19.tgz#36feef3aa35d045cacd5ed60fe0eef5272f19492"
   integrity sha512-PiYG40pnQRdPHnlf7tZnp0aQ6q9tspYr72vD61saO6zFCybLfMqwUCN0va1/P+86DXn18ZWeW30Bk7xlC5eEAQ==
@@ -4775,7 +4776,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^17", "@types/react@^17.0.2", "@types/react@^17.x":
+"@types/react@*", "@types/react@^17", "@types/react@^17.0.2":
   version "17.0.58"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.58.tgz#c8bbc82114e5c29001548ebe8ed6c4ba4d3c9fb0"
   integrity sha512-c1GzVY97P0fGxwGxhYq989j4XwlcHQoto6wQISOC2v6wm3h0PORRWJFHlkRjfGsiG3y1609WdQ+J+tKxvrEd6A==
@@ -10657,6 +10658,11 @@ nanoid@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmmirror.com/nanoid/-/nanoid-4.0.0.tgz#6e144dee117609232c3f415c34b0e550e64999a5"
   integrity sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==
+
+nanoid@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmmirror.com/nanoid/-/nanoid-4.0.2.tgz#140b3c5003959adbebf521c170f282c5e7f9fb9e"
+  integrity sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==
 
 natural-compare@^1.4.0:
   version "1.4.0"
