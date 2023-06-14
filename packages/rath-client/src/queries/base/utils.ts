@@ -69,11 +69,14 @@ export function encodingDecorate (encoding: any, fields: IFieldMeta[], statField
     return false;
 }
 
-export function applyZeroScale (encoding: IVegaSubset['encoding']) {
-    Object.values(encoding).forEach(ch => {
-        if (!ch.scale) ch.scale = {};
-        ch.scale.zero = false;
-    })
+export function applyZeroScale (spec: IVegaSubset, includeZero: boolean) {
+    if (!spec.config) {
+        spec.config = {}
+    }
+    if (!spec.config.scale) {
+        spec.config.scale = {}
+    }
+    spec.config.scale.zero = includeZero;
 }
 
 const COUNT_FIELD_ID = '__tmp_stat_id_unique'

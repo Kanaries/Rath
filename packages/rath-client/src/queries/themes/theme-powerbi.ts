@@ -1,4 +1,4 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const ptToPx = (value: number) => value * (1 / 3 + 1);
 
@@ -23,7 +23,7 @@ const divergentColorMin = '#DEEFFF';
 const divergentPalette = [divergentColorMin, divergentColorMax];
 const ordinalPalette = [divergentColorMin, '#c7e4ff', '#b0d9ff', '#9aceff', '#83c3ff', '#6cb9ff', '#55aeff', '#3fa3ff', '#2898ff', divergentColorMax];
 
-const powerbiTheme: VegaThemeConfig = {
+const powerbiTheme: VegaGlobalConfig = {
     font: fontStandard,
     header: {
         titleFont: fontTitle,

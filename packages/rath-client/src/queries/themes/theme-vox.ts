@@ -1,8 +1,8 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const markColor = '#3e5c69';
 
-const voxTheme: VegaThemeConfig = {
+const voxTheme: VegaGlobalConfig = {
     arc: { fill: markColor },
     area: { fill: markColor },
     path: { stroke: markColor },

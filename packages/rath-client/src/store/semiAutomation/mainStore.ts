@@ -409,4 +409,8 @@ export class SemiAutomationStore {
         // this.initAssociate()
         // this.clearViews();
     }
+    public analysisInCopilot(pattern: IPattern) {
+        this.init();
+        this.mainView = pattern;
+    }
 }

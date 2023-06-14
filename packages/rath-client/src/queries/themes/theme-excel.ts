@@ -1,8 +1,8 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const markColor = '#4572a7';
 
-const excelTheme: VegaThemeConfig = {
+const excelTheme: VegaGlobalConfig = {
 
     arc: { fill: markColor },
     area: { fill: markColor },

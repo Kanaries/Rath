@@ -7,7 +7,7 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
-import { VegaThemeConfig } from '../../../queries/themes/config';
+import { VegaGlobalConfig } from '../../../queries/themes/config';
 import { useGlobalStore } from '../../../store';
 import { labDistVisService } from '../../../services';
 import { useAsyncViews } from '../../semiAutomation/predictZone/utils';
@@ -19,7 +19,7 @@ interface AssociationProps {
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IInsightSpace) => void;
-    themeConfig?: VegaThemeConfig;
+    themeConfig?: VegaGlobalConfig;
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
     const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;

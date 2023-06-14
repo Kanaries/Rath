@@ -1,13 +1,19 @@
 import produce from "immer";
+import { ISemanticType } from "@kanaries/loa";
 import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { applySizeConfig } from "../../queries/base/utils";
 
+function uncompressAxisSemanticType (semanticType: ISemanticType) {
+    return semanticType === 'nominal' || semanticType === 'ordinal';
+}
+
+// interface Advice
 export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: number | undefined = 260, height: number | undefined = 260): IVegaSubset {
     let fixed = false;
     if (spec.encoding.x) {
         const targetField = fields.find(f => f.fid === spec.encoding.x?.field);
         if (targetField) {
-            if (targetField.semanticType === 'nominal' && targetField.features.unique > 20) {
+            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 20) {
                 fixed = true
             }
         }
@@ -15,7 +21,7 @@ export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: nu
     if (spec.encoding.y) {
         const targetField = fields.find(f => f.fid === spec.encoding.y?.field);
         if (targetField) {
-            if (targetField.semanticType === 'nominal' && targetField.features.unique > 20) {
+            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 20) {
                 fixed = true
             }
         }

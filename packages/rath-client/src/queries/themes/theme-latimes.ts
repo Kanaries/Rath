@@ -1,4 +1,4 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const headlineFontSize = 22;
 const headlineFontWeight = 'normal';
@@ -20,7 +20,7 @@ const colorSchemes = {
     'ice-7': ['#edefee', '#dadfe2', '#c4ccd2', '#a6b7c6', '#849eae', '#607785', '#47525d'],
 };
 
-const latimesTheme: VegaThemeConfig = {
+const latimesTheme: VegaGlobalConfig = {
 
     title: {
         anchor: 'start',

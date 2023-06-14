@@ -1,4 +1,4 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 import { default as VIS_GOOGLE_THEME } from './theme-googlecharts';
 import { default as VIS_GGPLOT2_THEME } from './theme-ggplot2';
@@ -21,7 +21,7 @@ export enum THEME_KEYS {
     g2 = 'g2',
 }
 
-export const prebuiltThemes: Readonly<Record<string, VegaThemeConfig>> = {
+export const prebuiltThemes: Readonly<Record<string, VegaGlobalConfig>> = {
     [THEME_KEYS.googlecharts]: VIS_GOOGLE_THEME,
     [THEME_KEYS.powerbi]: VIS_POWERBI_THEME,
     [THEME_KEYS.ggplot2]: VIS_GGPLOT2_THEME,

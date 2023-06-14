@@ -3,7 +3,7 @@ import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
 import { THEME_KEYS, prebuiltThemes } from '../queries/themes';
-import { VegaThemeConfig } from '../queries/themes/config';
+import { VegaGlobalConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { deepcopy } from '../utils';
@@ -53,8 +53,8 @@ export class CommonStore {
     public graphicWalkerSpec: Specification;
     public vizSpec: IVegaSubset | null = null;
     public vizTheme: string = 'default';
-    public customThemeConfig: VegaThemeConfig | undefined = undefined;
-    public themes: Record<string, VegaThemeConfig | undefined> = { ...prebuiltThemes };
+    public customThemeConfig: VegaGlobalConfig | undefined = undefined;
+    public themes: Record<string, VegaGlobalConfig | undefined> = { ...prebuiltThemes };
     public useCustomTheme: boolean = false;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
@@ -67,10 +67,10 @@ export class CommonStore {
             themes: observable.shallow,
         });
     }
-    public get themeConfig (): VegaThemeConfig | undefined {
+    public get themeConfig (): VegaGlobalConfig | undefined {
         return this.getTheme(this.vizTheme);
     }
-    public getTheme(themeKey: string): VegaThemeConfig | undefined {
+    public getTheme(themeKey: string): VegaGlobalConfig | undefined {
         if (this.useCustomTheme) return this.customThemeConfig;
         // if (themeKey === THEME_KEYS.default) return undefined;
         if (themeKey === THEME_KEYS.default) return this.themes[THEME_KEYS.g2];
@@ -85,7 +85,7 @@ export class CommonStore {
     public applyPreBuildTheme (themeKey: string) {
         this.vizTheme = themeKey;
     }
-    public setCustomThemeConfig (config: VegaThemeConfig | undefined) {
+    public setCustomThemeConfig (config: VegaGlobalConfig | undefined) {
         this.customThemeConfig = config;
     }
     public resetCustomThemeConfigByThemeKey (themeKey: string) {

@@ -7,7 +7,7 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
 import ViewInfo from '../../../components/viewInfo/pillInfo';
-import { VegaThemeConfig } from '../../../queries/themes/config';
+import { VegaGlobalConfig } from '../../../queries/themes/config';
 
 const CollectContainer = styled.div`
     .seg-header {
@@ -40,7 +40,7 @@ interface ListViewProps {
     metas: IFieldMeta[];
     views: IInsightVizView[];
     onConfig: (data: IInsightVizView) => void;
-    themeConfig?: VegaThemeConfig;
+    themeConfig?: VegaGlobalConfig;
 }
 const ListView: React.FC<ListViewProps> = (props) => {
     const { data, views, metas, onConfig, themeConfig } = props;
