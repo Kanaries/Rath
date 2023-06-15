@@ -3,7 +3,7 @@ import { View } from 'vega';
 import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
 import { getVegaTimeFormatRules } from '../utils';
-import { VegaThemeConfig } from '../queries/themes/config';
+import { VegaGlobalConfig } from '../queries/themes/config';
 import ImageExportDialog, { ImageExportDialogHandler } from './image-export-dialog';
 import type { ImageExportInfo } from './image-export-dialog/export-image';
 
@@ -14,7 +14,7 @@ interface ReactVegaProps {
     signalHandler?: {
         [key: string]: (name: any, value: any, view: View) => void;
     };
-    config?: VegaThemeConfig;
+    config?: VegaGlobalConfig;
 }
 
 export interface IReactVegaHandler {

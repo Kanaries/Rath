@@ -6,13 +6,13 @@
  * https://developers.google.com/open-source/licenses/bsd
  */
 
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const markColor = '#3366CC';
 const gridColor = '#ccc';
 const defaultFont = 'Arial, sans-serif';
 
-const googlechartsTheme: VegaThemeConfig = {
+const googlechartsTheme: VegaGlobalConfig = {
     arc: { fill: markColor },
     area: { fill: markColor },
     path: { stroke: markColor },

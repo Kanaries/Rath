@@ -10,8 +10,8 @@ import base64
 bp = Blueprint('database', __name__, url_prefix='/api')
 
 
-@bp.route('/get_connector', methods=['POST'])
-def get_connector():
+@bp.route('/get_connection', methods=['POST'])
+def get_connection():
     props = json.loads(request.data)
     func = props['func']
     if func == 'ping':

@@ -44,9 +44,6 @@ export function distVis(props: BaseVisProps): IVegaSubset {
         statFields: transedFields,
         statEncodes: transedEncodes,
     })
-    if (excludeScaleZero) {
-        applyZeroScale(enc);
-    }
 
     humanHabbit(enc);
 
@@ -64,6 +61,7 @@ export function distVis(props: BaseVisProps): IVegaSubset {
         },
         encoding: enc
     };
+    applyZeroScale(enc, !excludeScaleZero);
     applyDefaultSort(basicSpec, fields);
     applySizeConfig2DistViz(basicSpec, {
         mode: resizeMode,

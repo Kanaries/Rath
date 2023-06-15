@@ -42,7 +42,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
     const simpleSpec = useVisSpec(specOptions, dataSource);
 
     const spec = useMemo(() => {
-        return simpleSpec && adviceVisSize(simpleSpec, fieldMetas)
+        return simpleSpec === null ? null : adviceVisSize(simpleSpec, fieldMetas);
     }, [simpleSpec, fieldMetas]);
 
     return spec && (

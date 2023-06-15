@@ -6,7 +6,7 @@ import ViewInfo from '../../../components/viewInfo/textInfo';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
-import { VegaThemeConfig } from '../../../queries/themes/config';
+import { VegaGlobalConfig } from '../../../queries/themes/config';
 import Pagination from '../../../components/pagination';
 import Divider from '../../../components/divider';
 
@@ -48,7 +48,7 @@ interface CardViewProps {
     metas: IFieldMeta[];
     views: IInsightVizView[];
     onConfig: (data: IInsightVizView) => void;
-    themeConfig?: VegaThemeConfig;
+    themeConfig?: VegaGlobalConfig;
 }
 const CardView: React.FC<CardViewProps> = (props) => {
     const { data, views, metas, onConfig, themeConfig } = props;

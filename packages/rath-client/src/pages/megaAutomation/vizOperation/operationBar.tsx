@@ -6,13 +6,13 @@ import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
 import { IVisSpecType } from '../../../interfaces';
 import type { IReactVegaHandler } from '../../../components/react-vega';
+import { PIVOT_KEYS } from '../../../constants';
 
 interface OperationBarProps {
     handler: React.RefObject<IReactVegaHandler>;
 }
 const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
-    const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
-    const { taskMode } = commonStore;
+    const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore, semiAutoStore } = useGlobalStore();
     const { mainViewSpec, mainViewPattern } = megaAutoStore;
 
     const customizeAnalysis = useCallback(() => {
@@ -71,12 +71,23 @@ const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
             iconProps: { iconName: 'EditCreate' },
             onClick: analysisInPainter
         },
+        // {
+        //     key: 'associate',
+        //     text: intl.get('megaAuto.commandBar.associate'),
+        //     iconProps: { iconName: 'Lightbulb' },
+        //     onClick: () => {
+        //         megaAutoStore.getAssociatedViews(taskMode);
+        //     }
+        // },
         {
-            key: 'associate',
+            key: 'analysisInSemi',
             text: intl.get('megaAuto.commandBar.associate'),
             iconProps: { iconName: 'Lightbulb' },
             onClick: () => {
-                megaAutoStore.getAssociatedViews(taskMode);
+                if (mainViewPattern !== null) {
+                    semiAutoStore.analysisInCopilot(toJS(mainViewPattern))
+                    commonStore.setAppKey(PIVOT_KEYS.semiAuto);
+                }
             }
         },
         {

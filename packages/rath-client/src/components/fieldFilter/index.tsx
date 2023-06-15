@@ -9,7 +9,7 @@ import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
-import { getOriginalRange } from './originalRange';
+import { getOriginalDateTimeRange, getOriginalRange } from './originalRange';
 
 interface FieldFilterProps {
     fid: string;
@@ -22,6 +22,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
     const { dataSourceStore } = useGlobalStore();
 
     const meta = dataSourceStore.fieldMetas.find(fm => fm.fid === fid);
+    const filterInUse = dataSourceStore.filters.find(f => f.fid === fid);
 
     const { rawDataStorage, rawDataMetaInfo } = dataSourceStore;
 
@@ -48,17 +49,22 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const [fieldRange, setFieldRange] = useState<[number, number]>([0, 0])
     const filterType = filter.type;
-    useEffect(() => {
+    const resetRange = useCallback(() => {
         if (rawDataMetaInfo.versionCode === -1) {
             setFieldRange([0, 0]);
         } else if (filterType !== 'range') {
             setFieldRange([0, 0]);
+        } else if (meta?.semanticType === 'temporal') {
+            getOriginalDateTimeRange(rawDataStorage, fid).then(r => {
+                setFieldRange(r)
+            });
         } else {
             getOriginalRange(rawDataStorage, fid).then(r => {
                 setFieldRange(r)
             })
         }
-    }, [fid, filterType, rawDataStorage, rawDataMetaInfo.versionCode])
+    }, [fid, meta?.semanticType, filterType, rawDataStorage, rawDataMetaInfo.versionCode])
+    useEffect(resetRange, [resetRange])
 
 
     const selection = useMemo(() => {
@@ -84,6 +90,11 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
         }
         setShowFilterConfig(false);
     }, [filter, meta?.distribution, dataSourceStore, selection])
+
+    const resetFilter = useCallback(() => {
+        resetRange();
+        dataSourceStore.removeFilter(fid);
+    }, [fid, dataSourceStore, resetRange])
 
     const toggleShowFilter = useCallback(() => {
         setShowFilterConfig(v => !v);
@@ -158,7 +169,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                     />
                 </div>
                 {
-                    filter.type === 'set' && meta && <SetSelection
+                    filter.type === 'set' && meta && !filterInUse && <SetSelection
                         dist={toJS(meta.distribution)}
                         selection={selection}
                     />
@@ -169,15 +180,22 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                         left={filter.range[0]}
                         right={filter.range[1]}
                         onValueChange={onRangeValueChange}
+                        type={meta.semanticType === 'temporal' ? 'time' : 'number'}
                     />
                 }
-                <Stack horizontal>
+                <Stack horizontal tokens={{ childrenGap: '1em' }}>
+                    {
+                        filterInUse && <DefaultButton
+                            onClick={resetFilter}
+                            text={intl.get('dataSource.filter.reset') || 'Reset'}
+                        />
+                    }
                     <PrimaryButton
                         text={intl.get('dataSource.filter.submit')}
+                        disabled={filter.type === 'set' && Boolean(filterInUse)}
                         onClick={submitFilter}
                     />
                     <DefaultButton
-                        style={{ marginLeft: '1em' }}
                         text={intl.get('dataSource.filter.cancel')}
                         onClick={toggleShowFilter}
                     />

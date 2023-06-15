@@ -146,9 +146,6 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
         statFields: transedFields,
         statEncodes: transedEncodes
     })
-    if (excludeScaleZero) {
-        applyZeroScale(enc)
-    }
 
     humanHabbit(enc);
     if (resizeMode === IResizeMode.control) {
@@ -164,6 +161,7 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
         },
         encoding: enc
     };
+    applyZeroScale(basicSpec, !excludeScaleZero)
     autoCoord(fields, basicSpec, dataSource)
     applyDefaultSort(basicSpec, fields)
     applySizeConfig2DistViz(basicSpec, {

@@ -217,7 +217,7 @@ class basefunc:
         return [meta, res_list[0], res_list[1]]
 
     @staticmethod
-    def clickhouse_getresult(sql, uri=None, engine=None):
+    def clickhouse_getresult(sql, uri=None, engine=None,**kwargs):
         if engine is None:
             engine = create_engine(uri, echo=True)
         res = engine.execute(sql)

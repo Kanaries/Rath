@@ -1,8 +1,8 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const markColor = '#000';
 
-const ggplot2Theme: VegaThemeConfig = {
+const ggplot2Theme: VegaGlobalConfig = {
 
     arc: { fill: markColor },
     area: { fill: markColor },

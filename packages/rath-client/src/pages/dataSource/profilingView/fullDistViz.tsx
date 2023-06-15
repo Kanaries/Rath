@@ -5,11 +5,11 @@ import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { shallowCopyArray } from '../../../utils/deepcopy';
 import { getVegaTimeFormatRules } from '../../../utils';
-import { VegaThemeConfig } from '../../../queries/themes/config';
+import { VegaGlobalConfig } from '../../../queries/themes/config';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
 const markColor = '#3371D7';
-const theme: VegaThemeConfig = {
+const theme: VegaGlobalConfig = {
     arc: { fill: markColor },
     area: { fill: markColor },
     path: { stroke: markColor },

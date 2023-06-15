@@ -1,4 +1,4 @@
-import { VegaThemeConfig } from './config';
+import { VegaGlobalConfig } from './config';
 
 const markColor = '#30a2da';
 const axisColor = '#cbcbcb';
@@ -6,7 +6,7 @@ const guideLabelColor = '#999';
 const guideTitleColor = '#333';
 const blackTitle = '#333';
 
-const fiveThirtyEightTheme: VegaThemeConfig = {
+const fiveThirtyEightTheme: VegaGlobalConfig = {
     arc: { fill: markColor },
     area: { fill: markColor },
 
