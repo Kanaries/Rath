@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Icon, IconButton, Spinner, IContextualMenuItem, SpinnerSize } from "@fluentui/react";
-import { defaultServers } from '..';
+import { defaultServers } from '../main';
 
 
 const ServerItem = styled.div`

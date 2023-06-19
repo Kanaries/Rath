@@ -2,7 +2,7 @@ import intl from 'react-intl-universal';
 import { PrimaryButton } from '@fluentui/react';
 import { FC, memo, CSSProperties, Fragment, useMemo } from 'react';
 import styled from 'styled-components';
-import type { TableData } from './index';
+import type { TableData } from './main';
 
 
 interface TablePreviewProps {

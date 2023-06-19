@@ -1,5 +1,5 @@
 import type { IDropdownOption } from '@fluentui/react';
-import type { SupportedDatabaseType } from "./type";
+import type { SupportedDatabaseType } from "./interfaces";
 
 
 export type DatabaseLevelType = 'database' | 'schema' | 'table';

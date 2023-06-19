@@ -1,11 +1,11 @@
 import { memo, useEffect, useState } from "react";
 import styled from "styled-components";
-import Diagram from "../../../../../components/dbGraph";
-import type { IDBGraph } from "../../../../../components/dbGraph/localTypes";
-import TablePreview from "../table-preview";
-import { toSQL } from "../../../../../components/dbGraph/utils";
-import type { TableInfo } from "../type";
-import type { TableData, TableLabels } from "..";
+import Diagram from "../../../../components/dbGraph";
+import type { IDBGraph } from "../../../../components/dbGraph/localTypes";
+import TablePreview from "../tablePreview";
+import { toSQL } from "../../../../components/dbGraph/utils";
+import type { TableInfo } from "../interfaces";
+import type { TableData, TableLabels } from "../main";
 
 
 const Container = styled.div`

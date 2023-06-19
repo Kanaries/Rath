@@ -1,7 +1,7 @@
-import { notify } from "../../../../components/error";
-import { getRathError } from "../../../../rath-error";
-import databaseOptions from "./config";
-import type { SupportedDatabaseType, TableColInfo, TableInfo, TableRowData } from "./type";
+import { notify } from "../../../components/error";
+import { getRathError } from "../../../rath-error";
+import databaseOptions from "./options";
+import type { SupportedDatabaseType, TableColInfo, TableInfo, TableRowData } from "./interfaces";
 
 
 const apiPath = '/api/get_connection';

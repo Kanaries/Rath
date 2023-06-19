@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor, { ChangeHandler, EditorWillMount } from 'react-monaco-editor';
 import { IRange, languages } from 'monaco-editor';
-import TablePreview from '../table-preview';
-import type { TableData } from '..';
+import TablePreview from '../tablePreview';
+import type { TableData } from '../main';
 import type { INestedListItem } from '../components/nested-list-item';
 
 type Monaco = Parameters<EditorWillMount>[0];

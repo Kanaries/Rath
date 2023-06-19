@@ -3,7 +3,7 @@ import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import type { TableInfo } from '../../pages/dataSource/selection/database/type';
+import type { TableInfo } from '../../pages/dataConnection/database/interfaces';
 import Link from './link';
 import { IDBGraph } from './localTypes';
 import DBNode from './node';

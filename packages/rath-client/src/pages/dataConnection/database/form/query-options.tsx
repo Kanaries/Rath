@@ -3,17 +3,17 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { IconButton, Spinner, useTheme } from '@fluentui/react';
-import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../type';
-import databaseOptions from '../config';
+import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../interfaces';
+import databaseOptions from '../options';
 import NestedList from '../components/nested-list';
 import type { INestedListItem } from '../components/nested-list-item';
-import useAsyncState, { AsyncDispatch } from '../../../../../hooks/use-async-state';
-import { notify } from '../../../../../components/error';
-import type { TableData } from '../index';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult } from '../api';
-import TablePreview from '../table-preview';
-import SQLEditor from '../query-editor/sql-editor';
-import DiagramEditor from '../query-editor/diagram-editor';
+import useAsyncState, { AsyncDispatch } from '../../../../hooks/use-async-state';
+import { notify } from '../../../../components/error';
+import type { TableData } from '../main';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult } from '../service';
+import TablePreview from '../tablePreview';
+import SQLEditor from '../queryEditor/sqlEditor';
+import DiagramEditor from '../queryEditor/diagramEditor';
 import { EditorKey, fetchListAsNodes, fetchTablePreviewData, findNodeByPathId, handleBrowserItemClick, MenuType, PageType } from './utils';
 import { MessageContainer, PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SpinnerContainer, SyncButton } from './components';
 

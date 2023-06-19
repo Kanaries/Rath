@@ -1,11 +1,11 @@
 import { Icon } from '@fluentui/react';
 import produce from 'immer';
 import type { Dispatch } from 'react';
-import type { DatabaseLevelType } from '../config';
+import type { DatabaseLevelType } from '../options';
 import { INestedListItem } from '../components/nested-list-item';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableDetail, fetchTableList } from '../api';
-import databaseOptions from '../config';
-import { SupportedDatabaseType } from '../type';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableDetail, fetchTableList } from '../service';
+import databaseOptions from '../options';
+import { SupportedDatabaseType } from '../interfaces';
 
 
 export const findNode = (root: INestedListItem[], path: INestedListItem[]): INestedListItem | null => {
