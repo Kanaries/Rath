@@ -9,7 +9,6 @@ import useAsyncState from '../../../../hooks/use-async-state';
 import useCachedState from '../../../../hooks/use-cached-state';
 import { notify } from '../../../../components/error';
 import { useGlobalStore } from '../../../../store';
-import { logDataImport } from '../../../../loggers/dataImport';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import databaseOptions from './config';
 import type { SupportedDatabaseType } from './type';
@@ -147,13 +146,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                     queryString,
                     credentials,
                 },
-            });
-            logDataImport({
-                dataType: `Database/${sourceType}`,
-                name,
-                fields,
-                dataSource: dataSource.slice(0, 10),
-                size: dataSource.length,
             });
             onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
 

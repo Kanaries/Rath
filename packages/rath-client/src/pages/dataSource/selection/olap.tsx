@@ -4,7 +4,6 @@ import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndica
 import ConnectionStatus from '../../../components/connectionStatus';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
-import { logDataImport } from '../../../loggers/dataImport';
 import { notify } from '../../../components/error';
 import { DataSourceTag } from '../../../utils/storage';
 
@@ -45,12 +44,6 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
     const loadData = useCallback(() => {
         clickHouseStore.loadSampleData()
             .then(({ fieldMetas, data}) => {
-                logDataImport({
-                    dataType: 'OLAP',
-                    fields: fieldMetas,
-                    dataSource: data.slice(0, 10),
-                    size: data.length
-                });
                 userStore.saveDataSourceOnCloudOnlineMode({
                     name: '',
                     datasourceType: DataSourceType.Restful,

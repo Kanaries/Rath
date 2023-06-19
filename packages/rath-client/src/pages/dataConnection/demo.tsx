@@ -19,7 +19,6 @@ import { useId } from "@fluentui/react-hooks";
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
-import { logDataImport } from '../../loggers/dataImport';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../constants';
 import { DataSourceTag, IDBMeta } from '../../utils/storage';
@@ -104,13 +103,6 @@ const DemoData: FC<DemoDataProps> = props => {
         requestDemoData(demo.key).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource, `${demo.text}.${RathDemoVirtualExt}`, DataSourceTag.DEMO);
-            logDataImport({
-                dataType: "Demo",
-                name: demo.key,
-                fields,
-                dataSource: [],
-                size: dataSource.length,
-            });
         }).catch((err) => {
             onLoadingFailed(err);
         })

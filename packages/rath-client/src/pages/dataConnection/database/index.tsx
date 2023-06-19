@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
-import { logDataImport } from '../../../loggers/dataImport';
 import prefetch from '../../../utils/prefetch';
 import { notify } from '../../../components/error';
 import { DataSourceTag } from '../../../utils/storage';
@@ -177,13 +176,6 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             const { dataSource, fields } = data;
             const name = [database.value, schema.value].filter(Boolean).join('.');
 
-            logDataImport({
-                dataType: `Database/${databaseType}`,
-                name,
-                fields,
-                dataSource: dataSource.slice(0, 10),
-                size: dataSource.length,
-            });
             userStore.saveDataSourceOnCloudOnlineMode({
                 name,
                 datasourceType: DataSourceType.Database,
