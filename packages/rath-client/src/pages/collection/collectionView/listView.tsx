@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { applyFilters } from '@kanaries/loa';
-import { Divider, Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
 import ViewInfo from '../../../components/viewInfo/pillInfo';
 import { VegaGlobalConfig } from '../../../queries/themes/config';
+import Pagination from '../../../components/pagination';
+import Divider from '../../../components/divider';
 
 const CollectContainer = styled.div`
     .seg-header {
@@ -49,11 +50,9 @@ const ListView: React.FC<ListViewProps> = (props) => {
         <div>
             <Pagination
                 style={{ marginTop: '1em', marginLeft: '1em' }}
-                variant="outlined"
-                shape="rounded"
-                count={Math.ceil(views.length / VIEW_NUM_IN_PAGE)}
-                page={pageIndex + 1}
-                onChange={(e, v) => {
+                pageCount={Math.ceil(views.length / VIEW_NUM_IN_PAGE)}
+                pageIdx={pageIndex + 1}
+                onChange={v => {
                     setPageIndex(v - 1);
                 }}
             />

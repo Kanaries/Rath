@@ -11,8 +11,6 @@
   "dependencies": {
     "@antv/g6": "^4.8.4",
     "@babel/parser": "^7.19.6",
-    "@emotion/react": "^11.10.4",
-    "@emotion/styled": "^11.10.4",
     "@fluentui/font-icons-mdl2": "^8.5.4",
     "@fluentui/react": "^8.94.4",
     "@fluentui/react-components": "^9.19.0",
@@ -22,7 +20,6 @@
     "@kanaries/graphic-walker": "0.3.7",
     "@kanaries/loa": "^0.0.16",
     "@kanaries/web-data-loader": "0.1.7",
-    "@material-ui/core": "^5.0.0-beta.5",
     "@vercel/analytics": "^1.0.0",
     "@zip.js/zip.js": "^2.6.60",
     "airtable": "^0.11.4",
