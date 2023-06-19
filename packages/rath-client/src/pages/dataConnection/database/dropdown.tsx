@@ -1,6 +1,6 @@
 import { Icon } from '@fluentui/react';
 import styled from 'styled-components';
-import databaseOptions from './config';
+import databaseOptions from './options';
 
 
 const ItemContainer = styled.div`

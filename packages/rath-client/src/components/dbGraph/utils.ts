@@ -1,4 +1,4 @@
-import type { TableInfo } from "../../pages/dataSource/selection/database/type";
+import type { TableInfo } from "../../pages/dataConnection/database/interfaces";
 import { BOX_HEIGHT, BOX_WIDTH, STROKE_RADIUS } from "./config";
 import type { IDBEdge, IDBGraph } from "./localTypes";
 

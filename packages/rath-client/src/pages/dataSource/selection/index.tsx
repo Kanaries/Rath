@@ -6,13 +6,13 @@ import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useDataSourceTypeOptions } from '../config';
 import DataLoadingStatus from '../dataLoadingStatus';
 import type { DataSourceTag, IDBMeta } from '../../../utils/storage';
+import DatabaseConnector from '../../dataConnection/database/main';
 import FileData from './file';
 import DemoData from './demo';
 // import RestfulData from './restful';
 import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseConnector from './database';
 import AirTableSource from './airtable';
 
 interface SelectionProps {

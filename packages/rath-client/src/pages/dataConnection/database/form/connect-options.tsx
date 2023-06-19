@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import produce from 'immer';
 import { useId } from '@fluentui/react-hooks';
 import { ContextualMenu, DefaultButton, Dropdown, Icon, IContextualMenuItem, IDropdownOption, Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
-import databaseOptions from '../config';
-import type { SupportedDatabaseType } from '../type';
-import { renderDropdownItem, renderDropdownTitle } from '../custom-dropdown';
-import useCachedState from '../../../../../hooks/use-cached-state';
+import databaseOptions from '../options';
+import type { SupportedDatabaseType } from '../interfaces';
+import { renderDropdownItem, renderDropdownTitle } from '../dropdown';
+import useCachedState from '../../../../hooks/use-cached-state';
 
 
 const InputGroupStackToken = { childrenGap: 10 };
