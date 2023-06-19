@@ -20,7 +20,7 @@ import { observer } from "mobx-react-lite";
 import * as xlsx from 'xlsx';
 import intl from "react-intl-universal";
 import { isExcelFile, loadDataFile, loadExcelFile, loadExcelRaw, parseExcelFile, readRaw, SampleKey } from "../../dataSource/utils"
-import { dataBackup, logDataImport } from "../../../loggers/dataImport";
+import { dataBackup } from "../../../loggers/dataImport";
 import { DataSourceType, IMuteFieldBase, IRow } from "../../../interfaces";
 import { DataSourceTag, IDBMeta } from "../../../utils/storage"
 import { useGlobalStore } from "../../../store";
@@ -238,12 +238,6 @@ const FileData: FC<FileDataProps> = (props) => {
                 fileType: preview.type,
             },
         }, preview);
-        logDataImport({
-            dataType: 'File',
-            fields,
-            dataSource: dataSource.slice(0, 10),
-            size: dataSource.length
-        });
         dataBackup(preview);
         onDataLoaded(fields, dataSource, preview.name, DataSourceTag.FILE);
         onClose();

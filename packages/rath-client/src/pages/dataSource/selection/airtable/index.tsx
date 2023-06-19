@@ -1,7 +1,6 @@
 import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import intl from 'react-intl-universal'
-import { logDataImport } from '../../../../loggers/dataImport';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import { DataSourceTag, IDBMeta } from '../../../../utils/storage';
@@ -38,12 +37,6 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
             .then((ds) => {
                 const name = `airtable-${tableName}-${viewName}`;
                 onDataLoaded(ds.fields, ds.dataSource, name, DataSourceTag.AIR_TABLE);
-                logDataImport({
-                    dataType: 'AirTable',
-                    fields: ds.fields,
-                    dataSource: ds.dataSource.slice(0, 10),
-                    size: ds.dataSource.length
-                });
                 userStore.saveDataSourceOnCloudOnlineMode({
                     name,
                     datasourceType: DataSourceType.AirTable,

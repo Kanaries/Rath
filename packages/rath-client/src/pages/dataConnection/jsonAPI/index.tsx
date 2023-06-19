@@ -20,7 +20,6 @@ import intl from 'react-intl-universal';
 import MonacoEditor from 'react-monaco-editor';
 import { unstable_batchedUpdates } from 'react-dom';
 import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
-import { logDataImport } from '../../../loggers/dataImport';
 import { DataSourceTag } from '../../../utils/storage';
 import { useGlobalStore } from '../../../store';
 import { IJSONAPIFormat, getFullData, getPreviewData, jsonDataFormatChecker, requestJSONAPIData } from './utils';
@@ -81,13 +80,6 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
                 name: api,
                 datasourceType: DataSourceType.Restful,
                 linkInfo: { api, detectedDataStruct },
-            });
-            logDataImport({
-                dataType: 'JSON API',
-                name: api,
-                fields,
-                dataSource: dataSource.slice(0, 20),
-                size: dataSource.length,
             });
         }
         onClose();
