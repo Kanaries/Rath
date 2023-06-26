@@ -13,7 +13,7 @@ export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: nu
     if (spec.encoding.x) {
         const targetField = fields.find(f => f.fid === spec.encoding.x?.field);
         if (targetField) {
-            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 20) {
+            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 32) {
                 fixed = true
             }
         }
@@ -21,7 +21,7 @@ export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: nu
     if (spec.encoding.y) {
         const targetField = fields.find(f => f.fid === spec.encoding.y?.field);
         if (targetField) {
-            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 20) {
+            if (uncompressAxisSemanticType(targetField.semanticType) && targetField.features.unique > 32) {
                 fixed = true
             }
         }
