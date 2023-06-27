@@ -68,8 +68,6 @@ const Collection: React.FC = (props) => {
                     <SearchBox
                         placeholder="Search"
                         onSearch={(newValue) => {
-                            // const res = searchFilterView(newValue, collectionList)
-                            // console.log(res)
                             setSearchContent(newValue);
                         }}
                     />

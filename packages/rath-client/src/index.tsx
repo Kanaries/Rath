@@ -21,9 +21,6 @@ import { customLightTheme, mainTheme } from './theme';
 
 inject();
 
-// @ts-ignore
-// window.Buffer = Buffer.Buffer;
-// console.log('buffer', Buffer)
 initializeIcons();
 
 ReactDOM.render(

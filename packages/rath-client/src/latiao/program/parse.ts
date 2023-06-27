@@ -136,7 +136,6 @@ const resolveNode = (exp: CallExpression['arguments'][0], context: LaTiaoProgram
       return resolveBinOp(exp, context, out);
     }
     default: {
-      // console.log('->', exp);
       throw new LaTiaoSyntaxError(
         'Unexpected token.',
         exp,

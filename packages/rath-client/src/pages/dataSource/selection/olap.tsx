@@ -90,9 +90,6 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
         })
     }, [clickHouseStore])
 
-    // useEffect(() => {
-    //     fetch('https://localhost:2333/api/config/connection').then(res => res.json()).then(console.log)
-    // }, [])
 
     return <div>
         <Stack horizontal tokens={StackTokens}>

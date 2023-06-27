@@ -177,12 +177,7 @@ const Painter: React.FC = (props) => {
                 
                 setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
-                // if(testConfig.printLog) {
-                //     res.view.addDataListener('dataSource', (name, value) => {
-                //         window.console.log("dataListener", name, value);
-                //         window.console.log(testConfig);
-                //     })
-                // }
+
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;

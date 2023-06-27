@@ -18,7 +18,6 @@ export function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
         let score = 0;
         const X = filteredDataSource.map(row => row[xField.fid]);
         const Y = filteredDataSource.map(row => row[yField.fid]);
-        // console.log(X, Y)
         if (xField.semanticType === 'quantitative' && yField.semanticType === 'quantitative') {
             score = mic(X, Y);
         }
@@ -35,7 +34,6 @@ export function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
             // 这里如果要用hack的temporal解法的话，需要用purennmic来做T-T类型。但是我们目前并不想提升T-T类型。不如等到之后时间系统改造完用正规的方法搞。
             else score = nnMic(X, Y)
         }
-        // console.log(score)
         totalScore += score * filteredDataSource.length / dataSource.length;
     }
     // eslint-disable-next-line no-constant-condition
@@ -46,7 +44,6 @@ export function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
             let score = 0;
             const X = filteredDataSource.map(row => row[xField.fid]);
             const Y = filteredDataSource.map(row => row[yField.fid]);
-            // console.log(X, Y)
             if (xField.semanticType === 'quantitative' && yField.semanticType === 'quantitative') {
                 score = mic(X, Y);
             }
@@ -85,7 +82,6 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
         let score = 0;
         const X = filteredDataSource.map(row => row[xField.fid]);
         const Y = filteredDataSource.map(row => row[yField.fid]);
-        // console.log(X, Y)
         if (xField.semanticType === 'quantitative' && yField.semanticType === 'quantitative') {
             score = mic(X, Y);
         }
@@ -102,7 +98,6 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
             // 这里如果要用hack的temporal解法的话，需要用purennmic来做T-T类型。但是我们目前并不想提升T-T类型。不如等到之后时间系统改造完用正规的方法搞。
             else score = nnMic(X, Y)
         }
-        // console.log(score)
         // totalScore += score * filteredDataSource.length / dataSource.length;
         totalScore = Math.min(score, totalScore)
     }
@@ -114,7 +109,6 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
             let score = 0;
             const X = filteredDataSource.map(row => row[xField.fid]);
             const Y = filteredDataSource.map(row => row[yField.fid]);
-            // console.log(X, Y)
             if (xField.semanticType === 'quantitative' && yField.semanticType === 'quantitative') {
                 score = mic(X, Y);
             }
@@ -140,7 +134,6 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
 }
 
 export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMeta[], dataSource: IRow[]) {
-    // console.log('start')
     let ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(0));
     for (let i = 0; i < mat.length; i++) {
         for (let j = 0; j < mat[i].length; j++) {
@@ -179,7 +172,6 @@ export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMe
             }
         }
     }
-    // console.log(JSON.stringify(ans, null, 2))
     return ans;
 }
 

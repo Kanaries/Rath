@@ -198,7 +198,6 @@ const diffGroups = (
         const loss = ignoreLoss ? 0 : Math.abs(a - b) / 2;
         return score + loss;
     }, 0);
-    // console.log(dimension.name, aggregated1, aggregated2, group1, group2, diff);
     return diff;
 };
 

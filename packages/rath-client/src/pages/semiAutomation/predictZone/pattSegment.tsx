@@ -60,7 +60,6 @@ const PattSegment: React.FC = () => {
                             }}
                         />
                     </Stack>
-                    <h2>{pattViews.views[i].imp}</h2>
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}
