@@ -61,6 +61,7 @@ const FeatSegment: React.FC = () => {
                             }}
                         />
                     </Stack>
+                    <h2>{featViews.views[i].imp}</h2>
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}

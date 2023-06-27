@@ -12,13 +12,13 @@ const Narrative: React.FC = () => {
     const [explainLoading, setExplainLoading] = useState(false);
     const requestId = useRef<number>(0);
     const fieldsInViz = useMemo(() => {
-        return mainView?.fields || [];
-    }, [mainView]);
+        return mainView.dataViewQuery?.fields || [];
+    }, [mainView.dataViewQuery]);
     const [viewInfo, setViewInfo] = useState<any[]>([])
     useEffect(() => {
         setViewInfo([])
         setExplainLoading(false);
-    }, [mainView])
+    }, [mainView.dataViewQuery])
     useEffect(() => {
         (() => getInsightExpl({
             requestId,

@@ -13,7 +13,7 @@ const PillsContainer = styled.div`
 
 const FieldContainer: React.FC = (props) => {
     const { megaAutoStore } = useGlobalStore();
-    const { mainViewPattern, fieldMetas } = megaAutoStore;
+    const { mainView, fieldMetas } = megaAutoStore;
 
     const appendFieldHandler = useCallback(
         (fid: string) => {
@@ -22,13 +22,13 @@ const FieldContainer: React.FC = (props) => {
         [megaAutoStore]
     );
 
-    if (mainViewPattern === null) {
+    if (mainView.dataViewQuery === null) {
         return <div></div>;
     }
     return (
         <div>
             <PillsContainer>
-                {mainViewPattern.fields
+                {mainView.dataViewQuery.fields
                     .filter((f) => f.analyticType === 'dimension')
                     .map((f) => {
                         return (
@@ -44,7 +44,7 @@ const FieldContainer: React.FC = (props) => {
                     })}
             </PillsContainer>
             <PillsContainer>
-                {mainViewPattern.fields
+                {mainView.dataViewQuery.fields
                     .filter((f) => f.analyticType === 'measure')
                     .map((f, fIndex) => {
                         return (

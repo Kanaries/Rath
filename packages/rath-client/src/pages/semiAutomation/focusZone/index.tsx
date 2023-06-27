@@ -8,7 +8,6 @@ import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
-import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import EditorCore from '../../editor/core/index';
 import type { IReactVegaHandler } from '../../../components/react-vega';
@@ -19,34 +18,34 @@ const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = () => {
     const { semiAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
-    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
+    const { mainView, showMiniFloatView, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
     const { muteSpec } = editorStore;
     const appendFieldHandler = useCallback(
         (fid: string) => {
-            if (mainView === null) {
+            if (mainView.dataViewQuery === null) {
                 semiAutoStore.initMainViewWithSingleField(fid);
             } else {
                 semiAutoStore.addMainViewField(fid);
             }
         },
-        [semiAutoStore, mainView]
+        [semiAutoStore, mainView.dataViewQuery]
     );
 
     const editChart = useCallback(() => {
-        if (mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(mainViewSpec);
+        if (mainView.spec) {
+            commonStore.visualAnalysisInGraphicWalker(mainView.spec);
         }
-    }, [mainViewSpec, commonStore]);
+    }, [mainView.spec, commonStore]);
 
     const paintChart = useCallback(() => {
-        if (mainViewSpec && mainView) {
-            painterStore.analysisInPainter(mainViewSpec, mainView);
+        if (mainView.spec && mainView.dataViewQuery) {
+            painterStore.analysisInPainter(mainView.spec, mainView.dataViewQuery);
         }
-    }, [mainViewSpec, painterStore, mainView]);
+    }, [mainView.spec, mainView.dataViewQuery, painterStore]);
 
     const viewSpec = useMemo(() => {
-        return mainViewSpecSource === 'custom' ? muteSpec : mainViewSpec;
-    }, [mainViewSpec, muteSpec, mainViewSpecSource]);
+        return mainViewSpecSource === 'custom' ? muteSpec : mainView.spec;
+    }, [mainView.spec, muteSpec, mainViewSpecSource]);
 
     const ChartEditButtonProps = useMemo<IContextualMenuProps>(() => {
         return {
@@ -62,21 +61,21 @@ const FocusZone: React.FC = () => {
                     text: intl.get('megaAuto.commandBar.editInEditor'),
                     iconProps: { iconName: 'Edit' },
                     onClick: () => {
-                        if (mainViewSpec) {
-                            editorStore.syncSpec(IVisSpecType.vegaSubset, mainViewSpec);
+                        if (mainView.spec) {
+                            editorStore.syncSpec(IVisSpecType.vegaSubset, mainView.spec);
                             semiAutoStore.changeMainViewSpecSource();
                         }
                     },
                 },
             ],
         };
-    }, [editChart, editorStore, mainViewSpec, semiAutoStore]);
+    }, [editChart, editorStore, mainView.spec, semiAutoStore]);
 
     const handler = useRef<IReactVegaHandler>(null);
 
     return (
         <MainViewContainer>
-            {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
+            {mainView.dataViewQuery && showMiniFloatView && <MiniFloatCanvas pined={mainView.dataViewQuery} />}
             <div className="vis-container">
                 <div className="spec">
                     {mainViewSpecSource === 'custom' && (
@@ -93,17 +92,12 @@ const FocusZone: React.FC = () => {
                         />
                     )}
                 </div>
-                <div className="vis">{mainView && mainViewSpec && <MainCanvas handler={handler} view={mainView} spec={viewSpec} />}</div>
-                {mainVizSetting.nlg && (
-                    <div style={{ overflow: 'auto' }}>
-                        <Narrative />
-                    </div>
-                )}
+                <div className="vis">{mainView.dataViewQuery && mainView.spec && <MainCanvas handler={handler} view={mainView.dataViewQuery} spec={viewSpec} />}</div>
             </div>
             <hr style={{ marginTop: '1em' }} />
             <div className="fields-container">
-                {mainView &&
-                    mainView.fields.map((f: IFieldMeta) => (
+                {mainView.dataViewQuery &&
+                    mainView.dataViewQuery.fields.map((f: IFieldMeta) => (
                         <ViewField
                             onDoubleClick={() => {
                                 semiAutoStore.setNeighborKeys(neighborKeys.includes(f.fid) ? [] : [f.fid]);
@@ -120,9 +114,9 @@ const FocusZone: React.FC = () => {
                 <FieldPlaceholder fields={fieldMetas} onAdd={appendFieldHandler} />
             </div>
             <div className="fields-container">
-                {mainView &&
-                    mainView.filters &&
-                    mainView.filters.map((f) => {
+                {mainView.dataViewQuery &&
+                    mainView.dataViewQuery.filters &&
+                    mainView.dataViewQuery.filters.map((f) => {
                         const targetField = fieldMetas.find((m) => m.fid === f.fid);
                         if (!targetField) return null;
                         let filterDesc = `${targetField.name || targetField.fid} ∈ `;
@@ -146,9 +140,9 @@ const FocusZone: React.FC = () => {
                 />
             </div>
             <div className="fields-container">
-                {mainView &&
-                    mainView.encodes &&
-                    mainView.encodes.map((f) => {
+                {mainView.dataViewQuery &&
+                    mainView.dataViewQuery.encodes &&
+                    mainView.dataViewQuery.encodes.map((f) => {
                         if (f.field === undefined)
                             return (
                                 <ViewField
@@ -174,9 +168,9 @@ const FocusZone: React.FC = () => {
                             />
                         );
                     })}
-                {mainView && (
+                {mainView.dataViewQuery && (
                     <EncodeCreationPill
-                        fields={mainView.fields}
+                        fields={mainView.dataViewQuery.fields}
                         onSubmit={(encode) => {
                             semiAutoStore.addFieldEncode2MainViewPattern(encode);
                         }}
@@ -188,27 +182,29 @@ const FocusZone: React.FC = () => {
                     style={BUTTON_STYLE}
                     text={intl.get('megaAuto.commandBar.editing')}
                     iconProps={{ iconName: 'BarChartVerticalEdit' }}
-                    disabled={mainView === null}
+                    disabled={mainView.dataViewQuery === null}
                     menuProps={ChartEditButtonProps}
                 />
                 <ActionButton
                     style={BUTTON_STYLE}
                     text={intl.get('megaAuto.commandBar.painting')}
                     iconProps={{ iconName: 'EditCreate' }}
-                    disabled={mainView === null}
+                    disabled={mainView.dataViewQuery === null}
                     onClick={paintChart}
                 />
-                {mainView && mainViewSpec && (
+                {mainView.dataViewQuery && mainView.spec && (
                     <ActionButton
                         style={BUTTON_STYLE}
                         iconProps={{
-                            iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters)
+                            iconName: collectionStore.collectionContains(fieldMetas, mainView.spec, IVisSpecType.vegaSubset, mainView.dataViewQuery.filters)
                                 ? 'FavoriteStarFill'
                                 : 'FavoriteStar',
                         }}
                         text={intl.get('common.star')}
                         onClick={() => {
-                            collectionStore.toggleCollectState(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters);
+                            if (mainView.spec && mainView.dataViewQuery) {
+                                collectionStore.toggleCollectState(fieldMetas, mainView.spec, IVisSpecType.vegaSubset, mainView.dataViewQuery.filters);
+                            }
                         }}
                     />
                 )}
@@ -228,7 +224,7 @@ const FocusZone: React.FC = () => {
                     ariaLabel={intl.get('megaAuto.commandBar.download')}
                     title={intl.get('megaAuto.commandBar.download')}
                     text={intl.get('megaAuto.commandBar.download')}
-                    disabled={mainView === null}
+                    disabled={mainView.dataViewQuery === null}
                     onClick={() => {
                         handler.current?.exportImage();
                     }}
