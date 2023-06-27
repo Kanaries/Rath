@@ -2,13 +2,12 @@ import produce from "immer";
 import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
 import { Specification } from "visual-insights";
-import { IResizeMode, IRow, ISpecSourceType, IVegaSubset } from "../../interfaces";
+import { IResizeMode, IRow, ISpecSourceType, IVisView } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
-import { labDistVis } from "../../queries/labdistVis";
 import { labDistVisService, loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
-import { adviceVisSize } from "../../pages/collection/utils";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
+import { autoVis } from "./autoVis";
 
 const RENDER_BATCH_SIZE = 5;
 
@@ -42,7 +41,10 @@ export class SemiAutomationStore {
     public filterViews!: IAssoViews;
     public neighborViews!: IAssoViews;
     private dataSourceStore: DataSourceStore;
-    public mainView: IPattern | null = null;
+    public mainView: IVisView = {
+        spec: null,
+        dataViewQuery: null
+    };
     public specForGraphicWalker: Specification = {};
     public showMiniFloatView: boolean = false;
     public neighborKeys: string[] = [];
@@ -59,7 +61,7 @@ export class SemiAutomationStore {
             featViews: observable.shallow,
             filterViews: observable.shallow,
             neighborViews: observable.shallow,
-            mainView: observable.ref,
+            mainView: observable.shallow,
             // @ts-expect-error private field
             dataSourceStore: false,
             reactions: false
@@ -67,7 +69,10 @@ export class SemiAutomationStore {
     }
     public init () {
         this.mainViewSpecSource = 'default';
-        this.mainView = null;
+        this.mainView = {
+            dataViewQuery: null,
+            spec: null
+        }
         this.autoAsso = {
             pattViews: true,
             featViews: true,
@@ -94,7 +99,7 @@ export class SemiAutomationStore {
         this.neighborViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.reactions.push(reaction(() => {
             return {
-                mainView: this.mainView,
+                mainViewQuery: this.mainView.dataViewQuery,
                 dataSource: this.dataSource,
                 fieldMetas: this.fieldMetas,
                 autoFeat: this.autoAsso.featViews,
@@ -102,8 +107,8 @@ export class SemiAutomationStore {
                 autoFilter: this.autoAsso.filterViews,
             }
         }, (props) => {
-            const { mainView, autoFeat, autoFilter, autoPatt } = props;
-            if (mainView) {
+            const { mainViewQuery, autoFeat, autoFilter, autoPatt } = props;
+            if (mainViewQuery) {
                 autoPatt && this.pattAssociate();
                 !autoPatt && this.initRenderViews('pattViews')
                 autoFeat && this.featAssociate();
@@ -117,20 +122,40 @@ export class SemiAutomationStore {
 
         this.reactions.push(reaction(() => {
             return {
-                mainView: this.mainView,
+                mainViewQuery: this.mainView.dataViewQuery,
                 dataSource: this.dataSource,
                 fieldMetas: this.fieldMetas,
                 autoNeighbor: this.autoAsso.neighborViews,
                 neighborKeys: this.neighborKeys
             }
         }, (props) => {
-            const { mainView, autoNeighbor, neighborKeys } = props;
-            if (mainView && neighborKeys.length > 0) {
+            const { mainViewQuery, autoNeighbor, neighborKeys } = props;
+            if (mainViewQuery && neighborKeys.length > 0) {
                 autoNeighbor && this.neighborAssociate();
                 !autoNeighbor && this.initRenderViews('neighborViews');
             } else {
                 this.initRenderViews('neighborViews');
             }
+        }))
+
+        this.reactions.push(reaction(() => {
+            return {
+                dataViewQuery: this.mainView.dataViewQuery,
+                dataSource: this.dataSource,
+                mainVizSetting: this.mainVizSetting,
+                fieldMetas: this.fieldMetas,
+                vizAlgo: this.settings.vizAlgo
+            }
+        }, (props) => {
+            const { mainVizSetting, dataViewQuery, fieldMetas } = props;
+            if (dataViewQuery === null) return null
+            this.mainView.spec = autoVis({
+                mainViewQuery: dataViewQuery,
+                mainVizSetting,
+                fieldMetas,
+                dataSource: this.dataSource,
+                vizAlgo: this.settings.vizAlgo
+            })
         }))
     }
     public setMainViewSpecSource (sourceType: ISpecSourceType) {
@@ -163,7 +188,10 @@ export class SemiAutomationStore {
         this[akey] = makeInitAssoViews();
     }
     public clearMainView () {
-        this.mainView = null;
+        this.mainView = {
+            dataViewQuery: null,
+            spec: null
+        }
     }
     public initMainViewWithSingleField (fid: string) {
         const field = this.fieldMetas.find(f => f.fid === fid);
@@ -235,15 +263,15 @@ export class SemiAutomationStore {
         const { fieldMetas, dataSource, mainView } = this;
         const neighborKeys = toJS(this.neighborKeys)
         try {
-            if (mainView === null) throw new Error('mainView is null');
-            const viewFields = mainView.fields.filter(f => !neighborKeys.includes(f.fid));
+            if (mainView.dataViewQuery === null) throw new Error('mainView is null');
+            const viewFields = mainView.dataViewQuery.fields.filter(f => !neighborKeys.includes(f.fid));
             const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'neighbors',
                 props: {
                     fields: [...viewFields, { fid: '*', neighbors: neighborKeys, includeNeighbor: false}],
-                    filters: mainView.filters,
+                    filters: mainView.dataViewQuery.filters,
                 }
             }, 'local')
             this.updateAssoViews('neighborViews', res);
@@ -261,7 +289,7 @@ export class SemiAutomationStore {
                 dataSource,
                 fields: fieldMetas,
                 task: 'featureSelection',
-                props: mainView
+                props: mainView.dataViewQuery
             }, 'local')
             this.updateAssoViews('featViews', res)
         } catch (error) {
@@ -277,7 +305,7 @@ export class SemiAutomationStore {
                 dataSource,
                 fields: fieldMetas,
                 task: 'patterns',
-                props: mainView
+                props: mainView.dataViewQuery
             }, 'local')
             this.updateAssoViews('pattViews', res);
         } catch (error) {
@@ -309,7 +337,7 @@ export class SemiAutomationStore {
                 dataSource,
                 fields: fieldMetas,
                 task: 'filterSelection',
-                props: mainView
+                props: mainView.dataViewQuery
             }, 'local')
             this.updateAssoViews('filterViews', res);
         } catch (error) {
@@ -317,37 +345,9 @@ export class SemiAutomationStore {
             this.endAssoViewComputing('filterViews');
         }
     }
-    public get mainViewSpec (): IVegaSubset | null {
-        const { mainVizSetting, mainView, fieldMetas } = this;
-        if (mainView === null) return null
-        if (this.settings.vizAlgo === 'lite') {
-            return adviceVisSize(distVis({
-                resizeMode: mainVizSetting.resize.mode,
-                pattern: toJS(mainView),
-                width: mainVizSetting.resize.width,
-                height: mainVizSetting.resize.height,
-                interactive: mainVizSetting.interactive,
-                stepSize: 32,
-                excludeScaleZero: mainVizSetting.excludeScaleZero,
-                specifiedEncodes: mainView.encodes
-            }), fieldMetas, 800, 500)
-        } else {
-            return adviceVisSize(labDistVis({
-                resizeMode: mainVizSetting.resize.mode,
-                pattern: toJS(mainView),
-                width: mainVizSetting.resize.width,
-                height: mainVizSetting.resize.height,
-                interactive: mainVizSetting.interactive,
-                stepSize: 32,
-                dataSource: this.dataSource,
-                excludeScaleZero: mainVizSetting.excludeScaleZero,
-                specifiedEncodes: mainView.encodes
-            }), fieldMetas, 800, 500)
-        }
-    }
     public addFieldEncode2MainViewPattern (encode: IFieldEncode) {
-        if (this.mainView) {
-            this.mainView = produce(this.mainView, draft => {
+        if (this.mainView.dataViewQuery) {
+            this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
                 if (!draft.encodes) {
                     draft.encodes = [];
                 }
@@ -356,8 +356,8 @@ export class SemiAutomationStore {
         }
     }
     public removeFieldEncodeFromMainViewPattern (encode: IFieldEncode) {
-        if (this.mainView) {
-            this.mainView = produce(this.mainView, draft => {
+        if (this.mainView.dataViewQuery) {
+            this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
                 if (!draft.encodes) {
                     draft.encodes = [];
                 }
@@ -366,29 +366,29 @@ export class SemiAutomationStore {
         }
     }
     public addMainViewField (fieldId: string) {
-        if (this.mainView === null) return;
+        if (this.mainView.dataViewQuery === null) return;
         const targetFieldIndex = this.fieldMetas.findIndex(f => f.fid === fieldId);
-        this.mainView = produce(this.mainView, draft => {
+        this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
             draft.fields.push(this.fieldMetas[targetFieldIndex])
         })
     }
     public removeMainViewFilter (filterFieldId: string) {
-        if (!this.mainView?.filters) return;
-        this.mainView = produce(this.mainView, draft => {
+        if (!this.mainView.dataViewQuery?.filters) return;
+        this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
             draft.filters = draft.filters!.filter(f => f.fid !== filterFieldId)
         })
     }
     public addMainViewFilter (filter: IFilter) {
-        if (!this.mainView) return;
-        if (typeof this.mainView.filters === 'undefined') this.mainView.filters = [];
-        this.mainView = produce(this.mainView, draft => {
+        if (!this.mainView.dataViewQuery) return;
+        if (typeof this.mainView.dataViewQuery.filters === 'undefined') this.mainView.dataViewQuery.filters = [];
+        this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
             draft.filters!.push(filter)
         })
     }
     public removeMainViewField (fieldId: string) {
-        if (this.mainView === null) return;
-        const targetFieldIndex = this.mainView.fields.findIndex(f => f.fid === fieldId);
-        this.mainView = produce(this.mainView, draft => {
+        if (this.mainView.dataViewQuery === null) return;
+        const targetFieldIndex = this.mainView.dataViewQuery.fields.findIndex(f => f.fid === fieldId);
+        this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
             draft.fields.splice(targetFieldIndex, 1)
         })
     }
@@ -405,12 +405,12 @@ export class SemiAutomationStore {
         this.neighborViews.amount = RENDER_BATCH_SIZE;
     }
     public updateMainView (view: IPattern) {
-        this.mainView = view;
+        this.mainView.dataViewQuery = view;
         // this.initAssociate()
         // this.clearViews();
     }
     public analysisInCopilot(pattern: IPattern) {
         this.init();
-        this.mainView = pattern;
+        this.mainView.dataViewQuery = pattern;
     }
 }

@@ -443,10 +443,6 @@ const CardEditor: FC<CardProviderProps> = ({
                     ))}
             </>
         ),
-        // onDoubleClick: handleDoubleClick,
-        // onRootMouseDown(x, y) {
-        //     // console.log({x,y})
-        // },
         onClick: handleClick,
         onFilter: handleFilter,
         style: focused

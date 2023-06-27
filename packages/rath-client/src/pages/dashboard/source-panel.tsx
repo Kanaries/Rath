@@ -58,7 +58,6 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
         [card, dashboardStore]
     );
 
-    // console.log(JSON.parse(JSON.stringify(card)));
     const [width, setWidth] = useState(0);
     const ref = useRef<HTMLDivElement>(null);
 

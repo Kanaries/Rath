@@ -1,6 +1,7 @@
 import { IFieldEncode, IPattern } from '@kanaries/loa';
 import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
+import produce from 'immer';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import {  IResizeMode, IRow, ISpecSourceType, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
 import { adviceVisSize } from '../pages/collection/utils';
@@ -41,8 +42,13 @@ export class MegaAutomationStore {
     public showSaveModal: boolean = false;
     public showSubinsights: boolean = false;
     public visualConfig!: PreferencePanelConfig;
-    public mainViewSpec: IVegaSubset | null = null;
-    public mainViewPattern: IPattern | null = null;
+    public mainView: {
+        spec: IVegaSubset | null,
+        dataViewQuery: IPattern | null
+    } = {
+        spec: null,
+        dataViewQuery: null
+    }
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public nlgThreshold: number = 0.2;
     public vizMode: 'lite' | 'strict' = 'strict';
@@ -61,7 +67,7 @@ export class MegaAutomationStore {
             assoListT1: observable.ref,
             assoListT2: observable.ref,
             insightSpaces: computed,
-            mainViewSpec: observable.ref,
+            mainView: observable.shallow,
             // @ts-expect-error private field
             ltsPipeLineStore: false
         });
@@ -81,8 +87,10 @@ export class MegaAutomationStore {
         this.showPreferencePannel = false;
         this.showSaveModal = false;
         this.showSubinsights = false;
-        this.mainViewSpec = null;
-        this.mainViewPattern = null;
+        this.mainView = {
+            dataViewQuery: null,
+            spec: null
+        }
         this.orderBy = EXPLORE_VIEW_ORDER.DEFAULT;
         this.nlgThreshold = 0.2;
         this.vizMode = 'strict';
@@ -197,8 +205,8 @@ export class MegaAutomationStore {
     public setVisualConig (updater: (config: PreferencePanelConfig) => void) {
         runInAction(() => {
             updater(this.visualConfig)
-            if (this.mainViewPattern) {
-                this.createMainViewSpec(this.mainViewPattern);
+            if (this.mainView.dataViewQuery) {
+                this.createMainViewSpec(this.mainView.dataViewQuery);
             }
         });
     }
@@ -264,17 +272,17 @@ export class MegaAutomationStore {
     }
     public createMainViewPattern (iSpace: IInsightSpace) {
         const viewFields = this.fieldMetas.filter(f => iSpace.dimensions.includes(f.fid) || iSpace.measures.includes(f.fid));
-        this.mainViewPattern = {
+        this.mainView.dataViewQuery = {
             fields: viewFields,
             imp: iSpace.score || 0,
             encodes: []
         }
-        return this.mainViewPattern;
+        return this.mainView.dataViewQuery;
     }
     public createMainViewSpec (pattern: IPattern) {
         const { visualConfig, vizMode, fieldMetas } = this;
         if (vizMode === 'lite') {
-            this.mainViewSpec = adviceVisSize(distVis({
+            this.mainView.spec = adviceVisSize(distVis({
                 resizeMode: visualConfig.resize,
                 pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
@@ -285,7 +293,7 @@ export class MegaAutomationStore {
                 specifiedEncodes: pattern.encodes
             }), fieldMetas)
         } else if (vizMode === 'strict') {
-            this.mainViewSpec = adviceVisSize(labDistVis({
+            this.mainView.spec = adviceVisSize(labDistVis({
                 resizeMode: visualConfig.resize,
                 pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
@@ -299,39 +307,47 @@ export class MegaAutomationStore {
         }
     }
     public refreshMainViewSpec () {
-        if (this.mainViewPattern) {
-            this.createMainViewSpec(this.mainViewPattern)
+        if (this.mainView.dataViewQuery) {
+            this.createMainViewSpec(this.mainView.dataViewQuery)
         }
     }
     public addFieldEncode2MainViewPattern (encode: IFieldEncode) {
-        if (this.mainViewPattern) {
-            if (!this.mainViewPattern.encodes) {
-                this.mainViewPattern.encodes = [];
-            }
-            this.mainViewPattern.encodes.push(encode)
+        if (this.mainView.dataViewQuery) {
+            this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
+                if (!draft.encodes) {
+                    draft.encodes = []
+                }
+                draft.encodes.push(encode)
+            })
         }
     }
     public removeFieldEncodeFromMainViewPattern (encode: IFieldEncode) {
-        if (this.mainViewPattern) {
-            if (!this.mainViewPattern.encodes) {
-                this.mainViewPattern.encodes = [];
-            }
-            this.mainViewPattern.encodes = this.mainViewPattern.encodes.filter(e => e.field !== encode.field)
+        if (this.mainView.dataViewQuery) {
+            this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
+                if (!draft.encodes) {
+                    draft.encodes = []
+                }
+                draft.encodes = draft.encodes.filter(e => e.field !== encode.field)
+            })
         }
     }
     public addField2MainViewPattern (fid: string) {
         const targetField = this.fieldMetas.find(f => f.fid === fid);
-        if (targetField && this.mainViewPattern) {
-            this.mainViewPattern.fields.push(targetField);
-            this.createMainViewSpec(this.mainViewPattern)
+        if (targetField && this.mainView.dataViewQuery) {
+            this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
+                draft.fields.push(targetField);
+            })
+            this.createMainViewSpec(this.mainView.dataViewQuery)
         }
     }
     public removeFieldInViewPattern (fid: string) {
-        if (this.mainViewPattern) {
-            const targetFieldIndex = this.mainViewPattern.fields.findIndex(f => f.fid === fid);
+        if (this.mainView.dataViewQuery) {
+            const targetFieldIndex = this.mainView.dataViewQuery.fields.findIndex(f => f.fid === fid);
             if (targetFieldIndex > -1) {
-                this.mainViewPattern.fields.splice(targetFieldIndex, 1)
-                this.createMainViewSpec(this.mainViewPattern)
+                this.mainView.dataViewQuery = produce(this.mainView.dataViewQuery, draft => {
+                    draft.fields.splice(targetFieldIndex, 1);
+                })
+                this.createMainViewSpec(this.mainView.dataViewQuery)
             }
         }
     }

@@ -96,7 +96,6 @@ export function useCertMail(email: string) {
             setClock((c) => {
                 const nextC = c - 1;
                 if (nextC === 0) {
-                    // console.log('[kanaries log] clock interval is cleared.');
                     clearInterval(int);
                     timerRef.current = undefined;
                 }
@@ -143,7 +142,6 @@ export function useCertPhone(phone: string) {
             setClock((c) => {
                 const nextC = c - 1;
                 if (nextC === 0) {
-                    // console.log('[kanaries log] clock interval is cleared.');
                     clearInterval(int);
                 }
                 return nextC;

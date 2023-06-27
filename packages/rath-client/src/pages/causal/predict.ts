@@ -58,11 +58,6 @@ function getPredictAPIPath (path = "/api/train_test") {
 
 export const execPredict = async (props: IPredictProps): Promise<IPredictResult | null> => {
     try {
-        // console.log(props.trainTestSplitIndices.map(flag => ({
-        //     [-1]: 'x',
-        //     0: 'T',
-        //     1: '_',
-        // }[flag])).join(''), props.trainTestSplitIndices.length)
         const res = await fetch(getPredictAPIPath(), {
             method: 'POST',
             headers: {

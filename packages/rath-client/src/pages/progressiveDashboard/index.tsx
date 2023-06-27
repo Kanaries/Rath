@@ -170,10 +170,8 @@ const ProgressiveDashboard: React.FC = (props) => {
         },
         [originSpecList, fieldMetas]
     );
-    // recommendVisList里是确定性的推荐，不含wildcard
     const recommendVisList = useMemo(() => {
         if (cleanedData.length > 0 && fieldMetas.length > 0) {
-            // console.log(cleanedData, toJS(fieldMetas));
             return autoSet(cleanedData, toJS(fieldMetas), originSpecList);
         }
         return [];

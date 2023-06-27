@@ -17,7 +17,7 @@ const BUTTON_STYLE = { marginRight: '6px', marginTop: '6px' };
 
 const LiteFocusZone: React.FC = (props) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
-    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys } = semiAutoStore;
+    const { mainVizSetting, mainView, showMiniFloatView, fieldMetas, neighborKeys } = semiAutoStore;
     const [showActions, setShowActions] = useState(false);
     const appendFieldHandler = useCallback(
         (fid: string) => {
@@ -27,47 +27,49 @@ const LiteFocusZone: React.FC = (props) => {
     );
 
     const editChart = useCallback(() => {
-        if (mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(mainViewSpec);
+        if (mainView.spec) {
+            commonStore.visualAnalysisInGraphicWalker(mainView.spec);
         }
-    }, [mainViewSpec, commonStore]);
+    }, [mainView.spec, commonStore]);
 
     const paintChart = useCallback(() => {
-        if (mainViewSpec && mainView) {
-            painterStore.analysisInPainter(mainViewSpec, mainView);
+        if (mainView.spec && mainView.dataViewQuery) {
+            painterStore.analysisInPainter(mainView.spec, mainView.dataViewQuery);
         }
-    }, [mainViewSpec, painterStore, mainView]);
+    }, [mainView.spec, painterStore, mainView.dataViewQuery]);
 
     return (
         <MainViewContainer>
-            {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
+            {mainView.dataViewQuery && showMiniFloatView && <MiniFloatCanvas pined={mainView.dataViewQuery} />}
             <div className="vis-container">
                 <Stack style={{ borderRight: '1px solid #eee' }}>
                     <IconButton
                         style={BUTTON_STYLE}
                         text={intl.get('megaAuto.commandBar.editing')}
                         iconProps={{ iconName: 'BarChartVerticalEdit' }}
-                        disabled={mainView === null}
+                        disabled={mainView.dataViewQuery === null}
                         onClick={editChart}
                     />
                     <IconButton
                         style={BUTTON_STYLE}
                         text={intl.get('megaAuto.commandBar.painting')}
                         iconProps={{ iconName: 'EditCreate' }}
-                        disabled={mainView === null}
+                        disabled={mainView.dataViewQuery === null}
                         onClick={paintChart}
                     />
-                    {mainView && mainViewSpec && (
+                    {mainView.dataViewQuery && mainView.spec && (
                         <IconButton
                             style={BUTTON_STYLE}
                             iconProps={{
-                                iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters)
+                                iconName: collectionStore.collectionContains(fieldMetas, mainView.spec, IVisSpecType.vegaSubset, mainView.dataViewQuery.filters)
                                     ? 'FavoriteStarFill'
                                     : 'FavoriteStar',
                             }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters);
+                                if (mainView.dataViewQuery && mainView.spec) {
+                                    collectionStore.toggleCollectState(fieldMetas, mainView.spec, IVisSpecType.vegaSubset, mainView.dataViewQuery.filters);
+                                }
                             }}
                         />
                     )}
@@ -93,8 +95,8 @@ const LiteFocusZone: React.FC = (props) => {
                     />
                 </Stack>
                 <div>
-                    {mainView && mainViewSpec && (
-                        <MainCanvas view={mainView} spec={adviceVisSize(mainViewSpec, fieldMetas)} />
+                    {mainView.dataViewQuery && mainView.spec && (
+                        <MainCanvas view={mainView.dataViewQuery} spec={adviceVisSize(mainView.spec, fieldMetas)} />
                     )}
                 </div>
                 {mainVizSetting.nlg && (
@@ -106,8 +108,8 @@ const LiteFocusZone: React.FC = (props) => {
             <hr style={{ marginTop: '6px' }} />
             {showActions && (
                 <div className="fields-container">
-                    {mainView &&
-                        mainView.fields.map((f: IFieldMeta) => (
+                    {mainView.dataViewQuery &&
+                        mainView.dataViewQuery.fields.map((f: IFieldMeta) => (
                             <ViewField
                                 key={f.fid}
                                 type={f.analyticType}
@@ -126,9 +128,9 @@ const LiteFocusZone: React.FC = (props) => {
             )}
             {showActions && (
                 <div className="fields-container">
-                    {mainView &&
-                        mainView.filters &&
-                        mainView.filters.map((f) => {
+                    {mainView.dataViewQuery &&
+                        mainView.dataViewQuery.filters &&
+                        mainView.dataViewQuery.filters.map((f) => {
                             const targetField = fieldMetas.find((m) => m.fid === f.fid);
                             if (!targetField) return null;
                             let filterDesc = `${targetField.name || targetField.fid} ∈ `;

@@ -228,7 +228,6 @@ function LCALabeling(tree: IPatternNode, depth: number): number {
 }
 
 function collectingCANodes(tree: IPatternNode, label: number, nodes: IPatternNode[]) {
-    // console.log(tree, tree.spe,  label, nodes)
     if (tree.specLabel === label) {
         nodes.push(tree);
     } else {

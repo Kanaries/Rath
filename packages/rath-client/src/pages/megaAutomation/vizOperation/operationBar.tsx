@@ -13,25 +13,24 @@ interface OperationBarProps {
 }
 const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
     const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore, semiAutoStore } = useGlobalStore();
-    const { mainViewSpec, mainViewPattern } = megaAutoStore;
+    const { mainView } = megaAutoStore;
 
     const customizeAnalysis = useCallback(() => {
-        if (mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(mainViewSpec)
+        if (mainView.spec) {
+            commonStore.visualAnalysisInGraphicWalker(mainView.spec)
         }
-    }, [mainViewSpec, commonStore])
+    }, [mainView.spec, commonStore])
 
     const analysisInPainter = useCallback(() => {
-        if (mainViewSpec && mainViewPattern) {
-            painterStore.analysisInPainter(mainViewSpec, mainViewPattern)
+        if (mainView.spec && mainView.dataViewQuery) {
+            painterStore.analysisInPainter(mainView.spec, mainView.dataViewQuery)
         }
-    }, [mainViewSpec, mainViewPattern, painterStore])
+    }, [mainView.spec, mainView.dataViewQuery, painterStore])
 
-    const viewExists = !(mainViewPattern === null || mainViewSpec === null);
     let starIconName = 'FavoriteStar';
-    if (viewExists) {
-        const viewFields = toJS(mainViewPattern.fields);
-        const viewSpec = toJS(mainViewSpec);
+    if (mainView.dataViewQuery && mainView.spec) {
+        const viewFields = toJS(mainView.dataViewQuery.fields);
+        const viewSpec = toJS(mainView.spec);
         if (collectionStore.collectionContains(viewFields, viewSpec, IVisSpecType.vegaSubset)) {
             starIconName = 'FavoriteStarFill'
         }
@@ -55,8 +54,8 @@ const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
                         text: intl.get('megaAuto.commandBar.editInEditor'),
                         iconProps: { iconName: 'Edit' },
                         onClick: () => {
-                            if (mainViewPattern && mainViewSpec) {
-                                editorStore.syncSpec(IVisSpecType.vegaSubset, mainViewSpec)
+                            if (mainView.dataViewQuery && mainView.spec) {
+                                editorStore.syncSpec(IVisSpecType.vegaSubset, mainView.spec)
                                 megaAutoStore.changeMainViewSpecSource()
                             }
                         }
@@ -84,8 +83,8 @@ const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
             text: intl.get('megaAuto.commandBar.associate'),
             iconProps: { iconName: 'Lightbulb' },
             onClick: () => {
-                if (mainViewPattern !== null) {
-                    semiAutoStore.analysisInCopilot(toJS(mainViewPattern))
+                if (mainView.dataViewQuery !== null) {
+                    semiAutoStore.analysisInCopilot(toJS(mainView.dataViewQuery))
                     commonStore.setAppKey(PIVOT_KEYS.semiAuto);
                 }
             }
@@ -95,8 +94,8 @@ const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
             text: intl.get('common.star'),
             iconProps: { iconName: starIconName },
             onClick: () => {
-                if (mainViewPattern && mainViewSpec) {
-                    collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec), IVisSpecType.vegaSubset)
+                if (mainView.dataViewQuery && mainView.spec) {
+                    collectionStore.toggleCollectState(toJS(mainView.dataViewQuery.fields), toJS(mainView.spec), IVisSpecType.vegaSubset)
                 }
             }
         },

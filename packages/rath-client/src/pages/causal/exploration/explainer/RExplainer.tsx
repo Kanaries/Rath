@@ -104,8 +104,6 @@ const RExplainer: FC = () => {
         const indexName = '__this_is_the_index_of_the_row__';
         const data = visSample.map((row, i) => ({ ...row, [indexName]: i }));
         const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
-        // console.log('indices');
-        // console.log(indicesA.join(','));
         const indicesB = diffMode === 'two-group'
             ? applyFilters(data, subspaces[1].predicates).map(row => row[indexName]) as number[]
             : diffMode === 'full' ? data.map(row => row[indexName]) as number[] : data.map(row => row[indexName] as number).filter(
@@ -178,8 +176,6 @@ const RExplainer: FC = () => {
             }
         }
     }, [diffMode, editingGroupIdx]);
-
-    // console.log({ irResult });
 
     return (
         <Container>

@@ -1,7 +1,7 @@
 // define new interfaces here, global.ts is no longer maintained.
 import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
-import { IFilter } from '@kanaries/loa'
+import { IFilter, IPattern } from '@kanaries/loa'
 import { Aggregator } from "./global";
 import type { DateTimeInfoType } from "./dev/workers/engine/dateTimeExpand";
 
@@ -391,6 +391,11 @@ export type IDatasetData = {
     data: IBackUpData;
     meta: IBackUpDataMeta;
 };
+
+export interface IVisView {
+    spec: IVegaSubset | null;
+    dataViewQuery: IPattern | null;
+}
 
 export interface ICreateDashboardPayload {
     datasourceId: string;

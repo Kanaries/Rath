@@ -214,14 +214,6 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
     }, [mainField, title, mainFieldAggregation, mode, dimension]);
 
     useEffect(() => {
-        // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
-        //     if (ctx.at(-1)?.[0] !== num) {
-        //         ctx.push([num, 1]);
-        //     } else {
-        //         ctx.at(-1)![1] += 1;
-        //     }
-        //     return ctx;
-        // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
         viewRef.current?.change(
             'dataSource',
             viewRef.current.changeset().remove(() => true).insert(source),

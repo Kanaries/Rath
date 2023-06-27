@@ -166,8 +166,6 @@ const LaTiaoEditor = observer(forwardRef<HTMLDivElement, LaTiaoEditorProps>(({
                         );
                     }                    
                 });
-
-                // console.log('扩展数据', {fields, f, data, rows});
             },
         );
 
