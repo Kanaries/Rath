@@ -285,6 +285,26 @@ export class SemiAutomationStore {
         this.featViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
         try {
+            if (localStorage.getItem('semi_service')) {
+                const res = await fetch(localStorage.getItem('semi_service')!, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        view: mainView.dataViewQuery,
+                        dataSource,
+                        metas: fieldMetas
+                    })
+                });
+                const result = await res.json();
+                const views = result.views;
+                this.updateAssoViews('featViews', views.map((v: any) => ({
+                    ...v,
+                    imp: v.score ?? 0
+                })))
+                return;
+            }
             const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
