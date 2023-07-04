@@ -301,7 +301,8 @@ export class SemiAutomationStore {
                 const views = result.views;
                 this.updateAssoViews('featViews', views.map((v: any) => ({
                     ...v,
-                    imp: v.score ?? 0
+                    imp: v.score ?? 0,
+                    fields: v.view.map((f: any) => fieldMetas.find(fm => fm.fid === f)).filter((f: any) => (Boolean(f)))
                 })))
                 return;
             }
