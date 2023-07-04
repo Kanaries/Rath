@@ -299,11 +299,13 @@ export class SemiAutomationStore {
                 });
                 const result = await res.json();
                 const views = result ?? [];
+                // eslint-disable-next-line no-console
+                console.log('views', views)
                 this.updateAssoViews('featViews', views.map((v: any) => ({
                     ...v,
                     imp: v.score ?? 0,
                     fields: v.view.map((f: any) => fieldMetas.find(fm => fm.fid === f)).filter((f: any) => (Boolean(f)))
-                })))
+                })) as IPattern[])
                 return;
             }
             const res = await loaEngineService<IPattern[]>({
