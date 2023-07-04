@@ -298,7 +298,7 @@ export class SemiAutomationStore {
                     })
                 });
                 const result = await res.json();
-                const views = result.views;
+                const views = result ?? [];
                 this.updateAssoViews('featViews', views.map((v: any) => ({
                     ...v,
                     imp: v.score ?? 0,
