@@ -284,6 +284,7 @@ export class SemiAutomationStore {
     public async featAssociate () {
         this.featViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
+        console.warn('feat start')
         try {
             if (localStorage.getItem('semi_service')) {
                 const res = await fetch(localStorage.getItem('semi_service')!, {
@@ -298,8 +299,9 @@ export class SemiAutomationStore {
                     })
                 });
                 const result = await res.json();
+                console.warn('result', result)
                 const views = result ?? [];
-                console.log('views', views)
+                console.warn('views', views)
                 this.updateAssoViews('featViews', views.map((v: any) => ({
                     ...v,
                     imp: v.score ?? 0,
