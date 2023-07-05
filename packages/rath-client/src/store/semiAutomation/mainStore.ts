@@ -299,7 +299,6 @@ export class SemiAutomationStore {
                 });
                 const result = await res.json();
                 const views = result ?? [];
-                // eslint-disable-next-line no-console
                 console.log('views', views)
                 this.updateAssoViews('featViews', views.map((v: any) => ({
                     ...v,

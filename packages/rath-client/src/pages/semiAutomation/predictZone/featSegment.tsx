@@ -70,6 +70,15 @@ const FeatSegment: React.FC = () => {
                         />
                     </div>
                     <div className="chart-desc">
+                        <div>{
+                            featViews.views[i].imp
+                        }</div>
+                        <div>
+                            {
+                                // @ts-ignore
+                                featViews.views[i].score
+                            }
+                        </div>
                         { featViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
                         { featViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
                         { featViews.views[i].filters?.map(f => {
