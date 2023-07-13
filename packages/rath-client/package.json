@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@antv/g6": "^4.8.4",
-    "@babel/parser": "^7.19.6",
     "@fluentui/font-icons-mdl2": "^8.5.4",
     "@fluentui/react": "^8.94.4",
     "@fluentui/react-components": "^9.19.0",

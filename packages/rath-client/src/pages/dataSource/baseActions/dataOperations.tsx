@@ -7,7 +7,6 @@ import { useGlobalStore } from '../../../store';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
-import LaTiaoModal from '../../../components/latiaoConsole/modal';
 
 const Cont = styled.div`
 `;
@@ -20,7 +19,7 @@ const overflowItems: ICommandBarItemProps[] = []
 
 const DataOperations: React.FC = () => {
     const { dataSourceStore/*, commonStore*/ } = useGlobalStore();
-    const { mutFields, cleanMethod, showCustomizeComputationModal } = dataSourceStore;
+    const { mutFields, cleanMethod } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
@@ -106,15 +105,6 @@ const DataOperations: React.FC = () => {
                 },
             },
             {
-                key: 'computation',
-                text: intl.get('dataSource.extend.manual'),
-                disabled: mutFields.length === 0,
-                iconProps: { iconName: 'Calculator' },
-                onClick: () => {
-                    dataSourceStore.togleShowCustomizeComputationModal(true);
-                }
-            },
-            {
                 key: 'enableAll',
                 text: intl.get('dataSource.operations.selectAll'),
                 iconProps: { iconName: 'CheckboxComposite' },
@@ -152,11 +142,6 @@ const DataOperations: React.FC = () => {
     ]);
     return (
         <Cont>
-            {
-                showCustomizeComputationModal && <LaTiaoModal close={() => {
-                    dataSourceStore.togleShowCustomizeComputationModal(false);
-                }} />
-            }
             <CommandBar
                 overflowButtonProps={overflowProps}
                 styles={{
