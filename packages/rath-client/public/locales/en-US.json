@@ -359,15 +359,11 @@
         },
         "extend": {
             "title": "Extend Information",
-            "manual": "Customized computation",
             "editor": "Editor",
             "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
             "notDecided": "{ count } fields has not been decided.",
             "findThem": "Find Next",
             "checkThem": "Check",
-            "empty": "No column exported.",
-            "apply": "Apply",
-            "cancel": "Cancel",
             "auto": "transforms",
             "suggestion": {
                 "regex_selection": "Pattern discovery & extraction | Extract patterns from text fields and generate new fields matching extracted pattern.",

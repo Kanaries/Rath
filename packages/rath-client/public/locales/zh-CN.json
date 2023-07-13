@@ -325,15 +325,11 @@
         },
         "extend": {
             "title": "扩展信息",
-            "manual": "自定义计算",
             "editor": "编辑器",
             "autoExtend": "{ count } 个字段可以自动扩展生成新的字段以增强分析和探索。",
             "notDecided": "{ count } 个自动扩展的字段待确认。",
             "findThem": "下一个",
             "checkThem": "筛选",
-            "empty": "没有导出的列。",
-            "apply": "扩展",
-            "cancel": "取消",
             "auto": "转换",
             "suggestion": {
                 "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
