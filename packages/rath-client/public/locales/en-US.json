@@ -359,15 +359,11 @@
         },
         "extend": {
             "title": "Extend Information",
-            "manual": "Customized computation",
             "editor": "Editor",
             "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
             "notDecided": "{ count } fields has not been decided.",
             "findThem": "Find Next",
             "checkThem": "Check",
-            "empty": "No column exported.",
-            "apply": "Apply",
-            "cancel": "Cancel",
             "auto": "transforms",
             "suggestion": {
                 "regex_selection": "Pattern discovery & extraction | Extract patterns from text fields and generate new fields matching extracted pattern.",
@@ -551,49 +547,6 @@
             "color": "Color",
             "clean": "Erase",
             "create": "Create"
-        }
-    },
-    "latiao": {
-        "maybe": {
-            "keyword": "keyword",
-            "operator": "operator",
-            "fid": "field"
-        },
-        "keyword": {
-            "out": "Append field to data."
-        },
-        "op": {
-            "$set": "Transforms a field to ordinals as a new column.",
-            "$vec": "Transforms a field to calculative numbers as a new column.",
-            "$text": "Transforms a field to strings as a new column.",
-            "$bool": "Transforms a field to 0 or 1 as a new column.",
-            "$id": "Generates an automatically incrementing id field, starting from 1.",
-            "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
-            "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
-            "$isNaN": "Transforms numbers to string \"1\" if the number is NaN, otherwise string \"0\" as a new column.",
-            "$isZero": "Transforms numbers to string \"1\" if the number is zero, otherwise string \"0\" as a new column.",
-            "$toDate": "Transforms a field to a set of operative Date objects, which could be sliced on time units.",
-            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
-            "$normalize": "Normalizes a field as a new column.",
-            "$inset": "Scales a field to range -1 ~ +1 as a new column.",
-            "$bound": "Scales a field to range 0 ~ 1 as a new column.",
-            "$log": "Projects a field by x -> log(x) (the base is default to E) as a new column.",
-            "$log2": "Projects a field by x -> log[2](x) as a new column.",
-            "$log1p": "Projects a field by x -> log(x + 1) as a new column.",
-            "$log10": "Projects a field by x -> log[10](x) as a new column.",
-            "$map": "Maps each value to a new value of the same type as a new column.",
-            "$test": "Maps each value to a 0 (false) or 1 (true) as a new column.",
-            "$ReLU": "Projects a field by x -> max(0, x) as a new column.",
-            "$match": "Finds the matched parts of each text content using Regular Expression as a new column.",
-            "$replace": "Replaces the matched parts of each text content with a given string using Regular Expression as a new column.",
-            "$concat": "Merge two or more text contents of all the fields as a new column.",
-            "$sigmoid": "Projects a field by x -> (1 + e^-x)^-1 as a new column.",
-            "$boxClip": "Maps overflowing values (due to boxplot) to the domain as a new column.",
-            "$meanClip": "Maps overflowing values (due to the given domain) to the mean of all the other values as a new column.",
-            "$nearestClip": "Maps overflowing values (due to the given domain) to the domain as a new column.",
-            "$zeroFill": "Maps Infinite or NaN to 0 as a new column.",
-            "$meanFill": "Maps Infinite or NaN to the mean of all the other values as a new column.",
-            "$partition": "Separates each value by boolean expression into two new column."
         }
     },
     "causal_direction": {

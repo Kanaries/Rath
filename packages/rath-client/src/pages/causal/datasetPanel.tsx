@@ -1,6 +1,5 @@
 import {
     Checkbox,
-    CommandButton,
     DetailsList,
     IColumn,
     Label,
@@ -15,9 +14,7 @@ import produce from 'immer';
 import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/fieldPill/filterCreationPill';
-// import LaTiaoConsole from '../../components/latiaoConsole/index';
 import type { IFieldMeta } from '../../interfaces';
-import LaTiaoModal from '../../components/latiaoConsole/modal';
 import { FilterCell } from './filters';
 
 
@@ -64,7 +61,7 @@ const SelectedKey = 'selected';
 
 const DatasetPanel: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
-    const { cleanedData, showCustomizeComputationModal } = dataSourceStore;
+    const { cleanedData } = dataSourceStore;
     const {
         fields, allFields, filteredDataSize, sampleRate, sampleSize, filters
     } = causalStore.dataset;
@@ -238,22 +235,6 @@ const DatasetPanel: FC = () => {
 
     return (
         <>
-            <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
-                <Label style={{ marginRight: '1em' }}>{intl.get('causal.dataset.extend')}</Label>
-                <CommandButton
-                    text={intl.get('dataSource.extend.manual')}
-                    iconProps={{ iconName: 'AppIconDefaultAdd' }}
-                    onClick={() => {
-                        dataSourceStore.togleShowCustomizeComputationModal(true);
-                    }}
-                />
-                {showCustomizeComputationModal && (
-                    <LaTiaoModal close={() => {
-                        dataSourceStore.togleShowCustomizeComputationModal(false);
-                    }} />
-                )}
-                {/* <LaTiaoConsole /> */}
-            </Stack>
             <Stack style={{ marginTop: '0.6em' }}>
                 <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
                     <span>{intl.get('common.filter')}</span>

@@ -108,7 +108,6 @@ export class DataSourceStore {
     private subscriptions: Subscription[] = [];
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
-    public showCustomizeComputationModal: boolean = false;
     public sourceType = DataSourceType.Unknown;
     constructor() {
         makeAutoObservable(this, {
@@ -138,7 +137,6 @@ export class DataSourceStore {
             versionCode: -1,
             length: 0,
         }
-        this.showCustomizeComputationModal = false;
         this.extData = new Map<string, ICol<any>>();
         this.mutFields = [];
         this.extFields = [];
@@ -418,9 +416,6 @@ export class DataSourceStore {
     public setDatasetId (id: string) {
         this.datasetId = id;
     }
-    public togleShowCustomizeComputationModal (show: boolean) {
-        this.showCustomizeComputationModal = show;
-    }
     public addFilter () {
         const sampleField = this.fieldMetas.find(f => f.semanticType === 'quantitative');
         this.filters = []
@@ -673,7 +668,7 @@ export class DataSourceStore {
             }
             if (f.semanticType === 'quantitative') {
                 const alreadyExpandedAsOutlier = Boolean(this.allFields.find(
-                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$outlier'
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'CC.outlier'
                 ));
                 if (!alreadyExpandedAsOutlier && this.canExpandAsOutlier(f.fid)) {
                     suggestions.push({
@@ -687,7 +682,7 @@ export class DataSourceStore {
             if (f.semanticType === 'nominal') {
                 const mayHaveSentences = await this.canExpandAsWord(f.fid);
                 const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
-                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'CC.oneHot'
                 ));
                 if (!alreadyExpandedAsOneHot) {
                     suggestions.push({
@@ -697,7 +692,7 @@ export class DataSourceStore {
                     })
                 }
                 const alreadyExpandedAsWordTF = Boolean(this.allFields.find(
-                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTF'
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'CC.wordTF'
                 ));
                 if (!alreadyExpandedAsWordTF && mayHaveSentences) {
                     suggestions.push({
@@ -707,7 +702,7 @@ export class DataSourceStore {
                     })
                 }
                 const alreadyExpandedAsWordTFIDF = Boolean(this.allFields.find(
-                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTFIDF'
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'CC.wordTFIDF'
                 ));
                 if (!alreadyExpandedAsWordTFIDF && mayHaveSentences) {
                     suggestions.push({
@@ -717,7 +712,7 @@ export class DataSourceStore {
                     })
                 }
                 const alreadyExpandedAsReGroupByFreq = Boolean(this.allFields.find(
-                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$reGroupByFreq'
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'CC.reGroupByFreq'
                 ));
                 if (!alreadyExpandedAsReGroupByFreq && this.canExpandAsReGroupByFreq(f.fid)) {
                     suggestions.push({
@@ -763,7 +758,7 @@ export class DataSourceStore {
         return which.semanticType === 'temporal' && !which.extInfo;
     }
     public canExpandAsReGroupByFreq(fid: string) {
-        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$reGroupByFreq');
+        const which = fieldNotExtended(fid, this.mutFields, 'CC.reGroupByFreq');
         if (typeof which === 'undefined') return;
         if (which.semanticType !== 'nominal') {
             return false;
@@ -773,7 +768,7 @@ export class DataSourceStore {
         return meta.features.unique > 8;
     }
     public canExpandAsOutlier(fid: string) {
-        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$outlierIForest');
+        const which = fieldNotExtended(fid, this.mutFields, 'CC.outlierIForest');
         if (typeof which === 'undefined') return;
         if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
         const meta = this.fieldMetas.find(f => f.fid === fid);
@@ -853,7 +848,7 @@ export class DataSourceStore {
                 analyticType: 'dimension',
                 extInfo: {
                     extFrom: [fid],
-                    extOpt: 'LaTiao.$wordTFIDF',
+                    extOpt: 'CC.wordTFIDF',
                     extInfo: {}
                 },
                 geoRole: 'none'
@@ -873,7 +868,7 @@ export class DataSourceStore {
         }
     }
     public clearTextPatternIfExist () {
-        const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'LaTiao.$selection_pattern' && f.stage === 'preview'));
+        const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'CC.selection_pattern' && f.stage === 'preview'));
         if (extRemainFields.length !== this.extFields.length) {
             this.extFields = extRemainFields;
         }
@@ -893,7 +888,7 @@ export class DataSourceStore {
             analyticType: 'dimension',
             extInfo: {
                 extFrom: [fid],
-                extOpt: 'LaTiao.$selection_pattern',
+                extOpt: 'CC.selection_pattern',
                 extInfo: {
                     pattern: pattern.toString(),
                 }
@@ -928,7 +923,7 @@ export class DataSourceStore {
             analyticType: 'dimension',
             extInfo: {
                 extFrom: [fid],
-                extOpt: 'LaTiao.$regex',
+                extOpt: 'CC.regex',
                 extInfo: {
                     pattern: pattern.toString(),
                 }
@@ -972,7 +967,7 @@ export class DataSourceStore {
                 analyticType: 'dimension',
                 extInfo: {
                     extFrom: [fid],
-                    extOpt: 'LaTiao.$wordTF',
+                    extOpt: 'CC.wordTF',
                     extInfo: {}
                 },
                 geoRole: 'none'
@@ -1006,7 +1001,7 @@ export class DataSourceStore {
             analyticType: 'dimension',
             extInfo: {
                 extFrom: [fid],
-                extOpt: 'LaTiao.$reGroupByFreq',
+                extOpt: 'CC.reGroupByFreq',
                 extInfo: {}
             },
             geoRole: 'none'
@@ -1039,7 +1034,7 @@ export class DataSourceStore {
                 analyticType: 'dimension',
                 extInfo: {
                     extFrom: [fid],
-                    extOpt: 'LaTiao.$oneHot',
+                    extOpt: 'CC.oneHot',
                     extInfo: {}
                 },
                 geoRole: 'none'
@@ -1076,7 +1071,7 @@ export class DataSourceStore {
             analyticType: 'dimension',
             extInfo: {
                 extFrom: [fid],
-                extOpt: 'LaTiao.$outlierIForest',
+                extOpt: 'CC.outlierIForest',
                 extInfo: {}
             },
             geoRole: 'none'
