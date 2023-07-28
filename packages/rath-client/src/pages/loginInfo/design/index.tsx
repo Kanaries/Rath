@@ -1,20 +1,14 @@
 import { Dropdown, IDropdownOption, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { FC, useEffect } from 'react';
+import type { FC } from 'react';
 import { useGlobalStore } from '../../../store';
 import VisThemeEditor from './visThemeEditor';
 
 const DesignSegment: FC = () => {
-    const { commonStore, userStore } = useGlobalStore();
+    const { commonStore } = useGlobalStore();
     const { vizTheme, useCustomTheme } = commonStore;
-    const { userName } = userStore;
     const { themes } = commonStore;
-    useEffect(() => {
-        if (userName) {
-            commonStore.getCloudThemes(userName);
-        }
-    }, [userName, commonStore]);
     const themeOptions: IDropdownOption[] = Object.keys(themes).map<IDropdownOption>(k => {
         return {
             key: k,

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from  'react';
 import { observer } from 'mobx-react-lite';
 import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from '@fluentui/react';
 import ConnectionStatus from '../../../components/connectionStatus';
-import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { logDataImport } from '../../../loggers/dataImport';
 import { notify } from '../../../components/error';
@@ -23,7 +23,7 @@ interface OLAPDataProps {
 
 const OLAPData: React.FC<OLAPDataProps> = props => {
     const { onDataLoaded, onClose } = props;
-    const { clickHouseStore, userStore } = useGlobalStore();
+    const { clickHouseStore } = useGlobalStore();
 
     const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config, proxyConfig } = clickHouseStore;
     const { protocol, user, password, host, port } = config;
@@ -51,11 +51,6 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
                     dataSource: data.slice(0, 10),
                     size: data.length
                 });
-                userStore.saveDataSourceOnCloudOnlineMode({
-                    name: '',
-                    datasourceType: DataSourceType.Restful,
-                    linkInfo: linkInfoRef.current,
-                });
                 onDataLoaded(fieldMetas, data, undefined, DataSourceTag.OLAP);
                 onClose();
             })
@@ -66,7 +61,7 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
                     content: `${err}\n Fail to load sample data from clickhouse.`
                 })
             })
-    }, [clickHouseStore, onDataLoaded, onClose, userStore])
+    }, [clickHouseStore, onDataLoaded, onClose])
 
     useEffect(() => {
         clickHouseStore.getDefaultConfig()

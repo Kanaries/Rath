@@ -22,9 +22,7 @@ import {
     IteratorStorageMetaInfo,
     IBackUpDataMeta,
     IBackUpData,
-    IDatasetMeta,
     DataSourceType,
-    IDashboardDocumentInfo,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -41,11 +39,8 @@ import { extractSelection, ITextPattern } from "../lib/textPattern";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'dataset' | 'others' | 'download';
+    type: 'init_data' | 'others';
     data: IDatasetBase
-    downLoadURL?: string;
-    dataset?: IDatasetMeta;
-    dashboard?: IDashboardDocumentInfo[];
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -224,64 +219,11 @@ export class DataSourceStore {
         })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
-        let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
-            const { userStore, commonStore } = getGlobalStore();
+            const { type } = msg;
+            const { commonStore } = getGlobalStore();
             switch (type) {
-                case 'download': {
-                    if (downLoadURL && !loadTaskReceived) {
-                        loadTaskReceived = true;
-                        console.warn('[Get Notebook From Other Pages]', msg);
-                        userStore.openNotebook(downLoadURL).then(() => {
-                            if (commonStore.appKey === PIVOT_KEYS.connection) {
-                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
-                            }
-                        });
-                    }
-                    break;
-                }
-                case 'dataset': {
-                    if (ev.source && !loadTaskReceived) {
-                        loadTaskReceived = true;
-                        console.warn('[Initialize From Other Pages]', msg);
-                        new Promise<{
-                            dataset?: boolean;
-                            dashboard?: boolean;
-                        }>(resolve => {
-                            if (dataset) {
-                                userStore.openDataset(dataset).then(ok => {
-                                    resolve({
-                                        dataset: ok,
-                                    });
-                                });
-                            } else {
-                                resolve({});
-                            }
-                        }).then(part => new Promise<typeof part>(resolve => {
-                            // TODO: release dashboard feature
-                            resolve(part);
-                            // if (dashboard) {
-                            //     userStore.openDashboardTemplates(dashboard).then(ok => {
-                            //         resolve({
-                            //             ...part,
-                            //             dashboard: ok,
-                            //         });
-                            //     });
-                            // } else {
-                            //     resolve(part);
-                            // }
-                        })).then(state => {
-                            // @ts-ignore
-                            ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
-                            if (commonStore.appKey === PIVOT_KEYS.connection) {
-                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
-                            }
-                        });
-                    }
-                    break;
-                }
                 case 'init_data': {
                     if (ev.source) {
                         console.warn('[Get DataSource From Other Pages]', msg)

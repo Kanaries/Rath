@@ -7,7 +7,6 @@ import { AppsListDetail24Regular, DataBarVertical24Regular, Database24Regular, T
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
-import BackupModal from '../../components/backupModal';
 import { notify } from '../../components/error';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -81,7 +80,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             <div>
                 <ImportStorage />
                 <FastSelection />
-                <BackupModal />
                 <Stack horizontal>
                     <MainActionButton />
                     <Button

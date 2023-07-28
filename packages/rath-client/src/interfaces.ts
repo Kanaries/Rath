@@ -269,11 +269,6 @@ export interface IRawFeatures {
 
 export type ISpecSourceType = 'default' | 'custom';
 
-export enum CloudAccessModifier {
-    PUBLIC = 1,
-    PROTECTED = 2,
-}
-
 export enum DataSourceType {
     File = 1,
     Database = 2,
@@ -282,110 +277,6 @@ export enum DataSourceType {
     Restful = 5,
     Unknown = 6,
 }
-
-export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
-    name: string;
-    datasourceType: DataSourceType;
-} & (
-    Mode extends 'online' ? {
-        linkInfo: Record<string, any>;
-    } : {
-        fileInfo: {
-            fileType?: string;
-            fileName: string;
-            /** bytes */
-            fileSize: number;
-        };
-    }
-);
-
-export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
-    id: string;
-    name: string;
-    type: CloudAccessModifier;
-} & (
-    Mode extends 'online' ? {
-        linkInfo: Record<string, any>;
-    } : {
-        fileInfo: {
-            storageId: string;
-            fileType: string;
-            fileName: string;
-            /** bytes */
-            fileSize: number;
-            uploadUrl: string;
-        };
-    }
-);
-
-export interface IDatasetFieldMeta {
-    name: string;
-    fid: string;
-    semanticType: ISemanticType;
-    analyticType: IAnalyticType;
-    geoRole: IGeoRole;
-    features: IFieldMeta['features'];
-    comment?: string;
-}
-
-export interface IDataSourceMeta {
-    id: string;
-    name: string;
-    type: DataSourceType;
-    fileInfo?: {
-        storageId: number;
-        fileType: string;
-        fileName: string;
-        /** bytes */
-        fileSize: number;
-        download_url: string;
-    };
-    createAt: number;
-}
-
-export type ICreateDatasetPayload = {
-    /** declared -> overwrite; undeclared -> create; */
-    id?: string;
-    datasourceId: string;
-    name: string;
-    workspaceName: string;
-    type: CloudAccessModifier;
-    /** bytes */
-    size: number;
-    totalCount: number;
-    comment?: string;
-    meta: IDatasetFieldMeta[];
-};
-
-export type ICreateDatasetResult = {
-    datasetId: string;
-    storageId: string;
-    uploadUrl: string;
-};
-
-export type IDatasetMeta = {
-    id: string;
-    name: string;
-    type: CloudAccessModifier;
-    size: number;
-    totalCount: number;
-    comment?: string;
-    meta: IDatasetFieldMeta[];
-    datasource: {
-        id: string;
-        name: string;
-    };
-    organization: {
-        id: string;
-        name: string;
-    };
-    workspace: {
-        id: string;
-        name: string;
-    };
-    createAt: number;
-    downloadUrl: string;
-};
 
 export type IDatasetData = {
     data: IBackUpData;
@@ -397,24 +288,6 @@ export interface IVisView {
     dataViewQuery: IPattern | null;
 }
 
-export interface ICreateDashboardPayload {
-    datasourceId: string;
-    workspaceName: string;
-    name: string;
-    publishTemplate: boolean;
-    description: string;
-    cover: {
-        name: string;
-        size: number;
-        type: string;
-    };
-    dashboard: {
-        name: string;
-        size: number;
-        type: string;
-    };
-}
-
 export interface IDashboardFieldMeta {
     fId: string;
     analyticType: IAnalyticType;
@@ -422,7 +295,7 @@ export interface IDashboardFieldMeta {
     description: string;
 }
 
-export interface IDashboardTemplateInfo {
+export interface IDashboardDocumentInfo {
     id: string;
     name: string;
     description: string;
@@ -438,150 +311,4 @@ export interface IDashboardTemplateInfo {
         storageId: string;
         downloadUrl: string;
     };
-    workspace: {
-        id: string;
-        name: string;
-        ownerName: string;
-    };
-    organization: {
-        id: string;
-        type: number;
-        name: string;
-        ownerName: string;
-    };
-}
-
-
-export interface IDashboardDocumentDetail {
-    id: string;
-    name: string;
-    type: number;
-    description: string;
-    dashboardTemplate: Omit<IDashboardTemplateInfo, 'workspace' | 'organization'>;
-    workspace: {
-        id: string;
-        name: string;
-        ownerName: string;
-    };
-    organization: {
-        id: string;
-        type: number;
-        name: string;
-        ownerName: string;
-    };
-    datasource: Pick<IDataSourceMeta, 'name' | 'id'>;
-}
-
-export type IDashboardDocumentInfo = IDashboardDocumentDetail['dashboardTemplate'];
-
-export type ICreateDashboardConfig = {
-    dashboard: {
-        name: string;
-        description: string;
-        bindDataset: boolean;
-    };
-    dashboardTemplate: {
-        name: string;
-        description: string;
-        fieldDescription: Record<string, string>;
-        publish: boolean;
-        cover?: File;
-    };
-};
-
-export interface ILoginForm {
-    userName: string;
-    password: string;
-    email: string;
-}
-
-export interface INotebook {
-    readonly id: string;
-    readonly name: string;
-    readonly size: number;
-    readonly createAt: number;
-    readonly downLoadURL: string;
-}
-
-export interface IWorkspace {
-    readonly id: string;
-    readonly name: string;
-    datasets?: readonly IDatasetMeta[] | null | undefined;
-    notebooks?: readonly INotebook[] | null | undefined;
-}
-
-export interface IOrganization {
-    readonly name: string;
-    readonly id: string;
-    /** `0` stands for personal organization */
-    readonly organizationType: number;
-    readonly userType: number;
-    workspaces?: readonly IWorkspace[] | null | undefined;
-}
-
-export interface IUserInfo {
-    userName: string;
-    email: string;
-    eduEmail: string;
-    phone: string;
-    avatarURL: string;
-    organizations?: readonly IOrganization[] | undefined;
-}
-
-export enum PlanRuleType {
-    Trueness = 1,
-    AmountLimited = 2,
-    SizeLimited = 3,
-}
-
-export type IPlanRule<RuleType extends PlanRuleType = PlanRuleType> = {
-    /** Rule ID, differs in different server area */
-    ruleId: string;
-    /** Rule name, keeps the same in different server area */
-    ruleName: string;
-    /**
-     * Display content.
-     * 
-     * May has a `"{limit}"` placeholder, which will be replaced by the `ruleLimit` field formatted according to the `ruleType`.
-     */
-    ruleDescription: string;
-} & (
-    RuleType extends PlanRuleType.Trueness ? {
-        /** @deprecated This field makes no sense */
-        ruleLimit: number;
-        /** This rule has no "limit" field */
-        ruleType: PlanRuleType.Trueness;
-    } : RuleType extends PlanRuleType.AmountLimited ? {
-        /** Amount limit of this rule, integer */
-        ruleLimit: number;
-        /** This rule has a countable "limit" field */
-        ruleType: PlanRuleType.AmountLimited;
-    } : RuleType extends PlanRuleType.SizeLimited ? {
-        /** Size limit of this rule in **byte**, integer */
-        ruleLimit: number;
-        /** This rule has a sizeable "limit" field */
-        ruleType: PlanRuleType.SizeLimited;
-    } : never
-);
-
-export interface IPlan {
-    planId: string;
-    /** Name to display */
-    name: string;
-    /**
-     * Subscriber cannot downgrade the plan.
-     * It can also be used to sort plan items in an ascending order.
-     */
-    planLevel: number;
-    currency: "usd" | string;
-    interval: "month";
-    intervalCount: number;
-    /**
-     * Origin price. Amount in cent (1/100), integer.
-     * 
-     * When `price` equals to -1, it means a "custom" price and should display a 'contact us' action button.
-     */
-    price: number;
-    /** Available features */
-    rules: IPlanRule[];
 }
