@@ -4292,11 +4292,6 @@
     "@types/keygrip" "*"
     "@types/node" "*"
 
-"@types/crypto-js@^4.1.0":
-  version "4.1.1"
-  resolved "https://registry.npmmirror.com/@types/crypto-js/-/crypto-js-4.1.1.tgz#602859584cecc91894eb23a4892f38cfa927890d"
-  integrity sha512-BG7fQKZ689HIoc5h+6D2Dgq1fABRa0RbBWKBd9SP/MVRVXROflpm5fhwyATX5duFmbStzyzyycPB8qUYKDH3NA==
-
 "@types/d3-timer@^2.0.0":
   version "2.0.1"
   resolved "https://registry.npmmirror.com/@types/d3-timer/-/d3-timer-2.0.1.tgz#ffb6620d290624f3726aa362c0c8a4b44c8d7200"
@@ -4936,11 +4931,6 @@
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
-
-"@zip.js/zip.js@^2.6.60":
-  version "2.6.60"
-  resolved "https://registry.npmmirror.com/@zip.js/zip.js/-/zip.js-2.6.60.tgz#70aa47d2983cd9cf52a02aac61e6ea639af805f4"
-  integrity sha512-95Vd9cmbiIGIBrR6kzMIkxPJp6xo67NYMAcEFS9fNgETHX87/kEpLrh48MM9JEbe+ghizb5gf2+9gGUfGsQ4nw==
 
 abab@^2.0.3, abab@^2.0.5:
   version "2.0.6"
@@ -6206,11 +6196,6 @@ cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
     which "^2.0.1"
-
-crypto-js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmmirror.com/crypto-js/-/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
-  integrity sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==
 
 crypto-random-string@^2.0.0:
   version "2.0.0"

@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import produce from "immer";
-import type { ICreateDashboardConfig, IDashboardDocumentInfo, IDashboardFieldMeta, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import type { IDashboardDocumentInfo, IDashboardFieldMeta, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
 import { getGlobalStore } from ".";
 
 
@@ -353,15 +353,6 @@ export default class DashboardStore {
             }
         }
         return true;
-    }
-
-    public async saveDashboardOnCloud(workspaceName: string, pageIdx: number, config: ICreateDashboardConfig) {
-        const { userStore } = getGlobalStore();
-        const save = this.save().data;
-        const data = save[pageIdx];
-        const part = JSON.stringify(data);
-        const file = new File([new Blob([ part ], { type: 'text/plain' })], `${config.dashboard.name}.rath-dashboard`);
-        await userStore.uploadDashboard(workspaceName, file, config);
     }
 
     /**

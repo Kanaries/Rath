@@ -19,10 +19,9 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor from 'react-monaco-editor';
 import { unstable_batchedUpdates } from 'react-dom';
-import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
 import { DataSourceTag } from '../../../utils/storage';
-import { useGlobalStore } from '../../../store';
 import { IJSONAPIFormat, getFullData, getPreviewData, jsonDataFormatChecker, requestJSONAPIData } from './utils';
 
 // const EXAMPLE_DATA: IDatasetBase = {
@@ -55,7 +54,6 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
     const [detectedDataStruct, setDetectedDataStruct] = useState<IJSONAPIFormat | undefined>('others');
     const [rawData, setRawData] = useState<any>(undefined);
     const historyAPI = localStorage.getItem(API_STO_KEY);
-    const { userStore } = useGlobalStore();
 
     // http://localhost:3000/datasets/ds-cars-service.json
     const loadData = useCallback(async () => {
@@ -77,11 +75,6 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
         const { dataSource, fields, error } = await getFullData(rawData, detectedDataStruct);
         if (typeof error === 'undefined') {
             onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
-            userStore.saveDataSourceOnCloudOnlineMode({
-                name: api,
-                datasourceType: DataSourceType.Restful,
-                linkInfo: { api, detectedDataStruct },
-            });
             logDataImport({
                 dataType: 'JSON API',
                 name: api,

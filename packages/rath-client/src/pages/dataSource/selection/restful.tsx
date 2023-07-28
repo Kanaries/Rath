@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import intl from 'react-intl-universal'
 import MonacoEditor from 'react-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
-import { DataSourceType, IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
+import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
 import { DataSourceTag } from '../../../utils/storage';
 import { useGlobalStore } from '../../../store';
@@ -60,11 +60,6 @@ const RestFul: React.FC<RestFulProps> = props => {
         requestAPIData(api).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
-            userStore.saveDataSourceOnCloudOnlineMode({
-                name: api,
-                datasourceType: DataSourceType.Restful,
-                linkInfo: { api },
-            });
             logDataImport({
                 dataType: "Restful API",
                 name: api,
