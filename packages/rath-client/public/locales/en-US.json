@@ -393,7 +393,8 @@
             "range": "value range",
             "set": "value set",
             "submit": "Submit",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "reset": "Reset"
         },
         "operations": {
             "title": "Operations",

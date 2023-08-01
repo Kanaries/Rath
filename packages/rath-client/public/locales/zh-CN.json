@@ -359,7 +359,8 @@
             "range": "区间",
             "set": "集合",
             "submit": "应用",
-            "cancel": "取消"
+            "cancel": "取消",
+            "reset": "重置"
         },
         "operations": {
             "title": "快捷操作",

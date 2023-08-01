@@ -387,7 +387,8 @@
             "range": "제출",
             "set": "취소",
             "submit": "작업",
-            "cancel": "모든 필드 활성화"
+            "cancel": "모든 필드 활성화",
+            "reset": "모든 필드 비활성화"
         },
         "operations": {
             "title": "모든 필드 비활성화",
