@@ -3689,15 +3689,16 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.3.7.tgz#41600d9b7825a69f6c7664173ab7b37380b11eca"
-  integrity sha512-bThrbrXbgh1QRUfbsnf8VpeeLWYttQwnsf4rrtwqXltUHuUN0OjkNnDMMOxd7ewKNqpxNTGL+9yLExGZ75Df6g==
+"@kanaries/graphic-walker@^0.3.14":
+  version "0.3.14"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.3.14.tgz#db9eb2a8bf9310a91e211933ec4e9514e3fa1159"
+  integrity sha512-ympwWfxgM9R4QxnPpSKANnrojPcWsHKSpIkTTjcEEFyVZIjYOtwykc08p2p/o78Um7PtnEbZGFiM3pXHl+nw9w==
   dependencies:
     "@headlessui/react" "^1.7.12"
     "@heroicons/react" "^2.0.8"
-    "@kanaries/react-beautiful-dnd" "0.0.1"
+    "@kanaries/react-beautiful-dnd" "0.0.2"
     "@kanaries/web-data-loader" "^0.1.7"
+    "@tailwindcss/forms" "^0.5.4"
     autoprefixer "^10.3.5"
     i18next "^21.9.1"
     i18next-browser-languagedetector "^6.1.5"
@@ -3722,10 +3723,10 @@
   resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.16.tgz#53af7fd1d8c8f21063b5bfed1f5eda296ab8dd6f"
   integrity sha512-kI0xme/oz5i0LjTfaurwnjelOf1ux93DHpoaL83sXWRd3/ElS7FbWvvv9sZ/EejhPGe79f4bWbi9R//M3KZjtw==
 
-"@kanaries/react-beautiful-dnd@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.npmmirror.com/@kanaries/react-beautiful-dnd/-/react-beautiful-dnd-0.0.1.tgz#18369ecd87649ff3d939ef0559e0e38f848de0b3"
-  integrity sha512-4gUYrpNXOU+mLZ/Dsl/rGkmEEdxZ70pq2d2vMLIbeuGo+qCJSHL2UC5sTXfS6bAZcjcjBsim1ZpCwVc/EO2PYg==
+"@kanaries/react-beautiful-dnd@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.npmmirror.com/@kanaries/react-beautiful-dnd/-/react-beautiful-dnd-0.0.2.tgz#2d8b5284b185189ae3927612e80bbd423eed477f"
+  integrity sha512-lCOJSSgWyx+GiHzymSxaFAJKMjglkRiUWhi02cDLp6pEFocNOBANr3jQyNjFLNwgl53+jpuBBs6szzYTR/cJyg==
   dependencies:
     "@babel/runtime" "^7.9.2"
     css-box-model "^1.2.0"
@@ -4115,6 +4116,13 @@
   integrity sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==
   dependencies:
     tslib "^2.4.0"
+
+"@tailwindcss/forms@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.npmmirror.com/@tailwindcss/forms/-/forms-0.5.4.tgz#5316a782fd95369eb5b6fd01d46323b3dce656a2"
+  integrity sha512-YAm12D3R7/9Mh4jFbYSMnsd6jG++8KxogWgqs7hbdo/86aWjjlIEvL7+QYdVELmAI0InXTpZqFIg5e7aDVWI2Q==
+  dependencies:
+    mini-svg-data-uri "^1.2.3"
 
 "@testing-library/dom@^7.28.1":
   version "7.31.2"
@@ -4570,7 +4578,7 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@^17.0.1", "@types/react-dom@^17.x":
+"@types/react-dom@^17.0.1":
   version "17.0.20"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.20.tgz#e0c8901469d732b36d8473b40b679ad899da1b53"
   integrity sha512-4pzIjSxDueZZ90F52mU3aPoogkHIoSIDG+oQ+wQK7Cy2B9S+MvOqY0uEA/qawKz381qrEDkvpwyt8Bm31I8sbA==
@@ -4587,7 +4595,7 @@
     hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
-"@types/react@*", "@types/react@^17", "@types/react@^17.0.2", "@types/react@^17.x":
+"@types/react@*", "@types/react@^17", "@types/react@^17.0.2":
   version "17.0.62"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.62.tgz#2efe8ddf8533500ec44b1334dd1a97caa2f860e3"
   integrity sha512-eANCyz9DG8p/Vdhr0ZKST8JV12PhH2ACCDYlFw6DIO+D+ca+uP4jtEDEpVqXZrh/uZdXQGwk7whJa3ah5DtyLw==
@@ -10292,6 +10300,11 @@ mini-css-extract-plugin@^2.4.5:
   integrity sha512-wd+SD57/K6DiV7jIR34P+s3uckTRuQvx0tKPcvjFlrEylk6P4mQ2KSWk1hblj1Kxaqok7LogKOieygXqBczNlg==
   dependencies:
     schema-utils "^4.0.0"
+
+mini-svg-data-uri@^1.2.3:
+  version "1.4.4"
+  resolved "https://registry.npmmirror.com/mini-svg-data-uri/-/mini-svg-data-uri-1.4.4.tgz#8ab0aabcdf8c29ad5693ca595af19dd2ead09939"
+  integrity sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==
 
 minimalistic-assert@^1.0.0:
   version "1.0.1"
