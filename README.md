@@ -71,7 +71,7 @@ Get started with RATH now!
 
 - 🎨 [Data Painter](https://docs.kanaries.net/rath/explore-data/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. Watch [this video](https://youtu.be/djqePNyhz7w) demonstrating about how to discover data insights with Data Painter.
 
-- :bar_chart: Dashboard: build a beautiful interactive data dashboard (including a automated dashboard designer which can provide suggestions to your dashboard).
+- :bar_chart: Dashboard: Build a beautiful interactive data dashboard (including a automated dashboard designer which can provide suggestions to your dashboard).
 
 - Causal Analysis: Identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
 
