@@ -51,7 +51,7 @@ export interface IPredictResult {
 const PREDICT_API_KEY = 'prediction_service';
 function getPredictAPIPath (path = "/api/train_test") {
     const baseURL = new URL(window.location.href);
-    const serviceURL = new URL(baseURL.searchParams.get(PREDICT_API_KEY) || localStorage.getItem(PREDICT_API_KEY) || "http://127.0.0.1:5533/api/train_test");
+    const serviceURL = new URL(baseURL.searchParams.get(PREDICT_API_KEY) || localStorage.getItem(PREDICT_API_KEY) || window.location.href);
     serviceURL.pathname = path;
     return serviceURL.toString();
 }

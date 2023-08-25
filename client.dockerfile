@@ -1,12 +1,16 @@
-FROM node:16 as build-stage
-COPY . /app
-WORKDIR /app
-ENV NODE_OPTIONS=--max_old_space_size=4096
-RUN npm config set registry https://registry.npmmirror.com
-RUN yarn config set registry https://registry.npmmirror.com
-RUN yarn install
-RUN yarn workspace rath-client build2
+FROM node:16 AS build-stage
 
-FROM nginx:latest
-COPY --from=build-stage /app/packages/rath-client/build /usr/share/nginx/html
-CMD ["nginx", "-g", "daemon off;"]
+COPY . /app
+
+WORKDIR /app
+
+RUN yarn install
+
+RUN yarn workspace rath-client buildOnDocker
+
+FROM nginx:1.24
+
+COPY --from=node-builder /app/packages/rath-client/build /usr/share/nginx/html
+COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

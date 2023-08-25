@@ -68,8 +68,8 @@ interface DatabaseDataProps {
 export const inputWidth = '180px';
 
 export const defaultServers: readonly string[] = [
+    "/connector",
     'https://gateway.kanaries.net/connector',
-    'https://kanaries.cn/connector',
 ];
 
 const MAX_SERVER_COUNT = 5;
