@@ -10,7 +10,7 @@ RUN yarn workspace rath-client buildOnDocker
 
 FROM nginx:1.24
 
-COPY --from=node-builder /app/packages/rath-client/build /usr/share/nginx/html
+COPY --from=build-stage /app/packages/rath-client/build /usr/share/nginx/html
 COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
