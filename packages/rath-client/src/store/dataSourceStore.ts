@@ -4,7 +4,7 @@ import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
-import { RATH_INDEX_COLUMN_KEY, PIVOT_KEYS } from "../constants";
+import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import {
     IDataPreviewMode,
     IDatasetBase,
@@ -22,9 +22,7 @@ import {
     IteratorStorageMetaInfo,
     IBackUpDataMeta,
     IBackUpData,
-    IDatasetMeta,
     DataSourceType,
-    IDashboardDocumentInfo,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -38,15 +36,6 @@ import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nl
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern";
-import { getGlobalStore } from ".";
-
-interface IDataMessage {
-    type: 'init_data' | 'dataset' | 'others' | 'download';
-    data: IDatasetBase
-    downLoadURL?: string;
-    dataset?: IDatasetMeta;
-    dashboard?: IDashboardDocumentInfo[];
-}
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
 // ds目前这里设置的是用户可能进行一定的数据类型定义，转换操作。用户此时关心的是单变量的信息，并不需要自动的触发后续流的计算，
@@ -222,82 +211,6 @@ export class DataSourceStore {
         })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
-        let loadTaskReceived = false;
-        window.addEventListener('message', (ev) => {
-            const msg = ev.data as IDataMessage;
-            const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
-            const { userStore, commonStore } = getGlobalStore();
-            switch (type) {
-                case 'download': {
-                    if (downLoadURL && !loadTaskReceived) {
-                        loadTaskReceived = true;
-                        console.warn('[Get Notebook From Other Pages]', msg);
-                        userStore.openNotebook(downLoadURL).then(() => {
-                            if (commonStore.appKey === PIVOT_KEYS.connection) {
-                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
-                            }
-                        });
-                    }
-                    break;
-                }
-                case 'dataset': {
-                    if (ev.source && !loadTaskReceived) {
-                        loadTaskReceived = true;
-                        console.warn('[Initialize From Other Pages]', msg);
-                        new Promise<{
-                            dataset?: boolean;
-                            dashboard?: boolean;
-                        }>(resolve => {
-                            if (dataset) {
-                                userStore.openDataset(dataset).then(ok => {
-                                    resolve({
-                                        dataset: ok,
-                                    });
-                                });
-                            } else {
-                                resolve({});
-                            }
-                        }).then(part => new Promise<typeof part>(resolve => {
-                            // TODO: release dashboard feature
-                            resolve(part);
-                            // if (dashboard) {
-                            //     userStore.openDashboardTemplates(dashboard).then(ok => {
-                            //         resolve({
-                            //             ...part,
-                            //             dashboard: ok,
-                            //         });
-                            //     });
-                            // } else {
-                            //     resolve(part);
-                            // }
-                        })).then(state => {
-                            // @ts-ignore
-                            ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
-                            if (commonStore.appKey === PIVOT_KEYS.connection) {
-                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
-                            }
-                        });
-                    }
-                    break;
-                }
-                case 'init_data': {
-                    if (ev.source) {
-                        console.warn('[Get DataSource From Other Pages]', msg)
-                        // @ts-ignore
-                        ev.source.postMessage(true, ev.origin)
-                        this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
-                        this.setShowDataImportSelection(false);
-                        if (commonStore.appKey === PIVOT_KEYS.connection) {
-                            commonStore.setAppKey(PIVOT_KEYS.dataSource);
-                        }
-                    }
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        })
         this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.filter;

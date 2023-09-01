@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Spinner, SpinnerSize } from '@fluentui/react';
 import './normalize.css';
@@ -20,10 +20,11 @@ import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 import DataConnection from './pages/dataConnection';
+import { getDataMessageHandler } from './utils/message';
 
 
 function App() {
-    const { langStore, commonStore } = useGlobalStore();
+    const { langStore, commonStore, dataSourceStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
 
     useEffect(() => {
@@ -37,6 +38,19 @@ function App() {
     useHotKey({
         'Control+Shift+P': () => setShowPerformanceWindow(on => !on),
     });
+
+    const userStoreRef = useRef(userStore);
+    userStoreRef.current = userStore;
+    const commonStoreRef = useRef(commonStore);
+    commonStoreRef.current = commonStore;
+
+    useEffect(() => {
+        const handler = getDataMessageHandler(dataSourceStore, commonStoreRef.current, userStoreRef.current);
+        window.addEventListener('message', handler);
+        return () => {
+            window.removeEventListener('message', handler);
+        };
+    }, [dataSourceStore]);
 
     if (!langStore.loaded) {
         return (
