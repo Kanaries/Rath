@@ -120,14 +120,6 @@ const DataOperations: React.FC = () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
-            // {
-            //     key: 'backup',
-            //     text: intl.get('dataSource.operations.backup'),
-            //     iconProps: { iconName: 'CloudUpload' },
-            //     onClick: () => {
-            //         commonStore.setShowBackupModal(true);
-            //     },
-            // },
         ];
     }, [
         cleanMethod,
@@ -138,7 +130,6 @@ const DataOperations: React.FC = () => {
         exportDataAsJson,
         mutFields.length,
         exportDataAsRATHDS,
-        // commonStore,
     ]);
     return (
         <Cont>

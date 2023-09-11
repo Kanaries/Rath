@@ -3,12 +3,11 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
-import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { DataSourceTag } from '../../../utils/storage';
 import useAsyncState from '../../../hooks/use-async-state';
 import useCachedState from '../../../hooks/use-cached-state';
 import { notify } from '../../../components/error';
-import { useGlobalStore } from '../../../store';
 import { logDataImport } from '../../../loggers/dataImport';
 import { rawData2DataWithBaseMetas } from '../../dataSource/utils';
 import databaseOptions from './options';
@@ -98,7 +97,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             setServers(JSON.stringify(servers.slice(0, MAX_SERVER_COUNT)));
         }
     }, [servers, setServers]);
-    const { userStore } = useGlobalStore();
     
     const [server, setServer] = useState(servers.at(0) ?? defaultServers[0]);
 
@@ -138,16 +136,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             );
             const { dataSource, fields } = data;
 
-            userStore.saveDataSourceOnCloudOnlineMode({
-                name,
-                datasourceType: DataSourceType.Database,
-                linkInfo: {
-                    sourceType,
-                    connectUri,
-                    queryString,
-                    credentials,
-                },
-            });
             logDataImport({
                 dataType: `Database/${sourceType}`,
                 name,
