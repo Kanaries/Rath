@@ -3689,30 +3689,39 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@^0.3.14":
-  version "0.3.14"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.3.14.tgz#db9eb2a8bf9310a91e211933ec4e9514e3fa1159"
-  integrity sha512-ympwWfxgM9R4QxnPpSKANnrojPcWsHKSpIkTTjcEEFyVZIjYOtwykc08p2p/o78Um7PtnEbZGFiM3pXHl+nw9w==
+"@kanaries/graphic-walker@^0.4.13":
+  version "0.4.13"
+  resolved "https://registry.npmjs.org/@kanaries/graphic-walker/-/graphic-walker-0.4.13.tgz#a03d400f4774974454e1525a2e3a3d879e31eac6"
+  integrity sha512-8Mn8rQjAuGgnEDN60VgxAlV1aVMqjJ/UdbRdtQkaxwPKdSOQ+DTMoFu/uccFQUaotT77eWJMLIvc06l+R+mpRw==
   dependencies:
     "@headlessui/react" "^1.7.12"
     "@heroicons/react" "^2.0.8"
-    "@kanaries/react-beautiful-dnd" "0.0.2"
+    "@kanaries/react-beautiful-dnd" "^0.0.3"
     "@kanaries/web-data-loader" "^0.1.7"
     "@tailwindcss/forms" "^0.5.4"
     autoprefixer "^10.3.5"
+    canvas-size "^1.2.6"
+    d3-format "^3.1.0"
+    d3-scale "^4.0.2"
+    d3-time-format "^4.1.0"
     i18next "^21.9.1"
     i18next-browser-languagedetector "^6.1.5"
     immer "^9.0.15"
+    leaflet "^1.9.4"
     mobx "^6.3.3"
     mobx-react-lite "^3.2.1"
     nanoid "^4.0.2"
     postcss "^8.3.7"
     postinstall-postinstall "^2.1.0"
     re-resizable "^6.9.8"
+    react-dropzone "^14.2.3"
+    react-error-boundary "^4.0.11"
     react-i18next "^11.18.6"
+    react-leaflet "^4.2.1"
     react-shadow "^20.0.0"
     rxjs "^7.3.0"
     tailwindcss "^3.2.4"
+    topojson-client "^3.1.0"
     uuid "^8.3.2"
     vega "^5.22.1"
     vega-embed "^6.21.0"
@@ -3723,10 +3732,10 @@
   resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.16.tgz#53af7fd1d8c8f21063b5bfed1f5eda296ab8dd6f"
   integrity sha512-kI0xme/oz5i0LjTfaurwnjelOf1ux93DHpoaL83sXWRd3/ElS7FbWvvv9sZ/EejhPGe79f4bWbi9R//M3KZjtw==
 
-"@kanaries/react-beautiful-dnd@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.npmmirror.com/@kanaries/react-beautiful-dnd/-/react-beautiful-dnd-0.0.2.tgz#2d8b5284b185189ae3927612e80bbd423eed477f"
-  integrity sha512-lCOJSSgWyx+GiHzymSxaFAJKMjglkRiUWhi02cDLp6pEFocNOBANr3jQyNjFLNwgl53+jpuBBs6szzYTR/cJyg==
+"@kanaries/react-beautiful-dnd@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/@kanaries/react-beautiful-dnd/-/react-beautiful-dnd-0.0.3.tgz#fce3972ed34a55223866b259b0adbabe003c7ba4"
+  integrity sha512-QKwQmmRDuYstNVvWJrdzCOs2FQAJSZFLdTe6iFZbqIlnGmZCGbRuajFJ2t+IFTV/vOelFKS9FOCJLVvRgB3Mmg==
   dependencies:
     "@babel/runtime" "^7.9.2"
     css-box-model "^1.2.0"
@@ -3846,6 +3855,11 @@
   integrity sha512-YKaYXiHF//fgy1OkX38JD70Lc8qxg2Viw8Q2CTNMwGPDJe12wda7kEmMKPJNw2oYLyFUfTzv00KJMA5h18z02w==
   dependencies:
     "@babel/runtime" "^7.0.0"
+
+"@react-leaflet/core@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/@react-leaflet/core/-/core-2.1.0.tgz#383acd31259d7c9ae8fb1b02d5e18fe613c2a13d"
+  integrity sha512-Qk7Pfu8BSarKGqILj4x7bCSZ1pjuAPZ+qmRwH5S7mDS91VSbVVsJSrW4qA+GPrro8t69gFYVMWb1Zc4yFmPiVg==
 
 "@rollup/plugin-babel@^5.2.0", "@rollup/plugin-babel@^5.3.0", "@rollup/plugin-babel@^5.3.1":
   version "5.3.1"
@@ -5295,6 +5309,11 @@ at-least-node@^1.0.0:
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
+attr-accept@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.npmjs.org/attr-accept/-/attr-accept-2.2.2.tgz#646613809660110749e92f2c10833b70968d929b"
+  integrity sha512-7prDjvt9HmqiZ0cl5CRjtS84sEyhsHP2coDkaZKRKVfCDo9s7iw7ChVmar78Gu9pC4SoR/28wFu/G5JJhTnqEg==
+
 autoprefixer@^10.3.5, autoprefixer@^10.4.11:
   version "10.4.12"
   resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-10.4.12.tgz#183f30bf0b0722af54ee5ef257f7d4320bb33129"
@@ -5747,6 +5766,11 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001400, caniuse-lite@^1.0.30001407:
   version "1.0.30001416"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001416.tgz#29692af8a6a11412f2d3cf9a59d588fcdd21ce4c"
   integrity sha512-06wzzdAkCPZO+Qm4e/eNghZBDfVNDsCgw33T27OwBH9unE9S478OYw//Q2L7Npf/zBzs7rjZOszIFQkwQKAEqA==
+
+canvas-size@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.npmjs.org/canvas-size/-/canvas-size-1.2.6.tgz#1eaa6b56167cf2a70fa4021680829d2073b45706"
+  integrity sha512-x2iVHOrZ5x9V0Hwx6kBz+Yxf/VCAII+jrD6WLjJbytJLozHq/oDJjEva432Os0eHxWMFR0vYlLJwTr6QxyxQqw==
 
 case-sensitive-paths-webpack-plugin@^2.4.0:
   version "2.4.0"
@@ -7648,6 +7672,13 @@ file-loader@^6.2.0:
   dependencies:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
+
+file-selector@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.npmjs.org/file-selector/-/file-selector-0.6.0.tgz#fa0a8d9007b829504db4d07dd4de0310b65287dc"
+  integrity sha512-QlZ5yJC0VxHxQQsQhXvBaC7VRJ2uaxTf+Tfpu4Z/OcVQJVpZO+DGU0rkoVW5ce2SccxugvpBJoMvUs59iILYdw==
+  dependencies:
+    tslib "^2.4.0"
 
 filelist@^1.0.1:
   version "1.0.4"
@@ -9970,6 +10001,11 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
+leaflet@^1.9.4:
+  version "1.9.4"
+  resolved "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz#23fae724e282fa25745aff82ca4d394748db7d8d"
+  integrity sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==
+
 leven@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/leven/-/leven-3.1.0.tgz#77891de834064cccba82ae7842bb6b14a13ed7f2"
@@ -11845,6 +11881,22 @@ react-dom@^17.0.1:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
+react-dropzone@^14.2.3:
+  version "14.2.3"
+  resolved "https://registry.npmjs.org/react-dropzone/-/react-dropzone-14.2.3.tgz#0acab68308fda2d54d1273a1e626264e13d4e84b"
+  integrity sha512-O3om8I+PkFKbxCukfIR3QAGftYXDZfOE2N1mr/7qebQJHs7U+/RSL/9xomJNpRg9kM5h9soQSdf0Gc7OHF5Fug==
+  dependencies:
+    attr-accept "^2.2.2"
+    file-selector "^0.6.0"
+    prop-types "^15.8.1"
+
+react-error-boundary@^4.0.11:
+  version "4.0.11"
+  resolved "https://registry.npmjs.org/react-error-boundary/-/react-error-boundary-4.0.11.tgz#36bf44de7746714725a814630282fee83a7c9a1c"
+  integrity sha512-U13ul67aP5DOSPNSCWQ/eO0AQEYzEFkVljULQIjMV0KlffTAhxuDoBKdO0pb/JZ8mDhMKFZ9NZi0BmLGUiNphw==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+
 react-error-overlay@^6.0.11:
   version "6.0.11"
   resolved "https://registry.npmmirror.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
@@ -11886,6 +11938,13 @@ react-is@^18.0.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.2.0.tgz#199431eeaaa2e09f86427efbb4f1473edb47609b"
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
+
+react-leaflet@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.npmjs.org/react-leaflet/-/react-leaflet-4.2.1.tgz#c300e9eccaf15cb40757552e181200aa10b94780"
+  integrity sha512-p9chkvhcKrWn/H/1FFeVSqLdReGwn2qmiobOQGO3BifX+/vV/39qhY8dGqbdcPh1e6jxh/QHriLXr7a4eLFK4Q==
+  dependencies:
+    "@react-leaflet/core" "^2.1.0"
 
 react-monaco-editor@^0.51.0:
   version "0.51.0"
