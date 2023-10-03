@@ -16,10 +16,10 @@ import {
 } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
+import { Label } from '@fluentui/react-components';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
-import { Label } from '@fluentui/react-components';
 
 const PreferencePanel: React.FC = () => {
     const { megaAutoStore } = useGlobalStore();
