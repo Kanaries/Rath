@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import { runInAction } from 'mobx';
+import { runInAction, toJS } from 'mobx';
 import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
@@ -82,7 +82,7 @@ const LTSPage: React.FC = () => {
     //     })
     // }, [megaAutoStore])
     const startTask = useCallback(() => {
-        ltsPipeLineStore.startTask(taskMode).then(() => {
+        ltsPipeLineStore.startTask(taskMode, toJS(megaAutoStore.visualConfig.viewSizeLimit)).then(() => {
             megaAutoStore.emitViewChangeTransaction(0);
         });
         commonStore.setAppKey(PIVOT_KEYS.megaAuto);

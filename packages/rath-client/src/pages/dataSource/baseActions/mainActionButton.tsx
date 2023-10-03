@@ -5,6 +5,7 @@ import intl from 'react-intl-universal';
 import { Menu, MenuButtonProps, MenuItem, MenuList, MenuPopover, MenuTrigger, SplitButton } from '@fluentui/react-components';
 import { Poll24Regular } from '@fluentui/react-icons';
 import va from '@vercel/analytics';
+import { toJS } from 'mobx';
 import { EXPLORE_MODE, PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
 
@@ -14,7 +15,7 @@ export const useActionModes = function () {
     const { exploreMode, taskMode } = commonStore;
     const { satisfyAnalysisCondition, fieldMetas } = dataSourceStore;
     const startMegaAutoAnalysis = useCallback(() => {
-        ltsPipeLineStore.startTask(taskMode).then(() => {
+        ltsPipeLineStore.startTask(taskMode, toJS(megaAutoStore.visualConfig.viewSizeLimit)).then(() => {
             megaAutoStore.emitViewChangeTransaction(0);
         });
         commonStore.setAppKey(PIVOT_KEYS.megaAuto);

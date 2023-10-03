@@ -108,6 +108,10 @@ export class MegaAutomationStore {
             },
             nlg: false,
             excludeScaleZero: false,
+            viewSizeLimit: {
+                dimension: 2,
+                measure: 3
+            }
         };
         this.globalConstraints = {
             dimensions: [],

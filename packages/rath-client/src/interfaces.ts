@@ -127,6 +127,10 @@ export interface PreferencePanelConfig {
     visMode: 'common' | 'dist';
     nlg: boolean;
     excludeScaleZero: boolean;
+    viewSizeLimit: {
+        dimension: number;
+        measure: number;
+    }
 }
 export interface IDBFieldMeta {
     fid: string;

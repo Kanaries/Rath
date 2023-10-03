@@ -1,7 +1,7 @@
 
 import { getCombination } from '@kanaries/loa';
 import { IInsightSpace, InsightFlow, Cube, ViewSpace,  } from 'visual-insights'
-import { IRow } from '../../interfaces';
+import { IRow, PreferencePanelConfig } from '../../interfaces';
 import { IVizSpace } from '../../store/megaAutomation';
 import { isSetEqual } from '../../utils';
 // import { setStateInStorage } from '../../utils/storage';
@@ -120,6 +120,14 @@ class CustomDataGraph extends DataGraph {
     // }
 }
 export class RathEngine extends VIEngine {
+    public params: {
+        limit: PreferencePanelConfig['viewSizeLimit']
+    } = {
+        limit: {
+            dimension: 2,
+            measure: 3
+        }
+    }
     public constructor() {
         super();
         // this.workerCollection.register('clusters', KNNClusterWorker);
@@ -320,15 +328,15 @@ export class RathEngine extends VIEngine {
         // console.log(this.dataGraph.dimensions.map(d => this.fields.find(f => f.key === d)!.name))
         const context = this;
         const DEFAULT_BIN_NUM = 16;
-        const { measures: globalMeasures, fieldDictonary } = context
+        const { measures: globalMeasures, fieldDictonary, params } = context
         let ansSpace: IInsightSpace[] = [];
         if (context.cube === null) return ansSpace;
         const globalCuboid = await context.cube.getCuboid([]);
         const globalDist = await globalCuboid.getAggregatedRows(globalMeasures, globalMeasures.map(() => 'dist'));
         const pureMeasureViewMeasures: string[][] = [];
         for (let measures of context.dataGraph.MClusters) {
-            if (measures.length > 4) {
-                pureMeasureViewMeasures.push(...getCombination(measures, 4, 4))
+            if (measures.length > params.limit.measure) {
+                pureMeasureViewMeasures.push(...getCombination(measures, params.limit.measure, params.limit.measure))
             } else {
                 pureMeasureViewMeasures.push(measures)
             }
@@ -372,6 +380,9 @@ export class RathEngine extends VIEngine {
             // FIXME: throtte
             ii % 10 === 0 && setStateInStorage('explore_progress', ii / viewSpaces.length)
             const { dimensions, measures } = space;
+            if (dimensions.length > params.limit.dimension || measures.length > params.limit.measure) {
+                continue;
+            }
             let dropSpace = false;
             const localCuboid = await context.cube.getCuboid(dimensions);
             await localCuboid.loadStateInCache();

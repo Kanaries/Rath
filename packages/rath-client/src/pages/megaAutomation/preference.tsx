@@ -19,12 +19,13 @@ import { runInAction } from 'mobx';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
+import { Label } from '@fluentui/react-components';
 
 const PreferencePanel: React.FC = () => {
     const { megaAutoStore } = useGlobalStore();
     const { visualConfig, showPreferencePannel, nlgThreshold, vizMode } = megaAutoStore;
 
-    const { nlg } = visualConfig;
+    const { nlg, viewSizeLimit } = visualConfig;
 
     const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
         text: intl.get(`megaAuto.orderBy.${or}`),
@@ -52,8 +53,8 @@ const PreferencePanel: React.FC = () => {
         runInAction(() => {
             megaAutoStore.setShowPreferencePannel(false);
             megaAutoStore.refreshMainViewSpec();
-        })
-    }, [megaAutoStore])
+        });
+    }, [megaAutoStore]);
 
     const onRenderFooterContent = () => (
         <div>
@@ -77,6 +78,20 @@ const PreferencePanel: React.FC = () => {
             closeButtonAriaLabel="Close"
             onRenderFooterContent={onRenderFooterContent}
         >
+            <Stack.Item>
+                <Label>Default SpinButton</Label>
+                <SpinButton
+                    value={viewSizeLimit.measure.toString()}
+                    min={1}
+                    max={20}
+                    step={1}
+                    onChange={(e, v) => {
+                        megaAutoStore.setVisualConig((cnf) => {
+                            cnf.viewSizeLimit.measure = Number(v);
+                        });
+                    }}
+                />
+            </Stack.Item>
             <Stack.Item>
                 <ChoiceGroup
                     label={intl.get('semiAuto.main.vizsys.title')}

@@ -1,6 +1,6 @@
 import { ICubeStorageManageMode, IFieldSummary, IInsightSpace, Cube, ViewSpace, StatFuncName } from "visual-insights";
 
-import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
+import { IFieldMeta, IRow, ISyncEngine, PreferencePanelConfig } from "../../interfaces";
 import { IRathStorage } from "../../utils/storage";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
@@ -37,15 +37,16 @@ function destroyEngine () {
     EngineRef.current = null;
 }
 
-type StartPipeLineProps = {
+type StartPipeLineProps = ({
     mode: 'webworker';
     cubeStorageManageMode: ICubeStorageManageMode;
     dataSource: IRow[];
     fieldMetas: IFieldMeta[];
 } | {
     mode: 'clickhouse';
-    fieldMetas: IFieldMeta[];
     viewName: string;
+}) & {
+    limit: PreferencePanelConfig['viewSizeLimit']
 }
 
 async function startPipeLine (props: StartPipeLineProps) {
@@ -56,10 +57,11 @@ async function startPipeLine (props: StartPipeLineProps) {
     let viewFields: IFieldSummary[] = [];
     times.push(performance.now())
     if (EngineRef.mode === 'webworker' && props.mode === 'webworker') {
-        const { dataSource, fieldMetas } = props;
+        const { dataSource, fieldMetas, limit } = props;
         const fieldsProps = fieldMetas.map(f => ({ key: f.fid, semanticType: f.semanticType, analyticType: f.analyticType, dataType: '?' as '?' }));
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');
+        engine.params.limit = limit
         engine.setData(dataSource)
             .setFields(fieldsProps)
         engine.univarSelection();

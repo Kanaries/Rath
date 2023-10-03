@@ -40,11 +40,7 @@ export async function dataBackup (file: File) {
       method: 'POST',
       credentials: 'include',
       body: data
-    }).then(res => res.json())
-    .then(res => {
-      // eslint-disable-next-line no-console
-      console.log(res)
-    }).catch(err => {
+    }).then(res => res.json()).catch(err => {
       console.warn(err)
     })
   } else {

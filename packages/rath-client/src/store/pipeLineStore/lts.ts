@@ -1,7 +1,7 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import { ICubeStorageManageMode, Sampling, IFieldSummary, IInsightSpace } from "visual-insights";
 
-import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
+import { IRow, ISyncEngine, ITaskTestMode, PreferencePanelConfig } from "../../interfaces";
 import { initRathWorker, rathEngineServerService, rathEngineService, destroyRathWorker } from "../../services/index";
 import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";
@@ -67,7 +67,7 @@ export class LTSPipeLine {
     public setCubeStorageManageMode (mode: ICubeStorageManageMode) {
         this.cubeStorageManageMode = mode;
     }
-    public async startTask (taskMode: ITaskTestMode = ITaskTestMode.local) {
+    public async startTask (taskMode: ITaskTestMode = ITaskTestMode.local, limit: PreferencePanelConfig['viewSizeLimit']) {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
         this.computing = true;
         try {
@@ -80,26 +80,19 @@ export class LTSPipeLine {
                         dataSource: cleanedData,
                         cubeStorageManageMode: this.cubeStorageManageMode,
                         fieldMetas,
-                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
+                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`,
+                        limit
                     }
                 })
             } else {
-                await rathEngineService({
-                    task: 'start',
-                    props: {
-                        mode: this.commonStore.computationEngine,
-                        dataSource: cleanedData,
-                        fieldMetas,
-                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
-                    }
-                })
                 res = await rathEngineServerService({
                     task: 'start',
                     dataSource: cleanedData,
                     fields: fieldMetas,
                     props: {
                         mode: this.commonStore.computationEngine,
-                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
+                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`,
+                        limit
                     }
                 })
             }
