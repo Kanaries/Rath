@@ -486,9 +486,10 @@ export class DataSourceStore {
         const { cleanedData, fieldMetas } = this;
         return {
             dataSource: cleanedData,
-            fields: fieldMetas.map(f => ({
-                ...f
-            }))
+            fields: fieldMetas.map(f => {
+                const { features, distribution, ...others } = f
+                return others
+            })
         }
     }
 
