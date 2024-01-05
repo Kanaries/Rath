@@ -1,6 +1,6 @@
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from xgboost import XGBClassifier
 
 
@@ -27,4 +27,11 @@ def classification (X_train, X_test, y_train, y_test, headers, algorithm):
             diffs.append(0)
         else:
             diffs.append(1)
-    return score, diffs
+
+    conf_matrix = confusion_matrix(y_test, predict_res)
+    class_report = classification_report(y_test, predict_res)
+    feature_importance = None
+    if hasattr(clf, 'feature_importances_'):
+        feature_importance = clf.feature_importances_
+
+    return score, diffs, conf_matrix, class_report, feature_importance
