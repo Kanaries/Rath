@@ -209,7 +209,6 @@ const Exploration = forwardRef<{
                         <GraphicWalker
                             dataSource={visSample.slice(0)}
                             rawFields={fieldMetas}
-                            hideDataSourceConfig
                             spec={initialSpec}
                             i18nLang={langStore.lang}
                             keepAlive={false}

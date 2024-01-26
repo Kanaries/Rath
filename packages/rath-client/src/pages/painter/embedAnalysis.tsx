@@ -24,7 +24,6 @@ const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
         rawFields={triggerFields}
         spec={spec}
         i18nLang={i18nLang}
-        hideDataSourceConfig
         keepAlive
         dark="light"
         fieldKeyGuard={false}
