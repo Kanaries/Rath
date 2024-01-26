@@ -32,13 +32,13 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
     const { mainVizSetting, dataSource, fieldMetas } = semiAutoStore;
     const [hide, setHide] = useState<boolean>(false);
 
-    const { debug } = mainVizSetting;
+    const { debug, excludeScaleZero } = mainVizSetting;
     const mainViewData = useMemo<IRow[]>(() => {
         if (pined) return applyFilters(dataSource, pined.filters);
         return [];
     }, [dataSource, pined]);
 
-    const specOptions = useMemo(() => ({ pattern: pined }), [pined]);
+    const specOptions = useMemo(() => ({ pattern: pined, excludeScaleZero }), [pined, excludeScaleZero]);
     const simpleSpec = useVisSpec(specOptions, dataSource);
 
     const spec = useMemo(() => {
