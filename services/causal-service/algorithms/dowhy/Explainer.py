@@ -16,7 +16,7 @@ EstimateEffectItems = {
 class ExplainerParams(common.OptionalParams, title="Explainer Algorithm"):
     """
     """
-    target: Optional[int] = Field(options=[{'key': '$fields', 'title': ''}], title="目标度量值字段", description="关注的度量值")
+    target: Optional[int] = Field(default=None, options=[{'key': '$fields', 'title': ''}], title="目标度量值字段", description="关注的度量值")
     treatment: Optional[List[int]] = Field(default=[], options=[{'key': '$fields', 'title': ''}], title="可干预变量字段", description="可干预变量")
     estimate_effect_method: Optional[str] = Field(
         default=None,
