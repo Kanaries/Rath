@@ -12,7 +12,7 @@ const StyledDropdown = styled(Dropdown)`
 
 const WorkspaceRole = observer(function WorkspaceRole () {
     const { userStore } = useGlobalStore();
-    const { loggedIn, currentWspName, organization } = userStore;
+    const { loggedIn, currentWorkspaceName, organization } = userStore;
     
     // const organizations = useMemo(() => info?.organizations ?? [], [info?.organizations]);
     const workspaces = organization?.workspaces ?? [];
@@ -43,7 +43,7 @@ const WorkspaceRole = observer(function WorkspaceRole () {
             <StyledDropdown
                 label={intl.get('user.workspace')}
                 options={workspaces.map(wsp => ({ key: wsp.name, text: wsp.name }))}
-                selectedKey={currentWspName}
+                selectedKey={currentWorkspaceName}
                 onChange={(_, opt) => opt && userStore.setWspName(opt.key as string)}
             />
         </Stack>
