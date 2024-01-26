@@ -35,7 +35,7 @@ export default class UserStore {
     /** Organization name */
     public currentOrgName: string | null = null;
     /** Workspace name */
-    public currentWspName: string | null = null;
+    public currentWorkspaceName: string | null = null;
 
     public uploadDataSource: (() => void) | null = null;
     public uploadingDataSource = false;
@@ -44,7 +44,7 @@ export default class UserStore {
         return this.info?.organizations?.find(org => org.name === this.currentOrgName) ?? null;
     }
     public get workspace(): IWorkspace | null {
-        return this.organization?.workspaces?.find(wsp => wsp.name === this.currentWspName) ?? null;
+        return this.organization?.workspaces?.find(wsp => wsp.name === this.currentWorkspaceName) ?? null;
     }
 
     protected effects: (() => void)[] = [];
@@ -161,15 +161,15 @@ export default class UserStore {
             return false;
         }
         this.currentOrgName = org.name;
-        const wsp = org.workspaces?.find(which => which.name === this.currentWspName);
+        const wsp = org.workspaces?.find(which => which.name === this.currentWorkspaceName);
         if (!wsp) {
-            this.currentWspName = null;
+            this.currentWorkspaceName = null;
         }
         return true;
     }
 
     public setWspName(wspName: string | null) {
-        this.currentWspName = wspName;
+        this.currentWorkspaceName = wspName;
     }
 
 }
