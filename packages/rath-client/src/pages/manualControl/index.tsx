@@ -30,7 +30,6 @@ const VisualInterface: React.FC = (props) => {
             dark="light"
             fieldKeyGuard={false}
             themeKey="g2"
-            hideDataSourceConfig={true}
         />
     );
 };
