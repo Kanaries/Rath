@@ -16,7 +16,7 @@
     "@fluentui/react-file-type-icons": "^8.8.3",
     "@fluentui/react-hooks": "^8.6.11",
     "@fluentui/react-icons": "^2.0.200",
-    "@kanaries/graphic-walker": "^0.4.47",
+    "@kanaries/graphic-walker": "^0.4.50",
     "@kanaries/loa": "^0.0.16",
     "@kanaries/web-data-loader": "0.1.7",
     "@vercel/analytics": "^1.0.0",
