@@ -123,6 +123,7 @@ const Painter: React.FC = (props) => {
     }, 800), [painterStore])
 
     const noViz = viewData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
+    const axisResizable = painterMode === PAINTER_MODE.MOVE;
     const painterSpec = useMemo<IVegaSubset | null>(() => {
         if (!noViz) {
             const mvd: any = {
@@ -140,7 +141,7 @@ const Painter: React.FC = (props) => {
                     domain: mutFeatValues,
                 },
             };
-            if (painterMode === PAINTER_MODE.MOVE) {
+            if (axisResizable) {
                 if (!(mvd.params instanceof Array)) {
                     mvd.params = [];
                 }
@@ -153,7 +154,7 @@ const Painter: React.FC = (props) => {
             return mvd;
         }
         return null;
-    }, [vizSpec, mutFeatValues, noViz, painterMode]);
+    }, [vizSpec, mutFeatValues, noViz, axisResizable]);
     const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec !== null && container.current) {

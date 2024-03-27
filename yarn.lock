@@ -3956,10 +3956,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@^0.4.47":
-  version "0.4.47"
-  resolved "https://registry.yarnpkg.com/@kanaries/graphic-walker/-/graphic-walker-0.4.47.tgz#bf4f0a1396153ecd62e401d2bb5cc7c7eb5c57db"
-  integrity sha512-VPByjpsTFPoAaEqwX/L/cRM7ut5QtWYRSjec2j83T2hRULk1ntb8flGYgVB6zrHIwfHvrI3/puiF5Pq9X8917Q==
+"@kanaries/graphic-walker@^0.4.50":
+  version "0.4.50"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.4.50.tgz#b117f41b8c16c3cca305d3280b28b0dcd3ebf4a3"
+  integrity sha512-KVwtsCgCQJbJ37GvEvk+JMIAaZPIdIUhoAtLwLtA7R59HslHwHCtvdByaJhhNvxRfydfn+BEpZ525JDd2sZflA==
   dependencies:
     "@headlessui-float/react" "^0.11.4"
     "@headlessui/react" "1.7.12"
