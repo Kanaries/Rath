@@ -515,6 +515,7 @@ export class DataSourceStore {
     public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[], tag?: DataSourceTag | undefined) {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
+            this.initStore()
             // vega-lite's title contains \n will fail to render
             // fix: https://github.com/Kanaries/Rath/issues/381
             metas.forEach(m => {

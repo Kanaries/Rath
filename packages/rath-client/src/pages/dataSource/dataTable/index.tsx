@@ -48,7 +48,7 @@ const ADD_BATCH_SIZE = 5;
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
+    const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage, datasetId } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
     const [textSelectList, setTextSelectList] = useState<IFieldTextSelection[]>([]);
     const [editTP, setEditTP] = useState<boolean>(false);
@@ -68,6 +68,23 @@ const DataTable: React.FC = (props) => {
         specific: 1,
         nlp: 1,
     });
+    useEffect(() => {
+        // clean state
+        setFilteredData([]);
+        setTextSelectList([]);
+        setEditTP(false);
+        setGroupedTextPatternList(initGroupedTextPatternList());
+        setTpPos({
+            groupKey: 'knowledge',
+            index: 0,
+        });
+        setGroupShownSize({
+            knowledge: 1,
+            generalize: 1,
+            specific: 1,
+            nlp: 1,
+        });
+    }, [datasetId]);
 
     const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
         try {
