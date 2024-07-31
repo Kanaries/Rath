@@ -53,7 +53,7 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
                     onChange={(e, value) => { setEndPoint(`${value}`) }}
                     value={endPoint}
                 />
-                <TextField required label="API Key" placeholder="key*********"
+                <TextField required label="Access token" placeholder="pat*********"
                     onChange={(e, value) => { setAPIKey(`${value}`) }}
                     value={apiKey}
                 />
@@ -65,7 +65,7 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
                     onChange={(e, value) => { setTableName(`${value}`) }}
                     value={tableName}
                 />
-                <TextField required label="View Name" placeholder="Gird View"
+                <TextField required label="View Name" placeholder="Gird view"
                     onChange={(e, value) => { setViewName(`${value}`) }}
                     value={viewName}
                 />
