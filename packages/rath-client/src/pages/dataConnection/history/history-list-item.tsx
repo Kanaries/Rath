@@ -56,8 +56,11 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
     const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
     const handleDelete=(e:React.MouseEvent)=>{
         e?.stopPropagation()
-        deleteStorageByIdInLocal(file.id)
+        deleteStorageByIdInLocal(file.id).then(() => {
+            handleRefresh?.();
+        });
     }
+    
 
     return (
         <Card

@@ -124,7 +124,7 @@ const HistoryList: FC<IHistoryListProps> = props => {
     const handleDeleteHistory = useCallback(
         (id: string) => {
             deleteDataStorageById(id).then(() => {
-                fetchDataStorageList();
+                fetchDataStorageList(false);
             });
         },
         [fetchDataStorageList]
@@ -192,15 +192,15 @@ const HistoryList: FC<IHistoryListProps> = props => {
                             <List role="grid" aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
                                 {group.list.map((file, i) => (
                                     <HistoryListItem
-                                        appearance={appearance}
-                                        key={i}
-                                        file={file}
-                                        rowIndex={Math.floor(i / colCount) + 1}
-                                        colIndex={(i % colCount) + 1}
-                                        handleClick={handleLoadHistory}
-                                        handleClearClick={handleDeleteHistory}
-                                        handleRefresh={() => fetchDataStorageList(false)}
-                                    />
+                                    appearance={appearance}
+                                    key={i}
+                                    file={file}
+                                    rowIndex={Math.floor(i / colCount) + 1}
+                                    colIndex={(i % colCount) + 1}
+                                    handleClick={handleLoadHistory}
+                                    handleClearClick={handleDeleteHistory}
+                                    handleRefresh={() => fetchDataStorageList(false)}
+                                />
                                 ))}
                             </List>
                         </Fragment>
