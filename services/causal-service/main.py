@@ -1,6 +1,8 @@
-import os, sys, json, time, argparse, math
-import numpy as np, pandas as pd
-from typing import Dict, List, Tuple, Optional, Union, Literal, Generic
+"""Module providing a function printing python version."""
+import os
+import sys
+import math
+from typing import Dict, List, Optional
 import traceback
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,80 +15,84 @@ debug = os.environ.get('mode', 'prod') == 'dev'
 print("Development Mode" if debug else 'Production Mode', file=sys.stderr)
 app = FastAPI()
 origins = [ "*" ]
-cors_regex = \
+CORS_REGEX = \
     "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$" if not debug else \
     "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app|localhost|192\.168\.\d{1,3}\.\d{1,3}|127\.0\.0\.1)(\:\d{1,})?$"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     # allow_origin_regex="^https?\://([\w\-_\.]*\.kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$",
-    allow_origin_regex=cors_regex,
+    allow_origin_regex=CORS_REGEX,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# {
-#     title: string;
-#     key: string;
-#     description?: string;
-#     dataType: 'number' | 'string' | 'time' | 'boolean';
-#     renderType: 'dropdown' | 'slider' | 'text' | 'toggle' | 'radio' | 'checkbox';
-#     defaultValue?: any;
-#     range?: [number, number]; //slider
-#     step?: number; // slider
-#     options?: {text: string; key: any}[] // dropdown or radio or checkbox
-# }
 
 class AlgoListRequest(BaseModel, extra=Extra.allow):
     fieldIds: Optional[List[str]] = Field(default=[], title="field Ids")
     fieldMetas: Optional[List[I.IFieldMeta]] = Field(default=[], title="field metas")
-    
-def inferRender(p: Dict, req: AlgoListRequest) -> Dict:
+def infer_render(p: Dict, req: AlgoListRequest) -> Dict:
+    """Infers the rendering properties for a given parameter based on its type and options."""
     res = {}
-    t = p['type']
-    opt = p.get('options', None)
-    if t == 'boolean':
+    param_type = p.get('type')
+    options = p.get('options')
+
+    if param_type == 'boolean':
         res['renderType'] = 'toggle'
-    elif opt is not None:
-        res['renderType'] = 'dropdown'
-        res_opt = []
-        if t == 'integer':
-            res['dataType'] = 'number'
-        for o in opt:
-            if o['key'] == '$fields':
-                if req.fieldMetas and len(req.fieldMetas) > 0:
-                    res_opt.extend([{
-                        'key': meta.fid,
-                        'text': meta.name if meta.name and len(meta.name) > 0 else meta.fid
-                    } for meta in req.fieldMetas])
-            else:
-                res_opt.append(o)
-        res['options'] = res_opt
-    elif t == 'number' or t == 'integer':
-        res['dataType'] = 'number'
-        if p.keys().isdisjoint(['maximum', 'minimum', 'exclusiveMinimum', 'exclusiveMaximum']):
-            res['renderType'] = 'text'
-        else:
-            res['renderType'] = 'slider'
-            res['range'] = [
-                p.get('minimum', p.get('exclusiveMinimum', -math.inf) + 1e-4),
-                p.get('maximum', p.get('exclusiveMaximum', math.inf) - 1e-4)
-            ]
-            step = p.get('multipleOf')
-            if step is not None:
-                res['step'] = step
-            else:
-                res['step'] = 1e-4
+    elif options is not None:
+        res.update(handle_options(param_type, options, req))
+    elif param_type in {'number', 'integer'}:
+        res.update(handle_numeric(p))
     else:
         res['renderType'] = 'text'
-        pass
+
+    return res
+
+
+def handle_options(param_type: str, options: List[Dict], req: AlgoListRequest) -> Dict:
+    """Handles rendering for parameters with options."""
+    res = {'renderType': 'dropdown'}
+    res_opt = []
+
+    if param_type == 'integer':
+        res['dataType'] = 'number'
+
+    for option in options:
+        if option.get('key') == '$fields' and req.fieldMetas:
+            res_opt.extend([
+                {
+                    'key': meta.fid,
+                    'text': meta.name if meta.name else meta.fid
+                } for meta in req.fieldMetas
+            ])
+        else:
+            res_opt.append(option)
+
+    res['options'] = res_opt
+    return res
+
+
+def handle_numeric(p: Dict) -> Dict:
+    """Handles rendering for numeric parameters."""
+    res = {'dataType': 'number'}
+    constraints = {'maximum', 'minimum', 'exclusiveMinimum', 'exclusiveMaximum'}
+
+    if p.keys().isdisjoint(constraints):
+        res['renderType'] = 'text'
+    else:
+        res['renderType'] = 'slider'
+        res['range'] = [
+            p.get('minimum', p.get('exclusiveMinimum', -math.inf) + 1e-4),
+            p.get('maximum', p.get('exclusiveMaximum', math.inf) - 1e-4)
+        ]
+        res['step'] = p.get('multipleOf', 1e-4)
+
     return res
 
 
 @app.post('/algo/list', response_model=Dict[str, I.ServiceSchemaResponse])
-async def algoList(req: AlgoListRequest, response: Response) -> Dict[str, I.ServiceSchemaResponse]:
+async def algo_list(req: AlgoListRequest, response: Response) -> Dict[str, I.ServiceSchemaResponse]:
     response.headers['content-type'] = 'application/json'
-    # print("/algo/list", req)
     return {
         algoName: getAlgoSchema(algoName, req)
         for algoName, algo in algorithms.DICT.items() if algo.dev_only == False or debug == True
@@ -115,10 +121,8 @@ def getAlgoSchema(algoName: str, req: AlgoListRequest) -> I.ServiceSchemaRespons
         new_p['key'] = key
         new_p['dataType'] = p['type']
         new_p['defaultValue'] = p.get('default', None)
-        res = inferRender(new_p, req)
+        res = infer_render(new_p, req)
         new_p.update(res.items())
-        # print('key =', key)
-        # print('res =', res)
         items.append(
             I.ServiceSchemaItem(
                 **new_p
@@ -130,12 +134,6 @@ def getAlgoSchema(algoName: str, req: AlgoListRequest) -> I.ServiceSchemaRespons
         items=items,
         message=schema
     )
-    # return {
-    #     "title":  # algo,
-    #     "description": schema['description'],
-    #     "items": items,
-    #     "message": schema
-    # }
 
 @app.get('/algo/schema/{algoName}')
 async def algoSchema(algoName: str, response: Response):
@@ -149,10 +147,6 @@ async def algoSchema(algoName: str, response: Response):
             "message": str(e)
         }
 
-from algorithms.causallearn.PC import PCParams
-from algorithms.causallearn.FCI import FCIParams
-import sys
-import logging
 
 def causal(algoName: str, item: algorithms.CausalRequest, response: Response) -> I.CausalAlgorithmResponse:
     try:
