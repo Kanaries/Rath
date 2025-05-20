@@ -21,7 +21,8 @@ import { customLightTheme, mainTheme } from './theme';
 
 inject();
 
-initializeIcons();
+// Load Fluent UI icons from local fonts to avoid CORS issues
+initializeIcons('/fonts/');
 
 ReactDOM.render(
     <ThemeProvider theme={mainTheme}>
