@@ -48,10 +48,10 @@ const hashAll = (data: readonly IRow[], fields: readonly IFieldMeta[]): HashResu
     for (const f of fields) {
         if (f.semanticType === 'quantitative') {
             const [min, max] = getRange(data.map(row => Number(row[f.fid])));
-            hash[f.fid] = val => Math.min(BIN_SIZE, Math.floor((Number(val) - min) / (max - min) * BIN_SIZE));
+            hash[f.fid] = val => Math.min(BIN_SIZE - 1, Math.floor((Number(val) - min) / (max - min) * BIN_SIZE));
         } else if (f.semanticType === 'temporal') {
             const [min, max] = getRange(data.map(row => dayjs(row[f.fid]).toDate().getTime()));
-            hash[f.fid] = val => Math.min(BIN_SIZE, Math.floor((dayjs(val).toDate().getTime() - min) / (max - min) * BIN_SIZE));
+            hash[f.fid] = val => Math.min(BIN_SIZE - 1, Math.floor((dayjs(val).toDate().getTime() - min) / (max - min) * BIN_SIZE));
         } else {
             hash[f.fid] = encodeColumn(data, f);
         }
