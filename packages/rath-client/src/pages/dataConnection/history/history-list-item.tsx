@@ -12,20 +12,20 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import intl from 'react-intl-universal';
-import { Icon } from '@fluentui/react';
+import { ButtonType, Icon } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import dayjs from 'dayjs';
 import type { FC } from 'react';
 import styled from 'styled-components';
-import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
+import { Button, Caption1, Card, CardHeader, Text,CardFooter } from '@fluentui/react-components';
 // import { MoreHorizontal20Filled } from '@fluentui/react-icons';
 import { IDBMeta } from '../../../utils/storage';
 import { RathDemoVirtualExt } from '../demo';
 import { IDataSourceType } from '../../../global';
 import getFileIcon from './get-file-icon';
-
+import React from 'react';
+import {deleteStorageByIdInLocal} from '../../../utils/storage'
 const Desc = styled.p`
     font-size: 12px;
 `;
@@ -54,6 +54,13 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
     const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /\.([^./]+)$/.exec(file.name)?.[1];
     const isRathDemo = ext === RathDemoVirtualExt;
     const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
+    const handleDelete=(e:React.MouseEvent)=>{
+        e?.stopPropagation()
+        deleteStorageByIdInLocal(file.id).then(() => {
+            handleRefresh?.();
+        });
+    }
+    
 
     return (
         <Card
@@ -71,8 +78,10 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
                 }
                 // action={<Button appearance="transparent" icon={<MoreHorizontal20Filled />} aria-label="More options" />}
             />
-
             <Desc>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</Desc>
+            <CardFooter>
+            <Button onClick={handleDelete}>{`Delete`}</Button>
+            </CardFooter>
         </Card>
     );
 };
