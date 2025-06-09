@@ -3,7 +3,7 @@ import intl from 'react-intl-universal';
 import { Stack, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { Button, Tab, TabList } from '@fluentui/react-components';
-import { AppsListDetail24Regular, DataBarVertical24Regular, Database24Regular, TableFreezeRow24Regular } from '@fluentui/react-icons';
+import { List, BarChart3, Database, Table } from 'lucide-react';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -18,7 +18,6 @@ import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
 import DataInfo from './dataInfo';
-
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -88,7 +87,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                             dataSourceStore.setShowDataImportSelection(true);
                         }}
                         style={MARGIN_LEFT}
-                        icon={<Database24Regular />}
+                        icon={<Database />}
                     >
                         {intl.get('dataSource.importData.buttonName')}
                     </Button>
@@ -109,12 +108,21 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     />
                 </Stack>
                 <hr style={{ margin: '1em 0em 0em 0em' }} />
-                <TabList selectedValue={dataPreviewMode} onTabSelect={(e, item) => {
-                    item.value && dataSourceStore.setDataPreviewMode(item.value as IDataPreviewMode);
-                }}>
-                    <Tab value={IDataPreviewMode.data} icon={<TableFreezeRow24Regular />}>{intl.get('dataSource.dataView')}</Tab>
-                    <Tab value={IDataPreviewMode.meta} icon={<AppsListDetail24Regular />}>{intl.get('dataSource.metaView')}</Tab>
-                    <Tab value={IDataPreviewMode.stat} icon={<DataBarVertical24Regular />}>{intl.get('dataSource.statView')}</Tab>
+                <TabList
+                    selectedValue={dataPreviewMode}
+                    onTabSelect={(e, item) => {
+                        item.value && dataSourceStore.setDataPreviewMode(item.value as IDataPreviewMode);
+                    }}
+                >
+                    <Tab value={IDataPreviewMode.data} icon={<Table />}>
+                        {intl.get('dataSource.dataView')}
+                    </Tab>
+                    <Tab value={IDataPreviewMode.meta} icon={<List />}>
+                        {intl.get('dataSource.metaView')}
+                    </Tab>
+                    <Tab value={IDataPreviewMode.stat} icon={<BarChart3 />}>
+                        {intl.get('dataSource.statView')}
+                    </Tab>
                 </TabList>
                 {rawDataMetaInfo.length > 0 && <DataOperations />}
                 <DataInfo />

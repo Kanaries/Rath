@@ -20,7 +20,7 @@ import dayjs from 'dayjs';
 import type { FC } from 'react';
 import styled from 'styled-components';
 import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
-// import { MoreHorizontal20Filled } from '@fluentui/react-icons';
+// import { MoreHorizontal } from 'lucide-react';
 import { IDBMeta } from '../../../utils/storage';
 import { RathDemoVirtualExt } from '../demo';
 import { IDataSourceType } from '../../../global';
@@ -47,7 +47,7 @@ export interface IHistoryListItemProps {
     handleClick?: (item: IDBMeta) => void;
     handleClearClick?: (itemId: string) => void;
     handleRefresh?: () => void;
-    appearance: "filled" | "outline";
+    appearance: 'filled' | 'outline';
 }
 
 const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, handleClick, handleClearClick, handleRefresh, appearance }) => {
@@ -69,7 +69,7 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
                         ext ? `${isRathDemo ? `Rath ${intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)}` : ext} - ` : ''
                     }${formatSize(file.size)}`}</Caption1>
                 }
-                // action={<Button appearance="transparent" icon={<MoreHorizontal20Filled />} aria-label="More options" />}
+                // action={<Button appearance="transparent" icon={<MoreHorizontal />} aria-label="More options" />}
             />
 
             <Desc>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</Desc>

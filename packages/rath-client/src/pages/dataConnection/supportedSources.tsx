@@ -16,43 +16,43 @@
 import React from 'react';
 import intl from 'react-intl-universal';
 import { Button, Card, CardHeader, makeStyles, shorthands, tokens, Text, Caption1 } from '@fluentui/react-components';
-import { MoreHorizontal20Filled } from '@fluentui/react-icons';
+import { MoreHorizontal } from 'lucide-react';
 import { IDataSourceType } from '../../global';
 
 const useStyles = makeStyles({
     main: {
-      ...shorthands.gap("22px"),
-      display: "flex",
-      flexWrap: "wrap",
+        ...shorthands.gap('22px'),
+        display: 'flex',
+        flexWrap: 'wrap',
     },
-  
+
     title: {
-      ...shorthands.margin(0, 0, "12px"),
+        ...shorthands.margin(0, 0, '12px'),
     },
-  
+
     description: {
-      ...shorthands.margin(0, 0, "12px"),
+        ...shorthands.margin(0, 0, '12px'),
     },
-  
+
     card: {
-      width: "480px",
-      maxWidth: "100%"
+        width: '480px',
+        maxWidth: '100%',
     },
-  
+
     caption: {
-      color: tokens.colorNeutralForeground3,
+        color: tokens.colorNeutralForeground3,
     },
-  
+
     logo: {
-      ...shorthands.borderRadius("4px"),
-      width: "48px",
-      height: "48px",
+        ...shorthands.borderRadius('4px'),
+        width: '48px',
+        height: '48px',
     },
-  
+
     text: {
-      ...shorthands.margin(0),
+        ...shorthands.margin(0),
     },
-  });
+});
 
 interface SupportedSourceProps {
     onSelected: (key: string | number) => void;
@@ -151,12 +151,10 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
                         image={op.iconImage && op.iconImage()}
                         header={<Text weight="semibold">{op.text}</Text>}
                         description={<Caption1 className={styles.caption}>Developer</Caption1>}
-                        action={<Button appearance="transparent" icon={<MoreHorizontal20Filled />} aria-label="More options" />}
+                        action={<Button appearance="transparent" icon={<MoreHorizontal />} aria-label="More options" />}
                     />
 
-                    <p className={styles.text}>
-                        {intl.get(`dataSource.importData.sources.${op.key}.desc`)}
-                    </p>
+                    <p className={styles.text}>{intl.get(`dataSource.importData.sources.${op.key}.desc`)}</p>
                 </Card>
             ))}
         </div>
