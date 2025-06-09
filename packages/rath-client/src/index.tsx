@@ -11,7 +11,7 @@ import { initializeIcons } from '@fluentui/font-icons-mdl2';
 import { ThemeProvider } from '@fluentui/react';
 import { inject } from '@vercel/analytics';
 
-import 'office-ui-fabric-core/dist/css/fabric.css';
+// import 'office-ui-fabric-core/dist/css/fabric.css'; // Deprecated - commenting out to avoid CDN issues
 import './index.css';
 import { FluentProvider } from '@fluentui/react-components';
 // @ts-ignore
@@ -21,7 +21,8 @@ import { customLightTheme, mainTheme } from './theme';
 
 inject();
 
-initializeIcons();
+// Fix for deprecated Fluent UI CDN - use local/npm-based icons instead of CDN
+initializeIcons(/* baseUrl */ undefined, { disableWarnings: true });
 
 ReactDOM.render(
     <ThemeProvider theme={mainTheme}>
