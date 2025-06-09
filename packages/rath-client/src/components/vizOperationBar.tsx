@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Dropdown, IDropdownOption, Position, SpinButton, Stack, Toggle } from '@fluentui/react';
+import { Dropdown, IDropdownOption, Position, SpinButton, Stack } from '@fluentui/react';
+import { Switch } from '@fluentui/react-components';
 import intl from 'react-intl-universal';
 import { IResizeMode } from '../interfaces';
 
@@ -33,85 +34,82 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
 
     return <Stack tokens={{ childrenGap: gap }} horizontal={stackLayout === 'horizontal'}>
         <Stack.Item>
-            <Toggle label={intl.get('megaAuto.operation.excludeScaleZero')}
+            <Switch 
+                label={intl.get('megaAuto.operation.excludeScaleZero')}
                 checked={excludeScaleZero}
-                onChange={(e, checked) => {
-                    onValueChange('excludeScaleZero', Boolean(checked))
+                onChange={(e, data) => {
+                    onValueChange('excludeScaleZero', Boolean(data.checked))
                 }}
             />
         </Stack.Item>
         <Stack.Item>
-            <Toggle label={intl.get('megaAuto.operation.debug')}
+            <Switch 
+                label={intl.get('megaAuto.operation.debug')}
                 checked={debug}
-                onChange={(e, checked) => {
-                    onValueChange('debug', Boolean(checked))
+                onChange={(e, data) => {
+                    onValueChange('debug', Boolean(data.checked))
                 }}
             />
         </Stack.Item>
         <Stack.Item>
-            <Toggle label={intl.get('megaAuto.operation.zoom')}
+            <Switch 
+                label={intl.get('megaAuto.operation.zoom')}
                 checked={interactive}
-                onChange={(e, checked) => {
-                    onValueChange('interactive', Boolean(checked))
+                onChange={(e, data) => {
+                    onValueChange('interactive', Boolean(data.checked))
                 }}
             />
         </Stack.Item>
         <Stack.Item>
-            <Toggle label="NLG"
+            <Switch 
+                label="NLG"
                 checked={nlg}
-                onChange={(e, checked) => {
-                    onValueChange('nlg', Boolean(checked))
+                onChange={(e, data) => {
+                    onValueChange('nlg', Boolean(data.checked))
                 }}
             />
         </Stack.Item>
         <Stack.Item>
-            <Dropdown selectedKey={resizeMode}
-                style={{ width: '120px' }}
-                label={intl.get('megaAuto.operation.resize')}
-                options={resizeModeList}
-                onChange={(e, op) => {
-                    op && onValueChange('resizeMode', op.key as IResizeMode)
+            <Dropdown
+                selectedKey={resizeMode}
+                onChange={(e, option) => {
+                    option && onValueChange('resizeMode', option.key);
                 }}
+                options={resizeModeList}
             />
         </Stack.Item>
         {
             resizeMode === IResizeMode.control && <Stack.Item>
-                <SpinButton label="width"
+                <SpinButton
+                    label={intl.get('megaAuto.operation.width')}
                     labelPosition={Position.top}
                     value={width.toString()}
-                    style={{ width: '32px' }}
-                    min={0}
-                    max={1000}
-                    step={10}
-                    onValidate={v => {
-                        onValueChange('width', parseInt(v));
+                    onValidate={(v) => {
+                        onValueChange('width', Number(v))
                     }}
-                    onIncrement={() => {
-                        onValueChange('width', Math.min(width + 10, 1000))
+                    onIncrement={(v) => {
+                        onValueChange('width', Number(v) + 20);
                     }}
-                    onDecrement={() => {
-                        onValueChange('width', Math.max(width - 10, 10))
+                    onDecrement={(v) => {
+                        onValueChange('width', Math.max(Number(v) - 20, 0));
                     }}
                 />
             </Stack.Item>
         }
         {
             resizeMode === IResizeMode.control && <Stack.Item>
-                <SpinButton label="height"
+                <SpinButton
+                    label={intl.get('megaAuto.operation.height')}
                     labelPosition={Position.top}
                     value={height.toString()}
-                    min={0}
-                    max={1000}
-                    step={10}
-                    style={{ width: '32px' }}
-                    onValidate={v => {
-                        onValueChange('height', parseInt(v));
+                    onValidate={(v) => {
+                        onValueChange('height', Number(v))
                     }}
-                    onIncrement={() => {
-                        onValueChange('height', Math.min(height + 10, 1000))
+                    onIncrement={(v) => {
+                        onValueChange('height', Number(v) + 20);
                     }}
-                    onDecrement={() => {
-                        onValueChange('height', Math.max(height - 10, 10))
+                    onDecrement={(v) => {
+                        onValueChange('height', Math.max(Number(v) - 20, 0));
                     }}
                 />
             </Stack.Item>

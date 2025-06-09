@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { PrimaryButton, TextField } from '@fluentui/react';
+import { Button, Input, Field } from '@fluentui/react-components';
 
 const ActionButton = styled.div`
-    > label {
+    > .field-container {
         font-weight: 600;
         display: inline-block;
         color: rgb(50, 49, 48);
@@ -38,23 +38,29 @@ const ActionTextField: React.FC<ActionTextFieldProps> = (props) => {
     const { label, placeholder, buttonLabel, value, isDisable, onButtonClick, onChange } = props;
     return (
         <ActionButton>
-            <label>{label}</label>
-            <div>
+            <Field label={label} className="field-container">
                 <div>
-                    <TextField
-                        value={value}
-                        placeholder={placeholder}
-                        onChange={(e, data) => {
-                            onChange && onChange(data);
-                        }}
-                    />
+                    <div>
+                        <Input
+                            value={value}
+                            placeholder={placeholder}
+                            onChange={(e, data) => {
+                                onChange && onChange(data.value);
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <Button 
+                            appearance="primary" 
+                            style={{ width: '100%' }} 
+                            disabled={isDisable} 
+                            onClick={onButtonClick}
+                        >
+                            {buttonLabel}
+                        </Button>
+                    </div>
                 </div>
-                <div>
-                    <PrimaryButton style={{ width: '100%' }} disabled={isDisable} onClick={onButtonClick}>
-                        {buttonLabel}
-                    </PrimaryButton>
-                </div>
-            </div>
+            </Field>
         </ActionButton>
     );
 };
