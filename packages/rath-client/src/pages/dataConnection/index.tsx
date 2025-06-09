@@ -18,7 +18,7 @@ import { IBreadcrumbItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { Button } from '@fluentui/react-components';
-import { Add24Filled, HomeDatabase24Regular } from '@fluentui/react-icons';
+import { Plus, Database } from 'lucide-react';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -102,7 +102,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                         onClick={() => {
                             setDsPageKey(DS_PAGE_KEYS.create);
                         }}
-                        icon={<Add24Filled />}
+                        icon={<Plus />}
                     >
                         Create DataSource
                     </Button>
@@ -113,7 +113,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                         onClick={() => {
                             setDsPageKey(DS_PAGE_KEYS.display);
                         }}
-                        icon={<HomeDatabase24Regular />}
+                        icon={<Database />}
                     >
                         My Data
                     </Button>

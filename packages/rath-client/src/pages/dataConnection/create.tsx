@@ -19,7 +19,7 @@ import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { Button, Card } from '@fluentui/react-components';
-import { ArrowHookUpLeft24Filled } from '@fluentui/react-icons';
+import { CornerUpLeft } from 'lucide-react';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -177,7 +177,7 @@ const ConnectionCreation: React.FC<ConnectionCreationProps> = (props) => {
                     <hr style={{ marginTop: '1em' }} />
                     <div style={{ margin: '2px 0em' }}>
                         <Button
-                            icon={<ArrowHookUpLeft24Filled />}
+                            icon={<CornerUpLeft />}
                             onClick={() => {
                                 setDataSourceType(null);
                             }}

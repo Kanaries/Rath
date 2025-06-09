@@ -3,12 +3,11 @@ import { observer, useObserver } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { Menu, MenuButtonProps, MenuItem, MenuList, MenuPopover, MenuTrigger, SplitButton } from '@fluentui/react-components';
-import { Poll24Regular } from '@fluentui/react-icons';
+import { BarChart3 } from 'lucide-react';
 import va from '@vercel/analytics';
 import { toJS } from 'mobx';
 import { EXPLORE_MODE, PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
-
 
 export const useActionModes = function () {
     const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
@@ -91,9 +90,9 @@ const MainActionButton: React.FC = () => {
     const { userStore } = useGlobalStore();
 
     const startHandler = useCallback(() => {
-        startMode.onClick && startMode.onClick()
-        va.track('start_analysis', { userName: userStore.userName, mode: startMode.key })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        startMode.onClick && startMode.onClick();
+        va.track('start_analysis', { userName: userStore.userName, mode: startMode.key });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startMode]);
 
     return (
@@ -105,7 +104,7 @@ const MainActionButton: React.FC = () => {
                         primaryActionButton={{ onClick: startHandler }}
                         menuButton={triggerProps}
                         appearance="primary"
-                        icon={<Poll24Regular />}
+                        icon={<BarChart3 />}
                     >
                         {intl.get(`${startMode.key}`)}
                     </SplitButton>
