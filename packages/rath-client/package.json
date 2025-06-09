@@ -9,7 +9,7 @@
         "singleQuote": true
     },
     "dependencies": {
-        "@antv/g6": "^4.8.4",
+        "@antv/g6": "^5.0.48",
         "@fluentui/font-icons-mdl2": "^8.5.4",
         "@fluentui/react": "^8.123.0",
         "@fluentui/react-components": "^9.64.1",
