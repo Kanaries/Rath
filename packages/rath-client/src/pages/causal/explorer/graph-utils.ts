@@ -1,5 +1,5 @@
 import { useMemo, useRef, CSSProperties } from "react";
-import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
+import { Graph } from "@antv/g6";
 import { PagLink, PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 
@@ -37,34 +37,13 @@ const arrows = {
 
 export const ForbiddenEdgeType = 'forbidden-edge';
 
-G6.registerEdge(
-    ForbiddenEdgeType,
-    {
-        afterDraw(cfg, group: any) {
-            // 获取图形组中的第一个图形，在这里就是边的路径图形
-            const shape = group.get('children')[0];
-            // 获取路径图形的中点坐标
-            const midPoint = shape.getPoint(0.5);
-            group.addShape('path', {
-                attrs: {
-                    width: 10,
-                    height: 10,
-                    stroke: '#c50f1f',
-                    lineWidth: 2,
-                    path: [
-                        ['M', midPoint.x + 6, midPoint.y + 6],
-                        ['L', midPoint.x - 6, midPoint.y - 6],
-                        ['M', midPoint.x - 6, midPoint.y + 6],
-                        ['L', midPoint.x + 6, midPoint.y - 6],
-                    ],
-                },
-                name: 'forbidden-mark',
-            });
-        },
-        update: undefined,
-    },
-    'line',
-);
+// TODO: Fix extension registration in G6 v5
+// register(ExtensionCategory.EDGE, ForbiddenEdgeType, {
+//     draw(model: any, shapeMap: any) {
+//         const { keyShape } = shapeMap;
+//         return keyShape;
+//     },
+// });
 
 export interface IRenderDataProps {
     mode: "explore" | "edit";
@@ -88,12 +67,29 @@ export const useRenderData = ({
     limit = Infinity,
     renderNode,
 }: IRenderDataProps) => {
-    return useMemo<GraphData>(() => ({
+    return useMemo(() => ({
         nodes: fields.map((f) => {
+            const nodeConfig = renderNode?.(f);
             return {
                 id: `${f.fid}`,
-                description: f.name ?? f.fid,
-                ...renderNode?.(f),
+                data: {
+                    description: f.name ?? f.fid,
+                },
+                style: {
+                    size: nodeConfig?.style?.size || 20,
+                    fill: nodeConfig?.style?.fill,
+                    stroke: nodeConfig?.style?.stroke,
+                    lineWidth: nodeConfig?.style?.lineWidth || 1,
+                    lineDash: nodeConfig?.style?.lineDash,
+                    shadowColor: nodeConfig?.style?.shadowColor,
+                    shadowBlur: nodeConfig?.style?.shadowBlur,
+                    shadowOffsetX: nodeConfig?.style?.shadowOffsetX,
+                    shadowOffsetY: nodeConfig?.style?.shadowOffsetY,
+                    opacity: nodeConfig?.style?.opacity,
+                    fillOpacity: nodeConfig?.style?.fillOpacity,
+                    cursor: nodeConfig?.style?.cursor,
+                },
+                type: nodeConfig?.type,
             };
         }),
         edges: mode === 'explore' ? PAG.filter(link => {
@@ -106,22 +102,20 @@ export const useRenderData = ({
                 id: `link_${i}`,
                 source: link.src,
                 target: link.tar,
-                style: {
-                    startArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.src_type],
-                    },
-                    endArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.tar_type],
-                    },
-                    lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
+                data: {
+                    label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
                 },
-                label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
-                labelCfg: {
-                    style: {
-                        opacity: 0,
-                    },
+                style: {
+                    startArrow: arrows[link.src_type] ? {
+                        d: arrows[link.src_type],
+                        fill: '#F6BD16',
+                    } : undefined,
+                    endArrow: arrows[link.tar_type] ? {
+                        d: arrows[link.tar_type],
+                        fill: '#F6BD16',
+                    } : undefined,
+                    lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
+                    labelOpacity: 0,
                 },
             };
         }) : PAG.map((assr, i) => {
@@ -136,16 +130,16 @@ export const useRenderData = ({
                     lineWidth: 2,
                     lineAppendWidth: 5,
                     stroke: color,
-                    startArrow: {
+                    startArrow: arrows[assr.src_type] ? {
+                        d: arrows[assr.src_type],
                         fill: color,
                         stroke: color,
-                        path: arrows[assr.src_type],
-                    },
-                    endArrow: {
+                    } : undefined,
+                    endArrow: arrows[assr.tar_type] ? {
+                        d: arrows[assr.tar_type],
                         fill: color,
                         stroke: color,
-                        path: arrows[assr.tar_type],
-                    },
+                    } : undefined,
                 },
                 type: isForbiddenType ? ForbiddenEdgeType : undefined,
             };
@@ -177,25 +171,25 @@ export const useGraphOptions = ({
     const handleLinkRef = useRef(handleLink);
     handleLinkRef.current = handleLink;
 
-    return useMemo<Omit<GraphOptions, 'container'>>(() => {
+    return useMemo(() => {
         let createEdgeFrom: string | null = null;
-        const exploreMode = ['drag-canvas', 'drag-node', {
+        const exploreMode = ['drag-canvas', 'drag-element', {
             type: 'lasso-select',
             trigger: 'shift',
             onSelect(nodes: any, edges: any) {
                 const selected: IFieldMeta[] = [];
                 for (const node of nodes) {
-                    const fid = node._cfg?.id as string | undefined;
+                    const fid = node.id as string | undefined;
                     if (fid) {
                         const f = fieldsRef.current.find(which => which.fid === fid);
                         if (f) {
                             selected.push(f);
                         }
                     }
-                    graphRef.current?.setItemState(node, 'selected', false);
+                    graphRef.current?.setElementState(node.id, []);
                 }
                 for (const edge of edges) {
-                    graphRef.current?.setItemState(edge, 'selected', false);
+                    graphRef.current?.setElementState(edge.id, []);
                 }
                 handleLassoRef.current?.(selected);
             },
@@ -204,7 +198,7 @@ export const useGraphOptions = ({
             type: 'create-edge',
             trigger: 'drag',
             shouldBegin(e: any) {
-                const sourceFid = e.item?._cfg?.id as string | undefined;
+                const sourceFid = e.itemId as string | undefined;
                 if (sourceFid) {
                     createEdgeFrom = sourceFid;
                 }
@@ -214,7 +208,7 @@ export const useGraphOptions = ({
                 if (createEdgeFrom === null) {
                     return false;
                 }
-                const targetFid = e.item?._cfg?.id as string | undefined;
+                const targetFid = e.itemId as string | undefined;
                 if (targetFid) {
                     if (createEdgeFrom !== targetFid) {
                         handleLinkRef.current?.(createEdgeFrom, targetFid);
@@ -224,62 +218,57 @@ export const useGraphOptions = ({
                 return false;
             },
         }];
-        const cfg: Omit<GraphOptions, 'container'> = {
+        const cfg = {
             width: widthRef.current,
             height: GRAPH_HEIGHT,
-            linkCenter: true,
-            modes: {
-                explore: exploreMode,
-                explore_zoom: [...exploreMode, 'zoom-canvas'],
-                edit: editMode,
-                edit_zoom: [...exploreMode, 'zoom-canvas'],
-            },
-            animate: true,
+            behaviors: exploreMode,
+            animation: true,
             layout: {
                 type: 'fruchterman',
-                // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
                 // 启用 GPU 加速会导致数据更新时视图变化很大
                 gpuEnabled: false,
                 speed: 1,
                 // for rendering after each iteration
                 tick: () => {
-                    graphRef.current?.refreshPositions();
+                    graphRef.current?.render();
                 },
             },
-            defaultNode: {
-                size: 20,
+            node: {
                 style: {
+                    size: 20,
                     lineWidth: 1,
                 },
+                state: {
+                    focused: {
+                        lineWidth: 1.5,
+                        opacity: 1,
+                        shadowColor: '#F6BD16',
+                        shadowBlur: 8,
+                    },
+                    highlighted: {
+                        opacity: 0.4,
+                    },
+                    faded: {
+                        opacity: 0.2,
+                    },
+                },
             },
-            nodeStateStyles: {
-                focused: {
-                    lineWidth: 1.5,
-                    opacity: 1,
-                    shadowColor: '#F6BD16',
-                    shadowBlur: 8,
+            edge: {
+                style: {
+                    lineWidth: 1,
+                    stroke: '#F6BD16',
+                    opacity: 0.9,
                 },
-                highlighted: {
-                    opacity: 0.4,
-                },
-                faded: {
-                    opacity: 0.2,
-                },
-            },
-            defaultEdge: {
-                size: 1,
-                color: '#F6BD16',
-                opacity: 0.9,
-            },
-            edgeStateStyles: {
-                highlighted: {
-                    opacity: 1,
-                },
-                semiHighlighted: {
-                    opacity: 0.8,
-                },
-                faded: {
-                    opacity: 0.12,
+                state: {
+                    highlighted: {
+                        opacity: 1,
+                    },
+                    semiHighlighted: {
+                        opacity: 0.8,
+                    },
+                    faded: {
+                        opacity: 0.12,
+                    },
                 },
             },
         };
