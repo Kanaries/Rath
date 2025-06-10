@@ -1,19 +1,23 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
 import { IFieldMeta } from '../../interfaces';
+
 interface RelationGraphProps {
     matrix: number[][];
     fields: IFieldMeta[]
 }
+
 interface IEdge {
     source: string; target: string
     value: number
 }
+
 interface INode {
     id: string;
     name: string;
     [key: string]: any
 }
+
 const RelationGraph: React.FC<RelationGraphProps> = props => {
     const { matrix, fields } = props;
     const container = useRef<HTMLDivElement>(null);
@@ -271,6 +275,5 @@ const RelationGraph: React.FC<RelationGraphProps> = props => {
     }, [nodes, edges]);
     return <div ref={container}></div>;
 };
-
 
 export default RelationGraph;

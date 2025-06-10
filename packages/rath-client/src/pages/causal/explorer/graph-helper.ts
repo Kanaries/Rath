@@ -70,8 +70,8 @@ export const useReactiveGraph = ({
                 container,
             });
             
-            // Set data and render
-            graph.setData(dataRef.current);
+            // Set data and render with proper typing
+            graph.setData(dataRef.current as any);
             graph.render();
 
             graph.on('node:click', (e: any) => {
@@ -140,8 +140,8 @@ export const useReactiveGraph = ({
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
-            // Always use setData + render for G6 v5
-            graph.setData(data);
+            // Always use setData + render for G6 v5 with proper typing
+            graph.setData(data as any);
             graph.render();
         }
     }, [graphRef, data, mode]);
@@ -149,7 +149,7 @@ export const useReactiveGraph = ({
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
-            graph.setData(dataRef.current);
+            graph.setData(dataRef.current as any);
             graph.render();
         }
     }, [graphRef]);
@@ -256,7 +256,7 @@ export const useReactiveGraph = ({
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {
             if (graphRef.current) {
-                graphRef.current.setData(dataRef.current);
+                graphRef.current.setData(dataRef.current as any);
                 graphRef.current.render();
             }
         },

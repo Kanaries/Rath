@@ -1,5 +1,5 @@
 import { useMemo, useRef, CSSProperties } from "react";
-import { Graph } from "@antv/g6";
+import { Graph, register, ExtensionCategory, Line } from "@antv/g6";
 import { PagLink, PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 
@@ -37,13 +37,9 @@ const arrows = {
 
 export const ForbiddenEdgeType = 'forbidden-edge';
 
-// TODO: Fix extension registration in G6 v5
-// register(ExtensionCategory.EDGE, ForbiddenEdgeType, {
-//     draw(model: any, shapeMap: any) {
-//         const { keyShape } = shapeMap;
-//         return keyShape;
-//     },
-// });
+// TODO: Implement custom forbidden edge for G6 v5
+// Currently using basic edge type until proper implementation
+// Custom edge registration will need to be revisited with proper G6 v5 API
 
 export interface IRenderDataProps {
     mode: "explore" | "edit";
@@ -87,7 +83,7 @@ export const useRenderData = ({
                     shadowOffsetY: nodeConfig?.style?.shadowOffsetY,
                     opacity: nodeConfig?.style?.opacity,
                     fillOpacity: nodeConfig?.style?.fillOpacity,
-                    cursor: nodeConfig?.style?.cursor,
+                    ...(nodeConfig?.style?.cursor ? { cursor: 'pointer' } : {}),
                 },
                 type: nodeConfig?.type,
             };
@@ -130,6 +126,7 @@ export const useRenderData = ({
                     lineWidth: 2,
                     lineAppendWidth: 5,
                     stroke: color,
+                    lineDash: isForbiddenType ? [5, 5] : undefined,
                     startArrow: arrows[assr.src_type] ? {
                         d: arrows[assr.src_type],
                         fill: color,
@@ -141,7 +138,7 @@ export const useRenderData = ({
                         stroke: color,
                     } : undefined,
                 },
-                type: isForbiddenType ? ForbiddenEdgeType : undefined,
+                type: 'line',
             };
         }),
     }), [fields, mode, PAG, limit, renderNode, weights, cutThreshold]);
