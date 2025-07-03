@@ -49,6 +49,14 @@
 https://user-images.githubusercontent.com/22167673/234053551-24e0f1c9-1efb-4250-a2f8-dbf148f5f4d0.mp4
 
 
+> [!TIP]
+> If you want more AI features, we also build [runcell](https://runcell.dev), an AI Code Agent in Jupyter that understands your code/data/cells and generate code, execute cells and take actions for you. It can be used in jupyter lab with `pip install runcell`
+
+
+
+https://github.com/user-attachments/assets/9ec64252-864d-4bd1-8755-83f9b0396d38
+
+
 
 ## Get started
 
