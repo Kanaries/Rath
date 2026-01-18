@@ -1,5 +1,3 @@
-version: "2"
-
 services:
   base:
     restart: always
@@ -11,14 +9,32 @@ services:
 
   connector-api:
     restart: always
-    network_mode: service:base
     build:
       context: ./services/connector
       dockerfile: Dockerfile
-  
+
   prediction-api:
     restart: always
-    network_mode: service:base
     build:
       context: ./services/prediction
+      dockerfile: Dockerfile
+
+  causal-api:
+    restart: always
+    ports:
+      - 9084:8000
+    build:
+      context: ./services/causal-service
+      dockerfile: Dockerfile
+
+  narrative-api:
+    restart: always
+    build:
+      context: ./services/narrative-service
+      dockerfile: Dockerfile
+
+  text-pattern-api:
+    restart: always
+    build:
+      context: ./services/text-pattern-service
       dockerfile: Dockerfile

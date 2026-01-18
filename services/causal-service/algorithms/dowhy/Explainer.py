@@ -16,7 +16,12 @@ EstimateEffectItems = {
 class ExplainerParams(common.OptionalParams, title="Explainer Algorithm"):
     """
     """
-    target: Optional[int] = Field(options=[{'key': '$fields', 'title': ''}], title="目标度量值字段", description="关注的度量值")
+    target: Optional[int] = Field(
+        default=None,
+        options=[{'key': '$fields', 'title': ''}],
+        title="目标度量值字段",
+        description="关注的度量值",
+    )
     treatment: Optional[List[int]] = Field(default=[], options=[{'key': '$fields', 'title': ''}], title="可干预变量字段", description="可干预变量")
     estimate_effect_method: Optional[str] = Field(
         default=None,
@@ -26,10 +31,11 @@ class ExplainerParams(common.OptionalParams, title="Explainer Algorithm"):
 import json
 class Explainer(common.AlgoInterface):
     ParamType = ExplainerParams
-    def __init__(self, dataSource: List[common.IRow], fields: List[common.IFieldMeta], params: Optional[ParamType] = ParamType()):
-        super(Explainer, self).__init__(dataSource=dataSource, fields=fields, params=params)
-        
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
+    def __init__(self, dataSource: List[common.IRow], fields: List[common.IFieldMeta], params: Optional[ParamType] = None):
+        super(Explainer, self).__init__(dataSource=dataSource, fields=fields, params=params or self.ParamType())
+
+    def calc(self, params: Optional[ParamType] = None, focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
+        params = params or self.ParamType()
         # array = self.selectArray(focusedFields=focusedFields, params=params)
         self.data = self.dataSource[focusedFields]
         print(self.data, focusedFields, bgKnowledgesPag)
@@ -48,7 +54,7 @@ class Explainer(common.AlgoInterface):
             if params.estimate_effect_method == 'backdoor.distance_matching' and np.unique(self.data[f].values).size == 2:
                 self.data = self.data.assign(**{f: self.data[f] != self.data[f].values[0]})
         print(self.data[f])
-        
+
         self.model = dowhy.CausalModel(
             data=self.data,
             treatment=[params.treatment],
@@ -57,7 +63,7 @@ class Explainer(common.AlgoInterface):
         )
         self.model.view_model()
         print(self.model)
-        
+
         res = {}
         res['identified_estimand'] = self.model.identify_effect(proceed_when_unidentifiable=True)
         print(res['identified_estimand'], params.estimate_effect_method)
@@ -66,7 +72,7 @@ class Explainer(common.AlgoInterface):
         print("res=")
         for k, v in res.items():
             print(k, v)
-        
+
         return {
             'data': [[]],
             'matrix': [[]],

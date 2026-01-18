@@ -6,4 +6,6 @@ COPY . /prediction
 
 RUN pip3 install --trusted-host pypi.python.org -r requirements.txt
 
+EXPOSE 5534
+
 CMD python3 -u /prediction/main.py

@@ -35,10 +35,10 @@ CORS(app, supports_credentials=True)
 
 @app.route('/insight',methods=['get','post'])
 def insight():
-    
+
     result = {'success':True,'data':{}}
     tic = time.time()
-    
+
     try:
         input_data =  json.loads(flask.request.data)
         dataSource = pd.DataFrame(input_data['dataSource'])
@@ -79,7 +79,7 @@ def insight():
             result['message']='error in read inputdata'
         else:
             pass
-    
+
     # try:
     if 1>0:
         insight_dict,insight_input = insight_check(fields,dataSource,check_list,breakdown,aggrType,subspaces,rangeN,langType)
@@ -94,12 +94,12 @@ def insight():
     #         result['message']='error in write result'
     #     else:
     #         pass
-        
+
     print(result['success'])
     print('time:',time.time()-tic)
     return flask.Response(json.dumps(result, ensure_ascii=False, cls=NpEncoder), mimetype="application/json")
 
 if __name__ == '__main__':
     # server = pywsgi.WSGIServer(('0.0.0.0', 8000), app, keyfile='./viexpl.key', certfile='./viexpl.pem')
-    server = pywsgi.WSGIServer(('0.0.0.0', 8000), app)
+    server = pywsgi.WSGIServer(('0.0.0.0', 8001), app)
     server.serve_forever()
