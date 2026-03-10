@@ -4,7 +4,7 @@ import { workerService } from '../../services';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import CausalComputationWorker from './computation.worker.js?worker';
+// import CausalComputationWorker from './computation.worker.js?worker';
 
 type ICausalProps = {
     task: 'ig';
@@ -19,7 +19,7 @@ type ICausalProps = {
 
 export async function causalService(props: ICausalProps): Promise<number[][]> {
     try {
-        const worker = new CausalComputationWorker();
+        const worker = new Worker(new URL('./computation.worker.js', import.meta.url));
         const result = await workerService<number[][], ICausalProps>(worker, props);
         worker.terminate();
         if (result.success) {

@@ -13,7 +13,7 @@ import { workerService } from "../../../services/index";
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import FileDataTransformWorker from './transFileData.worker?worker';
+// import FileDataTransformWorker from './transFileData.worker?worker';
 
 export enum SampleKey {
   none = 'none',
@@ -42,7 +42,7 @@ export async function rawData2DataWithBaseMetas (rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
-    const worker = new FileDataTransformWorker()
+    const worker = new Worker(new URL('./transFileData.worker', import.meta.url))
     const res = await workerService<{
             fields: IMuteFieldBase[];
             dataSource: IRow[]

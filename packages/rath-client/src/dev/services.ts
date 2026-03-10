@@ -4,7 +4,7 @@ import { workerService } from '../services';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import ExpandDateTimeWorker from './workers/dateTimeExpand.worker.js?worker';
+// import ExpandDateTimeWorker from './workers/dateTimeExpand.worker.js?worker';
 import { dateTimeExpand, doTest } from './workers/engine/dateTimeExpand';
 import { checkExpandEnv } from './workers/engine/checkExpandEnv';
 
@@ -25,7 +25,7 @@ export async function expandDateTimeService(props: ExpandDateTimeProps): Promise
         return res;
     } else {
         try {
-            const worker = new ExpandDateTimeWorker();
+            const worker = new Worker(new URL('./workers/dateTimeExpand.worker.js', import.meta.url));
             const result = await workerService<ExpandDateTimeProps, ExpandDateTimeProps>(worker, props);
             worker.terminate();
             if (result.success) {

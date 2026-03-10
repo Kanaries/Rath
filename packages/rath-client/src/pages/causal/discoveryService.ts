@@ -3,7 +3,7 @@ import type { CausalDiscoveryRequest, CausalDiscoveryResult } from './discoveryT
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import CausalDiscoveryWorker from './discovery.worker.ts?worker';
+// import CausalDiscoveryWorker from './discovery.worker.ts?worker';
 
 function normalizeCellValue(value: unknown): unknown {
     if (
@@ -65,7 +65,7 @@ function createSerializableRequest(props: CausalDiscoveryRequest): CausalDiscove
 }
 
 export async function causalDiscoveryService(props: CausalDiscoveryRequest): Promise<CausalDiscoveryResult> {
-    const worker = new CausalDiscoveryWorker();
+    const worker = new Worker(new URL('./discovery.worker.ts', import.meta.url));
     try {
         const payload = createSerializableRequest(props);
         const result = await workerService<CausalDiscoveryResult, CausalDiscoveryRequest>(worker, payload);

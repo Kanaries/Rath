@@ -1,6 +1,6 @@
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
-import RInsightWorker from '../workers/insight/r-insight.worker?worker';
+// import RInsightWorker from '../workers/insight/r-insight.worker?worker';
 import type { IRInsightExplainProps, IRInsightExplainResult } from '../workers/insight/r-insight.worker';
 import { getGlobalStore } from '../store';
 import { workerService } from './base';
@@ -25,7 +25,7 @@ export const RInsightService = async (props: IRInsightExplainProps, mode: 'worke
             throw new Error('[RInsight server]' + result.message);
         }
     }
-    const worker = new RInsightWorker();
+    const worker = new Worker(new URL('../workers/insight/r-insight.worker.ts', import.meta.url));
     const result = await workerService<IRInsightExplainResult, IRInsightExplainProps>(worker, props);
     worker.terminate();
     if (result.success) {
