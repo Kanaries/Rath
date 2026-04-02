@@ -16,6 +16,9 @@ export async function CHQuery (sql: string): Promise<string> {
 }
 
 export async function getFieldMetas(viewName: string): Promise<IDBFieldMeta[]> {
+    if (!/^[A-Za-z0-9_]+$/.test(viewName)) {
+        throw new Error('Invalid view name');
+    }
     const metaRaw = await CHQuery(`DESC ${viewName}`);
     return metaRaw.slice(0, -1).split('\n').map(fr => {
         const infos = fr.split('\t');
