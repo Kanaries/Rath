@@ -371,8 +371,9 @@ class XLearner(AlgoInterface):
 
         # Fisher-Z based CI tests can become unstable on near-collinear data.
         # If the user selected Fisher-Z explicitly but the data is ill-conditioned, fall back to a discrete test.
+        effective_independence_test_method = getattr(params, "independence_test_method", None)
         try:
-            it = getattr(params, "independence_test_method", None)
+            it = effective_independence_test_method
             if it in ("fisherz", "mv_fisherz"):
                 # quick heuristic: high collinearity -> near-singular correlation matrix
                 if array.shape[0] > 1 and array.shape[1] > 1:
@@ -388,15 +389,18 @@ class XLearner(AlgoInterface):
                 "Consider reducing selected fields or cleaning constant/duplicate columns.",
                 file=sys.stderr,
             )
-            params.independence_test_method = "gsq"
+            effective_independence_test_method = "gsq"
 
-        self.G, self.edges = fci(array, **params.__dict__, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
+        fci_kwargs = {**params.__dict__, "independence_test_method": effective_independence_test_method}
+        fci_kwargs.pop('catEncodeType', None)
+        fci_kwargs.pop('quantEncodeType', None)
+        self.G, self.edges = fci(array, **fci_kwargs, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         # if bgKnowledges and len(bgKnowledges) > 0:
         f_ind = {fid: i for i, fid in enumerate(focusedFields)}
         bk = self.constructBgKnowledgePag(bgKnowledgesPag=bgKnowledgesPag if bgKnowledgesPag else [], f_ind=f_ind)
             
-        self.G, self.edges = xlearn(array, **params.__dict__, background_knowledge=bk, functional_dependencies=funcDeps, f_ind=f_ind, fields=focusedFields, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
+        self.G, self.edges = xlearn(array, **fci_kwargs, background_knowledge=bk, functional_dependencies=funcDeps, f_ind=f_ind, fields=focusedFields, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         l = self.G.graph.tolist()
         return {
             'data': l,

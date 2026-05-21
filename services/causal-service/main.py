@@ -279,8 +279,15 @@ def causal(algoName: str, item: algorithms.CausalRequest, response: Response) ->
 # -----------------------
 # Minimal background jobs
 # -----------------------
+# Job files are stored on the local filesystem. The default /tmp path is ephemeral
+# and will be cleared on reboot unless RATH_JOB_DIR is set to persistent storage.
 
 _JOB_DIR = os.environ.get("RATH_JOB_DIR", "/tmp/rath-jobs")
+if _JOB_DIR == "/tmp/rath-jobs":
+    logging.warning(
+        "Using ephemeral job directory %s; set RATH_JOB_DIR for persistent job state",
+        _JOB_DIR,
+    )
 os.makedirs(_JOB_DIR, exist_ok=True)
 
 def _job_path(job_id: str) -> str:
@@ -320,7 +327,20 @@ async def create_causal_job(algoName: str, item: algorithms.CausalRequest, respo
 
     def run_job():
         try:
-            _write_job(job_id, {**_read_job(job_id), "status": "running", "updatedAt": time.time()})
+            job_record = _read_job(job_id)
+            if job_record is None:
+                logging.error("Job %s not found when starting execution", job_id)
+                _write_job(job_id, {
+                    "jobId": job_id,
+                    "type": "causal",
+                    "algoName": algoName,
+                    "status": "failed",
+                    "createdAt": now,
+                    "updatedAt": time.time(),
+                    "error": "Job record not found",
+                })
+                return
+            _write_job(job_id, {**job_record, "status": "running", "updatedAt": time.time()})
             # Reuse same logic as sync endpoint.
             if len(item.dataSource) == 0 or len(item.focusedFields) == 0:
                 raise Exception("Empty dataSource or focusedFields.")

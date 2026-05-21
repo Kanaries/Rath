@@ -64,7 +64,6 @@ class FCI(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print(array, array.min(), array.max())
         fci_kwargs = {**params.__dict__}
         # These are preprocessing options, not FCI parameters.
         fci_kwargs.pop('catEncodeType', None)

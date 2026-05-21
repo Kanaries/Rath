@@ -1,19 +1,28 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
+# Limit fields included in the LLM prompt to avoid exceeding token/context limits.
+MAX_FIELDS = 20
+TIMEOUT_DEFAULT = 10
+
+logger = logging.getLogger(__name__)
+
 
 def _llm_configured() -> bool:
-    return bool(os.environ.get("ASSISTANT_LLM_URL") or os.environ.get("OPENAI_API_KEY"))
+    llm_url = (os.environ.get("ASSISTANT_LLM_URL") or "").strip()
+    api_key = (os.environ.get("OPENAI_API_KEY") or "").strip()
+    return bool(llm_url or api_key)
 
 
 def _build_prompt(question: str, fields: List[Dict[str, Any]], rule_answer: str) -> str:
     field_lines = []
-    for field in fields[:20]:
+    for field in fields[:MAX_FIELDS]:
         field_lines.append(
             f"- {field.get('name') or field.get('fid')} ({field.get('analyticType')}, {field.get('semanticType')})"
         )
@@ -29,15 +38,33 @@ def _build_prompt(question: str, fields: List[Dict[str, Any]], rule_answer: str)
     )
 
 
-def _post_json(url: str, payload: Dict[str, Any], headers: Dict[str, str]) -> Dict[str, Any]:
+def _post_json(url: str, payload: Dict[str, Any], headers: Dict[str, str], timeout: int = TIMEOUT_DEFAULT) -> Dict[str, Any]:
     req = urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json", **headers},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=20) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode("utf-8"))
+
+
+def _extract_message_content(response: Any) -> Optional[str]:
+    if not isinstance(response, dict):
+        return None
+    choices = response.get("choices")
+    if not isinstance(choices, list) or len(choices) == 0:
+        return None
+    first = choices[0]
+    if not isinstance(first, dict):
+        return None
+    message = first.get("message")
+    if not isinstance(message, dict):
+        return None
+    content = message.get("content")
+    if not isinstance(content, str) or not content.strip():
+        return None
+    return content.strip()
 
 
 def maybe_enrich_answer_with_llm(
@@ -66,10 +93,10 @@ def maybe_enrich_answer_with_llm(
             },
             headers={"Authorization": f"Bearer {api_key}"} if api_key else {},
         )
-        content = response.get("choices", [{}])[0].get("message", {}).get("content")
-        if isinstance(content, str) and content.strip():
-            return content.strip(), True
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, IndexError):
-        pass
+        content = _extract_message_content(response)
+        if content:
+            return content, True
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, IndexError) as e:
+        logger.exception("assistant LLM request failed: %s", e)
 
     return rule_answer, False

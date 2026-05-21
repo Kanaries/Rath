@@ -82,7 +82,7 @@ describe('workflowSession', () => {
         try {
             const url = buildShareableWorkflowUrl(snapshot);
             expect(url).toContain('workflow=');
-            expect(url).toContain('#causal');
+            expect(url).toContain('#/causal');
         } finally {
             Object.defineProperty(globalThis, 'window', {
                 configurable: true,

@@ -192,27 +192,27 @@
             },
             "BTC_GOLD": {
                 "title": "比特币-金价数据集",
-                "description": ""
+                "description": "比特币和金价的历史数据，用于金融时间序列分析。"
             },
             "CAR_SALES": {
                 "title": "汽车销售数据集",
-                "description": ""
+                "description": "各车型和地区的月度汽车销售数据，用于销售趋势分析。"
             },
             "COLLAGE": {
                 "title": "大学数据集",
-                "description": ""
+                "description": "大学公开指标数据，用于教育数据分析。"
             },
             "TITANIC": {
                 "title": "泰坦尼克数据集",
-                "description": ""
+                "description": "泰坦尼克号沉船事件乘客数据，用于生存因素分析。"
             },
             "KEPLER": {
                 "title": "开普勒数据集",
-                "description": ""
+                "description": "开普勒望远镜天文观测数据，用于系外行星分析。"
             },
             "BIKE_SHARING_DC": {
                 "title": "共享单车数据集",
-                "description": ""
+                "description": "华盛顿特区共享单车行程记录，用于出行与使用分析。"
             }
         },
         "btn": {
@@ -863,6 +863,8 @@
             "tryCausal": "对这些字段做因果分析",
             "openManual": "在自助分析中打开",
             "copyLink": "复制分享链接",
+            "copyFailedTitle": "无法复制链接",
+            "copyFailedContent": "已在新的浏览器标签页中打开分享链接。",
             "tip": "提示：「保存到报表」会创建或更新最新报表页，可在报表编辑器中调整布局、筛选和标题。"
         },
         "causal": {
@@ -904,6 +906,7 @@
             "run": "估计因果效应",
             "running": "正在估计效应…",
             "errorTitle": "因果效应估计失败",
+            "tooManyRows": "数据集有 {rows} 行，超过 {limit} 行的上限。请先筛选或采样数据后再估计效应。",
             "resultValue": "对 {target} 的估计效应：{value}（{method}）",
             "saveToDashboard": "将效应保存到报表",
             "dashboardTitle": "对 {target} 的效应",
@@ -934,6 +937,7 @@
             "needFieldsForExplain": "请在问题中指明至少一个字段，并确保数据集同时有维度和度量。",
             "noNarrative": "暂无叙述解释。可先运行全自动探索以获得更丰富的上下文。",
             "unknown": "暂时无法识别该问题。可尝试：{suggestions}",
+            "error": "出错了：{message}",
             "linkCopied": "分享链接已复制到剪贴板。"
         }
     },

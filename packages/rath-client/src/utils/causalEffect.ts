@@ -67,7 +67,7 @@ export function summarizeCausalEstimate(raw: string): { summary: string; value?:
         return { summary: '' };
     }
 
-    const valueMatch = trimmed.match(/(?:^value=|value:\s*|estimate=)([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/i)
+    const valueMatch = trimmed.match(/(?:value=|value:\s*|estimate=)([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/i)
         ?? trimmed.match(/([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/);
     const value = valueMatch ? Number(valueMatch[1]) : undefined;
 

@@ -37,7 +37,7 @@ function pickRecommendedFieldIndices(allFields: readonly IFieldMeta[], limit = 1
     const safe = allFields.filter((f) => f.fid !== '__index__');
     const numeric = safe.filter((f) => f.semanticType === 'quantitative' || f.semanticType === 'ordinal');
     const fallback = safe;
-    const picked = (numeric.length >= 4 ? numeric : fallback).slice(0, Math.max(4, Math.min(limit, safe.length)));
+    const picked = (numeric.length >= 4 ? numeric : fallback).slice(0, Math.min(Math.max(4, limit), safe.length));
     return picked.map((f) => allFields.findIndex((x) => x.fid === f.fid)).filter((i) => i >= 0);
 }
 
@@ -79,7 +79,7 @@ const CausalCoach = () => {
             linkedFromAutopilot: Boolean(autopilotHandoff),
             autopilotTitle: autopilotHandoff?.title,
         });
-    }, [hasCausal, algoName, fields, edgeCount, autopilotHandoff, workflowStore]);
+    }, [hasCausal, algoName, fields, edgeCount, autopilotHandoff]);
 
     const saveSummaryToDashboard = () => {
         const handoff = workflowStore.causalHandoff;

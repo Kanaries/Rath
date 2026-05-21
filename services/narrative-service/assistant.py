@@ -37,7 +37,7 @@ def _match_fields(question: str, fields: List[Dict[str, Any]]) -> List[str]:
             continue
         name = str(field.get("name") or fid).strip()
         token = _normalize(name)
-        if len(token) >= 2 and token in q:
+        if len(token) >= 3 and re.search(r"\b" + re.escape(token) + r"\b", q):
             hits.append(fid)
     return hits
 

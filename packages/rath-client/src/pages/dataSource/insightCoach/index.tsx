@@ -220,7 +220,7 @@ const InsightCoach: FC = () => {
                                 appearance="primary"
                                 disabled={!satisfyAnalysisCondition || !startMode?.onClick}
                                 icon={<Play />}
-                                onClick={() => startMode.onClick?.(undefined as never)}
+                                onClick={() => startMode.onClick?.()}
                             >
                                 {intl.get(`${startMode.key}`)}
                             </Button>
@@ -275,7 +275,7 @@ const InsightCoach: FC = () => {
                                         <Sparkles />
                                     }
                                     disabled={!satisfyAnalysisCondition && item.key === 'function.analysis.start'}
-                                    onClick={() => item.onClick?.(undefined as never)}
+                                    onClick={() => item.onClick?.()}
                                 >
                                     {item.text}
                                 </Button>

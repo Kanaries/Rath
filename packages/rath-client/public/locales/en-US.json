@@ -886,6 +886,8 @@
             "tryCausal": "Try causal on these fields",
             "openManual": "Open in manual explorer",
             "copyLink": "Copy share link",
+            "copyFailedTitle": "Could not copy link",
+            "copyFailedContent": "The share link was opened in a new tab instead.",
             "tip": "Tip: \"Save to dashboard\" creates/updates the latest dashboard page. You can refine layout, filters, and titles in the dashboard editor."
         },
         "causal": {
@@ -927,6 +929,7 @@
             "run": "Estimate causal effect",
             "running": "Estimating effect…",
             "errorTitle": "Causal effect estimation failed",
+            "tooManyRows": "Dataset has {rows} rows, which exceeds the limit of {limit}. Filter or sample the data before estimating effects.",
             "resultValue": "Estimated effect on {target}: {value} ({method})",
             "saveToDashboard": "Save effect to dashboard",
             "dashboardTitle": "Effect on {target}",
@@ -957,6 +960,7 @@
             "needFieldsForExplain": "Name at least one field in your question, and make sure the dataset has both a dimension and a measure.",
             "noNarrative": "No narrative explanation returned yet. Try running AutoPilot first for richer context.",
             "unknown": "I couldn't map that question yet. Try: {suggestions}",
+            "error": "Something went wrong: {message}",
             "linkCopied": "Share link copied to clipboard."
         }
     },

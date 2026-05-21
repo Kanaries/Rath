@@ -1,8 +1,19 @@
 import intl from 'react-intl-universal';
-import { MessageBar, MessageBarType } from '@fluentui/react';
+import { Link, MessageBar, MessageBarType } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
+
+const effectValueFormatter = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 4,
+});
+
+function formatEffectValue(value: unknown): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return '—';
+    }
+    return effectValueFormatter.format(value);
+}
 
 const DashboardWorkflowBanner: React.FC = () => {
     const { workflowStore, commonStore } = useGlobalStore();
@@ -25,7 +36,7 @@ const DashboardWorkflowBanner: React.FC = () => {
     if (effectEstimate) {
         parts.push(intl.get('dashboardPage.workflow.effect', {
             target: effectEstimate.targetFid,
-            value: typeof effectEstimate.value === 'number' ? effectEstimate.value.toPrecision(4) : '—',
+            value: formatEffectValue(effectEstimate.value),
         }));
     }
 
@@ -36,13 +47,9 @@ const DashboardWorkflowBanner: React.FC = () => {
             actions={
                 autopilotHandoff ? (
                     <div>
-                        <button
-                            type="button"
-                            onClick={() => commonStore.setAppKey(PIVOT_KEYS.megaAuto)}
-                            style={{ border: 'none', background: 'transparent', color: '#106ebe', cursor: 'pointer' }}
-                        >
+                        <Link onClick={() => commonStore.setAppKey(PIVOT_KEYS.megaAuto)}>
                             {intl.get('dashboardPage.workflow.backToAutopilot')}
-                        </button>
+                        </Link>
                     </div>
                 ) : undefined
             }

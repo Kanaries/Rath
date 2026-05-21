@@ -5,17 +5,20 @@ import intl from 'react-intl-universal';
 import { MessageBar, MessageBarType, Spinner, Stack, TextField } from '@fluentui/react';
 import { Button } from '@fluentui/react-components';
 import { Bot, Play, Sparkles } from 'lucide-react';
-import { useGlobalStore } from '../../store';
-import { Card } from '../../components/card';
-import { getInsightExpl } from '../../services/insights';
-import { askAssistantGateway, isAssistantGatewayConfigured } from '../../services/assistantGateway';
+import { useGlobalStore } from '../../../store';
+import { Card } from '../../../components/card';
+import { getInsightExpl } from '../../../services/insights';
+import { askAssistantGateway, isAssistantGatewayConfigured } from '../../../services/assistantGateway';
 import {
     executeAssistantIntent,
     parseDataQuestion,
     persistAssistantWorkflow,
     pickNarrativeFields,
-} from '../../utils/dataAssistant';
-import { buildShareableWorkflowUrl, createWorkflowSnapshot } from '../../utils/workflowSession';
+} from '../../../utils/dataAssistant';
+import { buildShareableWorkflowUrl, createWorkflowSnapshot } from '../../../utils/workflowSession';
+
+const NARRATIVE_SAMPLE_SIZE = 800;
+const INSIGHT_EXPL_TIMEOUT_MS = 30_000;
 
 const Layout = styled.div`
     display: grid;
@@ -51,7 +54,7 @@ const DataAssistant: React.FC = () => {
             intl.get('assistant.suggestions.causal'),
             intl.get('assistant.suggestions.explain'),
         ],
-        [],
+        [langStore.lang],
     );
 
     const stores = useMemo(
@@ -112,28 +115,44 @@ const DataAssistant: React.FC = () => {
                         setLastReply(intl.get('assistant.reply.needFieldsForExplain'));
                         break;
                     }
-                    const sampled = dataSourceStore.cleanedData.slice(0, 800);
+                    const sampled = dataSourceStore.cleanedData.slice(0, NARRATIVE_SAMPLE_SIZE);
                     const explanations: string[] = [];
                     await new Promise<void>((resolve) => {
-                        getInsightExpl({
-                            requestId: narrativeRequestId,
-                            dataSource: sampled,
-                            fields: narrativeFields,
-                            aggrType: 'mean',
-                            langType: langStore.lang ?? 'en-US',
-                            setExplainLoading: () => undefined,
-                            resolveInsight: (rows) => {
-                                if (Array.isArray(rows) && rows.length > 0) {
-                                    const top = Object.keys(rows[0])
-                                        .filter((k) => rows[0]?.[k]?.score > 0)
-                                        .map((k) => rows[0][k]?.para?.explain ?? '')
-                                        .filter(Boolean)
-                                        .slice(0, 2);
-                                    explanations.push(...top);
-                                }
-                                resolve();
-                            },
-                        });
+                        let settled = false;
+                        const finish = () => {
+                            if (settled) return;
+                            settled = true;
+                            clearTimeout(timer);
+                            resolve();
+                        };
+                        const timer = setTimeout(() => {
+                            console.error('getInsightExpl timed out');
+                            finish();
+                        }, INSIGHT_EXPL_TIMEOUT_MS);
+                        try {
+                            getInsightExpl({
+                                requestId: narrativeRequestId,
+                                dataSource: sampled,
+                                fields: narrativeFields,
+                                aggrType: 'mean',
+                                langType: langStore.lang ?? 'en-US',
+                                setExplainLoading: () => undefined,
+                                resolveInsight: (rows) => {
+                                    if (Array.isArray(rows) && rows.length > 0) {
+                                        const top = Object.keys(rows[0])
+                                            .filter((k) => rows[0]?.[k]?.score > 0)
+                                            .map((k) => rows[0][k]?.para?.explain ?? '')
+                                            .filter(Boolean)
+                                            .slice(0, 2);
+                                        explanations.push(...top);
+                                    }
+                                    finish();
+                                },
+                            });
+                        } catch (err) {
+                            console.error(err);
+                            finish();
+                        }
                     });
                     setLastReply(
                         explanations.length > 0
@@ -150,6 +169,13 @@ const DataAssistant: React.FC = () => {
                 default:
                     setLastReply(intl.get('assistant.reply.unknown', { suggestions: suggestions.join(' · ') }));
             }
+        } catch (err) {
+            console.error(err);
+            setLastReply(
+                intl.get('assistant.reply.error', {
+                    message: err instanceof Error ? err.message : String(err),
+                }),
+            );
         } finally {
             setLoading(false);
         }

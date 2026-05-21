@@ -33,7 +33,7 @@ services:
       - PORT=3000
       - CHOKIDAR_USEPOLLING=true
       - WDS_SOCKET_PORT=0
-    command: bash -lc "yarn install && yarn build:utils && yarn build:scenegraph && yarn build:renderer && yarn workspace rath-client start"
+    command: bash -lc "./scripts/dev-start.sh"
 
   connector-api:
     volumes:

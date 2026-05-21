@@ -283,7 +283,20 @@ def transDataSource(dataSource: List[IRow], fields: List[IFieldMeta], params: Op
     df, fields = trans(df, fields, params)
     # Ensure numeric matrix for downstream causal algorithms (many call np.isnan internally).
     # Coerce everything to numeric; non-convertible values become NaN.
-    df = df.apply(pd.to_numeric, errors='coerce')
+    numeric_df = df.apply(pd.to_numeric, errors='coerce')
+    newly_nan = numeric_df.isna() & df.notna()
+    if newly_nan.any().any():
+        import warnings
+        affected = [
+            f"{col} ({int(newly_nan[col].sum())} values)"
+            for col in df.columns
+            if newly_nan[col].any()
+        ]
+        warnings.warn(
+            f"Coercing columns to numeric introduced NaNs in: {', '.join(affected)}",
+            stacklevel=2,
+        )
+    df = numeric_df
     return df, fields
 
 import algorithms
@@ -378,6 +391,14 @@ class AlgoInterface:
         if np.isnan(arr).any():
             # Column-wise median imputation; all-NaN columns become 0.
             med = np.nanmedian(arr, axis=0)
+            all_nan_cols = ~np.isfinite(med)
+            if np.any(all_nan_cols):
+                import warnings
+                col_indices = np.where(all_nan_cols)[0].tolist()
+                warnings.warn(
+                    f"All-NaN columns detected at indices {col_indices}; filling with 0.0",
+                    stacklevel=2,
+                )
             med = np.where(np.isfinite(med), med, 0.0)
             nan_idx = np.where(np.isnan(arr))
             arr[nan_idx] = med[nan_idx[1]]

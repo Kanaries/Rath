@@ -214,9 +214,16 @@ export function getTestServerAPI(api: string): string {
     const defaultBase = (['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname))
         ? window.location.origin
         : 'https://gateway.kanaries.net';
-    const url = forced || defaultBase;
+    let url = forced || defaultBase;
+    if (forced) {
+        try {
+            new URL(forced);
+        } catch {
+            url = defaultBase;
+        }
+    }
     const surl = new URL(url);
-    surl.pathname = api;
+    surl.pathname = api.startsWith('/') ? api : `/${api}`;
     return surl.href;
 }
 export async function rathEngineServerService(props: MessageServerProps) {

@@ -303,6 +303,7 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
         for res in results:
             sum2 += res.responsibility * res.responsibility
         vars = math.sqrt(sum2 / len(results))
+        vars = max(vars, 1e-12)
         for res in results:
             res.responsibility = significance_value(res.responsibility, vars)
     

@@ -12,6 +12,7 @@ import { PIVOT_KEYS } from '../../constants';
 import type { IFieldMeta } from '../../interfaces';
 import { saveAutopilotInsightToDashboard } from '../../store/workflowStore';
 import { buildShareableWorkflowUrl, createWorkflowSnapshot, saveWorkflowSession } from '../../utils/workflowSession';
+import { notify } from '../../components/error';
 
 const Row = styled.div`
     display: flex;
@@ -135,8 +136,14 @@ const NextActions: React.FC = () => {
         const url = buildShareableWorkflowUrl(snapshot);
         try {
             await navigator.clipboard.writeText(url);
-        } catch {
-            // Clipboard unavailable; fall back to opening the URL in a new tab context via prompt-less copy failure.
+        } catch (err) {
+            console.error('copyShareLink failed', err);
+            notify({
+                type: 'warning',
+                title: intl.get('coach.nextActions.copyFailedTitle'),
+                content: intl.get('coach.nextActions.copyFailedContent'),
+            });
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
     };
 

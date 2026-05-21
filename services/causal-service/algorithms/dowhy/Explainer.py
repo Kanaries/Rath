@@ -81,13 +81,18 @@ class Explainer(common.AlgoInterface):
         import pandas as pd
         import numpy as np
         if params.estimate_effect_method == 'backdoor.distance_matching':
+            import logging
+            logger = logging.getLogger(__name__)
             for fid in treatment_fids:
                 try:
                     if np.unique(self.data[fid].values).size == 2:
                         self.data = self.data.assign(**{fid: self.data[fid] != self.data[fid].values[0]})
-                except Exception:
-                    # If type conversion fails, keep original values and let DoWhy handle it.
-                    pass
+                except (KeyError, TypeError, ValueError) as e:
+                    logger.warning(
+                        "Failed to binarize treatment column %s for distance matching: %s",
+                        fid,
+                        e,
+                    )
 
         self.model = dowhy.CausalModel(
             data=self.data,

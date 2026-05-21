@@ -117,7 +117,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
             }
             return { fields, dataSource };
         }
-        let rawData = structured.dataSource;
+        rawData = structured.dataSource;
         if (sampleMethod === SampleKey.reservoir) {
             rawData = Sampling.reservoirSampling(rawData, sampleSize);
         }

@@ -192,7 +192,7 @@ const FileHelper: FC<IFileHelperProps> = ({
                             />
                         </>
                     )}
-                    {(!preview || preview.type === 'text/csv' || isStructuredDataFile(preview)) && (separator === ',' || (preview && isStructuredDataFile(preview))) && (
+                    {(!preview || preview.type === 'text/csv' || isStructuredDataFile(preview)) && (
                         <>
                             <Label>{intl.get('dataSource.upload.sampling')}</Label>
                             <ChoiceGroup

@@ -81,31 +81,33 @@ def main() -> int:
     # DoWhy explain smoke (may be slow / optional depending on deps)
     try:
         from algorithms.dowhy import ExplainData, IRInsightExplainProps, IRInsightExplainSubspace, IRInsightSubspaceGroup, IRViewSpec, IRMeasureSpec, ICausalModel, PagLink, IFilter
-
-        props = IRInsightExplainProps(
-            data=dataSource,
-            fields=fields,
-            causalModel=ICausalModel(
-                funcDeps=[],
-                edges=[
-                    PagLink(src="x", tar="y", src_type=-1, tar_type=1),
-                ],
-            ),
-            groups=IRInsightSubspaceGroup(
-                current=IRInsightExplainSubspace(predicates=[IFilter(fid="cat", type="set", values=["A"])]),
-                other=IRInsightExplainSubspace(predicates=[IFilter(fid="cat", type="set", values=["B"])]),
-            ),
-            view=IRViewSpec(
-                dimensions=["cat"],
-                measures=[IRMeasureSpec(fid="y", op="mean")],
-            ),
-        )
-        explain = ExplainData(props)
-        assert hasattr(explain, "causalEffects")
-        print("[ok] /explain core")
-    except Exception as e:
-        # Keep the script usable even if DoWhy stack isn't available.
-        print(f"[skip] /explain smoke: {e}")
+    except (ModuleNotFoundError, ImportError) as e:
+        print(f"[skip] /explain smoke (missing dependencies): {e}")
+    else:
+        try:
+            props = IRInsightExplainProps(
+                data=dataSource,
+                fields=fields,
+                causalModel=ICausalModel(
+                    funcDeps=[],
+                    edges=[
+                        PagLink(src="x", tar="y", src_type=-1, tar_type=1),
+                    ],
+                ),
+                groups=IRInsightSubspaceGroup(
+                    current=IRInsightExplainSubspace(predicates=[IFilter(fid="cat", type="set", values=["A"])]),
+                    other=IRInsightExplainSubspace(predicates=[IFilter(fid="cat", type="set", values=["B"])]),
+                ),
+                view=IRViewSpec(
+                    dimensions=["cat"],
+                    measures=[IRMeasureSpec(fid="y", op="mean")],
+                ),
+            )
+            explain = ExplainData(props)
+            assert hasattr(explain, "causalEffects")
+            print("[ok] /explain core")
+        except ValueError as e:
+            print(f"[skip] /explain smoke (runtime): {e}")
 
     try:
         from algorithms.dowhy.Explainer import Explainer, ExplainerParams

@@ -1,10 +1,10 @@
-FROM python:3.10.7
+FROM python:3.11-slim
 
 WORKDIR /text-pattern-service
 
 COPY . /text-pattern-service
 
-RUN pip3 install --trusted-host pypi.python.org -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 EXPOSE 5533
 

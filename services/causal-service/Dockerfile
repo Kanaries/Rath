@@ -22,4 +22,4 @@ RUN if [ ! -d causal-learn ] || [ ! -f causal-learn/setup.py ]; then \
 RUN pip install -vvv -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir /app/causal-learn
 
 EXPOSE 8000
-CMD gunicorn main:app --workers 16 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300 --graceful-timeout 30 --reload
+CMD gunicorn main:app --workers 16 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 300 --graceful-timeout 30

@@ -16,16 +16,31 @@ export type AssistantGatewayResponse = {
 };
 
 function getAssistantEndpoint(): string {
-    if (typeof window === 'undefined') return '';
-    const fromQuery = new URL(window.location.href).searchParams.get('llmServer');
-    if (fromQuery) {
-        return `${decodeURIComponent(fromQuery).replace(/\/$/, '')}/assistant`;
+    if (typeof window !== 'undefined') {
+        const fromQuery = new URL(window.location.href).searchParams.get('llmServer');
+        if (fromQuery) {
+            return `${decodeURIComponent(fromQuery).replace(/\/$/, '')}/assistant`;
+        }
+        return getTestServerAPI('assistant');
     }
-    return getTestServerAPI('assistant');
+    const fromEnv = (process.env.RATH_ASSISTANT_GATEWAY ?? '').trim();
+    if (fromEnv) {
+        return fromEnv.replace(/\/$/, '');
+    }
+    return '';
 }
 
 export function isAssistantGatewayConfigured(): boolean {
-    return typeof window !== 'undefined';
+    const endpoint = getAssistantEndpoint();
+    if (!endpoint) {
+        return false;
+    }
+    try {
+        new URL(endpoint);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export async function askAssistantGateway(
@@ -75,7 +90,8 @@ export async function askAssistantGateway(
             return { answer: json.answer, intent: json.intent };
         }
         return null;
-    } catch {
+    } catch (err) {
+        console.error('assistantGateway error', err);
         return null;
     }
 }

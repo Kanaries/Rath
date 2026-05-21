@@ -7,6 +7,7 @@ import { setDataStorage } from '../utils/storage';
 
 export function useDataImportCallbacks(options?: { onClose?: () => void }) {
     const { dataSourceStore, megaAutoStore, semiAutoStore } = useGlobalStore();
+    const onClose = options?.onClose;
 
     const onSelectDataLoaded = useCallback(
         (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag, withHistory?: IDBMeta) => {
@@ -17,9 +18,9 @@ export function useDataImportCallbacks(options?: { onClose?: () => void }) {
                 dataSourceStore.setDatasetId(name);
                 setDataStorage(name, fields, dataSource, tag, withHistory);
             }
-            options?.onClose?.();
+            onClose?.();
         },
-        [dataSourceStore, megaAutoStore, semiAutoStore, options?.onClose],
+        [dataSourceStore, megaAutoStore, semiAutoStore, onClose],
     );
 
     const onSelectStartLoading = useCallback(() => {

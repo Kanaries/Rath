@@ -44,6 +44,8 @@ const ResultBox = styled.pre`
     line-height: 1.4;
 `;
 
+const EFFECT_ESTIMATION_ROW_LIMIT = 10_000;
+
 function fieldLabel(fields: readonly { fid: string; name?: string }[], fid: string): string {
     return fields.find((f) => f.fid === fid)?.name ?? fid;
 }
@@ -72,6 +74,19 @@ const EffectEstimationPanel: React.FC = () => {
 
     const runEstimate = async () => {
         if (!plan || !mergedPag) return;
+        const { sampleSize, fullDataSize } = causalStore.dataset;
+        const rowCount = sampleSize || fullDataSize;
+        if (rowCount > EFFECT_ESTIMATION_ROW_LIMIT) {
+            notify({
+                type: 'warning',
+                title: intl.get('coach.effect.errorTitle'),
+                content: intl.get('coach.effect.tooManyRows', {
+                    rows: rowCount,
+                    limit: EFFECT_ESTIMATION_ROW_LIMIT,
+                }),
+            });
+            return;
+        }
         setLoading(true);
         setResult(null);
         try {

@@ -2,17 +2,29 @@ import { isPivotKey, readRouteKeyFromHash, toNavHash } from '../router/routerBri
 import { PIVOT_KEYS } from '../constants';
 
 describe('routerBridge', () => {
-    const originalHash = window.location.hash;
+    const originalWindow = globalThis.window;
 
     afterEach(() => {
-        window.location.hash = originalHash;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            value: originalWindow,
+        });
     });
 
+    function mockHash(hash: string) {
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            value: {
+                location: { hash },
+            },
+        });
+    }
+
     it('reads legacy and slash-prefixed hashes', () => {
-        window.location.hash = '#megaAuto';
+        mockHash('#megaAuto');
         expect(readRouteKeyFromHash()).toBe(PIVOT_KEYS.megaAuto);
 
-        window.location.hash = '#/dataSource';
+        mockHash('#/dataSource');
         expect(readRouteKeyFromHash()).toBe(PIVOT_KEYS.dataSource);
     });
 

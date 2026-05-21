@@ -4,7 +4,7 @@ import intl from 'react-intl-universal';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { notify } from '../components/error';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
-import { isPivotKey, navigateToRoute, readRouteKeyFromHash } from '../router/routerBridge';
+import { isPivotKey, navigateToRoute } from '../router/routerBridge';
 import { THEME_KEYS, prebuiltThemes } from '../queries/themes';
 import { VegaGlobalConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
@@ -117,13 +117,23 @@ export class CommonStore {
     public async setComputationEngine(engine: string) {
         try {
             if (engine === COMPUTATION_ENGINE.clickhouse) {
-                const { clickHouseStore } = await import('./index').then((m) => m.getGlobalStore());
-                if (clickHouseStore.connectStatus !== 'engine') {
+                try {
+                    const { clickHouseStore } = await import('./index').then((m) => m.getGlobalStore());
+                    if (clickHouseStore.connectStatus !== 'engine') {
+                        notify({
+                            type: 'info',
+                            title: intl.get('config.computationEngine.clickhouseSetupTitle'),
+                            content: intl.get('config.computationEngine.clickhouseSetup'),
+                        });
+                    }
+                } catch (error) {
+                    console.error(error);
                     notify({
-                        type: 'info',
-                        title: intl.get('config.computationEngine.clickhouseSetupTitle'),
-                        content: intl.get('config.computationEngine.clickhouseSetup'),
+                        type: 'error',
+                        title: intl.get('config.computationEngine.switchFailedTitle'),
+                        content: error instanceof Error ? error.message : String(error),
                     });
+                    return;
                 }
             }
             destroyRathWorker();
