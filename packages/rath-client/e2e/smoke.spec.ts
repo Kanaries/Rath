@@ -6,7 +6,7 @@ test.describe('RATH smoke', () => {
 
         await expect(page.locator('.main-app-container')).toBeVisible({ timeout: 60_000 });
 
-        await page.locator('.main-app-nav a').filter({ hasText: /Data Source|数据源/ }).first().click();
+        await page.getByRole('link', { name: 'DataSource' }).click();
 
         await expect(page).toHaveURL(/#\/dataSource/);
     });

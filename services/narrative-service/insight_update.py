@@ -7,7 +7,10 @@ from scipy.cluster.vq import kmeans,whiten
 from sklearn.cluster import DBSCAN
 from scipy.stats import pearsonr,ttest_rel,linregress
 from typing import List, Tuple, Dict
-from pyscagnostics import scagnostics
+try:
+    from pyscagnostics import scagnostics
+except ImportError:
+    scagnostics = None
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,6 +18,40 @@ warnings.filterwarnings("ignore")
 VectorStr = List[str]
 VectorNum = List[float]
 VectorObj = List[object]
+
+def as_1d(values) -> np.ndarray:
+    """Coerce values to a 1-D numpy array (never 0-D)."""
+    arr = np.asarray(values)
+    if arr.ndim == 0:
+        return arr.reshape(1)
+    return arr.reshape(-1)
+
+def as_2d(values) -> np.ndarray:
+    """Coerce tabular measure values to a 2-D numpy array."""
+    arr = np.asarray(values)
+    if arr.ndim == 0:
+        return arr.reshape(1, 1)
+    if arr.ndim == 1:
+        return arr.reshape(-1, 1)
+    return arr
+
+def to_list(values) -> list:
+    """Coerce array-like selections to a plain Python list."""
+    if values is None:
+        return []
+    if isinstance(values, pd.Index):
+        return values.tolist()
+    arr = np.asarray(values)
+    if arr.ndim == 0:
+        return [arr.item()]
+    return list(values)
+
+def has_items(values) -> bool:
+    if values is None:
+        return False
+    if isinstance(values, (list, tuple)):
+        return len(values) > 0
+    return np.asarray(values).size > 0
 
 def func_residuals(x:VectorNum, alpha:float, beta:float)->VectorNum:
     return alpha*(x**-beta)
@@ -190,7 +227,7 @@ def cal_Correlation(subspaces:VectorObj,subspaces_name:VectorStr,breakdown:Vecto
 def cal_Attribution(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    persent_list = groupData[measures[0]].values
+    persent_list = as_1d(groupData[measures[0]].values)
     arg_index = np.argsort(-persent_list)
     first_persent = persent_list[arg_index[0]]/np.sum(persent_list)
     para = {}
@@ -210,15 +247,14 @@ def cal_Attribution(breakdown:VectorStr,measures:VectorStr,subDataSource:object,
 def cal_OutstandingNo1(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    persent_list = groupData[measures[0]].values
-    arg_index = np.argsort(-np.squeeze(persent_list),axis=0)
-    arg_list = np.squeeze(persent_list[arg_index])
-    ydata = arg_list
-    ydata = ydata[ydata>0]
-    xdata = np.array(list(range(len(ydata))))+1
+    persent_list = as_1d(groupData[measures[0]].values)
+    arg_index = np.argsort(-persent_list, axis=0)
+    arg_list = persent_list[arg_index]
+    ydata = arg_list[arg_list > 0]
+    xdata = np.array(list(range(ydata.size)))+1
     para = {}
     para['persent'] = ydata
-    if len(ydata)<=2:
+    if ydata.size<=2:
         score = 0
     else:
         score = min(np.abs(ydata[0]/ydata[1]-1),1)
@@ -232,15 +268,14 @@ def cal_OutstandingNo1(breakdown:VectorStr,measures:VectorStr,subDataSource:obje
 def cal_OutstandingNo2(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    persent_list = groupData[measures[0]].values
-    arg_index = np.argsort(-np.squeeze(persent_list),axis=0)
-    arg_list = np.squeeze(persent_list[arg_index])
-    ydata = arg_list
-    ydata = ydata[ydata>0]
-    xdata = np.array(list(range(len(ydata))))+1
+    persent_list = as_1d(groupData[measures[0]].values)
+    arg_index = np.argsort(-persent_list, axis=0)
+    arg_list = persent_list[arg_index]
+    ydata = arg_list[arg_list > 0]
+    xdata = np.array(list(range(ydata.size)))+1
     para = {}
     para['persent'] = ydata
-    if len(ydata)<=3:
+    if ydata.size<=3:
         score = 0
     else:
         score = min(np.abs(ydata[1]/ydata[2]-1),1)
@@ -254,15 +289,14 @@ def cal_OutstandingNo2(breakdown:VectorStr,measures:VectorStr,subDataSource:obje
 def cal_OutstandingLast(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    persent_list = groupData[measures[0]].values
-    arg_index = np.argsort(np.squeeze(persent_list),axis=0)
-    arg_list = np.squeeze(persent_list[arg_index])
-    ydata = arg_list
-    ydata = -ydata[ydata<0]
-    xdata = np.array(list(range(len(ydata))))+1
+    persent_list = as_1d(groupData[measures[0]].values)
+    arg_index = np.argsort(persent_list, axis=0)
+    arg_list = persent_list[arg_index]
+    ydata = -arg_list[arg_list < 0]
+    xdata = np.array(list(range(ydata.size)))+1
     para = {}
     para['persent'] = -ydata
-    if len(ydata)<=2:
+    if ydata.size<=2:
         score = 0
     else:
         score = min(np.abs(ydata[0]/ydata[1]-1),1)
@@ -276,7 +310,7 @@ def cal_OutstandingLast(breakdown:VectorStr,measures:VectorStr,subDataSource:obj
 def cal_Evenness(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    persent_list = groupData[measures[0]].values
+    persent_list = as_1d(groupData[measures[0]].values)
     std = np.std(persent_list)
     para = {}
     para['persent'] = persent_list
@@ -294,27 +328,27 @@ def cal_ChangePoint(breakdown:VectorStr,measures:VectorStr,subDataSource:object,
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
     timelabel = groupData.index
-    timeseries = np.squeeze(groupData[measures[0]].values)
+    timeseries = as_1d(groupData[measures[0]].values)
     para = {}
     para['timelabel']=timelabel
     para['timeseries']=timeseries
-    if len(timeseries)>rangeN*2:
-        Y_left = np.array([np.sum(timeseries[i-rangeN:i])/rangeN for i in range(rangeN,len(timeseries)-rangeN+1)])
-        Y_right = np.array([np.sum(timeseries[i:i+rangeN])/rangeN for i in range(rangeN,len(timeseries)-rangeN+1)])
+    if timeseries.size>rangeN*2:
+        Y_left = np.array([np.sum(timeseries[i-rangeN:i])/rangeN for i in range(rangeN,timeseries.size-rangeN+1)])
+        Y_right = np.array([np.sum(timeseries[i:i+rangeN])/rangeN for i in range(rangeN,timeseries.size-rangeN+1)])
         delta_Y = np.sqrt(abs(np.sum(timeseries**2)/2/rangeN-(np.sum(timeseries)/2/rangeN)**2))/np.sqrt(rangeN)
         p_list_mean = norm.cdf(Y_left-Y_right,np.mean(delta_Y),np.std(delta_Y))
         score_mean = max(0.05-p_list_mean.min(),0)/0.05
         score_mean = np.where(np.isnan(score_mean),0,score_mean)
-        timeseries_slope = np.array([0]+[timeseries[i]-timeseries[i-1] for i in range(len(timeseries)-1)])
-        Y_slope_left = np.array([np.sum(timeseries_slope[i-rangeN:i])/rangeN for i in range(rangeN,len(timeseries_slope)-rangeN+1)])
-        Y_slope_right = np.array([np.sum(timeseries_slope[i:i+rangeN])/rangeN for i in range(rangeN,len(timeseries_slope)-rangeN+1)])
+        timeseries_slope = np.array([0]+[timeseries[i]-timeseries[i-1] for i in range(timeseries.size-1)])
+        Y_slope_left = np.array([np.sum(timeseries_slope[i-rangeN:i])/rangeN for i in range(rangeN,timeseries_slope.size-rangeN+1)])
+        Y_slope_right = np.array([np.sum(timeseries_slope[i:i+rangeN])/rangeN for i in range(rangeN,timeseries_slope.size-rangeN+1)])
         delta_Y_slope = np.sqrt(abs(np.sum(timeseries_slope**2)/2/rangeN-(np.sum(timeseries_slope)/2/rangeN)**2))/np.sqrt(rangeN)
         p_list_slope = norm.cdf(Y_slope_left-Y_slope_right,np.mean(delta_Y_slope),np.std(delta_Y_slope))
         score_slope = max(0.05-p_list_slope.min(),0)/0.05
         score_slope = np.where(np.isnan(score_slope),0,score_slope)
         score = max(score_mean,score_slope)
-        para['ChangePointMean'] = timelabel[rangeN:len(timeseries)-rangeN+1][p_list_mean<0.05]
-        para['ChangePointSlope'] = timelabel[rangeN:len(timeseries_slope)-rangeN+1][p_list_slope<0.05]
+        para['ChangePointMean'] = to_list(timelabel[rangeN:timeseries.size-rangeN+1][p_list_mean<0.05])
+        para['ChangePointSlope'] = to_list(timelabel[rangeN:timeseries_slope.size-rangeN+1][p_list_slope<0.05])
         explain = explain_ChangePoint(langType,para['ChangePointMean'],para['ChangePointSlope'])
         # if len(para['ChangePointMean'])>0:
         #     explain = 'There is change point of mean in '+','.join((str(x) for x in para['ChangePointMean']))
@@ -332,18 +366,18 @@ def cal_Outlier(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggr
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
     timelabel = groupData.index
-    timeseries = np.squeeze(groupData[measures[0]].values)
+    timeseries = as_1d(groupData[measures[0]].values)
     para = {}
     para['timelabel'] = timelabel
     para['timeseries'] = timeseries
-    if np.std(timeseries)>0:
+    if timeseries.size > 0 and np.std(timeseries)>0:
         p_list = norm.cdf(timeseries,np.mean(timeseries),np.std(timeseries)**2)
         score = max(0.05-p_list.min(),0)/0.05
-        para['Outlier'] = timelabel[p_list<0.05]
+        para['Outlier'] = to_list(timelabel[p_list<0.05])
     else:
         score = 0
     if score>0:
-        para['Outlier'] = timelabel[p_list<0.05]
+        para['Outlier'] = to_list(timelabel[p_list<0.05])
         explain = explain_Outlier(langType,measures[0],aggrType,breakdown[0])
         # explain = measures[0]+' has outliers after '+aggrType+' with '+breakdown[0]
         para['explain'] = explain
@@ -353,7 +387,7 @@ def cal_Seasonality(breakdown:VectorStr,measures:VectorStr,subDataSource:object,
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
     timelabel = groupData.index
-    timeseries = np.squeeze(groupData[measures[0]].values)
+    timeseries = as_1d(groupData[measures[0]].values)
     time = pd.to_datetime(timelabel)
     winter = np.array([timeseries[i] for i in range(len(time)) if time[i].month in set([12,1,2])])
     spring = np.array([timeseries[i] for i in range(len(time)) if time[i].month in set([3,4,5])])
@@ -379,10 +413,13 @@ def cal_Seasonality(breakdown:VectorStr,measures:VectorStr,subDataSource:object,
 def cal_Trend(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    timeseries = np.squeeze(groupData[measures[0]].values)
-    slope, intercept, r, p, se = linregress(range(len(timeseries)), timeseries)
-    para = {'slope':slope,'intercept':intercept,'timeseries':timeseries}
-    timeseries_avg = timeseries - np.array(range(len(timeseries)))*slope+intercept
+    timeseries = as_1d(groupData[measures[0]].values)
+    para = {'timeseries':timeseries}
+    if timeseries.size < 2:
+        return 0, para
+    slope, intercept, r, p, se = linregress(range(timeseries.size), timeseries)
+    para.update({'slope':slope,'intercept':intercept})
+    timeseries_avg = timeseries - np.array(range(timeseries.size))*slope+intercept
     std = np.std(timeseries_avg)
     if std==0:
         score = 1
@@ -390,42 +427,42 @@ def cal_Trend(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrTy
         alpha = abs(np.mean(timeseries_avg))/(std+abs(np.mean(timeseries_avg)))
         score = max(alpha-0.85,0)/0.15
     explain = explain_Trend(langType,slope,measures[0],aggrType,breakdown[0])
-    # if slope>0:
-    #     explain = measures[0]+'is trending upwards'
-    # elif slope<0:
-    #     explain = measures[0]+'is trending downwards'
     para['explain'] = explain
     return score,para
 
 def cal_HeteroscedasticityV1(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    timeseries = np.squeeze(groupData[measures[0]].values)
-    slope, intercept, r, p, se = linregress(range(len(timeseries)), timeseries)
-    para = {'slope':slope,'intercept':intercept,'timeseries':timeseries}
-    timeseries_line = np.array(range(len(timeseries)))*slope+intercept
+    timeseries = as_1d(groupData[measures[0]].values)
+    para = {'timeseries':timeseries}
+    if timeseries.size < 2:
+        return 0, para
+    slope, intercept, r, p, se = linregress(range(timeseries.size), timeseries)
+    para.update({'slope':slope,'intercept':intercept})
+    timeseries_line = np.array(range(timeseries.size))*slope+intercept
     residuals = np.abs(timeseries-timeseries_line)
-    was_dis = np.sqrt(np.sum(np.abs(np.argsort(residuals)-np.array(range(len(residuals))))))/len(residuals)
+    was_dis = np.sqrt(np.sum(np.abs(np.argsort(residuals)-np.array(range(residuals.size)))))/residuals.size
     score = 1-min(was_dis/0.618,1)
     if score>0:
         explain = explain_HeteroscedasticityV1(langType,measures[0],aggrType,breakdown[0])
-        # explain = measures[0]+' shows heteroscedasticity after '+aggrType+' with '+breakdown[0]
         para['explain'] = explain
     return score,para
 
 def cal_HeteroscedasticityV2(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-1 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    timeseries = np.squeeze(groupData[measures[0]].values)
-    slope, intercept, r, p, se = linregress(range(len(timeseries)), timeseries)
-    para = {'slope':slope,'intercept':intercept,'timeseries':timeseries}
-    timeseries_line = np.array(range(len(timeseries)))*slope+intercept
+    timeseries = as_1d(groupData[measures[0]].values)
+    para = {'timeseries':timeseries}
+    if timeseries.size < 2:
+        return 0, para
+    slope, intercept, r, p, se = linregress(range(timeseries.size), timeseries)
+    para.update({'slope':slope,'intercept':intercept})
+    timeseries_line = np.array(range(timeseries.size))*slope+intercept
     residuals = np.flip(np.abs(timeseries-timeseries_line))
-    was_dis = np.sqrt(np.sum(np.abs(np.argsort(residuals)-np.array(range(len(residuals))))))/len(residuals)
+    was_dis = np.sqrt(np.sum(np.abs(np.argsort(residuals)-np.array(range(residuals.size)))))/residuals.size
     score = 1-min(was_dis/0.618,1)
     if score>0:
         explain = explain_HeteroscedasticityV2(langType,measures[0],aggrType,breakdown[0])
-        # explain = measures[0]+' shows heteroscedasticity after '+aggrType+' with '+breakdown[0]
         para['explain'] = explain
     return score,para
 
@@ -473,7 +510,7 @@ def cal_SimpsonParadoxV1(measures:VectorStr,subDataSource:object,langType:str)->
 def cal_SimpsonParadoxV2(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-2 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    whitened = whiten(np.squeeze(groupData[measures[0:2]].values))
+    whitened = whiten(as_2d(groupData[measures[0:2]].values))
     if len(groupData)<2:
         score = 0
         para = {}
@@ -556,12 +593,16 @@ def cal_SimpsonParadoxV3(dimensions:VectorStr,breakdown:VectorStr,measures:Vecto
 def cal_NolinearrelationshipV1(breakdown:VectorStr,measures:VectorStr,subDataSource:object,aggrType:str,langType:str)->Tuple[float,dict]:
     # measures-2 measures
     groupData,aggr_mark = func_aggr(subDataSource,breakdown,aggrType)
-    timeseries = np.squeeze(groupData[measures[0:2]].values)
-    x = timeseries[:,0]
-    y = timeseries[:,1]
+    matrix = as_2d(groupData[measures[0:2]].values)
+    if matrix.shape[0] < 2 or matrix.shape[1] < 2:
+        return 0, {}
+    x = matrix[:,0]
+    y = matrix[:,1]
     if np.std(x)>0:
         slope, intercept, r, p, se = linregress(x, y)
         para = {'slope':slope,'intercept':intercept,'x':x,'y':y}
+    else:
+        para = {'x':x,'y':y}
     if np.std(x)==0 or np.std(y)==0:
         score = 0
     else:
@@ -611,6 +652,8 @@ def cal_scagnostics(measures,subDataSource,langType):
 
     # pyscagnostics is strict about input types: must be 1D numeric arrays without NaNs.
     try:
+        if scagnostics is None:
+            raise ValueError("pyscagnostics is not installed")
         x = np.asarray(x, dtype=float).reshape(-1)
         y = np.asarray(y, dtype=float).reshape(-1)
         if x.shape[0] != y.shape[0]:
@@ -735,23 +778,25 @@ def explain_Evenness(langType,measure0,aggrType,breakdown):
     return explain
 
 def explain_ChangePoint(langType,ChangePointMean,ChangePointSlope):
+    change_mean = to_list(ChangePointMean)
+    change_slope = to_list(ChangePointSlope)
     explain = ''
     if langType=='en':
-        if len(ChangePointMean)>0:
-            explain = 'There is change point of mean in '+','.join((str(x) for x in ChangePointMean))
-            if len(ChangePointSlope)>0:
-                explain = explain+' and change point of slope in '+','.join((str(x) for x in ChangePointSlope))
+        if has_items(change_mean):
+            explain = 'There is change point of mean in '+','.join((str(x) for x in change_mean))
+            if has_items(change_slope):
+                explain = explain+' and change point of slope in '+','.join((str(x) for x in change_slope))
         else:
-            if len(ChangePointSlope)>0:
-                explain = 'There is change point of slope in '+','.join((str(x) for x in ChangePointSlope))
+            if has_items(change_slope):
+                explain = 'There is change point of slope in '+','.join((str(x) for x in change_slope))
     if langType=='cn':
-        if len(ChangePointMean)>0:
-            explain = '数据在'+','.join((str(x) for x in ChangePointMean))+'有突变'
-            if len(ChangePointSlope)>0:
-                explain = explain+'且其斜率在'+','.join((str(x) for x in ChangePointSlope))+'有突变'
+        if has_items(change_mean):
+            explain = '数据在'+','.join((str(x) for x in change_mean))+'有突变'
+            if has_items(change_slope):
+                explain = explain+'且其斜率在'+','.join((str(x) for x in change_slope))+'有突变'
         else:
-            if len(ChangePointSlope)>0:
-                explain = '数据的斜率在'+','.join((str(x) for x in ChangePointSlope))+'有突变'
+            if has_items(change_slope):
+                explain = '数据的斜率在'+','.join((str(x) for x in change_slope))+'有突变'
     return explain
 
 def explain_Outlier(langType,measure0,aggrType,breakdown):
@@ -881,11 +926,11 @@ def insight_check(fields:object,dataSource:object,check_list:VectorStr=None,brea
     dataSource = dataSource.loc[:,list(fields['fid'])]
     if 'name' in fields.columns:
         dataSource.columns = list([fields.loc[fields['fid']==i,'name'].values[0] for i in dataSource.columns])
-        dimensions = [i for i in dataSource.columns if fields[fields['name']==i]['analyticType'].values=='dimension']
-        measures = [i for i in dataSource.columns if fields[fields['name']==i]['analyticType'].values=='measure']
+        dimensions = [i for i in dataSource.columns if (fields.loc[fields['name']==i, 'analyticType'] == 'dimension').any()]
+        measures = [i for i in dataSource.columns if (fields.loc[fields['name']==i, 'analyticType'] == 'measure').any()]
     else:
-        dimensions = [i for i in dataSource.columns if fields[fields['fid']==i]['analyticType'].values=='dimension']
-        measures = [i for i in dataSource.columns if fields[fields['fid']==i]['analyticType'].values=='measure']
+        dimensions = [i for i in dataSource.columns if (fields.loc[fields['fid']==i, 'analyticType'] == 'dimension').any()]
+        measures = [i for i in dataSource.columns if (fields.loc[fields['fid']==i, 'analyticType'] == 'measure').any()]
     Oridimensions = dimensions.copy()
     if breakdown is None and len(dimensions)>0:
         breakdown = [dimensions[0]]
