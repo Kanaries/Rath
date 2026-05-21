@@ -5,6 +5,9 @@ import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
+import { getLocalCausalAlgorithmList } from "../../pages/causal/discoveryConfig";
+import { causalDiscoveryService } from "../../pages/causal/discoveryService";
+import type { CausalDiscoveryAlgorithm } from "../../pages/causal/discoveryTypes";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
@@ -26,10 +29,6 @@ export default class CausalOperatorStore {
     }
     public params: { [algo: string]: { [key: string]: any } } = {};
     protected set causalAlgorithmForm(schema: IAlgoSchema) {
-        if (Object.keys(schema).length === 0) {
-            console.error('[causalAlgorithmForm]: schema is empty');
-            return;
-        }
         this._causalAlgorithmForm = schema;
     }
     public get causalAlgorithmOptions() {
@@ -111,17 +110,7 @@ export default class CausalOperatorStore {
     
     protected async fetchCausalAlgorithmList(fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> {
         try {
-            const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    fieldIds: fields.map((f) => f.fid),
-                    fieldMetas: fields,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then((resp) => resp.json());
-            return schema;
+            return getLocalCausalAlgorithmList(fields);
         } catch (error) {
             console.error('[CausalAlgorithmList error]:', error);
             return null;
@@ -172,23 +161,17 @@ export default class CausalOperatorStore {
             });
             const originFieldsLength = inputFields.length;
             const dataSource = await data.getAll();
-            const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    dataSource,
-                    fields: allFields,
-                    focusedFields: inputFields.map(f => f.fid),
-                    bgKnowledgesPag: assertions,
-                    funcDeps: functionalDependencies,
-                    params: this.params[algoName],
-                }),
+            const result = await causalDiscoveryService({
+                algorithm: algoName as CausalDiscoveryAlgorithm,
+                dataSource,
+                fields: allFields,
+                focusedFields: inputFields.map(f => f.fid),
+                bgKnowledgesPag: assertions,
+                funcDeps: functionalDependencies,
+                params: this.params[algoName],
             });
-            const result = await res.json();
-            if (result.success) {
-                const rawMatrix = result.data.matrix as PAG_NODE[][];
+            if (result) {
+                const rawMatrix = result.matrix as PAG_NODE[][];
                 const causalMatrix = rawMatrix
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
@@ -210,8 +193,6 @@ export default class CausalOperatorStore {
                         });
                     }
                 }
-            } else {
-                throw new Error(result.message);
             }
         } catch (error) {
             notify({

@@ -3,6 +3,29 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 // const path = require('path');
 // const { override, babelInclude } = require('customize-cra')
 
+const BROKEN_SOURCE_MAP_PACKAGES = ['dagre-compound'];
+
+function patchSourceMapLoader(config) {
+    const sourceMapRule = config.module?.rules?.find(
+        (rule) => rule.enforce === 'pre' && String(rule.loader || '').includes('source-map-loader')
+    );
+
+    if (!sourceMapRule) return;
+
+    const packagePattern = new RegExp(
+        `node_modules[\\\\/](${BROKEN_SOURCE_MAP_PACKAGES.map((name) => name.replace('/', '[\\\\/]')).join('|')})[\\\\/]`
+    );
+
+    if (!sourceMapRule.exclude) {
+        sourceMapRule.exclude = packagePattern;
+        return;
+    }
+
+    sourceMapRule.exclude = Array.isArray(sourceMapRule.exclude)
+        ? [...sourceMapRule.exclude, packagePattern]
+        : [sourceMapRule.exclude, packagePattern];
+}
+
 // const mid_override = override(
 //   babelInclude([
 //     path.resolve('src'),
@@ -11,6 +34,8 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 // )
 
 module.exports = function override(config, env) {
+    patchSourceMapLoader(config);
+
     config.plugins.push(
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
