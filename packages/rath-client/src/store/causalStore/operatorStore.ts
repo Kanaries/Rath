@@ -5,10 +5,13 @@ import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
+import { getLocalCausalAlgorithmList } from "../../pages/causal/discoveryConfig";
+import { causalDiscoveryService } from "../../pages/causal/discoveryService";
+import type { CausalDiscoveryAlgorithm } from "../../pages/causal/discoveryTypes";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
-import { resolveCausality } from "./pag";
+import { findUnmatchedCausalResults, resolveCausality } from "./pag";
 
 type CausalJobStatus = 'idle' | 'creating' | 'queued' | 'running' | 'done' | 'failed' | 'cancelled';
 
@@ -136,23 +139,7 @@ export default class CausalOperatorStore {
     
     protected async fetchCausalAlgorithmList(fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> {
         try {
-            const res = await fetch(`${this.causalServer}/algo/list`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    fieldIds: fields.map((f) => f.fid),
-                    fieldMetas: fields,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const text = await res.text();
-            try {
-                return JSON.parse(text) as IAlgoSchema;
-            } catch {
-                console.error('[CausalAlgorithmList error]: non-JSON response', res.status, text.slice(0, 200));
-                return null;
-            }
+            return getLocalCausalAlgorithmList(fields);
         } catch (error) {
             console.error('[CausalAlgorithmList error]:', error);
             return null;
@@ -276,7 +263,7 @@ export default class CausalOperatorStore {
             });
             const originFieldsLength = inputFields.length;
             const dataSource = await data.getAll();
-            const shouldUseJob = (algoName === 'XLearner' || originFieldsLength >= 10 || dataSource.length >= 500);
+            const shouldUseJob = (originFieldsLength >= 10 || dataSource.length >= 500);
             if (shouldUseJob) {
                 notify({
                     title: 'Causal discovery started',
@@ -328,13 +315,13 @@ export default class CausalOperatorStore {
                 // Poll asynchronously; do NOT block the caller (prevents "infinite loop" feel).
                 void (async () => {
                     try {
-                        const result = await this.pollJobUntilDone(jobId, controller.signal);
+                        const jobResult = await this.pollJobUntilDone(jobId, controller.signal);
                         notify({
                             title: 'Causal discovery finished',
                             type: 'success',
                             content: 'Results are ready.',
                         });
-                        const rawMatrix = (result?.data?.matrix ?? result?.data?.data) as PAG_NODE[][] | undefined;
+                        const rawMatrix = (jobResult?.data?.matrix ?? jobResult?.data?.data) as PAG_NODE[][] | undefined;
                         if (!rawMatrix) {
                             throw new Error('Background job returned no matrix.');
                         }
@@ -367,38 +354,39 @@ export default class CausalOperatorStore {
                 })();
 
                 return null;
-            } else {
-                const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        dataSource,
-                        fields: allFields,
-                        focusedFields: inputFields.map(f => f.fid),
-                        bgKnowledgesPag: assertions,
-                        funcDeps: functionalDependencies,
-                        params: this.params[algoName],
-                    }),
-                });
-                const text = await res.text();
-                let result: unknown;
-                try {
-                    result = JSON.parse(text);
-                } catch {
-                    throw new Error(`Non-JSON response (${res.status}). ${text.slice(0, 200)}`);
-                }
-                const typed = result as { success?: boolean; data?: any; message?: any };
-                if (typed.success) {
-                    const rawMatrix = typed.data.matrix as PAG_NODE[][];
-                    const causalMatrix = rawMatrix
-                        .slice(0, originFieldsLength)
-                        .map((row) => row.slice(0, originFieldsLength));
-                    const causalPag = resolveCausality(causalMatrix, inputFields);
-                    causality = { raw: causalMatrix, pag: causalPag };
-                } else {
-                    throw new Error(typed.message ?? 'Causal service returned success=false');
+            }
+
+            const result = await causalDiscoveryService({
+                algorithm: algoName as CausalDiscoveryAlgorithm,
+                dataSource,
+                fields: allFields,
+                focusedFields: inputFields.map(f => f.fid),
+                bgKnowledgesPag: assertions,
+                funcDeps: functionalDependencies,
+                params: this.params[algoName],
+            });
+            if (result) {
+                const rawMatrix = result.matrix as PAG_NODE[][];
+                const causalMatrix = rawMatrix
+                    .slice(0, originFieldsLength)
+                    .map((row) => row.slice(0, originFieldsLength));
+                const causalPag = resolveCausality(causalMatrix, inputFields);
+                causality = { raw: causalMatrix, pag: causalPag };
+                const unmatched = findUnmatchedCausalResults(assertions, causalPag);
+                if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+                    const getFieldName = (fid: string) => {
+                        const field = inputFields.find(f => f.fid === fid);
+                        return field?.name ?? fid;
+                    };
+                    for (const info of unmatched) {
+                        notify({
+                            title: 'Causal Result Not Matching',
+                            type: 'error',
+                            content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
+                                + `  Expected: ${info.expected.src_type} -> ${info.expected.tar_type}\n`
+                                + `  Received: ${info.received.src_type} -> ${info.received.tar_type}`,
+                        });
+                    }
                 }
             }
         } catch (error) {
