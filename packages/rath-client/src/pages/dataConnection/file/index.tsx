@@ -291,7 +291,6 @@ const FileData: FC<FileDataProps> = (props) => {
                 <>
                     <header>{intl.get('dataSource.upload.history')}</header>
                     <HistoryList
-                        appearance="outline"
                         is={DataSourceTag.FILE}
                         onDataLoaded={onDataLoaded}
                         onLoadingFailed={onLoadingFailed}
