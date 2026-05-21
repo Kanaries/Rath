@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { PIVOT_KEYS } from '../constants';
 import { useGlobalStore } from '../store';
+import { toNavHash } from '../router/routerBridge';
 import LoginInfo from '../pages/loginInfo';
 import useHotKey from '../hooks/use-hotkey';
 import UserSetting from './userSettings';
@@ -100,7 +101,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
             return pivotKeys.map((p) => {
                 const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(([, key]) => key === p)?.[0] ?? null : null;
                 return {
-                    url: `#${p}`,
+                    url: toNavHash(p),
                     key: p,
                     name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${hotkeyAccess ? ` (${hotkeyAccess})` : ''}`,
                     forceAnchor: true,
@@ -163,6 +164,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                         PIVOT_KEYS.semiAuto,
                         PIVOT_KEYS.megaAuto,
                         PIVOT_KEYS.painter,
+                        PIVOT_KEYS.causal,
                     ]),
                 },
                 ...getLinks([
@@ -179,11 +181,6 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                         e.preventDefault();
                     },
                     links: getLinks([
-                        // PIVOT_KEYS.noteBook,
-                        // PIVOT_KEYS.gallery,
-                        // PIVOT_KEYS.explainer,
-                        // PIVOT_KEYS.dashBoard,
-                        PIVOT_KEYS.causal,
                         PIVOT_KEYS.dashBoardDesigner,
                     ]),
                 },

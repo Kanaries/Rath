@@ -14,33 +14,28 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DEMO_DATA_REQUEST_TIMEOUT } from "../../../../constants"
-import { IDatasetBase, IRow } from "../../../../interfaces"
+import { IDatasetBase } from "../../../../interfaces"
+import {
+    extractRecords,
+    jsonDataFormatChecker,
+    type IJSONAPIFormat,
+} from "../../../../utils/structuredDataParser"
 import { rawData2DataWithBaseMetas } from "../../utils"
 
-export type IJSONAPIFormat = 'array' | 'array_with_meta' | 'others'
-export function jsonDataFormatChecker (parsedData: any): IJSONAPIFormat {
-    if (parsedData instanceof Array) {
-        return 'array'
-    }
-    if (parsedData.dataSource instanceof Array && parsedData.fields instanceof Array) {
-        return 'array_with_meta'
-    }
-    return 'others'
-}
+export type { IJSONAPIFormat } from "../../../../utils/structuredDataParser"
+export { jsonDataFormatChecker }
 
 export function getPreviewData (parsedData: any, format: IJSONAPIFormat): any {
     try {
         if (format === 'array') {
-            return parsedData.slice(0, 10)
+            const { rows } = extractRecords(parsedData);
+            return rows.slice(0, 10)
         }
         if (format === 'array_with_meta') {
-            // drop distribution key in each field in fields
+            const { fields, rows } = extractRecords(parsedData);
             return {
-                fields: parsedData.fields.map((field: any) => {
-                    const { distribution, ...rest } = field
-                    return rest
-                }),
-                dataSource: parsedData.dataSource.slice(0, 10)
+                fields,
+                dataSource: rows.slice(0, 10)
             }
         }
     } catch (error) {
@@ -55,22 +50,17 @@ export function getPreviewData (parsedData: any, format: IJSONAPIFormat): any {
 
 export async function getFullData (parsedData: any, format: IJSONAPIFormat): Promise<IDatasetBase> {
     try {
-        if (format === 'array') {
-            const res = await rawData2DataWithBaseMetas(parsedData as IRow[])
-            return res;
-        }
-        if (format === 'array_with_meta') {
-            // drop distribution key in each field in fields
-            return {
-                fields: parsedData.fields.map((field: any) => {
-                    const { distribution, ...rest } = field
-                    return rest
-                }),
-                dataSource: parsedData.dataSource
+        if (format === 'array' || format === 'array_with_meta') {
+            const extracted = extractRecords(parsedData);
+            if (extracted.format === 'array_with_meta' && extracted.fields) {
+                return {
+                    fields: extracted.fields,
+                    dataSource: extracted.rows,
+                };
             }
-        } else {
-            throw new Error("not supportted format")
+            return await rawData2DataWithBaseMetas(extracted.rows);
         }
+        throw new Error("not supportted format")
     } catch (error) {
         return {
             fields: [],
@@ -96,4 +86,4 @@ export function requestJSONAPIData (api: string): Promise<any> {
             })
             .catch(err => reject(err));
     })
-} 
+}

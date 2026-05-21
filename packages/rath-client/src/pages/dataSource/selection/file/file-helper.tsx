@@ -3,6 +3,7 @@ import { ChoiceGroup, Dropdown, IChoiceGroupOption, Label, SpinButton, TextField
 import { FC, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
+import { isStructuredDataFile } from '../../../../utils/structuredDataParser';
 import { SampleKey, useSampleOptions } from '../../utils';
 
 
@@ -175,7 +176,7 @@ const FileHelper: FC<IFileHelperProps> = ({
                     />
                 </>
             )}
-            {(!preview || preview.type.match(/^text\/.*/)) && (
+            {(!preview || (preview.type.match(/^text\/.*/) && !isStructuredDataFile(preview))) && (
                 <>
                     {showMoreConfig && (
                         <>
@@ -191,7 +192,7 @@ const FileHelper: FC<IFileHelperProps> = ({
                             />
                         </>
                     )}
-                    {(!preview || preview.type === 'text/csv') && separator === ',' && (
+                    {(!preview || preview.type === 'text/csv' || isStructuredDataFile(preview)) && (separator === ',' || (preview && isStructuredDataFile(preview))) && (
                         <>
                             <Label>{intl.get('dataSource.upload.sampling')}</Label>
                             <ChoiceGroup

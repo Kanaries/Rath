@@ -29,6 +29,16 @@ import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow
 import { ILoaProps } from '../workers/loa/service';
 import { IteratorStorage } from '../utils/iteStorage';
 import type { labDistVis } from '../queries/labdistVis';
+import { notify } from '../components/error';
+import intl from 'react-intl-universal';
+
+function notifyWorkerError(titleKey: string, fallbackTitle: string, error: unknown) {
+    notify({
+        type: 'error',
+        title: intl.get(titleKey) || fallbackTitle,
+        content: error instanceof Error ? error.message : String(error),
+    });
+}
 
 interface SuccessResult<T> {
     success: true;
@@ -114,6 +124,7 @@ export async function inferMetaService(props: InferMetaServiceProps): Promise<IR
         worker.terminate();
     } catch (error) {
         console.error(error);
+        notifyWorkerError('coach.workerError.inferMetaTitle', 'Field inference failed', error);
     }
     return metas;
 }
@@ -142,6 +153,7 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
         worker.terminate();
     } catch (error) {
         console.error(error);
+        notifyWorkerError('coach.workerError.cleanDataTitle', 'Data cleaning failed', error);
     }
     return data;
 }
@@ -179,6 +191,7 @@ export async function filterDataService(props: FilterServiceProps): Promise<{row
         worker.terminate();
     } catch (error) {
         console.error(error);
+        notifyWorkerError('coach.workerError.filterDataTitle', 'Data filtering failed', error);
     }
     return data;
 }
@@ -197,8 +210,12 @@ function getTestServerUrl(): URL | null {
 }
 
 export function getTestServerAPI(api: string): string {
-    const url = new URL(window.location.href).searchParams.get('server') || 'https://gateway.kanaries.net';
-    let surl = new URL(url);
+    const forced = new URL(window.location.href).searchParams.get('server');
+    const defaultBase = (['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname))
+        ? window.location.origin
+        : 'https://gateway.kanaries.net';
+    const url = forced || defaultBase;
+    const surl = new URL(url);
     surl.pathname = api;
     return surl.href;
 }

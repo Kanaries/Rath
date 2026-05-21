@@ -37,6 +37,7 @@
         "react-dom": "^17.0.1",
         "react-intl-universal": "^2.6.6",
         "react-monaco-editor": "^0.51.0",
+        "react-router-dom": "^6.28.0",
         "react-scripts": "^5.0.1",
         "regexgen": "^1.3.0",
         "rxjs": "^7.5.7",
@@ -52,6 +53,7 @@
         "xlsx": "^0.18.5"
     },
     "devDependencies": {
+        "@playwright/test": "^1.49.0",
         "@testing-library/jest-dom": "^5.11.8",
         "@testing-library/react": "^11.2.3",
         "@testing-library/user-event": "^12.6.0",
@@ -81,6 +83,8 @@
         "build:client": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8000 build",
         "buildForAnalysis": "react-app-rewired build",
         "test": "jest -c ./jest.config.js --passWithNoTests --no-cache",
+        "test:e2e": "playwright test",
+        "test:e2e:ui": "playwright test --ui",
         "eject": "react-app-rewired eject",
         "analyze": "source-map-explorer 'build/static/js/*.js'",
         "count": "cloc --exclude-dir=$(tr '\n' ',' < ../../.clocignore) ."

@@ -10,14 +10,14 @@ from causallearn.search.FCMBased.lingam import CAMUV
 from causallearn.graph.GeneralGraph import GeneralGraph
 from causallearn.graph.Node import Node
 
-class CAM_UVParams(OptionalParams, title="CAM-UV Algorithm(暂不支持背景知识)"):
+class CAM_UVParams(OptionalParams, title="CAM-UV Algorithm (background knowledge not supported yet)"):
     alpha: Optional[float] = Field(
-        default=0.05, title="显著性阈值", # "Alpha",
+        default=0.05, title="Significance level (alpha)", # "Alpha",
         description="desired significance level (float) in (0, 1). Default: 0.05.",
         gt=0.0, le=1.0
     )
     num_explanatory_vals: Optional[int] = Field(
-        default=0, title="推导因果关系的最大变量数",
+        default=0, title="Max explanatory variables",
         description="the maximum number of variables to infer causal relationships. This is equivalent to d in the paper.",
         ge=0, le=0, multiple_of=1
     )

@@ -18,19 +18,19 @@ function deepFrom (obj: any, keys: string[], depth: number): any {
 
 class LangIntl {
     private locales: { [key: string]: any } = {}
-    private currentLocale: string = 'zh-CN';
+    private currentLocale: string = 'en-US';
     private deepGet (keyStr: string) {
         const locale = this.locales[this.currentLocale];
         if (keyStr in locale) {
             const keys = keyStr.split('.');
             const value = deepFrom(locale, keys, 0);
             if (value === null) {
-                console.warn('kv不匹配');
+                console.warn('Locale key/value does not match the expected structure.');
                 return '';
             }
             return value;
         }
-        console.warn('locale 资源未加载.')
+        console.warn('Locale resources not loaded.');
         return ''
     }
     public get (keyStr: string) {

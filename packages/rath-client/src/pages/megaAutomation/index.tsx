@@ -1,4 +1,5 @@
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
+import type { FC } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
@@ -20,6 +21,7 @@ import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
 import VizPagination from './vizPagination';
 import MainCanvas from './mainCanvas';
+import NextActions from './nextActions';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -61,7 +63,7 @@ const InsightContainer = styled.div`
     }
 `;
 
-const LTSPage: React.FC = () => {
+const LTSPage: FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
 
     const { visualConfig, mainViewSpecSource } = megaAutoStore;
@@ -119,6 +121,7 @@ const LTSPage: React.FC = () => {
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
+                <NextActions />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <VizPagination />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />

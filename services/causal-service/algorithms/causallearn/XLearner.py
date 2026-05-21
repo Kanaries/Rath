@@ -17,9 +17,24 @@ from causallearn.utils.PCUtils import SkeletonDiscovery
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_background_knowledge
 
-def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha: float = 0.05, depth: int = -1,
-        max_path_length: int = -1, verbose: bool = False, background_knowledge: BackgroundKnowledge | None = None,
-        functional_dependencies: List[common.IFunctionalDep]=[], f_ind={}, fields=[], **kwargs) -> Tuple[FCI.Graph, List[FCI.Edge]]:
+def _vprint(verbose: bool, *args, **kwargs):
+    if verbose:
+        print(*args, **kwargs)
+
+def xlearn(
+    dataset: np.ndarray,
+    independence_test_method: str = FCI.fisherz,
+    alpha: float = 0.05,
+    depth: int = -1,
+    max_path_length: int = -1,
+    verbose: bool = False,
+    background_knowledge: BackgroundKnowledge | None = None,
+    functional_dependencies: List[common.IFunctionalDep] = [],
+    f_ind={},
+    fields=[],
+    max_epochs: int = 2000,
+    **kwargs,
+) -> Tuple[FCI.Graph, List[FCI.Edge]]:
     """
     Parameters
     ----------
@@ -111,11 +126,11 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     #     adj[src].add(dest)
     #     anc[dest].add(src)
     """
-    NodeId: Dict[int, int] 原始图中对应点的局域编号
-    FDNode: List[int]: 在Gfd中的causallearn格式的graphnodes，全局编号
-    attr_id: Gfd中每个点在原始图中对应的点编号
-    adj, anc: Gfd的邻接表
-    G_fd: Gfd中的点集，原图编号
+    NodeId: Dict[int, int] local node indices in the FD subgraph (mapping from original node index)
+    FDNode: List[int] GraphNodes in causallearn format for the FD subgraph (global indexing)
+    attr_id: original node index for each node in the FD subgraph
+    adj, anc: adjacency lists for the FD subgraph
+    G_fd: set of nodes in the FD subgraph (original graph indices)
     """
     for dep in functional_dependencies:
         if len(dep.params) == 1:
@@ -148,7 +163,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     for t in topo[::-1]:
         mxvcnt, y = 0, -1
         for a in anc[t]:
-            print("a = ", a, attr_id[a])
+            _vprint(verbose, "a = ", a, attr_id[a])
             vcnt = np.unique(dataset[:, attr_id[a]]).size
             if vcnt > mxvcnt:
                 y = a
@@ -169,7 +184,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
         GfdNodes.append(node)
     FDgraph, FD_sep_sets = FCI.fas(dataset, GfdNodes, independence_test_method=independence_test_method, alpha=alpha,
                           knowledge=None, depth=depth, verbose=verbose)
-    print("FDGraph:", FDgraph, FD_sep_sets)
+    _vprint(verbose, "FDGraph:", FDgraph, FD_sep_sets)
     
     # S = S join fas(dataset, GV)
     nodes = []
@@ -188,8 +203,8 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             # if FDgraph.graph[j, i] == -1:
             #     fake_knowledge.add_required_by_node(node[y], node[x])
     
-    print("fake_knowledge =", fake_knowledge)
-    print(skeleton_knowledge)
+    _vprint(verbose, "fake_knowledge =", fake_knowledge)
+    _vprint(verbose, skeleton_knowledge)
     # for k in fake_knowledge.required_rules_specs:
     #     print(k[0].get_all_attributes(), k[1].get_all_attributes())
     
@@ -201,12 +216,12 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     graph, sep_sets = FCI.fas(dataset, nodes, independence_test_method=independence_test_method, alpha=alpha,
                           knowledge=background_knowledge, depth=depth, verbose=verbose)
     for u, v in skeleton_knowledge:
-        print(u, v)
+        _vprint(verbose, u, v)
         graph.add_edge(FCI.Edge(nodes[u], nodes[v], FCI.Endpoint.TAIL, FCI.Endpoint.TAIL))
         # graph[u, v] = graph[v, u] = -1
     
-    print("global fas graph =", graph)
-    print({u: s for u, s in sep_sets.items() if len(s)})
+    _vprint(verbose, "global fas graph =", graph)
+    _vprint(verbose, {u: s for u, s in sep_sets.items() if len(s)})
     # return graph, sep_sets
     # forbid_knowledge = BackgroundKnowledge()
     # for (u, v) in background_knowledge.forbidden_rules_specs:
@@ -256,8 +271,16 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
 
     change_flag = True
     first_time = True
+    epoch = 0
 
     while change_flag:
+        epoch += 1
+        if max_epochs > 0 and epoch > max_epochs:
+            raise RuntimeError(
+                f"XLearn orientation loop did not converge after {max_epochs} epochs. "
+                "This usually indicates ill-conditioned data (NaNs/collinearity) or an overly large field set. "
+                "Try reducing selected fields or switching the independence test away from Fisher-Z."
+            )
         change_flag = False
         change_flag = FCI.rulesR1R2cycle(graph, background_knowledge, change_flag, verbose)
         change_flag = FCI.ruleR3(graph, sep_sets, background_knowledge, change_flag, verbose)
@@ -285,10 +308,10 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
 class XLearnerParams(OptionalParams, title="XLearn"):
     """
     G:
-    G.graph[j,i]=1 and G.graph[i,j]=-1 表示 i –> j;
-    G.graph[i,j] = G.graph[j,i] = -1 表示 i — j;
-    G.graph[i,j] = G.graph[j,i] = 1 表示 i <-> j;
-    G.graph[j,i]=1 and G.graph[i,j]=2 表示 i o-> j.
+    - G.graph[j,i] = 1 and G.graph[i,j] = -1 indicates i -> j
+    - G.graph[i,j] = G.graph[j,i] = -1 indicates i -- j
+    - G.graph[i,j] = G.graph[j,i] = 1 indicates i <-> j
+    - G.graph[j,i] = 1 and G.graph[i,j] = 2 indicates i o-> j
     """
     # """
     # G: a CausalGraph object, where
@@ -300,24 +323,30 @@ class XLearnerParams(OptionalParams, title="XLearn"):
     # edges: list. Contains graph’s edges properties. If edge.properties have the Property ‘dd’, then there is no latent confounder. Otherwise, there might be latent confounders. If edge.properties have the Property ‘nl’, then it is definitely direct. Otherwise, it is possibly direct.
     # """
     independence_test_method: Optional[str] = Field(
-        default='gsq', title="独立性检验", #"Independence Test",
-        description="Independence test method function.  Default: ‘fisherz’",
+        default='gsq', title="Independence test", #"Independence Test",
+        description="Independence test method. Default: 'gsq' (recommended for discretized/ordinal data).",
         options=getOpts(IDepTestItems),
     )
     alpha: Optional[float] = Field(
-        default=0.05, title="显著性阈值", # "Alpha",
+        default=0.05, title="Significance level (alpha)", # "Alpha",
         description="Significance level of individual partial correlation tests. Default: 0.05.",
         gt=0.0, le=1.0
     )
     depth: Optional[int] = Field(
-        default=-1, title="邻接表搜索深度", # 'Depth',
+        default=-1, title="Adjacency search depth", # 'Depth',
         description="The depth for the fast adjacency search, or -1 if unlimited. Default: -1.",
         ge=-1, le=8, multiple_of=1
     )
     max_path_length: Optional[int] = Field(
-        default=-1, title="判别路径最大长度", # 'Max path length',
+        default=-1, title="Max discriminating path length", # 'Max path length',
         description="The maximum length of any discriminating path, or -1 if unlimited. Default: -1",
         ge=-1, le=16, multiple_of=1
+    )
+    max_epochs: Optional[int] = Field(
+        default=2000,
+        title="Max orientation epochs",
+        description="Hard cap on the internal orientation loop iterations to avoid non-convergence on ill-conditioned data. 0 disables the cap.",
+        ge=0, le=20000, multiple_of=1
     )
 
 class XLearner(AlgoInterface):
@@ -339,7 +368,28 @@ class XLearner(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print(array, array.min(), array.max())
+
+        # Fisher-Z based CI tests can become unstable on near-collinear data.
+        # If the user selected Fisher-Z explicitly but the data is ill-conditioned, fall back to a discrete test.
+        try:
+            it = getattr(params, "independence_test_method", None)
+            if it in ("fisherz", "mv_fisherz"):
+                # quick heuristic: high collinearity -> near-singular correlation matrix
+                if array.shape[0] > 1 and array.shape[1] > 1:
+                    c = np.corrcoef(array, rowvar=False)
+                    if not np.all(np.isfinite(c)):
+                        raise ValueError("non-finite correlation")
+                    if np.linalg.matrix_rank(c) < c.shape[0]:
+                        raise ValueError("singular correlation")
+        except Exception:
+            # Fall back silently (but log to stderr) to avoid hours-long runs producing repeated warnings.
+            print(
+                "XLearner: detected ill-conditioned data for Fisher-Z CI test; falling back to 'gsq'. "
+                "Consider reducing selected fields or cleaning constant/duplicate columns.",
+                file=sys.stderr,
+            )
+            params.independence_test_method = "gsq"
+
         self.G, self.edges = fci(array, **params.__dict__, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         # if bgKnowledges and len(bgKnowledges) > 0:

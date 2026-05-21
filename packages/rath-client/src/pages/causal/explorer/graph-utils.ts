@@ -66,6 +66,28 @@ G6.registerEdge(
     'line',
 );
 
+function clamp01(n: number): number {
+    if (Number.isNaN(n)) return 0;
+    return Math.max(0, Math.min(1, n));
+}
+
+function lerp(a: number, b: number, t: number): number {
+    return a + (b - a) * t;
+}
+
+function lerpColor(a: [number, number, number], b: [number, number, number], t: number): string {
+    const tt = clamp01(t);
+    const r = Math.round(lerp(a[0], b[0], tt));
+    const g = Math.round(lerp(a[1], b[1], tt));
+    const bb = Math.round(lerp(a[2], b[2], tt));
+    return `rgb(${r},${g},${bb})`;
+}
+
+function weightToStroke(w: number): string {
+    // Weak → neutral gray, strong → warm orange (reads well on light backgrounds).
+    return lerpColor([138, 136, 134], [247, 99, 12], w);
+}
+
 export interface IRenderDataProps {
     mode: "explore" | "edit";
     fields: readonly Readonly<IFieldMeta>[];
@@ -101,6 +123,8 @@ export const useRenderData = ({
             return w === undefined || w >= cutThreshold;
         }).slice(0, limit).map((link, i) => {
             const w = weights?.get(link.src)?.get(link.tar);
+            const ww = typeof w === 'number' ? clamp01(w) : undefined;
+            const stroke = typeof ww === 'number' ? weightToStroke(ww) : '#F6BD16';
 
             return {
                 id: `link_${i}`,
@@ -108,16 +132,19 @@ export const useRenderData = ({
                 target: link.tar,
                 style: {
                     startArrow: {
-                        fill: '#F6BD16',
+                        fill: stroke,
+                        stroke,
                         path: arrows[link.src_type],
                     },
                     endArrow: {
-                        fill: '#F6BD16',
+                        fill: stroke,
+                        stroke,
                         path: arrows[link.tar_type],
                     },
-                    lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
+                    stroke,
+                    lineWidth: typeof ww === 'number' ? 1 + ww * 4 : undefined,
                 },
-                label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
+                label: typeof ww === 'number' ? `${(ww * 100).toFixed(0)}%` : undefined,
                 labelCfg: {
                     style: {
                         opacity: 0,
@@ -272,6 +299,9 @@ export const useGraphOptions = ({
                 opacity: 0.9,
             },
             edgeStateStyles: {
+                hovered: {
+                    opacity: 1,
+                },
                 highlighted: {
                     opacity: 1,
                 },

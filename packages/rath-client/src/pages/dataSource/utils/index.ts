@@ -5,6 +5,11 @@ import { useMemo } from "react";
 import * as xlsx from 'xlsx';
 import { STORAGE_FILE_SUFFIX } from "../../../constants";
 import { FileLoader } from "../../../utils";
+import {
+    getStructuredFileKind,
+    isStructuredDataFile,
+    loadStructuredDataText,
+} from "../../../utils/structuredDataParser";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../../utils/storage";
 import { workerService } from "../../../services/index";
@@ -101,6 +106,23 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
      */
     let rawData: IRow[] = []
 
+    if (isStructuredDataFile(file)) {
+        const kind = getStructuredFileKind(file)!;
+        const text = await FileLoader.textLoader(file);
+        const structured = await loadStructuredDataText(text, kind);
+        if (structured.fields.length > 0) {
+            let { fields, dataSource } = structured;
+            if (sampleMethod === SampleKey.reservoir) {
+                dataSource = Sampling.reservoirSampling(dataSource, sampleSize);
+            }
+            return { fields, dataSource };
+        }
+        let rawData = structured.dataSource;
+        if (sampleMethod === SampleKey.reservoir) {
+            rawData = Sampling.reservoirSampling(rawData, sampleSize);
+        }
+        return rawData2DataWithBaseMetas(rawData);
+    }
     if (file.type.match(/^text\/.*/)) {     // csv-like text files
         if (separator && separator !== ',') {
             const content = (await readRaw(file, encoding) ?? '');
@@ -132,13 +154,8 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
               onLoading
             })) as IRow[]
         }
-    } else if (file.type === 'application/json') {
-        rawData = await FileLoader.jsonLoader(file)
-        if (sampleMethod === SampleKey.reservoir) {
-            rawData = Sampling.reservoirSampling(rawData, sampleSize)
-        }
     } else {
-        throw new Error(`unsupported file type=${file.type} `)
+        throw new Error(`unsupported file type=${file.type || 'unknown'} (${file.name})`)
     }
     const dataset = await rawData2DataWithBaseMetas(rawData);
     return dataset

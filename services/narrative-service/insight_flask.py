@@ -11,6 +11,8 @@ from scipy.stats import pearsonr,ttest_rel,linregress
 from typing import List, Tuple, Dict
 import time
 from insight_update import *
+import traceback as _traceback
+from assistant import handle_assistant_request
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -32,6 +34,10 @@ class NpEncoder(json.JSONEncoder):
 
 app=flask.Flask(__name__)
 CORS(app, supports_credentials=True)
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    return flask.Response(json.dumps({'success': True}), mimetype="application/json")
 
 @app.route('/insight',methods=['get','post'])
 def insight():
@@ -72,7 +78,8 @@ def insight():
             elif input_data['langType']=='zh-CN':
                 langType = 'cn'
         else:
-            langType = 'cn'
+            # Default to English to avoid surprising Chinese output.
+            langType = 'en'
     except:
         if result['success']==True:
             result['success']=False
@@ -80,23 +87,35 @@ def insight():
         else:
             pass
 
-    # try:
-    if 1>0:
+    try:
         insight_dict,insight_input = insight_check(fields,dataSource,check_list,breakdown,aggrType,subspaces,rangeN,langType)
         result['data'] = (insight_dict,insight_input)
-        print(insight_input)
+        # Keep logs lightweight: don't print full payloads.
         for d in insight_dict:
             if insight_dict[d]['score']>0:
                 print(d,':',insight_dict[d]['score'])
-    # except:
-    #     if result['success']==True:
-    #         result['success']=False
-    #         result['message']='error in write result'
-    #     else:
-    #         pass
+    except Exception as e:
+        result['success'] = False
+        result['message'] = f"insight generation failed: {e}"
+        result['traceback'] = _traceback.format_exc()
 
     print(result['success'])
     print('time:',time.time()-tic)
+    return flask.Response(json.dumps(result, ensure_ascii=False, cls=NpEncoder), mimetype="application/json")
+
+@app.route('/assistant', methods=['GET', 'POST'])
+def assistant():
+    result = {'success': True, 'data': {}}
+    try:
+        if flask.request.method == 'GET':
+            result['data'] = {'status': 'ok', 'message': 'RATH assistant router is available'}
+        else:
+            input_data = json.loads(flask.request.data)
+            result['data'] = handle_assistant_request(input_data)
+    except Exception as e:
+        result['success'] = False
+        result['message'] = f"assistant routing failed: {e}"
+        result['traceback'] = _traceback.format_exc()
     return flask.Response(json.dumps(result, ensure_ascii=False, cls=NpEncoder), mimetype="application/json")
 
 if __name__ == '__main__':

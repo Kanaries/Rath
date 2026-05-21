@@ -10,18 +10,18 @@ import numpy as np
 from causallearn.search.HiddenCausal.GIN.GIN import GIN as gin
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 
-class GINParams(OptionalParams, title="GIN Algorithm(暂不支持背景知识)"):
+class GINParams(OptionalParams, title="GIN Algorithm (background knowledge not supported yet)"):
     """
     G: GeneralGraph. Causal graph.
     K: list. Causal Order.
     """
     indep_test_method: Optional[str] = Field(
-        default='kci', title="独立性检验", #"Independence Test",
+        default='kci', title="Independence test",
         description="The independence test to use for causal discovery",
         options=getOpts({'kci': 'kci', 'hsic': 'hsic'})
     )
     alpha: Optional[float] = Field(
-        default=0.05, title="显著性阈值", # "Alpha",
+        default=0.05, title="Significance level (alpha)",
         description="desired significance level (float) in (0, 1). Default: 0.05.",
         gt=0.0, le=1.0
     )

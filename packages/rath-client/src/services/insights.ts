@@ -1,6 +1,7 @@
 import { IFieldMeta, IRow } from "../interfaces";
 import { Aggregator } from "../global";
 import { getTestServerAPI } from "./base";
+import { notify } from "../components/error";
 
 export interface IGetInsightExplProps {
     requestId: React.MutableRefObject<number>,
@@ -35,7 +36,19 @@ export async function getInsightExpl (props: IGetInsightExplProps) {
             langType: langType
         })
     })
-    .then(res => res.json())
+    .then(async (res) => {
+        const text = await res.text();
+        let json: any;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            throw new Error(`Narrative service returned non-JSON (${res.status}): ${text.slice(0, 200)}`);
+        }
+        if (!res.ok) {
+            throw new Error(json?.message ?? `Narrative service error (${res.status})`);
+        }
+        return json;
+    })
     .then(res => {
         if (res.success) {
             rid === requestId.current && resolveInsight(res.data)
@@ -44,6 +57,11 @@ export async function getInsightExpl (props: IGetInsightExplProps) {
         }
     }).catch(err => {
         console.error(err);
+        notify({
+            type: 'error',
+            title: 'Narrative service error',
+            content: err instanceof Error ? err.message : String(err),
+        });
         resolveInsight([])
     }).finally(() => {
         setExplainLoading(false)

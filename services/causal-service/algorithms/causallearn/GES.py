@@ -8,11 +8,11 @@ import algorithms.common as common
 
 from causallearn.search.ScoreBased.GES import ges
 
-class GESParams(OptionalParams, title="GES Algorithm(暂不支持背景知识)"):
+class GESParams(OptionalParams, title="GES Algorithm (background knowledge not supported yet)"):
     """
     Record[‘G’]: 
-        Record[‘G’].graph[j,i]=1 and Record[‘G’].graph[i,j]=-1 表示 i –> j;
-        Record[‘G’].graph[i,j] = Record[‘G’].graph[j,i] = -1 表示 i — j.
+        - Record['G'].graph[j,i] = 1 and Record['G'].graph[i,j] = -1 indicates i -> j
+        - Record['G'].graph[i,j] = Record['G'].graph[j,i] = -1 indicates i -- j
     """
     # """
     # Record[‘G’]: learned causal graph, where

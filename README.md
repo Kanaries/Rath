@@ -190,6 +190,20 @@ yarn install
 yarn workspace rath-client build
 ```
 
+### Docker development (hot reload)
+
+Run the full stack with source mounted into containers and hot reload enabled:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+Open the UI at `http://localhost:9083`.
+
+Notes:
+- If you change dependencies (`yarn.lock` or any `requirements.txt`), rebuild the affected images.
+- Node modules and caches are stored in named Docker volumes to avoid clobbering the bind mount.
+
 If you are using RATH for your project(s), please let us know what are you using it for by emailing us at  [support@kanaries.org](support@kanaries.org). Feedbacks are also welcomed. If you find a bug or have a feature request, please create an issue.
 
 We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. 

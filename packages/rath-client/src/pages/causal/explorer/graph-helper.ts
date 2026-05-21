@@ -106,6 +106,32 @@ export const useReactiveGraph = ({
                 }
             });
 
+            const setEdgeLabelOpacity = (edge: any, opacity: number) => {
+                graph.updateItem(edge, {
+                    labelCfg: {
+                        style: {
+                            opacity,
+                        },
+                    },
+                });
+            };
+
+            graph.on('edge:mouseenter', (e: any) => {
+                const edge = e.item;
+                if (!edge) return;
+                graph.setItemState(edge, 'hovered', true);
+                setEdgeLabelOpacity(edge, 0.9);
+            });
+
+            graph.on('edge:mouseleave', (e: any) => {
+                const edge = e.item;
+                if (!edge) return;
+                graph.setItemState(edge, 'hovered', false);
+                const isHighlighted = edge.hasState('highlighted');
+                const isSemi = edge.hasState('semiHighlighted');
+                setEdgeLabelOpacity(edge, isHighlighted ? 1 : isSemi ? 0.6 : 0);
+            });
+
             graphRef.current = graph;
 
             return () => {

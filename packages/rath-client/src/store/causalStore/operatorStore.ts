@@ -8,17 +8,37 @@ import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } fr
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
-import { findUnmatchedCausalResults, resolveCausality } from "./pag";
+import { resolveCausality } from "./pag";
+
+type CausalJobStatus = 'idle' | 'creating' | 'queued' | 'running' | 'done' | 'failed' | 'cancelled';
+
+type CausalJobState = {
+    id: string;
+    status: CausalJobStatus;
+    algoName: string;
+    createdAt: number;
+    updatedAt?: number;
+    error?: string;
+};
 
 
 export default class CausalOperatorStore {
 
     public causalServer = (
         decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '').replace(/\/$/, '')
-        || `${window.location.protocol}//causal.gateway.kanaries.net`
+        || (
+            ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname)
+                ? window.location.origin
+                : `${window.location.protocol}//causal.gateway.kanaries.net`
+        )
     );
 
     public busy = false;
+
+    public runningJob: CausalJobState | null = null;
+    public lastJobResult: { raw: number[][]; pag: PagLink[] } | null = null;
+    public lastJobError: string | null = null;
+    protected jobAbortController: AbortController | null = null;
 
     protected _causalAlgorithmForm: IAlgoSchema = {};
     public get causalAlgorithmForm(): IAlgoSchema {
@@ -27,7 +47,8 @@ export default class CausalOperatorStore {
     public params: { [algo: string]: { [key: string]: any } } = {};
     protected set causalAlgorithmForm(schema: IAlgoSchema) {
         if (Object.keys(schema).length === 0) {
-            console.error('[causalAlgorithmForm]: schema is empty');
+            // This can happen transiently while (re)loading schema; avoid noisy console errors.
+            this._causalAlgorithmForm = {};
             return;
         }
         this._causalAlgorithmForm = schema;
@@ -104,14 +125,18 @@ export default class CausalOperatorStore {
         ];
 
         this.destroy = () => {
-            mobxReactions.forEach(dispose => dispose());
-            rxReactions.forEach(subscription => subscription.unsubscribe());
+            mobxReactions.forEach(dispose => {
+                dispose();
+            });
+            rxReactions.forEach(subscription => {
+                subscription.unsubscribe();
+            });
         };
     }
     
     protected async fetchCausalAlgorithmList(fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> {
         try {
-            const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
+            const res = await fetch(`${this.causalServer}/algo/list`, {
                 method: 'POST',
                 body: JSON.stringify({
                     fieldIds: fields.map((f) => f.fid),
@@ -120,11 +145,88 @@ export default class CausalOperatorStore {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }).then((resp) => resp.json());
-            return schema;
+            });
+            const text = await res.text();
+            try {
+                return JSON.parse(text) as IAlgoSchema;
+            } catch {
+                console.error('[CausalAlgorithmList error]: non-JSON response', res.status, text.slice(0, 200));
+                return null;
+            }
         } catch (error) {
             console.error('[CausalAlgorithmList error]:', error);
             return null;
+        }
+    }
+
+    public cancelRunningJob() {
+        if (this.jobAbortController) {
+            this.jobAbortController.abort();
+        }
+        runInAction(() => {
+            this.jobAbortController = null;
+            if (this.runningJob) {
+                this.runningJob = { ...this.runningJob, status: 'cancelled', updatedAt: Date.now() };
+            }
+            this.busy = false;
+        });
+    }
+
+    protected abortJobPoller() {
+        if (this.jobAbortController) {
+            this.jobAbortController.abort();
+        }
+        runInAction(() => {
+            this.jobAbortController = null;
+        });
+    }
+
+    protected async pollJobUntilDone(jobId: string, signal: AbortSignal): Promise<any> {
+        const start = Date.now();
+        const maxMs = 24 * 60 * 60 * 1000; // 24h; still bounded to avoid accidental infinite loops.
+        let delayMs = 1500;
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            if (signal.aborted) {
+                throw new Error('Polling cancelled');
+            }
+            if (Date.now() - start > maxMs) {
+                throw new Error('Timed out waiting for background job');
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            const r = await fetch(`${this.causalServer}/jobs/${jobId}`, { signal });
+            // eslint-disable-next-line no-await-in-loop
+            const t = await r.text();
+            let j: any;
+            try {
+                j = JSON.parse(t);
+            } catch {
+                throw new Error(`Non-JSON job response (${r.status}). ${t.slice(0, 200)}`);
+            }
+            const job = j?.data;
+            const st = job?.status as string | undefined;
+
+            runInAction(() => {
+                if (this.runningJob && this.runningJob.id === jobId) {
+                    this.runningJob = {
+                        ...this.runningJob,
+                        status: (st as CausalJobStatus) ?? this.runningJob.status,
+                        updatedAt: typeof job?.updatedAt === 'number' ? Math.floor(job.updatedAt * 1000) : Date.now(),
+                        error: job?.error ?? undefined,
+                    };
+                }
+            });
+
+            if (st === 'done') return job?.result;
+            if (st === 'failed') {
+                throw new Error(job?.error ?? 'Background job failed');
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+            delayMs = Math.min(10000, Math.floor(delayMs * 1.15));
         }
     }
 
@@ -169,49 +271,135 @@ export default class CausalOperatorStore {
         try {
             runInAction(() => {
                 this.busy = true;
+                this.lastJobResult = null;
+                this.lastJobError = null;
             });
             const originFieldsLength = inputFields.length;
             const dataSource = await data.getAll();
-            const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    dataSource,
-                    fields: allFields,
-                    focusedFields: inputFields.map(f => f.fid),
-                    bgKnowledgesPag: assertions,
-                    funcDeps: functionalDependencies,
-                    params: this.params[algoName],
-                }),
-            });
-            const result = await res.json();
-            if (result.success) {
-                const rawMatrix = result.data.matrix as PAG_NODE[][];
-                const causalMatrix = rawMatrix
-                    .slice(0, originFieldsLength)
-                    .map((row) => row.slice(0, originFieldsLength));
-                const causalPag = resolveCausality(causalMatrix, inputFields);
-                causality = { raw: causalMatrix, pag: causalPag };
-                const unmatched = findUnmatchedCausalResults(assertions, causalPag);
-                if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
-                    const getFieldName = (fid: string) => {
-                        const field = inputFields.find(f => f.fid === fid);
-                        return field?.name ?? fid;
+            const shouldUseJob = (algoName === 'XLearner' || originFieldsLength >= 10 || dataSource.length >= 500);
+            if (shouldUseJob) {
+                notify({
+                    title: 'Causal discovery started',
+                    type: 'info',
+                    content: 'Running in background. You can keep using the app; you will be notified when it finishes.',
+                });
+                // Cancel previous poller (if any) so we don't have multiple loops running.
+                this.abortJobPoller();
+                const controller = new AbortController();
+                runInAction(() => {
+                    this.jobAbortController = controller;
+                });
+                const createRes = await fetch(`${this.causalServer}/jobs/causal/${algoName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        dataSource,
+                        fields: allFields,
+                        focusedFields: inputFields.map(f => f.fid),
+                        bgKnowledgesPag: assertions,
+                        funcDeps: functionalDependencies,
+                        params: this.params[algoName],
+                    }),
+                });
+                const createText = await createRes.text();
+                let createJson: any;
+                try {
+                    createJson = JSON.parse(createText);
+                } catch {
+                    throw new Error(`Non-JSON response (${createRes.status}). ${createText.slice(0, 200)}`);
+                }
+                const jobId = createJson?.data?.jobId as string | undefined;
+                if (!jobId) {
+                    throw new Error('Failed to create background job.');
+                }
+                runInAction(() => {
+                    this.runningJob = {
+                        id: jobId,
+                        status: 'queued',
+                        algoName,
+                        createdAt: Date.now(),
                     };
-                    for (const info of unmatched) {
+                    // Let the user continue using the app immediately.
+                    this.busy = false;
+                });
+
+                // Poll asynchronously; do NOT block the caller (prevents "infinite loop" feel).
+                void (async () => {
+                    try {
+                        const result = await this.pollJobUntilDone(jobId, controller.signal);
                         notify({
-                            title: 'Causal Result Not Matching',
+                            title: 'Causal discovery finished',
+                            type: 'success',
+                            content: 'Results are ready.',
+                        });
+                        const rawMatrix = (result?.data?.matrix ?? result?.data?.data) as PAG_NODE[][] | undefined;
+                        if (!rawMatrix) {
+                            throw new Error('Background job returned no matrix.');
+                        }
+                        const causalMatrix = rawMatrix
+                            .slice(0, originFieldsLength)
+                            .map((row) => row.slice(0, originFieldsLength));
+                        const causalPag = resolveCausality(causalMatrix, inputFields);
+                        runInAction(() => {
+                            this.lastJobResult = { raw: causalMatrix, pag: causalPag };
+                            if (this.runningJob?.id === jobId) {
+                                this.runningJob = { ...this.runningJob, status: 'done', updatedAt: Date.now() };
+                            }
+                            this.jobAbortController = null;
+                        });
+                    } catch (e) {
+                        const msg = e instanceof Error ? e.message : String(e);
+                        notify({
+                            title: 'Causal Discovery Error',
                             type: 'error',
-                            content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
-                                + `  Expected: ${info.expected.src_type} -> ${info.expected.tar_type}\n`
-                                + `  Received: ${info.received.src_type} -> ${info.received.tar_type}`,
+                            content: msg,
+                        });
+                        runInAction(() => {
+                            this.lastJobError = msg;
+                            if (this.runningJob?.id === jobId) {
+                                this.runningJob = { ...this.runningJob, status: 'failed', updatedAt: Date.now(), error: msg };
+                            }
+                            this.jobAbortController = null;
                         });
                     }
-                }
+                })();
+
+                return null;
             } else {
-                throw new Error(result.message);
+                const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        dataSource,
+                        fields: allFields,
+                        focusedFields: inputFields.map(f => f.fid),
+                        bgKnowledgesPag: assertions,
+                        funcDeps: functionalDependencies,
+                        params: this.params[algoName],
+                    }),
+                });
+                const text = await res.text();
+                let result: unknown;
+                try {
+                    result = JSON.parse(text);
+                } catch {
+                    throw new Error(`Non-JSON response (${res.status}). ${text.slice(0, 200)}`);
+                }
+                const typed = result as { success?: boolean; data?: any; message?: any };
+                if (typed.success) {
+                    const rawMatrix = typed.data.matrix as PAG_NODE[][];
+                    const causalMatrix = rawMatrix
+                        .slice(0, originFieldsLength)
+                        .map((row) => row.slice(0, originFieldsLength));
+                    const causalPag = resolveCausality(causalMatrix, inputFields);
+                    causality = { raw: causalMatrix, pag: causalPag };
+                } else {
+                    throw new Error(typed.message ?? 'Causal service returned success=false');
+                }
             }
         } catch (error) {
             notify({
@@ -221,6 +409,7 @@ export default class CausalOperatorStore {
             });
         } finally {
             runInAction(() => {
+                // In async-job mode we already flipped busy=false above.
                 this.busy = false;
             });
         }

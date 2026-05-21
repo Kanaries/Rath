@@ -87,7 +87,11 @@
             "desc": "自定义你的计算任务会在哪里运行，如果你的数据集较小（通常是指100MB以内的csv），推荐使用webworker模式在本地进行计算。否则则建议尝试clickhouse模式。\n但需要连接你自己的clickhouse服务或使用kanaries提供的扩展服务。",
             "clickhouse": "ClickHouse",
             "webworker": "浏览器(Web Worker)",
-            "notCompatible": "与数据源暂不兼容"
+            "notCompatible": "与数据源暂不兼容",
+            "clickhouseSetupTitle": "已选择 ClickHouse 引擎",
+            "clickhouseSetup": "请通过「数据源连接 → OLAP」连接 ClickHouse，或运行 olap-connector 服务。未连接前，全自动探索可能仍受本地算力限制。",
+            "switched": "计算引擎已切换为 {engine}。",
+            "switchFailedTitle": "切换计算引擎失败"
         },
         "analysisConfig": "数据分析设置",
         "cubeStorageManageMode": {
@@ -178,14 +182,38 @@
         },
         "sizeInfo": "{nCols} 列 x {nRows} 行",
         "demoDataset": {
-            "CARS": { "title": "汽车数据集", "description": "记录了汽车的型号、厂商、物理参数的数据。" },
-            "STUDENTS": { "title": "学生成绩数据集", "description": "分析学生的成绩和部分其他因素等关系。" },
-            "BTC_GOLD": { "title": "比特币-金价数据集", "description": "" },
-            "CAR_SALES": { "title": "汽车销售数据集", "description": "" },
-            "COLLAGE": { "title": "大学数据集", "description": "" },
-            "TITANIC": { "title": "泰坦尼克数据集", "description": "" },
-            "KEPLER": { "title": "开普勒数据集", "description": "" },
-            "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
+            "CARS": {
+                "title": "汽车数据集",
+                "description": "记录了汽车的型号、厂商、物理参数的数据。"
+            },
+            "STUDENTS": {
+                "title": "学生成绩数据集",
+                "description": "分析学生的成绩和部分其他因素等关系。"
+            },
+            "BTC_GOLD": {
+                "title": "比特币-金价数据集",
+                "description": ""
+            },
+            "CAR_SALES": {
+                "title": "汽车销售数据集",
+                "description": ""
+            },
+            "COLLAGE": {
+                "title": "大学数据集",
+                "description": ""
+            },
+            "TITANIC": {
+                "title": "泰坦尼克数据集",
+                "description": ""
+            },
+            "KEPLER": {
+                "title": "开普勒数据集",
+                "description": ""
+            },
+            "BIKE_SHARING_DC": {
+                "title": "共享单车数据集",
+                "description": ""
+            }
         },
         "btn": {
             "use_table": "导入这些数据 (最大 100 行)",
@@ -274,7 +302,7 @@
         },
         "upload": {
             "title": "连接数据",
-            "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
+            "fileTypes": "支持 Excel、CSV/TSV、JSON（数组或 {fields, dataSource}）以及 JSONL/NDJSON",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "show_more": "高级设置",
             "sampling": "数据采样",
@@ -322,6 +350,11 @@
             "downloadJSON": "导出JSON",
             "downloadJSONMeta": "导出JSON(含元数据)",
             "downloadRATHDS": "下载RATH格式数据集"
+        },
+        "workflow": {
+            "export": "导出工作流会话",
+            "import": "导入工作流会话",
+            "importFailedTitle": "工作流导入失败"
         },
         "extend": {
             "title": "扩展信息",
@@ -551,11 +584,56 @@
         "dateTime": "%x %A %X",
         "date": "%Y年%-m月%-d日",
         "time": "%H:%M:%S",
-        "periods": ["上午", "下午"],
-        "days": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-        "shortDays": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
-        "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
-        "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+        "periods": [
+            "上午",
+            "下午"
+        ],
+        "days": [
+            "星期日",
+            "星期一",
+            "星期二",
+            "星期三",
+            "星期四",
+            "星期五",
+            "星期六"
+        ],
+        "shortDays": [
+            "周日",
+            "周一",
+            "周二",
+            "周三",
+            "周四",
+            "周五",
+            "周六"
+        ],
+        "months": [
+            "一月",
+            "二月",
+            "三月",
+            "四月",
+            "五月",
+            "六月",
+            "七月",
+            "八月",
+            "九月",
+            "十月",
+            "十一月",
+            "十二月"
+        ],
+        "shortMonths": [
+            "一月",
+            "二月",
+            "三月",
+            "四月",
+            "五月",
+            "六月",
+            "七月",
+            "八月",
+            "九月",
+            "十月",
+            "十一月",
+            "十二月"
+        ]
     },
     "date_format": "{Y}年{m}{d}日 {w} {H}:{M}:{S}",
     "login": {
@@ -591,7 +669,7 @@
             "phoneNo": "手机号码",
             "certCode": "验证码"
         },
-        "email": { 
+        "email": {
             "title": "邮箱地址",
             "certCode": "验证码",
             "errEmail": "不支持此类邮箱"
@@ -742,6 +820,130 @@
             "CausalInsight": "可解释探索",
             "GraphicWalker": "可视化自助分析",
             "predict": "模型预测"
+        }
+    },
+    "coach": {
+        "insight": {
+            "title": "洞察引导",
+            "subtitle": "不知道点哪里、选哪些字段？从这里开始——你会得到明确的下一步和通俗的解释。",
+            "noData": "加载任意数据集（或示例数据），我会立即推荐几个高价值的起点（图表、叙述和后续操作）。",
+            "noMeasure": "数据已加载，但还没有「度量」字段。请至少将一个数值列设为度量，即可解锁全自动探索。",
+            "recommendedNext": "推荐下一步",
+            "starterQuestion": "默认「入门问题」",
+            "groupBy": "分组：{name}",
+            "groupByPlaceholder": "分组：（选择维度）",
+            "measure": "度量：{name}",
+            "measurePlaceholder": "度量：（选择度量）",
+            "aggregation": "聚合：均值",
+            "whyInteresting": "为什么值得关注",
+            "generatingExplanation": "正在生成简短解释…",
+            "noNarrative": "入门问题暂无叙述洞察。请先运行全自动探索以生成更丰富的视图。",
+            "quickActions": "快捷操作",
+            "largeDataHint": "当前数据集有 {rows} 行。若要在更大数据上流畅运行全自动探索，请在连接 OLAP 数据源后，于分析设置中将计算引擎切换为 ClickHouse。",
+            "startMode": {
+                "start": "全自动探索将扫描数据集并推荐最有「意思」的图表作为起点。",
+                "checkResult": "你已有全自动探索结果，可直接跳转到最有潜力的洞察。",
+                "pattern": "模式探索可快速发现相关性与结构，并附带引导式叙述。",
+                "manual": "手动制图适合已有明确问题、需要完全控制的场景。",
+                "causal": "因果发现用于检验方向性关系（实验功能；数值字段越干净效果越好）。",
+                "default": "选择一种分析模式开始探索。"
+            }
+        },
+        "nextActions": {
+            "title": "后续操作",
+            "defaultTitle": "全自动探索洞察",
+            "titleDimsOnly": "全自动探索：{dims}",
+            "titleMeasOnly": "全自动探索：{meas}",
+            "titleBoth": "全自动探索：{dims} → {meas}",
+            "emptyDesc": "运行全自动探索生成排序后的洞察列表，然后用这里的一键操作深入分析。",
+            "scoreDesc": "将此洞察作为下一步（得分 {score}%）。",
+            "noInsights": "尚无全自动探索结果。点击「重新运行」生成列表后，这里会出现一键深入操作。",
+            "saveToDashboard": "保存到报表",
+            "explain": "解释为何有趣",
+            "tryCausal": "对这些字段做因果分析",
+            "openManual": "在自助分析中打开",
+            "copyLink": "复制分享链接",
+            "tip": "提示：「保存到报表」会创建或更新最新报表页，可在报表编辑器中调整布局、筛选和标题。"
+        },
+        "causal": {
+            "title": "因果引导",
+            "subtitle": "因果发现初看像「黑盒」。此面板会推荐安全的默认字段与算法，并提示下一步该做什么。",
+            "noData": "请先在数据准备页加载数据集，返回此处我会自动推荐适合因果分析的字段子集。",
+            "selectedFields": "已选字段：{selected} / {total}",
+            "useRecommendedFields": "使用推荐字段",
+            "useAlgorithm": "使用 {algo}",
+            "algorithmSettings": "算法设置",
+            "nextStep": "下一步：",
+            "nextComputeMutual": "先计算互信息概览，再运行因果发现。",
+            "nextRunDiscovery": "现在运行因果发现（可能在后台执行）。",
+            "nextExploreGraph": "因果图已就绪。点击边或节点组，在右侧面板查看解释。",
+            "computeMutual": "计算互信息",
+            "runDiscovery": "运行因果发现",
+            "runAlways": "运行（始终）",
+            "whatRunning": "当前运行",
+            "algorithm": "算法：",
+            "algorithmNone": "（无）",
+            "fromAutopilot": "承接全自动探索洞察：{title}",
+            "saveSummary": "将因果摘要保存到报表",
+            "summaryTitle": "因果：{algo}（{edges} 条边）",
+            "summaryText": "对 {fields} 使用 {algo} 进行因果发现，发现 {edges} 条有向边。",
+            "backToAutopilot": "返回全自动探索",
+            "openDashboard": "打开报表"
+        },
+        "workerError": {
+            "inferMetaTitle": "字段推断失败",
+            "cleanDataTitle": "数据清洗失败",
+            "filterDataTitle": "数据筛选失败"
+        },
+        "effect": {
+            "title": "效应估计",
+            "subtitle": "基于已发现的因果图，用 DoWhy 估计所选原因对结果变量的影响。",
+            "noPlan": "请先运行因果发现。我们会从图中选择结果变量和候选原因。",
+            "plan": "结果：{target}。原因：{treatments}。方法：线性回归（后门）。",
+            "needTreatments": "当前图对所选结果变量没有明确的父节点。请调整字段或编辑图后重试。",
+            "run": "估计因果效应",
+            "running": "正在估计效应…",
+            "errorTitle": "因果效应估计失败",
+            "resultValue": "对 {target} 的估计效应：{value}（{method}）",
+            "saveToDashboard": "将效应保存到报表",
+            "dashboardTitle": "对 {target} 的效应",
+            "dashboardValue": "估计效应：{value}（{method}）",
+            "dashboardText": "结果：{target}。原因：{treatments}。方法：{method}。"
+        }
+    },
+    "assistant": {
+        "title": "数据助手",
+        "subtitle": "用自然语言提问，我会把你导向合适的工作流，并保留可分享的上下文。",
+        "placeholder": "例如：运行全自动探索、对 revenue 做因果分析、打开报表",
+        "ask": "执行",
+        "copyLink": "复制分享链接",
+        "noData": "请先加载数据集，再询问字段、全自动探索、因果分析或报表相关问题。",
+        "suggestions": {
+            "autopilot": "对当前数据集运行全自动探索",
+            "causal": "对关键字段尝试因果分析",
+            "dashboard": "打开报表",
+            "explain": "解释 revenue 为什么重要"
+        },
+        "gatewayEnabled": "助手路由已通过 narrative 服务提供。如需覆盖，可使用 ?llmServer=。",
+        "thinking": "思考中…",
+        "reply": {
+            "navigate": "正在打开{page}。",
+            "autopilot": "正在打开全自动探索并准备新的洞察运行。",
+            "causal": "正在打开因果分析并使用合理默认设置。",
+            "fields": "匹配字段：{names}。可用于全自动探索、半自动探索或因果发现。",
+            "needFieldsForExplain": "请在问题中指明至少一个字段，并确保数据集同时有维度和度量。",
+            "noNarrative": "暂无叙述解释。可先运行全自动探索以获得更丰富的上下文。",
+            "unknown": "暂时无法识别该问题。可尝试：{suggestions}",
+            "linkCopied": "分享链接已复制到剪贴板。"
+        }
+    },
+    "dashboardPage": {
+        "workflow": {
+            "summary": "已保存的工作流上下文：{details}",
+            "autopilot": "全自动探索：{title}",
+            "causal": "因果：{algo}（{edges} 条边）",
+            "effect": "对 {target} 的效应：{value}",
+            "backToAutopilot": "返回全自动探索"
         }
     }
 }

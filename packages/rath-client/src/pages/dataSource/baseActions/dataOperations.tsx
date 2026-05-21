@@ -7,34 +7,43 @@ import { useGlobalStore } from '../../../store';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
+import { notify } from '../../../components/error';
+import {
+    createWorkflowSnapshot,
+    exportWorkflowSession,
+    importWorkflowSession,
+} from '../../../utils/workflowSession';
 
-const Cont = styled.div`
-`;
+const Cont = styled.div``;
 
 const overflowProps: IButtonProps = {
     ariaLabel: 'More commands',
-  };
+};
 
-const overflowItems: ICommandBarItemProps[] = []
+const overflowItems: ICommandBarItemProps[] = [];
 
 const DataOperations: React.FC = () => {
-    const { dataSourceStore/*, commonStore*/ } = useGlobalStore();
+    const { dataSourceStore, commonStore, workflowStore } = useGlobalStore();
     const { mutFields, cleanMethod } = dataSourceStore;
+
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
         downloadFileWithContent(content, 'dataset-with-metas.json');
     }, [dataSourceStore]);
+
     const exportDataAsJson = useCallback(() => {
         const content = JSON.stringify(dataSourceStore.exportCleanData());
         downloadFileWithContent(content, 'dataset.json');
     }, [dataSourceStore]);
+
     const exportDataAsCSV = useCallback(() => {
         const data = dataSourceStore.exportCleanData();
         const fields = dataSourceStore.fieldMetas;
         const content = rows2csv(data, fields);
         downloadFileWithContent(content, 'dataset.csv');
     }, [dataSourceStore]);
+
     const exportDataAsRATHDS = useCallback(() => {
         dataSourceStore.backupDataStore().then((data) => {
             const content = JSON.stringify(data);
@@ -45,6 +54,46 @@ const DataOperations: React.FC = () => {
             downloadFileWithContent(content, 'dataset_rathds_meta.json');
         });
     }, [dataSourceStore]);
+
+    const exportWorkflow = useCallback(() => {
+        const snapshot = createWorkflowSnapshot({
+            appKey: commonStore.appKey,
+            autopilotHandoff: workflowStore.autopilotHandoff,
+            causalHandoff: workflowStore.causalHandoff,
+            effectEstimate: workflowStore.effectEstimate,
+        });
+        downloadFileWithContent(exportWorkflowSession(snapshot), 'rath-workflow.json');
+    }, [commonStore.appKey, workflowStore]);
+
+    const importWorkflow = useCallback(() => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json,.json';
+        input.onchange = () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const snapshot = importWorkflowSession(String(reader.result ?? ''));
+                    workflowStore.setAutopilotHandoff(snapshot.autopilotHandoff ?? null);
+                    workflowStore.setCausalHandoff(snapshot.causalHandoff ?? null);
+                    workflowStore.setEffectEstimate(snapshot.effectEstimate ?? null);
+                    if (snapshot.appKey) {
+                        commonStore.setAppKey(snapshot.appKey);
+                    }
+                } catch (error) {
+                    notify({
+                        type: 'error',
+                        title: intl.get('dataSource.workflow.importFailedTitle'),
+                        content: error instanceof Error ? error.message : String(error),
+                    });
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }, [commonStore, workflowStore]);
 
     const cleanMethodListLang = useCleanMethodList();
     const items = useMemo<ICommandBarItemProps[]>(() => {
@@ -91,9 +140,20 @@ const DataOperations: React.FC = () => {
                             text: intl.get('dataSource.downloadData.downloadRATHDS'),
                             onClick: exportDataAsRATHDS,
                         },
+                        {
+                            key: 'downloadWorkflow',
+                            text: intl.get('dataSource.workflow.export'),
+                            onClick: exportWorkflow,
+                        },
                     ],
                 },
                 disabled: mutFields.length === 0,
+            },
+            {
+                key: 'importWorkflow',
+                text: intl.get('dataSource.workflow.import'),
+                iconProps: { iconName: 'OpenFile' },
+                onClick: importWorkflow,
             },
             {
                 key: 'fastSelection',
@@ -128,9 +188,12 @@ const DataOperations: React.FC = () => {
         exportDataset,
         exportDataAsCSV,
         exportDataAsJson,
-        mutFields.length,
         exportDataAsRATHDS,
+        exportWorkflow,
+        importWorkflow,
+        mutFields.length,
     ]);
+
     return (
         <Cont>
             <CommandBar

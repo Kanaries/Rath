@@ -12,30 +12,30 @@ from causallearn.graph.Node import Node
 
 from causallearn.search.FCMBased import lingam
 
-class RCDParams(OptionalParams, title="RCD Algorithm(暂不支持背景知识)"):
+class RCDParams(OptionalParams, title="RCD Algorithm (background knowledge not supported yet)"):
     max_explanatory_num: Optional[int] = Field(
-        default=2, title="推导因果关系的最大变量数",
+        default=2, title="Max explanatory variables",
         description="Maximum number of explanatory variables.",
         ge=1, le=5, multiple_of=1
     )
     cor_alpha: Optional[float] = Field(
-        default=0.01, title="Pearson系数的阈值",
+        default=0.01, title="Pearson correlation threshold",
         ge=0., le=1., multiple_of=0.002
     )
     ind_alpha: Optional[float] = Field(
-        default=0.01, title="HSIC的阈值",
+        default=0.01, title="HSIC threshold",
         ge=0., le=1., multiple_of=0.002
     )
     shapiro_alpha: Optional[float] = Field(
-        default=0.01, title="Shapiro-Wilk测试的阈值",
+        default=0.01, title="Shapiro-Wilk threshold",
         ge=0., le=1., multiple_of=0.002
     )
     MLHSICR: Optional[bool] = Field(
-        default=False, title="是否使用MLHSICR进行多变量回归",
+        default=False, title="Use MLHSICR for multivariate regression",
         description="If True, use MLHSICR for multiple regression, if False, use OLS for multiple regression.",
     )
     bw_method: Optional[str] = Field(
-        default='mdbs', title="频宽算法",
+        default='mdbs', title="Bandwidth method",
         description="The method used to calculate the bandwidth of the HSIC.",
         options=getOpts(BandwidthMethods)
     )

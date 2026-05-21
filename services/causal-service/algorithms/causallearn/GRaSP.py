@@ -8,7 +8,7 @@ import algorithms.common as common
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.search.PermutationBased.GRaSP import grasp
 
-class GRaSPParams(OptionalParams, title="GRaSP Algorithm(暂不支持背景知识)"):
+class GRaSPParams(OptionalParams, title="GRaSP Algorithm (background knowledge not supported yet)"):
     """Greedy relaxation of the sparsest permutation (GRaSP) algorithm.
     G: PAG
     """
@@ -16,7 +16,7 @@ class GRaSPParams(OptionalParams, title="GRaSP Algorithm(暂不支持背景知�
         default='local_score_BIC', title='Score Function', description=" The score function you would like to use, including (see score_functions.). Default: ‘local_score_BIC’.",
         options=getOpts(ScoreFunctions))
     depth: Optional[int] = Field(
-        default=-1, title="邻接表搜索深度", # 'Depth',
+        default=-1, title="Adjacency search depth", # 'Depth',
         description="The depth for the fast adjacency search, or -1 if unlimited. Default: -1.",
         ge=-1, le=8, multiple_of=1
     )

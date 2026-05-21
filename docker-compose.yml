@@ -6,35 +6,78 @@ services:
       dockerfile: client.dockerfile
     ports:
       - 9083:80
+    depends_on:
+      connector-api:
+        condition: service_healthy
+      prediction-api:
+        condition: service_healthy
+      causal-api:
+        condition: service_healthy
+      narrative-api:
+        condition: service_healthy
+      text-pattern-api:
+        condition: service_healthy
 
   connector-api:
     restart: always
     build:
       context: ./services/connector
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/ping', timeout=2).read(); print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   prediction-api:
     restart: always
     build:
       context: ./services/prediction
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5534/api/ping', timeout=2).read(); print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   causal-api:
     restart: always
     ports:
       - 9084:8000
+    environment:
+      - mode=dev
     build:
       context: ./services/causal-service
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=2).read(); print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s
 
   narrative-api:
     restart: always
     build:
       context: ./services/narrative-service
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/ping', timeout=2).read(); print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   text-pattern-api:
     restart: always
     build:
       context: ./services/text-pattern-service
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5533/api/ping', timeout=2).read(); print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s

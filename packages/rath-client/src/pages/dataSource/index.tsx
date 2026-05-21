@@ -1,13 +1,13 @@
-import React, { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import type { FC } from 'react';
 import intl from 'react-intl-universal';
 import { Stack, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { Button, Tab, TabList } from '@fluentui/react-components';
 import { List, BarChart3, Database, Table } from 'lucide-react';
 import { useGlobalStore } from '../../store';
-import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
-import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
-import { notify } from '../../components/error';
+import { IDataPrepProgressTag, IDataPreviewMode } from '../../interfaces';
+import { useDataImportCallbacks } from '../../hooks/useDataImportCallbacks';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -18,62 +18,28 @@ import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
 import DataInfo from './dataInfo';
+import InsightCoach from './insightCoach';
+import DataAssistant from './dataAssistant';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
-interface DataSourceBoardProps {}
+const DataSourceBoard: FC = () => {
+    const { dataSourceStore } = useGlobalStore();
 
-const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore, megaAutoStore, semiAutoStore } = useGlobalStore();
-
-    const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } = dataSourceStore;
+    const { rawDataMetaInfo, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } = dataSourceStore;
 
     const onSelectPannelClose = useCallback(() => {
         dataSourceStore.setShowDataImportSelection(false);
     }, [dataSourceStore]);
 
-    const onSelectDataLoaded = useCallback(
-        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
-            megaAutoStore.init();
-            semiAutoStore.init();
-            dataSourceStore.loadDataWithInferMetas(dataSource, fields, tag);
-            if (name && tag !== undefined) {
-                dataSourceStore.setDatasetId(name);
-                setDataStorage(name, fields, dataSource, tag, withHistory);
-            }
-        },
-        [dataSourceStore, megaAutoStore, semiAutoStore]
-    );
-
-    const onSelectStartLoading = useCallback(() => {
-        dataSourceStore.setLoading(true);
-    }, [dataSourceStore]);
-
-    const onSelectLoadingFailed = useCallback(
-        (err: any) => {
-            dataSourceStore.setLoading(false);
-            notify({
-                type: 'error',
-                title: '[Data Loading Error]',
-                content: `${err}`,
-            });
-        },
-        [dataSourceStore]
-    );
-
-    const toggleLoadingAnimation = useCallback(
-        (on: boolean) => {
-            dataSourceStore.setLoading(on);
-        },
-        [dataSourceStore]
-    );
-
-    const onDataLoading = useCallback(
-        (p: number) => {
-            dataSourceStore.setLoadingDataProgress(Math.floor(p * 100) / 100);
-        },
-        [dataSourceStore]
-    );
+    const {
+        onSelectDataLoaded,
+        onSelectStartLoading,
+        onLoadingFailed: onSelectLoadingFailed,
+        toggleLoadingAnimation,
+        onDataLoading,
+        loading,
+    } = useDataImportCallbacks({ onClose: onSelectPannelClose });
     return (
         <div className="content-container" style={{ position: 'relative' }}>
             <div>
@@ -110,7 +76,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 <hr style={{ margin: '1em 0em 0em 0em' }} />
                 <TabList
                     selectedValue={dataPreviewMode}
-                    onTabSelect={(e, item) => {
+                    onTabSelect={(_e, item) => {
                         item.value && dataSourceStore.setDataPreviewMode(item.value as IDataPreviewMode);
                     }}
                 >
@@ -127,6 +93,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 {rawDataMetaInfo.length > 0 && <DataOperations />}
                 <DataInfo />
                 {rawDataMetaInfo.length > 0 && <Advice />}
+                <DataAssistant />
+                <InsightCoach />
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}

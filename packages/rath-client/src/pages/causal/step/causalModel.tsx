@@ -1,16 +1,20 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, RefObject, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
+import type { FC, RefObject } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta } from '../../../interfaces';
+import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import type { EdgeAssert } from '../../../store/causalStore/modelStore';
 import Explorer from '../explorer';
 import Params from '../params';
 import ModelStorage from '../modelStorage';
-import Exploration, { Subtree } from '../exploration';
+import Exploration from '../exploration';
+import type { Subtree } from '../exploration';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
+import CausalCoach from '../coach';
+import EffectEstimationPanel from '../effectEstimationPanel';
 
 
 const Container = styled.div`
@@ -97,6 +101,10 @@ const CausalModal: FC = () => {
     return (
         <Container>
             <div>
+                <div style={{ marginTop: '1em' }}>
+                    <CausalCoach />
+                    <EffectEstimationPanel />
+                </div>
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <ModelStorage />
                     <Params />

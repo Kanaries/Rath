@@ -1,9 +1,9 @@
 name: Rath Auto Build
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, master]
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, master]
 jobs:
   auto-build:
     runs-on: ubuntu-latest
@@ -17,4 +17,25 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
+      - run: yarn workspace rath-client test --watchAll=false
       - run: yarn workspace rath-client build
+
+  causal-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build causal-service image
+        run: docker compose -f docker-compose.yml build causal-api
+      - name: Run causal-service smoke tests
+        run: docker compose -f docker-compose.yml run --rm --no-deps causal-api python3 smoke_test.py
+
+  narrative-assistant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Run assistant router tests
+        working-directory: services/narrative-service
+        run: python3 test_assistant.py

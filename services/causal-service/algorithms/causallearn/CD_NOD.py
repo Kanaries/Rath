@@ -14,10 +14,10 @@ from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_b
 
 class CD_NOD_Params(OptionalParams, extra=Extra.allow):
     """
-    此处CD-NOD算法暂不支持设置\"一定不相连\"
-    cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 表示 i –> j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 表示 i — j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 表示 i <-> j.
+    Note: CD-NOD currently does not support specifying \"must-not-connect\" constraints here.
+    - cg.G.graph[j,i] = 1 and cg.G.graph[i,j] = -1 indicates i -> j
+    - cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i -- j
+    - cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j
     """
     # """CD-NOD Algorithm
     # Returns: cg : a CausalGraph object, where
@@ -27,40 +27,40 @@ class CD_NOD_Params(OptionalParams, extra=Extra.allow):
     
     # """
     c_indx: Optional[str] = Field(
-        default='$id', title="包含潜在影响因子的索引字段", #"Condition Index",
-        description="", # "time index or domain index that captures the unobserved changing factors.",
+        default='$id', title="Condition index field", #"Condition Index",
+        description="Time index or domain index that captures unobserved changing factors.",
         options=getOpts({
-            '$id': "使用原有的ID",  # "use original index as condition index",
-            '$fields': "" # "use specified field",
+            '$id': "Use row index (ID)",
+            '$fields': "Use selected field",
         }),
         extra=Extra.allow
     )
     alpha: Optional[float] = Field(
-        default=0.05, title="显著性阈值", # "Alpha",
+        default=0.05, title="Significance level (alpha)", # "Alpha",
         description="desired significance level (float) in (0, 1). Default: 0.05.",
         gt=0.0, lt=1.0
     )
     indep_test: Optional[str] = Field(
-        default='fisherz', title="独立性检验", #"Independence Test",
+        default='fisherz', title="Independence test", #"Independence Test",
         description="The independence test to use for causal discovery",
         options=getOpts(IDepTestItems),
     )
     stable: Optional[bool] = Field(
-        default=True, title="使用稳定版本",
+        default=True, title="Stable",
         description="run stabilized skeleton discovery if True. Default: True.",
     )
     uc_rule: Optional[int] = Field(
-        default=0, title="无向边冲突处理规则", # "UC Rule",
+        default=0, title="Unshielded collider rule (UC rule)", # "UC Rule",
         description="The rule to use for undirected colliders",
         options=getOpts(UCRuleItems)
     )
     uc_priority: Optional[int] = Field(
-        default=-1, title="无向边冲突优先级", # "UC Priority",
-        desciption="The priority to use for undirected colliders",
+        default=-1, title="Unshielded collider priority (UC priority)", # "UC Priority",
+        description="The priority to use for undirected colliders",
         options=getOpts(UCPriorityItems)
     )
     mvcdnod: Optional[bool] = Field(
-        default=False, title="允许空值的CD-NOD算法", # "Missing-Value CD-NOD",
+        default=False, title="Missing-value CD-NOD (MVCDNOD)", # "Missing-Value CD-NOD",
         description="use missing-value PC or not. Default (and suggested for CDNOD): False."
     )
 

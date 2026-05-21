@@ -88,7 +88,11 @@
             "desc": "Define where the analysis task run. If your dataset is small (< 100MB), web worker mode is recommended. Otherwise try clickhouse mode.",
             "clickhouse": "ClickHouse",
             "webworker": "Browser(Web Worker)",
-            "notCompatible": "Not compatible with datasource"
+            "notCompatible": "Not compatible with datasource",
+            "clickhouseSetupTitle": "ClickHouse engine selected",
+            "clickhouseSetup": "Connect to ClickHouse via Data Connections → OLAP, or run the olap-connector service. Until connected, AutoPilot may fall back to limited local compute.",
+            "switched": "Computation engine switched to {engine}.",
+            "switchFailedTitle": "Failed to switch computation engine"
         },
         "analysisConfig": "Analysis Settings",
         "cubeStorageManageMode": {
@@ -179,14 +183,38 @@
         },
         "sizeInfo": "{nCols} fields, {nRows} rows",
         "demoDataset": {
-            "CARS": { "title": "Cars", "description": "Origin, product name and physical attributes of cars." },
-            "STUDENTS": { "title": "Students", "description": "What influence students' performance on exams?" },
-            "BTC_GOLD": { "title": "BTC - Gold", "description": "History data of bitcoin and gold price." },
-            "CAR_SALES": { "title": "Car Sales", "description": "Sales data of cars." },
-            "COLLAGE": { "title": "College", "description": "Public indicators of colleges." },
-            "TITANIC": { "title": "Titanic", "description": "Titanic shipwreck." },
-            "KEPLER": { "title": "Kepler", "description": "Kelper telescope data." },
-            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "Bike renting data." }
+            "CARS": {
+                "title": "Cars",
+                "description": "Origin, product name and physical attributes of cars."
+            },
+            "STUDENTS": {
+                "title": "Students",
+                "description": "What influence students' performance on exams?"
+            },
+            "BTC_GOLD": {
+                "title": "BTC - Gold",
+                "description": "History data of bitcoin and gold price."
+            },
+            "CAR_SALES": {
+                "title": "Car Sales",
+                "description": "Sales data of cars."
+            },
+            "COLLAGE": {
+                "title": "College",
+                "description": "Public indicators of colleges."
+            },
+            "TITANIC": {
+                "title": "Titanic",
+                "description": "Titanic shipwreck."
+            },
+            "KEPLER": {
+                "title": "Kepler",
+                "description": "Kelper telescope data."
+            },
+            "BIKE_SHARING_DC": {
+                "title": "Bike Sharing",
+                "description": "Bike renting data."
+            }
         },
         "btn": {
             "use_table": "Load this table (up to 100 rows)",
@@ -257,7 +285,6 @@
                 "olap": {
                     "name": "OLAP",
                     "desc": "Load data from OLAP."
-                
                 }
             },
             "cloud": {
@@ -308,7 +335,7 @@
         },
         "upload": {
             "title": "Connect your data",
-            "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
+            "fileTypes": "Excel workbooks, CSV/TSV, JSON (array or {fields, dataSource}), and JSONL/NDJSON are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "show_more": "More Options",
             "sampling": "Sampling",
@@ -356,6 +383,11 @@
             "downloadJSON": "Download JSON",
             "downloadJSONMeta": "Download JSON with Meta",
             "downloadRATHDS": "Download RATH's Dataset"
+        },
+        "workflow": {
+            "export": "Export workflow session",
+            "import": "Import workflow session",
+            "importFailedTitle": "Workflow import failed"
         },
         "extend": {
             "title": "Extend Information",
@@ -575,11 +607,56 @@
         "dateTime": "%x, %X",
         "date": "%-m/%-d/%Y",
         "time": "%-I:%M:%S %p",
-        "periods": ["AM", "PM"],
-        "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-        "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-        "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        "periods": [
+            "AM",
+            "PM"
+        ],
+        "days": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ],
+        "shortDays": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+        ],
+        "months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ],
+        "shortMonths": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+        ]
     },
     "date_format": "{Y}-{m}-{d}({w}) {H}:{M}:{S}",
     "login": {
@@ -615,7 +692,7 @@
             "phoneNo": "Phone NO.",
             "certCode": "Cert Code"
         },
-        "email": { 
+        "email": {
             "title": "Email",
             "certCode": "Cert Code",
             "errEmail": "not support email type"
@@ -766,6 +843,130 @@
             "CausalInsight": "CausalInsight",
             "GraphicWalker": "GraphicWalker",
             "predict": "predict"
+        }
+    },
+    "coach": {
+        "insight": {
+            "title": "Insight Coach",
+            "subtitle": "Don't know what to click or which fields to choose? Start here — you'll always get a useful next step and a plain-English explanation.",
+            "noData": "Load any dataset (or a demo) and I'll immediately propose a few high-value starting points (charts + narratives + next actions).",
+            "noMeasure": "Your dataset is loaded, but it looks like we don't have any \"measure\" fields yet. Assign at least one numeric column as a measure, and AutoPilot will unlock.",
+            "recommendedNext": "Recommended next step",
+            "starterQuestion": "A good default \"starter question\"",
+            "groupBy": "Group by: {name}",
+            "groupByPlaceholder": "Group by: (choose a dimension)",
+            "measure": "Measure: {name}",
+            "measurePlaceholder": "Measure: (choose a measure)",
+            "aggregation": "Aggregation: mean",
+            "whyInteresting": "Why this could be interesting",
+            "generatingExplanation": "Generating a short explanation…",
+            "noNarrative": "No narrative insights yet for the starter question. Try running AutoPilot to generate richer, higher-signal views first.",
+            "quickActions": "Quick actions",
+            "largeDataHint": "This dataset has {rows} rows. For smoother AutoPilot on large data, switch the computation engine to ClickHouse in Analysis Settings after connecting an OLAP source.",
+            "startMode": {
+                "start": "AutoPilot will scan your dataset and propose the most \"interesting\" charts to start with.",
+                "checkResult": "You already have AutoPilot results. Jump straight to the most promising insight.",
+                "pattern": "Pattern mode helps you explore correlations and structures quickly, with guided narratives.",
+                "manual": "Manual charting is great when you already have a question and want full control.",
+                "causal": "Causal discovery helps you test directional relationships (experimental; best with clean numeric fields).",
+                "default": "Pick an analysis mode to start discovering insights."
+            }
+        },
+        "nextActions": {
+            "title": "Next actions",
+            "defaultTitle": "AutoPilot insight",
+            "titleDimsOnly": "AutoPilot: {dims}",
+            "titleMeasOnly": "AutoPilot: {meas}",
+            "titleBoth": "AutoPilot: {dims} → {meas}",
+            "emptyDesc": "Run AutoPilot to generate a ranked list of insights, then use these one-click actions to go deeper.",
+            "scoreDesc": "Turn this insight into your next step (score {score}%).",
+            "noInsights": "No AutoPilot insights yet. Click \"Re-run\" to generate a ranked list, then you'll get one-click \"go deeper\" actions here.",
+            "saveToDashboard": "Save to dashboard",
+            "explain": "Explain why it's interesting",
+            "tryCausal": "Try causal on these fields",
+            "openManual": "Open in manual explorer",
+            "copyLink": "Copy share link",
+            "tip": "Tip: \"Save to dashboard\" creates/updates the latest dashboard page. You can refine layout, filters, and titles in the dashboard editor."
+        },
+        "causal": {
+            "title": "Causal Coach",
+            "subtitle": "Causal discovery can feel \"black-box\" at first. This panel picks safe defaults (fields + algorithm) and tells you what to do next.",
+            "noData": "Load a dataset first (DataSource page). Then come back here and I'll suggest a causal-ready subset of fields automatically.",
+            "selectedFields": "Selected fields: {selected} / {total}",
+            "useRecommendedFields": "Use recommended fields",
+            "useAlgorithm": "Use {algo}",
+            "algorithmSettings": "Algorithm settings",
+            "nextStep": "Next step:",
+            "nextComputeMutual": "Compute mutual information for a quick overview, then run causal discovery.",
+            "nextRunDiscovery": "Now run causal discovery (it may run in the background).",
+            "nextExploreGraph": "Causal graph is available. Click an edge/group to get explanations in the right panel.",
+            "computeMutual": "Compute mutual info",
+            "runDiscovery": "Run causal discovery",
+            "runAlways": "Run (always)",
+            "whatRunning": "What you're running",
+            "algorithm": "Algorithm:",
+            "algorithmNone": "(none)",
+            "fromAutopilot": "Following up on AutoPilot insight: {title}",
+            "saveSummary": "Save causal summary to dashboard",
+            "summaryTitle": "Causal: {algo} ({edges} edges)",
+            "summaryText": "Causal discovery on {fields} found {edges} directed edge(s) using {algo}.",
+            "backToAutopilot": "Back to AutoPilot",
+            "openDashboard": "Open dashboard"
+        },
+        "workerError": {
+            "inferMetaTitle": "Field inference failed",
+            "cleanDataTitle": "Data cleaning failed",
+            "filterDataTitle": "Data filtering failed"
+        },
+        "effect": {
+            "title": "Effect estimation",
+            "subtitle": "Estimate how much selected causes move the outcome, using the discovered graph and DoWhy.",
+            "noPlan": "Run causal discovery first. We will pick an outcome and candidate treatments from the graph.",
+            "plan": "Outcome: {target}. Treatments: {treatments}. Method: linear regression (backdoor).",
+            "needTreatments": "The current graph does not expose clear parent variables for the chosen outcome. Adjust field selection or edit the graph, then try again.",
+            "run": "Estimate causal effect",
+            "running": "Estimating effect…",
+            "errorTitle": "Causal effect estimation failed",
+            "resultValue": "Estimated effect on {target}: {value} ({method})",
+            "saveToDashboard": "Save effect to dashboard",
+            "dashboardTitle": "Effect on {target}",
+            "dashboardValue": "Estimated effect: {value} ({method})",
+            "dashboardText": "Outcome: {target}. Treatments: {treatments}. Method: {method}."
+        }
+    },
+    "assistant": {
+        "title": "Data Assistant",
+        "subtitle": "Ask a plain-language question. I'll route you to the right workflow and remember context for sharing.",
+        "placeholder": "e.g. Run AutoPilot, try causal on revenue, or open dashboard",
+        "ask": "Go",
+        "copyLink": "Copy share link",
+        "noData": "Load a dataset first, then ask about fields, AutoPilot, causal analysis, or dashboards.",
+        "suggestions": {
+            "autopilot": "Run AutoPilot on this dataset",
+            "causal": "Try causal analysis on key fields",
+            "dashboard": "Open dashboard",
+            "explain": "Explain why revenue matters"
+        },
+        "gatewayEnabled": "Assistant routing is available through the narrative service. Override with ?llmServer= if needed.",
+        "thinking": "Thinking…",
+        "reply": {
+            "navigate": "Opening {page}.",
+            "autopilot": "Opening AutoPilot and preparing a fresh insight run.",
+            "causal": "Opening causal analysis with sensible defaults.",
+            "fields": "Matched fields: {names}. Use them in AutoPilot, Copilot, or causal discovery.",
+            "needFieldsForExplain": "Name at least one field in your question, and make sure the dataset has both a dimension and a measure.",
+            "noNarrative": "No narrative explanation returned yet. Try running AutoPilot first for richer context.",
+            "unknown": "I couldn't map that question yet. Try: {suggestions}",
+            "linkCopied": "Share link copied to clipboard."
+        }
+    },
+    "dashboardPage": {
+        "workflow": {
+            "summary": "Saved workflow context: {details}",
+            "autopilot": "AutoPilot: {title}",
+            "causal": "Causal: {algo} ({edges} edges)",
+            "effect": "Effect on {target}: {value}",
+            "backToAutopilot": "Back to AutoPilot"
         }
     }
 }

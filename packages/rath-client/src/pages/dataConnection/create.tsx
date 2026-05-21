@@ -21,12 +21,10 @@ import styled from 'styled-components';
 import { Button, Card } from '@fluentui/react-components';
 import { CornerUpLeft } from 'lucide-react';
 import { IDataSourceType } from '../../global';
-import { IMuteFieldBase, IRow } from '../../interfaces';
-import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import DataLoadingStatus from '../dataSource/dataLoadingStatus';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
-import { notify } from '../../components/error';
+import { useDataImportCallbacks } from '../../hooks/useDataImportCallbacks';
 import DatabaseConnector from './database/main';
 import FileData from './file';
 import DemoData from './demo';
@@ -53,59 +51,22 @@ const Content = styled.div<{ open: boolean }>`
 `;
 
 const ConnectionCreation: React.FC<ConnectionCreationProps> = (props) => {
-    const { dataSourceStore, commonStore, megaAutoStore, semiAutoStore } = useGlobalStore();
-    const { loading } = dataSourceStore;
-    // const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, toggleLoadingAnimation } = props;
+    const { commonStore } = useGlobalStore();
 
     const [dataSourceType, setDataSourceType] = useState<IDataSourceType | null>(null);
 
     const onSelectPannelClose = useCallback(() => {
-        // dataSourceStore.setShowDataImportSelection(false);
         commonStore.setAppKey(PIVOT_KEYS.dataSource);
     }, [commonStore]);
 
-    const onSelectDataLoaded = useCallback(
-        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
-            megaAutoStore.init();
-            semiAutoStore.init();
-            dataSourceStore.loadDataWithInferMetas(dataSource, fields);
-            if (name && tag !== undefined) {
-                dataSourceStore.setDatasetId(name);
-                setDataStorage(name, fields, dataSource, tag, withHistory);
-            }
-        },
-        [dataSourceStore, megaAutoStore, semiAutoStore]
-    );
-
-    const onSelectStartLoading = useCallback(() => {
-        dataSourceStore.setLoading(true);
-    }, [dataSourceStore]);
-
-    const onLoadingFailed = useCallback(
-        (err: any) => {
-            dataSourceStore.setLoading(false);
-            notify({
-                type: 'error',
-                title: '[Data Loading Error]',
-                content: `${err}`,
-            });
-        },
-        [dataSourceStore]
-    );
-
-    const toggleLoadingAnimation = useCallback(
-        (on: boolean) => {
-            dataSourceStore.setLoading(on);
-        },
-        [dataSourceStore]
-    );
-
-    const onDataLoading = useCallback(
-        (p: number) => {
-            dataSourceStore.setLoadingDataProgress(Math.floor(p * 100) / 100);
-        },
-        [dataSourceStore]
-    );
+    const {
+        onSelectDataLoaded,
+        onSelectStartLoading,
+        onLoadingFailed,
+        toggleLoadingAnimation,
+        onDataLoading,
+        loading,
+    } = useDataImportCallbacks();
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
         [IDataSourceType.FILE]: (

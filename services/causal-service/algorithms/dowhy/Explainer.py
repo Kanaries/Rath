@@ -1,12 +1,12 @@
 from algorithms import common
-from typing import List, Optional, Dict, Set
+from typing import List, Optional, Dict, Set, Union
 from pydantic import Field
 import dowhy
 
 import math
 EstimateEffectItems = {
-    'backdoor.linear_regression': '线性回归',
-    'backdoor.distance_matching': '距离匹配',
+    'backdoor.linear_regression': 'Linear regression',
+    'backdoor.distance_matching': 'Distance matching',
     'backdoor.propensity_score_stratification': 'Propensity Score Stratification',
     'backdoor.propensity_score_matching': 'Propensity Score Matching',
     'backdoor.propensity_score_weighting': 'Propensity Score Weighting',
@@ -16,13 +16,18 @@ EstimateEffectItems = {
 class ExplainerParams(common.OptionalParams, title="Explainer Algorithm"):
     """
     """
-    target: Optional[int] = Field(
+    target: Optional[Union[int, str]] = Field(
         default=None,
         options=[{'key': '$fields', 'title': ''}],
-        title="目标度量值字段",
-        description="关注的度量值",
+        title="Outcome (target) field",
+        description="Outcome variable to explain",
     )
-    treatment: Optional[List[int]] = Field(default=[], options=[{'key': '$fields', 'title': ''}], title="可干预变量字段", description="可干预变量")
+    treatment: List[Union[int, str]] = Field(
+        default=[],
+        options=[{'key': '$fields', 'title': ''}],
+        title="Treatments (interventions)",
+        description="Intervenable variables",
+    )
     estimate_effect_method: Optional[str] = Field(
         default=None,
         options=common.getOpts(EstimateEffectItems)
@@ -37,12 +42,37 @@ class Explainer(common.AlgoInterface):
     def calc(self, params: Optional[ParamType] = None, focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
         params = params or self.ParamType()
         # array = self.selectArray(focusedFields=focusedFields, params=params)
-        self.data = self.dataSource[focusedFields]
-        print(self.data, focusedFields, bgKnowledgesPag)
-        d = len(focusedFields)
+
+        def resolve_field_id(v: Optional[Union[int, str]]) -> Optional[str]:
+            if v is None:
+                return None
+            if isinstance(v, int):
+                return focusedFields[v] if 0 <= v < len(focusedFields) else None
+            s = str(v)
+            return s if len(s) > 0 else None
+
+        target_fid = resolve_field_id(params.target)
+        treatment_fids = [fid for fid in (resolve_field_id(t) for t in (params.treatment or [])) if fid is not None]
+
+        if not target_fid:
+            raise Exception('Explainer requires a non-empty outcome (target) field.')
+        if len(treatment_fids) == 0:
+            raise Exception('Explainer requires at least one treatment (intervention) field.')
+        if not params.estimate_effect_method:
+            raise Exception('Explainer requires an estimate_effect_method.')
+
+        # Keep node order stable (focusedFields first, then any missing treatment/target fields).
+        model_fields: List[str] = []
+        for fid in [*focusedFields, *treatment_fids, target_fid]:
+            if fid not in model_fields:
+                model_fields.append(fid)
+
+        self.data = self.dataSource[model_fields].copy()
+        print(self.data, model_fields, bgKnowledgesPag)
+
         g_gml = "graph[directed 1"
-        for f in focusedFields:
-            g_gml += f"node[id \"{f}\" label \"{f}\"]"
+        for fid in model_fields:
+            g_gml += f"node[id \"{fid}\" label \"{fid}\"]"
         for k in bgKnowledgesPag:
             g_gml += f"edge[source \"{k.src}\" target \"{k.tar}\"]"
             # k.src_type, k.tar_type
@@ -50,15 +80,19 @@ class Explainer(common.AlgoInterface):
         print(g_gml)
         import pandas as pd
         import numpy as np
-        for f in [params.treatment]:
-            if params.estimate_effect_method == 'backdoor.distance_matching' and np.unique(self.data[f].values).size == 2:
-                self.data = self.data.assign(**{f: self.data[f] != self.data[f].values[0]})
-        print(self.data[f])
+        if params.estimate_effect_method == 'backdoor.distance_matching':
+            for fid in treatment_fids:
+                try:
+                    if np.unique(self.data[fid].values).size == 2:
+                        self.data = self.data.assign(**{fid: self.data[fid] != self.data[fid].values[0]})
+                except Exception:
+                    # If type conversion fails, keep original values and let DoWhy handle it.
+                    pass
 
         self.model = dowhy.CausalModel(
             data=self.data,
-            treatment=[params.treatment],
-            outcome=[params.target],
+            treatment=treatment_fids,
+            outcome=[target_fid],
             graph=g_gml
         )
         self.model.view_model()
@@ -76,7 +110,7 @@ class Explainer(common.AlgoInterface):
         return {
             'data': [[]],
             'matrix': [[]],
-            'fields': self.safeFieldMeta(self.focusedFields),
+            'fields': self.safeFieldMeta([f for f in self.fields if f.fid in model_fields]),
             'res': {k: str(v) for k, v in res.items()},
             # 'data': res.tolist(),
             # 'matrix': res.tolist(),

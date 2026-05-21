@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import DashboardList from './dashboard-list';
 import dashboardGallery from './dashboard-gallery';
+import DashboardWorkflowBanner from './workflowBanner';
 
 const PageLayout = styled.div`
     flex-grow: 1;
@@ -179,6 +180,9 @@ const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
 
     return (
         <PageLayout onClick={clearActiveEditableCell}>
+            <div style={{ marginInline: '2em', marginTop: '1em' }}>
+                <DashboardWorkflowBanner />
+            </div>
             <WorkspaceView>
                 <Stack>
                     <WorkspaceName>

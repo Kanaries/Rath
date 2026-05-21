@@ -5,6 +5,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import styled from "styled-components";
 import type { loadDataFile } from "../../utils";
 import { notify } from "../../../../components/error";
+import { isStructuredDataFile } from "../../../../utils/structuredDataParser";
 import getFileIcon from "../history/get-file-icon";
 
 
@@ -217,7 +218,8 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
 
     const handleUpload = useCallback(() => {
         const [file] = fileInputRef.current?.files ?? [];
-        if (!file.name.endsWith('.csv') && file.size > MAX_UPLOAD_SIZE) {
+        const isLargeTextTable = !isStructuredDataFile(file) && !file.name.endsWith('.csv');
+        if (isLargeTextTable && file.size > MAX_UPLOAD_SIZE) {
             notify({
                 type: 'error',
                 title: 'Failed to upload',
@@ -239,7 +241,12 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
     return (
         <Container>
             <Input>
-                <input type="file" ref={fileInputRef} onChange={handleUpload} />
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".csv,.tsv,.txt,.json,.jsonl,.ndjson,.jsonlines,.xlsx,.xls,.xlsm,.xlsb"
+                    onChange={handleUpload}
+                />
                 {preview ? (
                     <FileOutput>
                         <div className="head">

@@ -1,24 +1,12 @@
 import { IRow } from "../interfaces";
+import { extractRecords, parseJsonDocumentText } from "./structuredDataParser";
 
 
 export function jsonLoader (file: File): Promise<IRow[]> {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader()
-    reader.readAsText(file)
-    reader.onload = (ev) => {
-      if (ev.target) {
-        try {
-          const rawData: IRow[] = JSON.parse(ev.target.result as string);
-          resolve(rawData);
-        } catch (error) {
-          reject(error)
-        }
-      } else {
-        reject(ev)
-      }
-    }
-    reader.onerror = reject
-  })
+  return textLoader(file).then((text) => {
+    const parsed = parseJsonDocumentText(text);
+    return extractRecords(parsed).rows;
+  });
 }
 
 export function textLoader (file: File): Promise<string> {

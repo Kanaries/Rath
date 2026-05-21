@@ -1,0 +1,85 @@
+services:
+  # Override the production UI container to become a dev gateway.
+  # This keeps the same external URL/port (http://localhost:9083) while:
+  # - proxying UI traffic to the CRA dev server (hot reload)
+  # - proxying API routes to the backend services (same routing as prod)
+  base:
+    build:
+      context: .
+      dockerfile: docker/dev.gateway.Dockerfile
+    depends_on:
+      rath-client-dev:
+        condition: service_started
+      connector-api:
+        condition: service_started
+      prediction-api:
+        condition: service_started
+      causal-api:
+        condition: service_started
+      narrative-api:
+        condition: service_started
+      text-pattern-api:
+        condition: service_started
+
+  rath-client-dev:
+    image: node:16
+    working_dir: /app
+    volumes:
+      - ./:/app:cached
+      - rath_node_modules:/app/node_modules
+      - rath_yarn_cache:/root/.cache/yarn
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0
+    command: bash -lc "yarn install && yarn build:utils && yarn build:scenegraph && yarn build:renderer && yarn workspace rath-client start"
+
+  connector-api:
+    volumes:
+      - ./services/connector:/connector:cached
+      - rath_pip_cache:/root/.cache/pip
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+    command: flask --app app.py run --host 0.0.0.0 --port 5001 --reload --debugger
+
+  prediction-api:
+    volumes:
+      - ./services/prediction:/prediction:cached
+      - rath_pip_cache:/root/.cache/pip
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_DEBUG=1
+    command: flask --app main.py run --host 0.0.0.0 --port 5534 --reload --debugger
+
+  narrative-api:
+    volumes:
+      - ./services/narrative-service:/usr/src/app:cached
+      - rath_pip_cache:/root/.cache/pip
+    environment:
+      - FLASK_APP=insight_flask.py
+      - FLASK_DEBUG=1
+    command: flask --app insight_flask.py run --host 0.0.0.0 --port 8001 --reload --debugger
+
+  text-pattern-api:
+    volumes:
+      - ./services/text-pattern-service:/text-pattern-service:cached
+      - rath_pip_cache:/root/.cache/pip
+      - rath_gensim_data:/root/gensim-data
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_DEBUG=1
+    command: flask --app main.py run --host 0.0.0.0 --port 5533 --reload --debugger
+
+  causal-api:
+    volumes:
+      - ./services/causal-service:/app:cached
+      - rath_pip_cache:/root/.cache/pip
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  rath_node_modules:
+  rath_yarn_cache:
+  rath_pip_cache:
+  rath_gensim_data:

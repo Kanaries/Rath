@@ -1,12 +1,17 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
+import intl from 'react-intl-universal';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
+import { notify } from '../components/error';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
+import { isPivotKey, navigateToRoute, readRouteKeyFromHash } from '../router/routerBridge';
 import { THEME_KEYS, prebuiltThemes } from '../queries/themes';
 import { VegaGlobalConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { deepcopy } from '../utils';
+
+export { readRouteKeyFromHash as readAppKeyFromHash } from '../router/routerBridge';
 
 export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
@@ -65,8 +70,12 @@ export class CommonStore {
         if (themeKey === THEME_KEYS.default) return this.themes[THEME_KEYS.g2];
         return this.themes[themeKey];
     }
-    public setAppKey(key: string) {
+    public setAppKey(key: string, options?: { syncHash?: boolean }) {
         this.appKey = key;
+        const syncHash = options?.syncHash ?? true;
+        if (syncHash && isPivotKey(key)) {
+            navigateToRoute(key);
+        }
     }
     public setUseCustomeTheme (use: boolean) {
         this.useCustomTheme = use;
@@ -86,11 +95,11 @@ export class CommonStore {
     }
     public visualAnalysisInGraphicWalker(spec: IVegaSubset) {
         this.graphicWalkerSpec = transVegaSubset2Schema(spec);
-        this.appKey = PIVOT_KEYS.editor;
+        this.setAppKey(PIVOT_KEYS.editor);
     }
     public analysisInPainter(spec: IVegaSubset) {
         this.vizSpec = spec;
-        this.appKey = PIVOT_KEYS.painter;
+        this.setAppKey(PIVOT_KEYS.painter);
     }
     public setNavMode (mode: 'text' | 'icon') {
         this.navMode = mode;
@@ -107,6 +116,16 @@ export class CommonStore {
     }
     public async setComputationEngine(engine: string) {
         try {
+            if (engine === COMPUTATION_ENGINE.clickhouse) {
+                const { clickHouseStore } = await import('./index').then((m) => m.getGlobalStore());
+                if (clickHouseStore.connectStatus !== 'engine') {
+                    notify({
+                        type: 'info',
+                        title: intl.get('config.computationEngine.clickhouseSetupTitle'),
+                        content: intl.get('config.computationEngine.clickhouseSetup'),
+                    });
+                }
+            }
             destroyRathWorker();
             initRathWorker(engine);
             await rathEngineService({
@@ -116,8 +135,19 @@ export class CommonStore {
             runInAction(() => {
                 this.computationEngine = engine;
             });
+            notify({
+                type: 'success',
+                title: intl.get('config.computationEngine.title'),
+                content: intl.get('config.computationEngine.switched', {
+                    engine: intl.get(`config.computationEngine.${engine}`),
+                }),
+            });
         } catch (error) {
-            // console.error(error);
+            notify({
+                type: 'error',
+                title: intl.get('config.computationEngine.switchFailedTitle'),
+                content: error instanceof Error ? error.message : String(error),
+            });
         }
     }
     public async setExploreMode(mode: string) {

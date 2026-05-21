@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, runInAction, toJS } from "mobx";
+import { action, makeAutoObservable, reaction, runInAction, toJS } from "mobx";
 import { notify } from "../../components/error";
 import type { PAG_NODE } from "../../pages/causal/config";
 import { getCausalModelStorage, getCausalModelStorageKeys, setCausalModelStorage } from "../../utils/storage";
@@ -24,12 +24,14 @@ export default class CausalStore {
     public readonly dataset: CausalDatasetStore;
     public readonly operator: CausalOperatorStore;
     public readonly model: CausalModelStore;
+    protected readonly disposers: (() => void)[] = [];
 
     public get fields() {
         return this.dataset.fields;
     }
 
     public destroy() {
+        this.disposers.forEach((d) => d());
         this.model.destroy();
         this.operator.destroy();
         this.dataset.destroy();
@@ -120,6 +122,20 @@ export default class CausalStore {
             model: false,
             checkout: action,
         });
+
+        // When a background causal job finishes, apply results to the model automatically.
+        this.disposers.push(
+            reaction(
+                () => this.operator.lastJobResult,
+                (r) => {
+                    if (!r) return;
+                    runInAction(() => {
+                        this.model.causalityRaw = r.raw;
+                        this.model.causality = r.pag;
+                    });
+                }
+            )
+        );
     }
 
     public selectFields(...args: Parameters<CausalDatasetStore['selectFields']>) {
@@ -145,10 +161,13 @@ export default class CausalStore {
             this.model.functionalDependencies,
             this.model.assertionsAsPag,
         );
-        runInAction(() => {
-            this.model.causalityRaw = result?.raw ?? null;
-            this.model.causality = result?.pag ?? null;
-        });
+        // If a background job was started, `result` will be null and a reaction will apply results later.
+        if (result) {
+            runInAction(() => {
+                this.model.causalityRaw = result.raw;
+                this.model.causality = result.pag;
+            });
+        }
 
         return result;
     }

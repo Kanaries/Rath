@@ -15,31 +15,31 @@ IDataSource = List[IRow]
 IFields = List[str]
 
 ICatEncodeType = {
-    'topk-with-noise': "将低频值分组",
-    'none': "无", # "No Encoding",
+    'topk-with-noise': "Group infrequent values",
+    'none': "None",
     'one-hot': "One-hot Encoding",
-    'one-hot-with-noise': "将低频值分组后做one-hot",
+    'one-hot-with-noise': "Group infrequent values then one-hot encode",
     # 'binary': "Binary Encoding",
-    'lex': "字典序", # "Lexicographic Ranking",
-    'random': "随机编码",
+    'lex': "Lexicographic ranking",
+    'random': "Random encoding",
 }
 ICatEncodeTypeDefault = 'topk-with-noise'
 
 IQuantEncodeType = {
-    'bin': "分箱", # "Binning",
-    'none': "无", # "No Encoding",
+    'bin': "Binning",
+    'none': "None",
     # 'id': "Any Index",
-    'order': "排名", # "Ranking"
+    'order': "Ranking"
     # 'binned-order': "按排名分箱" # "count-awared binning"
 }
 IQuantEncodeTypeDefault = 'bin'
     
 IDepTestItems = {
-    'gsq': 'G检验', # ('g-square', 'G-squared conditional independence test.'),
-    'chisq': '卡方条件独立性检验', # ('chi-square', 'Chi-squared conditional independence test.'),
-    'fisherz': 'Fisher-Z变换', # ('fisher-z', 'Fisher’s Z conditional independence test.'),
+    'gsq': 'G-squared test',
+    'chisq': 'Chi-squared conditional independence test',
+    'fisherz': 'Fisher-Z transform',
     # 'kci': ('kernel-based conditional independence test', '(As a kernel method, its complexity is cubic in the sample size, so it might be slow if the same size is not small.)'),
-    'mv_fisherz': '允许空值的Fisher-Z变换' # ('missing-value fisher-z', 'Missing-value Fisher’s Z'),
+    'mv_fisherz': 'Fisher-Z transform (missing values allowed)',
     # 'mc_fisherz': ('missing correction fisher-z', "Fisher-Z's test with test-wise deletion and missingness correction")
 }
 UCRuleItems = {
@@ -88,26 +88,18 @@ def getOpts(Items: Dict):
 
 
 def checkLinearCorr(array: np.ndarray):
-    print(array)
-    for i in range(8):
-        if np.linalg.matrix_rank(array) < array.shape[1]:
-            U, s, VT = np.linalg.svd(array)
-            print("================checkLinearCorr:{}".format(i))
-            print(U, s, VT, sep='\n')
-            # raise Exception("The input array is linear correlated, some fields should be unselected.\n[to be optimized]")
-            # array *= (1 + np.random.randn(*array.shape)*1e-3)
-            # array *= (1 + np.random.randn(*array.shape) * 1e-3)
-            print("The input array is linear correlated, some fields should be unselected.\n[to be optimized]", file=sys.stderr)
-            # if np.abs(s[-1] / s[0]) < 1e-4:
-            #     print("CheckLinearCorr", U, s, VT)
-            #     raise Exception("The input array is linear correlated, some fields should be unselected")
-        else:
-            break
+    """
+    Deprecated debug helper.
+    We avoid printing large matrices in production; use `_stabilize_numeric_matrix` in AlgoInterface instead.
+    """
+    if array.size == 0:
+        return
+    _ = np.linalg.matrix_rank(array)  # keep behavior lightweight; no prints
 
 class OptionalParams(BaseModel, extra=Extra.allow):
     """Optional Parameters"""
     catEncodeType: Optional[str] = Field(
-        default=ICatEncodeTypeDefault, title="类别变量编码方式", #"Categorical Encoding",
+        default=ICatEncodeTypeDefault, title="Categorical encoding",
         description="The encoding to use for categorical variables",
         options=getOpts(ICatEncodeType)
     )
@@ -115,7 +107,7 @@ class OptionalParams(BaseModel, extra=Extra.allow):
     #     default=False, title="Keep Original Categorical Variables", description="Whether to keep the original categorical variables", allow_mutation=False
     # )
     quantEncodeType: Optional[str] = Field(
-        default=IQuantEncodeTypeDefault, title="数值型变量编码方式", #"Quantitative Encoding",
+        default=IQuantEncodeTypeDefault, title="Quantitative encoding",
         description="The encoding to use for quantitative variables",
         options=getOpts(IQuantEncodeType)
     )
@@ -204,7 +196,7 @@ def encodeQuant(x: pd.Series, encodeType: str) -> pd.DataFrame:
         return pd.DataFrame(res)
     elif encodeType == 'order': # encodeType.order:
         x = pd.Series(x.factorize(sort=True)[0], name=x.name)
-        return x
+        return pd.DataFrame(x)
     elif encodeType == 'binned-order':
         order = pd.Series(x.factorize(sort=True)[0])
         len = x.size
@@ -229,9 +221,10 @@ def trans(df: pd.DataFrame, fields: List[IFieldMeta], params: OptionalParams):
                 try:
                     newcode = encodeCat(df[f.fid], pd.Series(code, name=f.fid), params.catEncodeType)
                 except Exception as e:
-                    with sys.stderr:
-                        print(f"encodeCat by {params.catEncodeType} failed:")
-                        traceback.print_exception(e)
+                    print(f"encodeCat by {params.catEncodeType} failed; falling back to factorized codes.", file=sys.stderr)
+                    traceback.print_exception(type(e), e, e.__traceback__, file=sys.stderr)
+                    # Fallback: ensure numeric codes are returned
+                    newcode = pd.DataFrame(pd.Series(code, name=f.fid))
                 # print("newcode-nominal", newcode)
                 if params.keepOriginCat or newcode.size == 0:
                     res_fields.append(f)
@@ -288,6 +281,9 @@ def trans(df: pd.DataFrame, fields: List[IFieldMeta], params: OptionalParams):
 def transDataSource(dataSource: List[IRow], fields: List[IFieldMeta], params: OptionalParams):
     df = pd.DataFrame(dataSource)
     df, fields = trans(df, fields, params)
+    # Ensure numeric matrix for downstream causal algorithms (many call np.isnan internally).
+    # Coerce everything to numeric; non-convertible values become NaN.
+    df = df.apply(pd.to_numeric, errors='coerce')
     return df, fields
 
 import algorithms
@@ -371,11 +367,45 @@ class AlgoInterface:
     
     def selectArray(self, focusedFields: List[str] = [], params: OptionalParams = OptionalParams()) -> np.ndarray:
         # print('\n\nselectArray', [{f.fid: f for f in self.fields}[ff] for ff in focusedFields])
-        print("Fields: ", {f.fid: f for f in self.fields}.keys(), focusedFields)
+        # Avoid noisy logs in production.
         focusedFields = self.transFocusedFields(focusedFields)
         self.data, self.focusedFields = transDataSource(self.dataSource, [{f.fid: f for f in self.fields}[ff] for ff in focusedFields], params)
         # print('\n\n', data.dtypes)
-        return self.data.to_numpy()
+        arr = self.data.to_numpy(dtype=float, copy=True)
+
+        # Replace inf with nan, then impute nans (many indep tests choke on missing/inf).
+        arr[~np.isfinite(arr)] = np.nan
+        if np.isnan(arr).any():
+            # Column-wise median imputation; all-NaN columns become 0.
+            med = np.nanmedian(arr, axis=0)
+            med = np.where(np.isfinite(med), med, 0.0)
+            nan_idx = np.where(np.isnan(arr))
+            arr[nan_idx] = med[nan_idx[1]]
+
+        # If the matrix is rank-deficient (perfect collinearity / constant columns),
+        # Fisher-Z style tests can become singular and the search may take extremely long.
+        # We add a *tiny* jitter to break exact collinearity; if still singular after a few tries,
+        # fail fast with a clear message rather than running for hours.
+        try:
+            if arr.shape[0] > 0 and arr.shape[1] > 0 and np.linalg.matrix_rank(arr) < arr.shape[1]:
+                rng = np.random.default_rng(0)
+                scale = np.nanstd(arr, axis=0)
+                scale = np.where(np.isfinite(scale) & (scale > 0), scale, 1.0)
+                for _ in range(4):
+                    arr = arr + rng.standard_normal(arr.shape) * (1e-6 * scale)
+                    if np.linalg.matrix_rank(arr) >= arr.shape[1]:
+                        break
+                if np.linalg.matrix_rank(arr) < arr.shape[1]:
+                    raise Exception(
+                        "Selected fields appear to be perfectly/near-perfectly collinear (singular correlation matrix). "
+                        "Causal discovery (especially Fisher-Z tests) may not converge. "
+                        "Try removing constant/duplicate columns, reducing the number of selected fields, or switching the independence test."
+                    )
+        except Exception:
+            # Preserve original exception message upstream.
+            raise
+
+        return arr
 
     def safeFieldMeta(self, fields: List[IFieldMeta]):
         def transMeta(fieldMeta: IFieldMeta):

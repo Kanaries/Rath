@@ -608,8 +608,28 @@ def cal_NolinearrelationshipV1(breakdown:VectorStr,measures:VectorStr,subDataSou
 def cal_scagnostics(measures,subDataSource,langType):
     x = subDataSource[measures[0]].values
     y = subDataSource[measures[1]].values
-    para,out = scagnostics(x,y)
-    score_list = [para[i] for i in list(para)]
+
+    # pyscagnostics is strict about input types: must be 1D numeric arrays without NaNs.
+    try:
+        x = np.asarray(x, dtype=float).reshape(-1)
+        y = np.asarray(y, dtype=float).reshape(-1)
+        if x.shape[0] != y.shape[0]:
+            n = min(x.shape[0], y.shape[0])
+            x = x[:n]
+            y = y[:n]
+        mask = np.isfinite(x) & np.isfinite(y)
+        x = x[mask]
+        y = y[mask]
+        if x.size < 3:
+            raise ValueError("not enough finite points for scagnostics")
+        para,out = scagnostics(x,y)
+        score_list = [para[i] for i in list(para)]
+    except Exception:
+        # scagnostics is optional; never crash the whole narrative response.
+        explain_list = explain_scagnostics(langType,measures[0],measures[1])
+        score_list = [0.0 for _ in range(len(explain_list))]
+        return score_list, explain_list
+
     explain_list = explain_scagnostics(langType,measures[0],measures[1])
     return score_list,explain_list
 
@@ -749,16 +769,33 @@ def explain_Seasonality(langType,measure0,aggrType,breakdown):
     return explain
 
 def explain_Trend(langType,slope,measure0,aggrType,breakdown):
+    """
+    Return a short natural-language explanation for a trend insight.
+    Must always return a string (never leave `explain` undefined).
+    """
+    explain = ''
     if langType=='en':
         if slope>0:
-            explain = measure0+'will increase after '+aggrType+' with '+breakdown
+            explain = measure0+' will increase after '+aggrType+' with '+breakdown
         elif slope<0:
-            explain = measure0+'will decrease after '+aggrType+' with '+breakdown
-    if langType=='cn':
+            explain = measure0+' will decrease after '+aggrType+' with '+breakdown
+        else:
+            explain = measure0+' shows no clear trend after '+aggrType+' with '+breakdown
+    elif langType=='cn':
         if slope>0:
             explain = measure0+'在'+aggrType+'聚合下会随着'+breakdown+'逐渐增大'
         elif slope<0:
             explain = measure0+'在'+aggrType+'聚合下会随着'+breakdown+'逐渐减小'
+        else:
+            explain = measure0+'在'+aggrType+'聚合下随'+breakdown+'没有明显趋势'
+    else:
+        # Fallback to English
+        if slope>0:
+            explain = measure0+' will increase after '+aggrType+' with '+breakdown
+        elif slope<0:
+            explain = measure0+' will decrease after '+aggrType+' with '+breakdown
+        else:
+            explain = measure0+' shows no clear trend after '+aggrType+' with '+breakdown
     return explain
 
 def explain_HeteroscedasticityV1(langType,measure0,aggrType,breakdown):

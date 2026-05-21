@@ -13,10 +13,10 @@ from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_b
 
 class PCParams(OptionalParams, title="PC Algorithm"):
     """
-    cg : 
-    cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 表示 i –> j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 表示 i — j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 表示 i <-> j. 
+    cg:
+    - cg.G.graph[j,i] = 1 and cg.G.graph[i,j] = -1 indicates i -> j
+    - cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i -- j
+    - cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j
     """
     # cg : a CausalGraph object, where
     # cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
@@ -24,31 +24,31 @@ class PCParams(OptionalParams, title="PC Algorithm"):
     # cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j. 
     # """
     indep_test: Optional[str] = Field(
-        default='chisq', title="独立性检验", #"Independence Test",
+        default='chisq', title="Independence test",
         description="The independence test to use for causal discovery",
         options=getOpts(IDepTestItems),
     )
     alpha: Optional[float] = Field(
-        default=0.05, title="显著性阈值", # "Alpha",
+        default=0.05, title="Significance level (alpha)",
         description="desired significance level (float) in (0, 1). Default: 0.05.",
         gt=0.0, le=1.0
     )
     stable: Optional[bool] = Field(
-        default=True, title="稳定版", #"Stable",
+        default=True, title="Stable",
         description="Whether to use the stable version of PC",
     )
     uc_rule: Optional[int] = Field(
-        default=0, title="无向冲突的处理规则", #"UC Rule",
+        default=0, title="Unshielded collider rule (UC rule)",
         description="The rule to use for undirected colliders",
         options=getOpts(UCRuleItems)
     )
     uc_priority: Optional[int] = Field(
-        default=-1, title="无向冲突优先级", # "UC Priority",
-        desciption="The priority to use for undirected colliders",
+        default=-1, title="Unshielded collider priority (UC priority)",
+        description="The priority to use for undirected colliders",
         options=getOpts(UCPriorityItems)
     )
     mvpc: Optional[bool] = Field(
-        default=0, title="使用支持空值的PC算法", # "Missing-Value PC",
+        default=0, title="Missing-value PC (MVPC)",
         description="Whether to use MVPC"
     )
 
@@ -71,8 +71,7 @@ class PC(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print("fields=", self.fields)
-        print("array=", array)
+        # Avoid printing large matrices; logs can explode on real datasets.
         
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'
         

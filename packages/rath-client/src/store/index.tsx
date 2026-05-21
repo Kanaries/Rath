@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { reaction } from 'mobx';
 import { LangStore } from "./langStore";
 import { CommonStore } from './commonStore';
 import { DataSourceStore } from './dataSourceStore';
@@ -12,6 +13,8 @@ import DashboardStore from './dashboardStore';
 import CausalStore from './causalStore/mainStore';
 import UserStore from './userStore';
 import { EditorStore } from './editorStore';
+import { WorkflowStore } from './workflowStore';
+import { createWorkflowSnapshot, saveWorkflowSession } from '../utils/workflowSession';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
@@ -26,6 +29,7 @@ export interface StoreCollection {
     dashboardStore: DashboardStore;
     causalStore: CausalStore;
     editorStore: EditorStore;
+    workflowStore: WorkflowStore;
 }
 
 const langStore = new LangStore();
@@ -41,6 +45,7 @@ const collectionStore = new CollectionStore(dataSourceStore);
 const dashboardStore = new DashboardStore();
 const causalStore = new CausalStore(dataSourceStore);
 const editorStore = new EditorStore();
+const workflowStore = new WorkflowStore();
 
 const storeCol: StoreCollection = {
     commonStore,
@@ -55,8 +60,21 @@ const storeCol: StoreCollection = {
     collectionStore,
     dashboardStore,
     causalStore,
-    editorStore
+    editorStore,
+    workflowStore,
 }
+
+reaction(
+    () => ({
+        appKey: commonStore.appKey,
+        autopilotHandoff: workflowStore.autopilotHandoff,
+        causalHandoff: workflowStore.causalHandoff,
+        effectEstimate: workflowStore.effectEstimate,
+    }),
+    (state) => {
+        saveWorkflowSession(createWorkflowSnapshot(state));
+    },
+);
 
 const StoreContext = React.createContext<StoreCollection>(null!);
 

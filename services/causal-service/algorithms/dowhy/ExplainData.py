@@ -51,12 +51,14 @@ def constructPAG(fields, causal_model: IDoWhy.ICausalModel):
     for f in fields:
         g_gml += f"node[id \"{f.fid}\" label \"{f.fid}\"]"
     for e in causal_model.edges:
-        if e.src_type == 1:
-            e.src, e.tar = e.tar, e.src
-            e.src_type, e.tar_type = e.tar_type, e.src_type
-        if e.src_type == -1 and e.tar_type == 1:
-            e.src, e.tar, e.src_type, e.tar_type
-            g_gml += f"\nedge[source \"{e.src}\" target \"{e.tar}\"]"
+        # Avoid mutating input model edges.
+        src, tar = e.src, e.tar
+        src_type, tar_type = e.src_type, e.tar_type
+        if src_type == 1:
+            src, tar = tar, src
+            src_type, tar_type = tar_type, src_type
+        if src_type == -1 and tar_type == 1:
+            g_gml += f"\nedge[source \"{src}\" target \"{tar}\"]"
         # k.src_type, k.tar_type
     g_gml += "]"
     print("gml=", g_gml)
@@ -182,7 +184,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     print('treat:', treatment)
     results = []
     
-    def testModel(results, model):
+    def testModel(results, model, src_fid: str):
         # model.view_model()
         estimand = model.identify_effect(proceed_when_unidentifiable=True)
         methods = {
@@ -209,7 +211,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             # evaluate_effect_strength=True,
             )
         results.append(IDoWhy.LinkInfo(
-            src=f.fid,
+            src=src_fid,
             tar=measures[0].fid,
             src_type=2,
             tar_type=1,
@@ -218,9 +220,9 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
         ))
         # TOBEDONE: more params
         if estimate.value > 0:
-            print("f===========", f.fid)
+            print("src===========", src_fid)
             print("target_units=\n", dataSource[tmp(transData)])
-            print('unobserved f = ', f, '\n', estimate)
+            print('unobserved src = ', src_fid, '\n', estimate)
     
     # General: use origin graph 
     # Fallback: without graph, any variable can be used as common_cause
@@ -241,7 +243,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
                 # graph=graph,
                 identify_vars=True
             )
-            testModel(results, model)
+            testModel(results, model, src_fid=f.fid)
     
     return results
 
@@ -276,8 +278,10 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
                 descrip_data['p-value'] = session.estimate.test_stat_significance()
                 # session.estimate.estimator.signif_results_tostr(session.estimate.test_stat_significance())
             if session.estimate.estimator._confidence_intervals:
-                descrip_data['confidence interval'], [session.estimate.estimator.confidence_level,
-                                                                session.estimate.get_confidence_intervals()]
+                descrip_data['confidence interval'] = {
+                    'level': session.estimate.estimator.confidence_level,
+                    'interval': session.estimate.get_confidence_intervals(),
+                }
         if session.estimate.conditional_estimates is not None:
             descrip_data['conditional estimates'] = str(session.estimate.conditional_estimates)
         if session.estimate.effect_strength is not None:
@@ -294,12 +298,13 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     
     results.extend(explainData(props))
     
-    sum2 = 0.
-    for res in results:
-        sum2 += res.responsibility * res.responsibility
-    vars = math.sqrt(sum2 / len(results))
-    for res in results:
-        res.responsibility = significance_value(res.responsibility, vars)
+    if len(results) > 0:
+        sum2 = 0.
+        for res in results:
+            sum2 += res.responsibility * res.responsibility
+        vars = math.sqrt(sum2 / len(results))
+        for res in results:
+            res.responsibility = significance_value(res.responsibility, vars)
     
     print("results =", results)
     

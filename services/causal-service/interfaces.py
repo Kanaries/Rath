@@ -36,18 +36,18 @@ class ServiceSchemaItem(BaseModel):
     key: str
     dataType: str
     renderType: str
-    description: Optional[str]
-    defaultValue: Optional[tp.Any]
+    description: Optional[str] = None
+    defaultValue: Optional[tp.Any] = None
     
-    range: Optional[Union[Tuple[float, float], Tuple[int, int]]]
-    step: Optional[Union[float, int]]
-    options: Optional[List[ServiceSchemaItemOption]]
+    range: Optional[Union[Tuple[float, float], Tuple[int, int]]] = None
+    step: Optional[Union[float, int]] = None
+    options: Optional[List[ServiceSchemaItemOption]] = None
 
 class ServiceSchemaResponse(BaseModel):
     title: str
     items: List[ServiceSchemaItem]
-    description: Optional[tp.Any]
-    message: Optional[tp.Any]
+    description: Optional[tp.Any] = None
+    message: Optional[tp.Any] = None
     
 IRow = Dict[str, Union[int, float, str]]
 IFieldMeta = Dict[str, object]

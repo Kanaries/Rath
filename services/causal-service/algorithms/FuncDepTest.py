@@ -8,9 +8,9 @@ import math
 class FuncDepTestParams(common.OptionalParams, title="FuncDepTest Algorithm"):
     """
     cg : 
-    cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 表示 i –> j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 表示 i — j;
-    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 表示 i <-> j. 
+    cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 means i --> j;
+    cg.G.graph[i,j] = cg.G.graph[j,i] = -1 means i --- j;
+    cg.G.graph[i,j] = cg.G.graph[j,i] = 1 means i <-> j.
     """
     # cg : a CausalGraph object, where
     # cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
@@ -18,22 +18,22 @@ class FuncDepTestParams(common.OptionalParams, title="FuncDepTest Algorithm"):
     # cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j. 
     # """
     indep_test: Optional[str] = Field(
-        default='gsq', title="独立性检验", #"Independence Test",
+        default='gsq', title="Independence test",
         description="The independence test to use for causal discovery",
         options=common.getOpts(common.IDepTestItems),
     )
     alpha: Optional[float] = Field(
-        default=-12, title="log10(显著性阈值)", # "Alpha",
+        default=-12, title="log10(significance level)",
         description="desired significance level (float) in (0, 1). Default: log10(0.005).",
         ge=-16, lt=0.0
     )
     orient: Optional[float] = Field(
-        default='ANM', title="方向判断算法",
+        default='ANM', title="Orientation test",
         options=common.getOpts({'ANM': "ANM"})
     )
     o_alpha: Optional[float] = Field(
-        default=math.log10(1000.0), title="log_10(方向判断阈值)",
-        description="对不同算法有不同阈值",
+        default=math.log10(1000.0), title="log10(orientation threshold)",
+        description="Different orientation tests may require different thresholds.",
         gt=0.0, le=5
     )
 
