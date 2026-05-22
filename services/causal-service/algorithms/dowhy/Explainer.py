@@ -34,12 +34,20 @@ class ExplainerParams(common.OptionalParams, title="Explainer Algorithm"):
     )
 
 import json
+
+def _pag_edges_from_func_deps(funcDeps: Optional[List[common.IFunctionalDep]]) -> List[common.BgKnowledgePag]:
+    edges: List[common.BgKnowledgePag] = []
+    for dep in funcDeps or []:
+        for param in dep.params:
+            edges.append(common.BgKnowledgePag(src=param.fid, tar=dep.fid, src_type=-1, tar_type=1))
+    return edges
+
 class Explainer(common.AlgoInterface):
     ParamType = ExplainerParams
     def __init__(self, dataSource: List[common.IRow], fields: List[common.IFieldMeta], params: Optional[ParamType] = None):
         super(Explainer, self).__init__(dataSource=dataSource, fields=fields, params=params or self.ParamType())
 
-    def calc(self, params: Optional[ParamType] = None, focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
+    def calc(self, params: Optional[ParamType] = None, focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], funcDeps: Optional[List[common.IFunctionalDep]] = [], **kwargs):
         params = params or self.ParamType()
         # array = self.selectArray(focusedFields=focusedFields, params=params)
 
@@ -73,7 +81,8 @@ class Explainer(common.AlgoInterface):
         g_gml = "graph[directed 1"
         for fid in model_fields:
             g_gml += f"node[id \"{fid}\" label \"{fid}\"]"
-        for k in bgKnowledgesPag:
+        pag_edges = [* (bgKnowledgesPag or []), *_pag_edges_from_func_deps(funcDeps)]
+        for k in pag_edges:
             g_gml += f"edge[source \"{k.src}\" target \"{k.tar}\"]"
             # k.src_type, k.tar_type
         g_gml += "]"

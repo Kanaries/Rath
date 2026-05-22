@@ -19,22 +19,38 @@ VectorObj = List[object]
 def func_residuals(x:VectorNum, alpha:float, beta:float)->VectorNum:
     return alpha*(x**-beta)
 
+def func_residuals(x:VectorNum, alpha:float, beta:float)->VectorNum:
+    return alpha*(x**-beta)
+
+def _prepare_for_aggregation(subDataSource: pd.DataFrame, breakdown: VectorStr) -> pd.DataFrame:
+    frame = subDataSource.copy()
+    breakdown_set = set(breakdown or [])
+    for col in frame.columns:
+        if col in breakdown_set or pd.api.types.is_numeric_dtype(frame[col]):
+            continue
+        converted = pd.to_numeric(frame[col], errors='coerce')
+        if converted.notna().any():
+            frame[col] = converted
+    return frame
+
 def func_aggr(subDataSource:object,breakdown:VectorStr,aggrType:str)->object:
     aggr_mark = False
     if breakdown is not None:
         if len(breakdown) > 0:
+            frame = _prepare_for_aggregation(subDataSource, breakdown)
+            grouped = frame.groupby(breakdown, dropna=False)
             if aggrType=='sum':
-                groupData = subDataSource.groupby(breakdown).sum()
+                groupData = grouped.sum(numeric_only=True)
             elif aggrType=='count':
-                groupData = subDataSource.groupby(breakdown).count()
+                groupData = grouped.count()
             elif aggrType=='mean':
-                groupData = subDataSource.groupby(breakdown).mean()
+                groupData = grouped.mean(numeric_only=True)
             elif aggrType=='max':
-                groupData = subDataSource.groupby(breakdown).max()
+                groupData = grouped.max(numeric_only=True)
             elif aggrType=='min':
-                groupData = subDataSource.groupby(breakdown).min()
+                groupData = grouped.min(numeric_only=True)
             elif aggrType=='median':
-                groupData = subDataSource.groupby(breakdown).median()
+                groupData = grouped.median(numeric_only=True)
             aggr_mark = True
         else:
             groupData = subDataSource
