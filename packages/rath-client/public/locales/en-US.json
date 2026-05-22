@@ -264,7 +264,7 @@
                 },
                 "database": {
                     "name": "Database",
-                    "desc": "Connect to a database to load data. Supported databases: MySQL, PostgreSQL, Oracle, SQL Server, and SQLite."
+                    "desc": "Connect to a database to load data. Supported engines include PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, MongoDB, ClickZetta, SQL Server, and more."
                 },
                 "demo": {
                     "name": "Demo",

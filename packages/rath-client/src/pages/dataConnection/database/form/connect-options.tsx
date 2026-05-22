@@ -28,6 +28,14 @@ const FlexingTextField = styled(TextField)`
     }
 `;
 
+const Hint = styled.div`
+    grid-column: 1 / -1;
+    color: #5b5b5b;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: -0.2em;
+`;
+
 const ConnectUriField = styled(FlexingTextField)`
     display: flex;
     flex-direction: column;
@@ -134,8 +142,12 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
     }, [sourceType]);
 
     useEffect(() => {
-        setConnectUri('');
-    }, [sourceType, setConnectUri]);
+        if (databaseConfig?.defaultUri) {
+            setConnectUri(databaseConfig.defaultUri);
+        } else {
+            setConnectUri('');
+        }
+    }, [sourceType, setConnectUri, databaseConfig?.defaultUri]);
 
     const [credentialsRaw, setCredentialsRaw] = useState('');
 
@@ -280,6 +292,9 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                     />
                     <SubmitButton disabled={sourceType !== 'demo' && !connectUri} text={intl.get('common.submit')} onClick={submit} />
                 </Stack>
+                {databaseConfig?.connectionHint && (
+                    <Hint>{databaseConfig.connectionHint}</Hint>
+                )}
             </Form>
             {databaseConfig?.credentials === 'json' && (
                 <FlexingTextField

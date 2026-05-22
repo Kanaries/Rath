@@ -10,15 +10,19 @@ export type DatabaseLevelConfig<T extends DatabaseLevelType = DatabaseLevelType>
     enumerable?: boolean;
 };
 
-const databaseOptions: Array<
-    & IDropdownOption
-    & {
-        key: SupportedDatabaseType;
-        icon?: string;
-        rule: string;
-        levels: DatabaseLevelConfig[];
-        credentials?: 'json' | undefined;
-}> = [
+export type DatabaseOption = IDropdownOption & {
+    key: SupportedDatabaseType;
+    icon?: string;
+    rule: string;
+    levels: DatabaseLevelConfig[];
+    credentials?: 'json' | undefined;
+    /** Pre-filled URI for local/Docker demos */
+    defaultUri?: string;
+    /** Shown under the URI field to explain how to connect */
+    connectionHint?: string;
+};
+
+const databaseOptions: DatabaseOption[] = [
     {
         text: 'PostgreSQL',
         key: 'postgres',
@@ -39,6 +43,48 @@ const databaseOptions: Array<
         rule: 'mysql://{userName}:{password}@{host}/{database}',
         levels: [{ type: 'database' }, { type: 'table' }],
         icon: 'mysql.svg',
+    },
+    {
+        text: 'MariaDB',
+        key: 'mariadb',
+        rule: 'mysql+pymysql://{userName}:{password}@{host}:{port}/{database}',
+        connectionHint: 'Use PyMySQL over the MySQL wire protocol. MariaDB must be reachable from the connector service.',
+        levels: [{ type: 'database' }, { type: 'table' }],
+        icon: 'mysql.svg',
+    },
+    {
+        text: 'SQLite',
+        key: 'sqlite',
+        rule: 'sqlite:////data/databases/{fileName}.sqlite',
+        defaultUri: 'sqlite:////data/databases/sample.sqlite',
+        connectionHint: 'Docker mounts ./data/connector-databases to /data/databases. Copy your .sqlite file there, or use the bundled sample.',
+        levels: [{ type: 'table' }],
+        icon: 'postgres.svg',
+    },
+    {
+        text: 'DuckDB',
+        key: 'duckdb',
+        rule: 'duckdb:////data/databases/{fileName}.duckdb',
+        defaultUri: 'duckdb:////data/databases/sample.duckdb',
+        connectionHint: 'Docker mounts ./data/connector-databases to /data/databases. Copy your .duckdb file there, or use the bundled sample.',
+        levels: [{ type: 'schema' }, { type: 'table' }],
+        icon: 'postgres.svg',
+    },
+    {
+        text: 'MongoDB',
+        key: 'mongodb',
+        rule: 'mongodb://{userName}:{password}@{host}:{port}/',
+        connectionHint: 'Browse database → collection to import. For custom queries, select a collection first; use the collection name or a JSON aggregation pipeline.',
+        levels: [{ type: 'database' }, { type: 'table' }],
+        icon: 'postgres.svg',
+    },
+    {
+        text: 'ClickZetta',
+        key: 'clickzetta',
+        rule: 'clickzetta://{userName}:{password}@{instance}.api.clickzetta.com/{workspace}?schema={schema}&vcluster={vcluster}',
+        connectionHint: 'Requires clickzetta-sqlalchemy and network access to your ClickZetta workspace. Include schema and vcluster in the URI query string.',
+        levels: [{ type: 'schema' }, { type: 'table' }],
+        icon: 'clickhouse.svg',
     },
     {
         text: 'Apache Kylin',

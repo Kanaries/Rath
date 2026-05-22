@@ -2,3 +2,8 @@ Flask
 Flask_cors
 SQLAlchemy==1.4.0
 gevent
+duckdb
+duckdb-engine
+pymongo
+PyMySQL
+clickzetta-sqlalchemy

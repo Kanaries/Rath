@@ -26,16 +26,27 @@ def get_connection():
     schema = props.get('schema', None)
     rows_num = props.get('rowsNum', 500)
     sql = props.get('query', None)
-    res = invoke(uri=uri,
-                 func=func,
-                 source_type=source_type,
-                 database=database,
-                 schema=schema,
-                 table=table,
-                 rows_num=rows_num,
-                 sql=sql,
-                 credentials=credentials,
-                 )
+    try:
+        res = invoke(uri=uri,
+                     func=func,
+                     source_type=source_type,
+                     database=database,
+                     schema=schema,
+                     table=table,
+                     rows_num=rows_num,
+                     sql=sql,
+                     credentials=credentials,
+                     )
+    except KeyError:
+        return {
+            'success': False,
+            'message': f'Unsupported connector operation: {source_type}.{func}',
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': str(e),
+        }
     if 'errorMessage' in res:
         return {
             'success': False,
@@ -74,8 +85,13 @@ def invoke(uri, func, source_type, database, schema, table, rows_num, sql, crede
             "rows": res_list[2]
         }
     elif func == 'getResult':
-        res_list = dict_func['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql,
-                                                                           credentials=credentials_64)
+        res_list = dict_func['{0}_getresult'.format(source_type)].__func__(
+            uri=uri,
+            sql=sql,
+            credentials=credentials_64,
+            database=database,
+            table=table,
+        )
         return {
             "columns": res_list[0],
             "rows": res_list[1]

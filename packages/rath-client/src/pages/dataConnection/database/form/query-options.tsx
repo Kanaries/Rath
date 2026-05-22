@@ -164,12 +164,18 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     }, [curPreview, page, config, credentials]);
 
     const doPreview = (query?: string) => {
+        const activePage = typeof pageIdx === 'number' ? pages[pageIdx] : undefined;
+        const path = activePage?.path ?? [];
+        const reversedPath = path.slice().reverse();
         // TODO: requires abstraction and props check
         setEditorPreview(
             fetchQueryResult(commonParamsRef.current.server, {
                 uri: commonParamsRef.current.connectUri,
                 sourceType: commonParamsRef.current.sourceType,
                 query: query ?? queryString,
+                db: reversedPath.find(d => d.group === 'database')?.key ?? null,
+                schema: reversedPath.find(d => d.group === 'schema')?.key ?? null,
+                table: reversedPath.find(d => d.group === 'table')?.key ?? null,
                 credentials: config?.credentials === 'json' ? credentials : undefined,
             }).then<{ name: string; value: TableData }>(res => ({
                 name: 'query result',

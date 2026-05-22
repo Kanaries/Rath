@@ -38,6 +38,7 @@ services:
   connector-api:
     volumes:
       - ./services/connector:/connector:cached
+      - ./data/connector-databases:/data/databases
       - rath_pip_cache:/root/.cache/pip
     environment:
       - FLASK_APP=app.py

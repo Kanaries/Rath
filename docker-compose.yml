@@ -23,6 +23,8 @@ services:
     build:
       context: ./services/connector
       dockerfile: Dockerfile
+    volumes:
+      - ./data/connector-databases:/data/databases
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/ping', timeout=2).read(); print('ok')"]
       interval: 10s

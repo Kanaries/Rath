@@ -2,6 +2,57 @@
 # 9:13
 from sqlalchemy import create_engine
 import numbers
+import json
+from urllib.parse import parse_qs, urlparse
+
+
+def _rows_from_result(res):
+    col_res = res.keys()
+    columns = [column for column in col_res]
+    sql_result = []
+    for row in res.fetchall():
+        rows = []
+        for item in row:
+            if isinstance(item, numbers.Number):
+                rows.append(item)
+            else:
+                rows.append(str(item))
+        sql_result.append(rows)
+    return columns, sql_result
+
+
+def _mongo_flatten_doc(doc, prefix=''):
+    items = {}
+    if not isinstance(doc, dict):
+        return {prefix or 'value': doc}
+    for key, value in doc.items():
+        field = f'{prefix}.{key}' if prefix else key
+        if isinstance(value, dict):
+            items.update(_mongo_flatten_doc(value, field))
+        elif isinstance(value, list):
+            items[field] = json.dumps(value, default=str)
+        else:
+            items[field] = value
+    return items
+
+
+def _clickzetta_schema_from_uri(uri):
+    query = parse_qs(urlparse(uri).query)
+    schema_values = query.get('schema') or query.get('Schema')
+    if schema_values:
+        return schema_values[0]
+    return None
+
+
+def _mongo_collect_field_order(docs):
+    field_order = []
+    for doc in docs:
+        for key in _mongo_flatten_doc(doc).keys():
+            if key not in field_order:
+                field_order.append(key)
+    if not field_order:
+        field_order = ['_id']
+    return field_order
 
 
 class basefunc:
@@ -1099,3 +1150,313 @@ class basefunc:
                     rows.append(str(item))
             sql_result.append(rows)
         return [columns, sql_result]
+
+    # sqlite
+    @staticmethod
+    def sqlite_gettable(uri, database, schema,**kwargs):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        ).fetchall()
+        table_list = []
+        for row in res:
+            for item in row:
+                meta = basefunc.sqlite_getmeta(database=database, schema=schema, table=item, engine=engine)
+                table_list.append({"name": item, "meta": meta})
+        return table_list
+
+    @staticmethod
+    def sqlite_getmeta(database, table, schema, engine=None,**kwargs):
+        meta_res = engine.execute(f'PRAGMA table_info("{table}")').fetchall()
+        meta = []
+        for i, col_data in enumerate(meta_res):
+            meta.append({"key": col_data.name, "colIndex": i, "dataType": col_data.type})
+        return meta
+
+    @staticmethod
+    def sqlite_getdata(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        data_res = engine.execute(f'SELECT * FROM "{table}" LIMIT {rows_num}').fetchall()
+        return [list(row) for row in data_res]
+
+    @staticmethod
+    def sqlite_getdetail(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        meta = basefunc.sqlite_getmeta(database=database, schema=schema, table=table, engine=engine)
+        sql = f'SELECT * FROM "{table}" LIMIT {rows_num}'
+        res_list = basefunc.sqlite_getresult(sql=sql, engine=engine)
+        return [meta, res_list[0], res_list[1]]
+
+    @staticmethod
+    def sqlite_getresult(sql, uri=None, engine=None,**kwargs):
+        if engine is None:
+            engine = create_engine(uri, echo=True)
+        res = engine.execute(sql)
+        columns, sql_result = _rows_from_result(res)
+        return [columns, sql_result]
+
+    # duckdb
+    @staticmethod
+    def duckdb_getschema(uri, db,**kwargs):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute(
+            "SELECT schema_name FROM information_schema.schemata ORDER BY schema_name"
+        ).fetchall()
+        schema_list = []
+        for row in res:
+            for item in row:
+                if item not in ('information_schema', 'pg_catalog'):
+                    schema_list.append(item)
+        return schema_list or ['main']
+
+    @staticmethod
+    def duckdb_gettable(uri, database, schema,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or 'main'
+        res = engine.execute(
+            "SELECT table_name FROM information_schema.tables "
+            f"WHERE table_schema = '{schema_name}' AND table_type = 'BASE TABLE' ORDER BY table_name"
+        ).fetchall()
+        table_list = []
+        for row in res:
+            for item in row:
+                meta = basefunc.duckdb_getmeta(database=database, schema=schema_name, table=item, engine=engine)
+                table_list.append({"name": item, "meta": meta})
+        return table_list
+
+    @staticmethod
+    def duckdb_getmeta(database, table, schema, engine=None,**kwargs):
+        schema_name = schema or 'main'
+        meta_res = engine.execute(
+            "SELECT column_name, data_type FROM information_schema.columns "
+            f"WHERE table_schema = '{schema_name}' AND table_name = '{table}' ORDER BY ordinal_position"
+        ).fetchall()
+        meta = []
+        for i, col_data in enumerate(meta_res):
+            meta.append({"key": col_data.column_name, "colIndex": i, "dataType": col_data.data_type})
+        return meta
+
+    @staticmethod
+    def duckdb_getdata(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or 'main'
+        data_res = engine.execute(
+            f'SELECT * FROM "{schema_name}"."{table}" LIMIT {rows_num}'
+        ).fetchall()
+        return [list(row) for row in data_res]
+
+    @staticmethod
+    def duckdb_getdetail(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or 'main'
+        meta = basefunc.duckdb_getmeta(database=database, schema=schema_name, table=table, engine=engine)
+        sql = f'SELECT * FROM "{schema_name}"."{table}" LIMIT {rows_num}'
+        res_list = basefunc.duckdb_getresult(sql=sql, engine=engine)
+        return [meta, res_list[0], res_list[1]]
+
+    @staticmethod
+    def duckdb_getresult(sql, uri=None, engine=None,**kwargs):
+        if engine is None:
+            engine = create_engine(uri, echo=True)
+        res = engine.execute(sql)
+        columns, sql_result = _rows_from_result(res)
+        return [columns, sql_result]
+
+    # clickzetta
+    @staticmethod
+    def clickzetta_getschema(uri, db,**kwargs):
+        schema_from_uri = _clickzetta_schema_from_uri(uri)
+        engine = create_engine(uri, echo=True)
+        try:
+            res = engine.execute('SHOW SCHEMAS').fetchall()
+            schema_list = []
+            for row in res:
+                for item in row:
+                    schema_list.append(item)
+            if schema_list:
+                return schema_list
+        except Exception:
+            pass
+        try:
+            res = engine.execute(
+                "SELECT schema_name FROM information_schema.schemata ORDER BY schema_name"
+            ).fetchall()
+            schema_list = []
+            for row in res:
+                for item in row:
+                    schema_list.append(item)
+            if schema_list:
+                return schema_list
+        except Exception:
+            pass
+        if schema_from_uri:
+            return [schema_from_uri]
+        raise ValueError(
+            'Could not list ClickZetta schemas. Include ?schema=your_schema in the connection URI.'
+        )
+
+    @staticmethod
+    def clickzetta_gettable(uri, database, schema,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or _clickzetta_schema_from_uri(uri) or 'public'
+        try:
+            res = engine.execute(f'SHOW TABLES IN {schema_name}').fetchall()
+        except Exception:
+            res = engine.execute(
+                "SELECT table_name FROM information_schema.tables "
+                f"WHERE table_schema = '{schema_name}' ORDER BY table_name"
+            ).fetchall()
+        table_list = []
+        for row in res:
+            for item in row:
+                meta = basefunc.clickzetta_getmeta(
+                    database=database, schema=schema_name, table=item, engine=engine
+                )
+                table_list.append({"name": item, "meta": meta})
+        return table_list
+
+    @staticmethod
+    def clickzetta_getmeta(database, table, schema, engine=None,**kwargs):
+        schema_name = schema or 'public'
+        meta_res = engine.execute(
+            "SELECT column_name, data_type FROM information_schema.columns "
+            f"WHERE table_schema = '{schema_name}' AND table_name = '{table}' ORDER BY ordinal_position"
+        ).fetchall()
+        meta = []
+        for i, col_data in enumerate(meta_res):
+            meta.append({"key": col_data.column_name, "colIndex": i, "dataType": col_data.data_type})
+        return meta
+
+    @staticmethod
+    def clickzetta_getdata(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or 'public'
+        data_res = engine.execute(
+            f'SELECT * FROM {schema_name}.{table} LIMIT {rows_num}'
+        ).fetchall()
+        return [list(row) for row in data_res]
+
+    @staticmethod
+    def clickzetta_getdetail(uri, database, table, schema, rows_num,**kwargs):
+        engine = create_engine(uri, echo=True)
+        schema_name = schema or 'public'
+        meta = basefunc.clickzetta_getmeta(database=database, schema=schema_name, table=table, engine=engine)
+        sql = f'SELECT * FROM {schema_name}.{table} LIMIT {rows_num}'
+        res_list = basefunc.clickzetta_getresult(sql=sql, engine=engine)
+        return [meta, res_list[0], res_list[1]]
+
+    @staticmethod
+    def clickzetta_getresult(sql, uri=None, engine=None,**kwargs):
+        if engine is None:
+            engine = create_engine(uri, echo=True)
+        res = engine.execute(sql)
+        columns, sql_result = _rows_from_result(res)
+        return [columns, sql_result]
+
+    # mongodb
+    @staticmethod
+    def _mongo_client(uri, **kwargs):
+        from pymongo import MongoClient
+        return MongoClient(uri, serverSelectionTimeoutMS=5000)
+
+    @staticmethod
+    def mongo_getdb(uri, schema,**kwargs):
+        client = basefunc._mongo_client(uri)
+        return sorted(client.list_database_names())
+
+    @staticmethod
+    def mongo_gettable(uri, database, schema,**kwargs):
+        client = basefunc._mongo_client(uri)
+        db = client[database]
+        table_list = []
+        for collection_name in sorted(db.list_collection_names()):
+            sample = db[collection_name].find_one() or {'_id': None}
+            flattened = _mongo_flatten_doc(sample)
+            meta = [
+                {"key": key, "colIndex": index, "dataType": type(value).__name__}
+                for index, (key, value) in enumerate(flattened.items())
+            ]
+            table_list.append({"name": collection_name, "meta": meta})
+        return table_list
+
+    @staticmethod
+    def mongo_getmeta(database, table, schema, engine=None, uri=None,**kwargs):
+        client = basefunc._mongo_client(uri)
+        sample = client[database][table].find_one() or {}
+        flattened = _mongo_flatten_doc(sample)
+        return [
+            {"key": key, "colIndex": index, "dataType": type(value).__name__}
+            for index, (key, value) in enumerate(flattened.items())
+        ]
+
+    @staticmethod
+    def mongo_getdata(uri, database, table, schema, rows_num,**kwargs):
+        client = basefunc._mongo_client(uri)
+        docs = list(client[database][table].find().limit(int(rows_num)))
+        field_order = _mongo_collect_field_order(docs)
+        rows = []
+        for doc in docs:
+            flattened = _mongo_flatten_doc(doc)
+            rows.append([flattened.get(key, None) for key in field_order])
+        return rows
+
+    @staticmethod
+    def mongo_getdetail(uri, database, table, schema, rows_num,**kwargs):
+        client = basefunc._mongo_client(uri)
+        docs = list(client[database][table].find().limit(int(rows_num)))
+        field_order = _mongo_collect_field_order(docs)
+        meta = [
+            {"key": key, "colIndex": index, "dataType": None}
+            for index, key in enumerate(field_order)
+        ]
+        rows = []
+        for doc in docs:
+            flattened = _mongo_flatten_doc(doc)
+            rows.append([flattened.get(key, None) for key in field_order])
+        return [meta, field_order, rows]
+
+    @staticmethod
+    def mongo_getresult(sql, uri=None, engine=None,**kwargs):
+        client = basefunc._mongo_client(uri)
+        database = kwargs.get('database')
+        if not database:
+            raise ValueError(
+                'MongoDB queries require a selected database. Browse to a database and collection first, '
+                'or use the table browser to import data.'
+            )
+        db = client[database]
+        query = (sql or '').strip()
+        collection_name = kwargs.get('table')
+        if query.startswith('['):
+            if not collection_name:
+                raise ValueError('MongoDB aggregation queries require a selected collection from the browser.')
+            pipeline = json.loads(query)
+            cursor = db[collection_name].aggregate(pipeline)
+        elif query:
+            cursor = db[query].find().limit(500)
+            collection_name = query
+        elif collection_name:
+            cursor = db[collection_name].find().limit(500)
+        else:
+            raise ValueError(
+                'Enter a collection name as the query, select a collection in the browser, '
+                'or provide a JSON aggregation pipeline.'
+            )
+        docs = list(cursor)
+        field_order = _mongo_collect_field_order(docs)
+        rows = []
+        for doc in docs:
+            flattened = _mongo_flatten_doc(doc)
+            row = []
+            for key in field_order:
+                value = flattened.get(key, None)
+                if isinstance(value, numbers.Number):
+                    row.append(value)
+                else:
+                    row.append(str(value) if value is not None else None)
+            rows.append(row)
+        return [field_order, rows]
+
+
+for _name in ('getdb', 'gettable', 'getmeta', 'getdata', 'getdetail', 'getresult'):
+    setattr(basefunc, f'mariadb_{_name}', getattr(basefunc, f'mysql_{_name}'))
