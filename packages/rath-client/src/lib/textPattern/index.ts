@@ -1,15 +1,15 @@
 // Copyright (C) 2023 observedobserver
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -18,13 +18,20 @@
 // import 'buffer/'
 import { Buffer } from 'buffer';
 // @ts-ignore
-if (window.Buffer === undefined) window.Buffer = Buffer;
+if (typeof window === 'object' && window.Buffer === undefined) window.Buffer = Buffer;
 import regexgen from 'regexgen';
 import type { IPatternNode, ITextPattern, ITextSelection } from './interfaces';
 import { getPatternNodeScore, patternNodeCompare } from './rank';
 
 export type { IPatternNode, ITextPattern, ITextSelection };
 
+/**
+ * The static knowledge base: a hierarchy of semantic pattern classes.
+ * Depth encodes specificity — deeper nodes are more specific abstractions
+ * and are preferred by the ranking (see rank.ts).
+ * The tree is never mutated; candidates are induced by evaluating every
+ * node against the user selections (see induceCandidateNodes).
+ */
 function initPatternTree(): IPatternNode {
     const root: IPatternNode = {
         pattern: /.+/,
@@ -54,7 +61,7 @@ function initPatternTree(): IPatternNode {
                                 children: [],
                             },
                             {
-                                name: 'date',
+                                name: 'isoDate',
                                 pattern: /(\d{4}-\d{2}-\d{2})/,
                                 type: 'knowledge',
                                 children: [],
@@ -95,7 +102,7 @@ function initPatternTree(): IPatternNode {
                     {
                         name: 'email',
                         type: 'knowledge',
-                        pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}/,
+                        pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
                         children: [],
                     },
                     {
@@ -151,136 +158,106 @@ function initPatternTree(): IPatternNode {
 
 function createSafeRegExp(str: string): RegExp {
     return new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  }
-function addPattern2PatternTree(exactPattern: string, tree: IPatternNode) {
-    const nodePattern = new RegExp(`^${tree.pattern.source}$`);
-    if (nodePattern.test(exactPattern)) {
-        if (tree.type === 'specific') {
-            return;
-        }
-        if (tree.type === 'generalize') {
-            for (let child of tree.children) {
-                const childPattern = new RegExp(`^${child.pattern.source}$`);
-                if (childPattern.test(exactPattern)) {
-                    return;
-                }
+}
+/**
+ * regexgen may emit a top-level alternation (e.g. /bar|foo/); anchoring or concatenating
+ * its source without a group would bind `^`/`$` to a single branch, so always wrap.
+ */
+function anchoredFullMatch(pattern: RegExp): RegExp {
+    return new RegExp(`^(?:${pattern.source})$`);
+}
+function composePattern(ph: RegExp, selection: RegExp, pe: RegExp): RegExp {
+    return new RegExp(`(?:${ph.source})(?<selection>${selection.source})(?:${pe.source})`);
+}
+
+interface IKnowledgeEntry {
+    node: IPatternNode;
+    depth: number;
+    anchored: RegExp;
+}
+let knowledgeEntriesCache: IKnowledgeEntry[] | null = null;
+/** flatten the static knowledge tree once (pre-order), pre-compiling anchored matchers */
+function getKnowledgeEntries(): IKnowledgeEntry[] {
+    if (knowledgeEntriesCache === null) {
+        const entries: IKnowledgeEntry[] = [];
+        const walk = (node: IPatternNode, depth: number) => {
+            entries.push({ node, depth, anchored: anchoredFullMatch(node.pattern) });
+            for (let child of node.children) {
+                walk(child, depth + 1);
             }
-            tree.children.push({
-                name: exactPattern,
-                pattern: createSafeRegExp(exactPattern),
-                type: 'specific',
+        };
+        walk(initPatternTree(), 0);
+        knowledgeEntriesCache = entries;
+    }
+    return knowledgeEntriesCache;
+}
+
+/**
+ * Induce candidate patterns for a set of selected strings.
+ *
+ * Every knowledge node that full-matches ALL selections is a candidate — each node is
+ * evaluated independently, so a string can be abstracted along several branches at once
+ * (e.g. "2021-07-08" is both a pureStr and an isoDate). On top of the knowledge
+ * candidates two data-driven candidates are added:
+ *  - a `generalize` node: the minimal literal union of the selections (regexgen),
+ *    one level deeper than the deepest matching knowledge node;
+ *  - a `specific` node when there is a single distinct selection: the escaped literal.
+ *
+ * Scoring stays depth/specLabel (see rank.ts): deeper — more specific — wins.
+ */
+function induceCandidateNodes(uniqueSelections: string[]): IPatternNode[] {
+    const specCount = uniqueSelections.length;
+    if (specCount === 0) {
+        return [];
+    }
+    const candidates: IPatternNode[] = [];
+    let deepestMatch = 0;
+    for (const { node, depth, anchored } of getKnowledgeEntries()) {
+        if (uniqueSelections.every((s) => anchored.test(s))) {
+            candidates.push({
+                name: node.name,
+                pattern: node.pattern,
+                type: 'knowledge',
                 children: [],
+                depth,
+                specLabel: specCount,
             });
-            tree.pattern = regexgen(tree.children.map((c) => c.pattern.source));
-            tree.name = tree.pattern.source;
-            return;
-        }
-        // discuss: create new generalize node
-        for (let child of tree.children) {
-            const childPattern = new RegExp(`^${child.pattern.source}$`);
-            if (childPattern.test(exactPattern)) {
-                addPattern2PatternTree(exactPattern, child);
-                return;
-            }
-        }
-        const generalizeChild = tree.children.find((c) => c.type === 'generalize');
-        if (generalizeChild) {
-            generalizeChild.pattern = regexgen(generalizeChild.children.map((c) => c.pattern.source).concat(exactPattern));
-            generalizeChild.name = generalizeChild.pattern.source;
-            generalizeChild.children.push({
-                name: exactPattern,
-                pattern: createSafeRegExp(exactPattern),
-                type: 'specific',
-                children: [],
-            });
-        } else {
-            tree.children.push({
-                name: exactPattern,
-                pattern: createSafeRegExp(exactPattern),
-                type: 'generalize',
-                children: [
-                    {
-                        name: exactPattern,
-                        pattern: createSafeRegExp(exactPattern),
-                        type: 'specific',
-                        children: [],
-                    },
-                ],
-            });
-        }
-    }
-    return tree;
-}
-
-function LCALabeling(tree: IPatternNode, depth: number): number {
-    if (tree.type === 'specific') {
-        tree.specLabel = 1;
-        tree.depth = depth;
-        return 1;
-    }
-    let specLabel = 0;
-    for (let child of tree.children) {
-        specLabel += LCALabeling(child, depth + 1);
-    }
-    tree.specLabel = specLabel;
-    tree.depth = depth;
-    return specLabel;
-}
-
-function collectingCANodes(tree: IPatternNode, label: number, nodes: IPatternNode[]) {
-    if (tree.specLabel === label) {
-        nodes.push(tree);
-    } else {
-        return;
-    }
-    for (let child of tree.children) {
-        collectingCANodes(child, label, nodes);
-    }
-}
-
-function findCommonParentsOfSepcificNodesInPatternTree(tree: IPatternNode): IPatternNode[] {
-    const parents: IPatternNode[] = [];
-    LCALabeling(tree, 0);
-    collectingCANodes(tree, tree.specLabel, parents);
-    return parents;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getRepeatNodes(nodes1: IPatternNode[], nodes2: IPatternNode[]): IPatternNode[] {
-    const repeatNodes: IPatternNode[] = [];
-    for (let node1 of nodes1) {
-        for (let node2 of nodes2) {
-            if (node1.name === node2.name) {
-                repeatNodes.push(node1);
+            if (depth > deepestMatch) {
+                deepestMatch = depth;
             }
         }
     }
-    return repeatNodes;
-}
-
-function copyNode(node: IPatternNode): IPatternNode {
-    let nextNode: IPatternNode = {
-        name: node.name,
-        pattern: node.pattern,
-        type: node.type,
+    const union = regexgen(uniqueSelections);
+    candidates.push({
+        name: union.source,
+        pattern: union,
+        type: 'generalize',
         children: [],
-        specLabel: node.specLabel,
-        depth: node.depth,
-    };
-    for (let child of node.children) {
-        nextNode.children.push(copyNode(child));
+        depth: deepestMatch + 1,
+        specLabel: specCount,
+    });
+    if (specCount === 1) {
+        candidates.push({
+            name: uniqueSelections[0],
+            raw: uniqueSelections[0],
+            pattern: createSafeRegExp(uniqueSelections[0]),
+            type: 'specific',
+            children: [],
+            depth: deepestMatch + 2,
+            specLabel: 1,
+        });
     }
-    return nextNode;
+    candidates.sort(patternNodeCompare);
+    return candidates;
 }
 
 export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[] {
-    const patternTree = initPatternTree();
-    // const patternTypes = new Set<string>();
+    if (textSelection.length === 0) {
+        return [];
+    }
     const rawPH: string[] = [];
     const rawPE: string[] = [];
-    let uniques: IPatternNode[] = [];
     for (let text of textSelection) {
-        const selection = text.str.slice(text.startIndex, text.endIndex);
         if (text.startIndex !== 0) {
             let headStart = text.startIndex - 1;
             if (/[^\w]/.test(text.str[headStart])) {
@@ -299,26 +276,23 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
             }
             rawPE.push(text.str.slice(text.endIndex, tailEnd));
         }
-        addPattern2PatternTree(selection, patternTree);
-        const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
-        uniques = commonParents
     }
-    // const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree);
-    uniques.sort(patternNodeCompare);
+    const uniqueSelections = Array.from(new Set(textSelection.map((t) => t.str.slice(t.startIndex, t.endIndex))));
+    let uniques = induceCandidateNodes(uniqueSelections);
     if (textSelection.length === 1) {
         uniques = uniques.filter(u => u.type === 'knowledge').concat(uniques.filter(u => u.type !== 'knowledge'))
     }
-    // console.log('commonParents', uniques, patternTree, textSelection);
-    // console.log(rawPE, rawPH)
-    // const ph = rawPH.length > 0 ? regexgen(rawPH) : new RegExp('^');
-    // const pe = rawPE.length > 0 ? regexgen(rawPE) : new RegExp('$');
     let phs: RegExp[] = [new RegExp('^')];
     let pes: RegExp[] = [new RegExp('$')];
+    // besides the induced context patterns, always keep an empty context as a candidate:
+    // when selections mix string-boundary and mid-string positions, no induced context
+    // can verify on every selection, and without the empty fallback the whole candidate
+    // set collapses to the weakest catch-all pattern.
     if (rawPH.length > 0) {
-        phs = textPatternInduction(rawPH).map(p => p.pattern)
+        phs = textPatternInduction(rawPH).map(p => p.pattern).concat([new RegExp('')])
     }
     if (rawPE.length > 0) {
-        pes = textPatternInduction(rawPE).map(p => p.pattern)
+        pes = textPatternInduction(rawPE).map(p => p.pattern).concat([new RegExp('')])
     }
     const ans: ITextPattern[] = [];
 
@@ -329,7 +303,7 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
                     ph,
                     pe,
                     selection: uni.pattern,
-                    pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
+                    pattern: composePattern(ph, uni.pattern, pe),
                     selectionType: uni.type,
                     score: getPatternNodeScore(uni)
                 }
@@ -344,30 +318,10 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
             }
         }
     }
-    // uniques.length === 0 wihch is impossible
     if (ans.length === 0) {
-        const sl = regexgen(textSelection.map(t => t.str.slice(t.startIndex, t.endIndex)))
-        for (let ph of phs) {
-            for (let pe of pes) {
-                
-                const patt: ITextPattern = {
-                    ph,
-                    pe,
-                    selection: sl,
-                    pattern: new RegExp(`${ph.source}(?<selection>${sl.source})${pe.source}`),
-                    selectionType: 'generalize',
-                    score: 1
-                };
-                const match = textSelection.every(text => {
-                    const res = extractSelection(patt ,text.str)
-                    if (res.missing) return false;
-                    return res.matchPos[0] === text.startIndex && res.matchPos[1] === text.endIndex;
-                });
-                if (match) {
-                    ans.push(patt);
-                }
-            }
-        }
+        // the literal-union candidate has already been tried against every (ph, pe)
+        // combination above, so only the unverified catch-all is left to offer
+        const sl = regexgen(uniqueSelections);
         ans.push({
             ph: /.*/,
             pe: /.*/,
@@ -380,39 +334,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
     return ans
 }
 
-export function textPatternInduction(textList: string[]) {
-    const patternTree = initPatternTree();
-    let uniques: IPatternNode[] = [];
-    for (let text of textList) {
-        addPattern2PatternTree(text, patternTree);
-        const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
-        // if (uniques.length === 0) {
-        //     uniques = commonParents;
-        // } else {
-        //     uniques = getRepeatNodes(uniques, commonParents);
-        // }
-        uniques = commonParents;
-    }
-    const ph = /^/;
-    const pe =  /$/;
-    uniques = uniques.filter(uni => {
-
-        const patt: ITextPattern = {
-            ph,
-            pe,
-            selection: uni.pattern,
-            pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
-            selectionType: uni.type,
-            score: getPatternNodeScore(uni)
-        }
-        return textList.every(text => {
-            const res = extractSelection(patt ,text)
-            if (res.missing) return false;
-            return res.matchPos[0] === 0 && res.matchPos[1] === text.length;
-        })
-    })
-    uniques.sort(patternNodeCompare);
-    return uniques
+export function textPatternInduction(textList: string[]): IPatternNode[] {
+    return induceCandidateNodes(Array.from(new Set(textList)));
 }
 
 type IExtractResult =
@@ -424,10 +347,26 @@ type IExtractResult =
     | {
           missing: true;
       };
+
+const patternWithIndicesCache: Map<string, RegExp> = new Map();
+/** recompiling with the 'd' flag on every call is wasteful — extraction runs per table cell */
+function compileWithIndices(pattern: RegExp): RegExp {
+    const key = `${pattern.source} ${pattern.flags}`;
+    let compiled = patternWithIndicesCache.get(key);
+    if (compiled === undefined) {
+        if (patternWithIndicesCache.size >= 512) {
+            patternWithIndicesCache.clear();
+        }
+        compiled = new RegExp(pattern.source, pattern.flags.includes('d') ? pattern.flags : pattern.flags + 'd');
+        patternWithIndicesCache.set(key, compiled);
+    }
+    return compiled;
+}
+
 export function extractSelection(selectionPattern: ITextPattern, text: string): IExtractResult {
     if (text.length === 0) return { missing: true };
-    const { pattern } = selectionPattern;
-    const patternForIndices = new RegExp(pattern.source, pattern.flags + 'd');
+    const patternForIndices = compileWithIndices(selectionPattern.pattern);
+    patternForIndices.lastIndex = 0;
     const match = patternForIndices.exec(text);
     // @ts-ignore
     if (match && match.indices) {

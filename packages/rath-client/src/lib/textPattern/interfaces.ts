@@ -20,6 +20,8 @@ export interface IPatternNode {
     name: string;
     children: IPatternNode[];
     type: ITextPatternType;
+    /** for `specific` nodes: the raw (unescaped) selected string, used as regexgen input */
+    raw?: string;
     [key: string]: any;
 }
 export interface ITextSelection {
