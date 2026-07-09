@@ -6,7 +6,7 @@ import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IFieldMeta, IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern } from '../../../lib/textPattern';
+import { attachColumnStats, extractSelection, findViolatedNegative, intersectPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
 import NestPanel from './components/nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
@@ -46,11 +46,38 @@ function provideSelectionRange (selectedRange: Range, currentNode: Node): { len:
 
 const ADD_BATCH_SIZE = 5;
 
+/** any of Alt / Ctrl / ⌘ works as the exclusion modifier — not every keyboard has an Alt key */
+function isExcludeModifier(e: React.MouseEvent): boolean {
+    return e.altKey || e.ctrlKey || e.metaKey;
+}
+
+/**
+ * hover-revealed toggle for excluding / restoring a cell — the pointer-only alternative
+ * to modifier+click. Renders no text node (the glyph lives in CSS ::after), so it never
+ * shifts the offsets of text selections made inside the cell.
+ */
+const ExcludeToggleButton: React.FC<{ excluded: boolean; title: string; onToggle: () => void }> = ({ excluded, title, onToggle }) => (
+    <button
+        type="button"
+        className={`tp-exclude-btn${excluded ? ' tp-exclude-btn-restore' : ''}`}
+        title={title}
+        aria-label={title}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
+        onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+        }}
+    />
+);
+
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage, datasetId } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
     const [textSelectList, setTextSelectList] = useState<IFieldTextSelection[]>([]);
+    // cells the user excluded (negative examples): the pattern must not match these values
+    const [textNegativeList, setTextNegativeList] = useState<IFieldTextSelection[]>([]);
     const [editTP, setEditTP] = useState<boolean>(false);
     // const [textPatternList, setTextPatternList] = useState<IFieldTextPattern[]>([]);
     const [groupedTextPatternList, setGroupedTextPatternList] = useState<{
@@ -72,6 +99,7 @@ const DataTable: React.FC = (props) => {
         // clean state
         setFilteredData([]);
         setTextSelectList([]);
+        setTextNegativeList([]);
         setEditTP(false);
         setGroupedTextPatternList(initGroupedTextPatternList());
         setTpPos({
@@ -86,10 +114,10 @@ const DataTable: React.FC = (props) => {
         });
     }, [datasetId]);
 
-    const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
+    const tsList2tpList = useCallback((tsl: IFieldTextSelection[], negatives: string[] = []) => {
         try {
             if (tsl.length === 0) return [];
-            const res = uniquePattern(intersectPattern(tsl));
+            const res = uniquePattern(intersectPattern(tsl, negatives));
             return res.map((r) => ({
                 ...r,
                 fid: tsl[0].fid,
@@ -98,6 +126,28 @@ const DataTable: React.FC = (props) => {
             return [];
         }
     }, []);
+
+    const columnValuesOf = useCallback(
+        (fid: string): string[] => {
+            return filteredData.map((row) => `${row[fid] ?? ''}`);
+        },
+        [filteredData]
+    );
+
+    const recomputeTextPatterns = useCallback(
+        (nextTSL: IFieldTextSelection[], nextNegatives: IFieldTextSelection[]) => {
+            const fid = nextTSL.length > 0 ? nextTSL[0].fid : undefined;
+            const negatives = fid ? nextNegatives.filter((n) => n.fid === fid).map((n) => n.str) : [];
+            const nextTPL = tsList2tpList(nextTSL, negatives);
+            const positiveValues = nextTSL.map((t) => t.str);
+            const withStats = fid ? attachColumnStats(nextTPL, columnValuesOf(fid), undefined, positiveValues) : nextTPL;
+            const gtp = groupTextPattern(withStats);
+            setGroupedTextPatternList(gtp);
+            const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+            setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
+        },
+        [tsList2tpList, columnValuesOf]
+    );
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -143,6 +193,7 @@ const DataTable: React.FC = (props) => {
             const range = sl?.getRangeAt(0);
             if (!range) return;
             const selectedText = range.toString();
+            if (selectedText.length === 0) return;
             const selectedRange = range.cloneRange();
             const search = provideSelectionRange(selectedRange, td);
             if (search.found) {
@@ -154,7 +205,6 @@ const DataTable: React.FC = (props) => {
                     startIndex: startIndex,
                     endIndex: endIndex,
                 });
-                const nextTPL = tsList2tpList(nextTSL);
                 // fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
                 //     method: 'POST',
                 //     headers: {
@@ -196,20 +246,38 @@ const DataTable: React.FC = (props) => {
                 //     });
                 unstable_batchedUpdates(() => {
                     setTextSelectList(nextTSL);
-                    // setTextPatternList(nextTPL);
-                    const gtp = groupTextPattern(nextTPL);
-                    setGroupedTextPatternList(gtp);
-                    const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
-                    setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
+                    recomputeTextPatterns(nextTSL, textNegativeList);
                 });
             }
         },
         // [textSelectList, tsList2tpList, dataSourceStore.cleanedData]
-        [textSelectList, tsList2tpList]
+        [textSelectList, textNegativeList, recomputeTextPatterns]
     );
+    const onNegativeToggle = useCallback(
+        (fid: string, cellValue: string) => {
+            // negative examples only make sense while a pattern is being built on this field
+            if (textSelectList.length === 0 || textSelectList[0].fid !== fid) return;
+            const exists = textNegativeList.some((n) => n.fid === fid && n.str === cellValue);
+            const nextNegatives = exists
+                ? textNegativeList.filter((n) => !(n.fid === fid && n.str === cellValue))
+                : textNegativeList.concat({ fid, str: cellValue, startIndex: 0, endIndex: 0 });
+            unstable_batchedUpdates(() => {
+                setTextNegativeList(nextNegatives);
+                recomputeTextPatterns(textSelectList, nextNegatives);
+            });
+        },
+        [textSelectList, textNegativeList, recomputeTextPatterns]
+    );
+    const clearNegatives = useCallback(() => {
+        unstable_batchedUpdates(() => {
+            setTextNegativeList([]);
+            recomputeTextPatterns(textSelectList, []);
+        });
+    }, [textSelectList, recomputeTextPatterns]);
     const clearTextSelect = () => {
         unstable_batchedUpdates(() => {
             setTextSelectList([]);
+            setTextNegativeList([]);
             // setTextPatternList([]);
             setGroupedTextPatternList(initGroupedTextPatternList());
             setTpPos({
@@ -275,6 +343,27 @@ const DataTable: React.FC = (props) => {
         };
         col.render = (value: any) => {
             const text: string = `${value}`;
+            const hasActiveSelection = textSelectList.length > 0 && textSelectList[0].fid === f.fid;
+            const isExcluded = hasActiveSelection && textNegativeList.some((n) => n.fid === f.fid && n.str === text);
+            if (isExcluded) {
+                return (
+                    <span
+                        className="cell-content"
+                        title={intl.get('dataSource.textPattern.excludedHint')}
+                        style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.EXCLUDE_COLOR }}
+                        onMouseUp={(e) => {
+                            if (isExcludeModifier(e)) onNegativeToggle(f.fid, text);
+                        }}
+                    >
+                        {text}
+                        <ExcludeToggleButton
+                            excluded
+                            title={intl.get('dataSource.textPattern.excludedHint')}
+                            onToggle={() => onNegativeToggle(f.fid, text)}
+                        />
+                    </span>
+                );
+            }
             if (groupedTextPatternList[tpPos.groupKey][tpPos.index] && groupedTextPatternList[tpPos.groupKey][tpPos.index].fid === f.fid) {
                 const res = extractSelection(groupedTextPatternList[tpPos.groupKey][tpPos.index], text);
 
@@ -285,7 +374,12 @@ const DataTable: React.FC = (props) => {
                     const ele = (
                         <span
                             className="cell-content"
+                            title={intl.get('dataSource.textPattern.excludeHint')}
                             onMouseUp={(e) => {
+                                if (isExcludeModifier(e)) {
+                                    onNegativeToggle(f.fid, text);
+                                    return;
+                                }
                                 const ele = (e.currentTarget.className === 'cell-content' ? e.currentTarget : e.currentTarget.parentElement) as Node;
                                 onTextSelect(f.fid, `${text}`, ele);
                             }}
@@ -293,6 +387,11 @@ const DataTable: React.FC = (props) => {
                             <span>{textBeforeSelection}</span>
                             <span style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.SELECT_COLOR }}>{matchedText}</span>
                             <span>{textAfterSelection}</span>
+                            <ExcludeToggleButton
+                                excluded={false}
+                                title={intl.get('dataSource.textPattern.excludeHint')}
+                                onToggle={() => onNegativeToggle(f.fid, text)}
+                            />
                         </span>
                     );
                     return ele;
@@ -302,10 +401,23 @@ const DataTable: React.FC = (props) => {
                 <span
                     className="cell-content"
                     onMouseUp={(e) => {
+                        if (isExcludeModifier(e)) {
+                            // excluding an unmatched cell pins it as a negative example so
+                            // broader patterns picked later cannot silently match it either
+                            onNegativeToggle(f.fid, text);
+                            return;
+                        }
                         onTextSelect(f.fid, `${text}`, e.target as Node);
                     }}
                 >
                     {text}
+                    {hasActiveSelection && (
+                        <ExcludeToggleButton
+                            excluded={false}
+                            title={intl.get('dataSource.textPattern.excludeHint')}
+                            onToggle={() => onNegativeToggle(f.fid, text)}
+                        />
+                    )}
                 </span>
             );
         };
@@ -329,6 +441,7 @@ const DataTable: React.FC = (props) => {
     const hasPattern = (Object.keys(groupedTextPatternList) as IFieldTextPattern['selectionType'][]).some(
         (k: IFieldTextPattern['selectionType']) => groupedTextPatternList[k].length > 0
     );
+    const activeNegatives = textSelectList.length > 0 ? textNegativeList.filter((n) => n.fid === textSelectList[0].fid) : [];
 
     return (
         <div style={{ position: 'relative' }}>
@@ -347,6 +460,28 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
+            {textSelectList.length > 0 && !hasPattern && (
+                <MessageBar
+                    messageBarType={MessageBarType.info}
+                    isMultiline={false}
+                    styles={{
+                        root: {
+                            boxSizing: 'border-box',
+                            width: 'unset',
+                            margin: '2px 0 0 0',
+                        },
+                    }}
+                    actions={
+                        activeNegatives.length > 0 ? (
+                            <div>
+                                <MiniButton text={intl.get('dataSource.textPattern.clearExcluded')} onClick={clearNegatives} />
+                            </div>
+                        ) : undefined
+                    }
+                >
+                    <span>{intl.get('dataSource.textPattern.noPatternFound')}</span>
+                </MessageBar>
+            )}
             <div style={{ display: 'flex' }}>
                 {columns.length > 0 && (
                     <CustomBaseTable
@@ -360,6 +495,16 @@ const DataTable: React.FC = (props) => {
                 <NestPanel show={hasPattern} onClose={() => {}}>
                     <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
                     <Label>{intl.get('common.suggestions')}</Label>
+                    {activeNegatives.length > 0 ? (
+                        <div style={{ fontSize: 12, color: '#8c8c8c', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span>{intl.get('dataSource.textPattern.excludedCount', { count: activeNegatives.length })}</span>
+                            <MiniButton text={intl.get('dataSource.textPattern.clearExcluded')} onClick={clearNegatives} />
+                        </div>
+                    ) : (
+                        <div style={{ fontSize: 12, color: '#8c8c8c', margin: '0 0 8px 0' }}>
+                            {intl.get('dataSource.textPattern.excludeUsage')}
+                        </div>
+                    )}
                     {(['knowledge', 'generalize', 'specific', 'nlp'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
                         groupedTextPatternList[groupKey].slice(0, groupShownSize[groupKey]).map((tp, ti) => (
                             <TextPatternCard key={tp.pattern.source + ti}>
@@ -385,6 +530,16 @@ const DataTable: React.FC = (props) => {
                                         }
                                     </div>
                                 }
+                                {tp.stats && (
+                                    <div style={{ fontSize: 12, color: '#8c8c8c', margin: '4px 0' }}>
+                                        {intl.get('dataSource.textPattern.matchStats', {
+                                            rate: Math.round(tp.stats.matchRate * 100),
+                                            matched: tp.stats.matched,
+                                            total: tp.stats.total,
+                                            distinct: tp.stats.distinct,
+                                        })}
+                                    </div>
+                                )}
                                 <Stack tokens={{ childrenGap: 4 }}>
                                     <MiniButton
                                         text={intl.get(`common.${tpPos.index === ti && tpPos.groupKey === groupKey ? 'applied' : 'apply'}`)}
@@ -420,12 +575,23 @@ const DataTable: React.FC = (props) => {
                                 {tpPos.index === ti && tpPos.groupKey === groupKey && editTP && (
                                     <TPRegexEditor
                                         tp={tp}
+                                        validate={(patt) => {
+                                            const negatives = textNegativeList.filter((n) => n.fid === patt.fid).map((n) => n.str);
+                                            const violated = findViolatedNegative(patt, negatives);
+                                            return violated !== null ? intl.get('dataSource.textPattern.editViolatesExclusion') : null;
+                                        }}
                                         onSubmit={(patt) => {
+                                            const [pattWithStats] = attachColumnStats(
+                                                [patt],
+                                                columnValuesOf(patt.fid),
+                                                undefined,
+                                                textSelectList.map((t) => t.str)
+                                            );
                                             unstable_batchedUpdates(() => {
                                                 setGroupedTextPatternList((l) => {
                                                     const nl = { ...l };
                                                     nl[groupKey] = [...nl[groupKey]];
-                                                    nl[groupKey][ti] = patt;
+                                                    nl[groupKey][ti] = pattWithStats;
                                                     return nl;
                                                 });
                                                 setEditTP(false);

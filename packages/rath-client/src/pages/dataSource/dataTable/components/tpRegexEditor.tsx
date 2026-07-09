@@ -15,33 +15,49 @@ interface TPRegexEditorProps {
     tp: IFieldTextPattern;
     onSubmit: (tp: IFieldTextPattern) => void;
     onCancel: () => void;
+    /** return an error message to block the submit, or null to accept */
+    validate?: (tp: IFieldTextPattern) => string | null;
 }
 const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
-    const { tp, onSubmit, onCancel } = props;
+    const { tp, onSubmit, onCancel, validate } = props;
     const [ph, setPh] = useState<string>('');
     const [sl, setSl] = useState<string>('');
     const [pe, setPe] = useState<string>('');
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         unstable_batchedUpdates(() => {
             setPh(tp.ph.source)
             setPe(tp.pe.source)
             setSl(tp.selection.source)
+            setError(null)
         })
     }, [tp])
 
     const submit = useCallback(() => {
-        const ans: IFieldTextPattern = {
-            fid: tp.fid,
-            ph: new RegExp(ph),
-            pe: new RegExp(pe),
-            selection: new RegExp(sl),
-            pattern: new RegExp(`${ph}(?<selection>${sl})${pe}`),
-            selectionType: tp.selectionType,
-            score: tp.score,
+        let ans: IFieldTextPattern;
+        try {
+            ans = {
+                fid: tp.fid,
+                ph: new RegExp(ph),
+                pe: new RegExp(pe),
+                selection: new RegExp(sl),
+                pattern: new RegExp(`(?:${ph})(?<selection>${sl})(?:${pe})`),
+                selectionType: tp.selectionType,
+                score: tp.score,
+            };
+        } catch (err) {
+            setError(intl.get('dataSource.textPattern.invalidRegex'));
+            return;
         }
+        const validationError = validate ? validate(ans) : null;
+        if (validationError !== null) {
+            setError(validationError);
+            return;
+        }
+        setError(null);
         onSubmit(ans);
-    }, [tp.fid, tp.selectionType, tp.score, ph, pe, sl, onSubmit])
+    }, [tp.fid, tp.selectionType, tp.score, ph, pe, sl, onSubmit, validate])
 
     return (
         <Stack>
@@ -50,6 +66,7 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
                 value={ph}
                 onChange={(e, newValue) => {
                     setPh(`${newValue}`);
+                    setError(null);
                 }}
             />
             <TextField
@@ -57,6 +74,7 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
                 value={sl}
                 onChange={(e, newValue) => {
                     setSl(`${newValue}`);
+                    setError(null);
                 }}
             />
             <TextField
@@ -64,8 +82,12 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
                 value={pe}
                 onChange={(e, newValue) => {
                     setPe(`${newValue}`);
+                    setError(null);
                 }}
             />
+            {error !== null && (
+                <span style={{ color: '#a4262c', fontSize: 12, margin: '4px 0' }}>{error}</span>
+            )}
             <Stack.Item>
                 <Stack horizontal>
                 <PrimaryButton text={intl.get('common.submit')} onClick={submit}  />

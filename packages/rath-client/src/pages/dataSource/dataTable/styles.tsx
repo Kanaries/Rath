@@ -19,6 +19,7 @@ import styled from "styled-components";
 
 export const DATA_TABLE_STYLE_CONFIG = {
     SELECT_COLOR: '#b7eb8f',
+    EXCLUDE_COLOR: '#ffccc7',
     TABLE_INNER_STYLE: {
         height: 600,
         overflow: 'auto',
@@ -41,6 +42,34 @@ export const CustomBaseTable = styled(BaseTable)`
     }
     td {
         cursor: text;
+        .tp-exclude-btn {
+            opacity: 0;
+            border: none;
+            background-color: rgba(0, 0, 0, 0.06);
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 16px;
+            padding: 0 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+            user-select: none;
+            transition: opacity 0.12s;
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.14);
+            }
+        }
+        /* content lives in ::after so the button never contributes a text node:
+           text selections across the cell keep their original offsets */
+        .tp-exclude-btn::after {
+            content: '✕';
+        }
+        .tp-exclude-btn.tp-exclude-btn-restore::after {
+            content: '↺';
+        }
+        &:hover .tp-exclude-btn {
+            opacity: 1;
+        }
     }
 `;
 

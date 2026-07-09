@@ -251,7 +251,13 @@ function induceCandidateNodes(uniqueSelections: string[]): IPatternNode[] {
     return candidates;
 }
 
-export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[] {
+/**
+ * @param textSelection positive examples: the pattern must reproduce each selection exactly.
+ * @param negativeSelections cell values the pattern must NOT match at all — the user has
+ * explicitly excluded these cells, so any candidate that extracts something from one of
+ * them is dropped. May make the result empty when the constraints are contradictory.
+ */
+export function intersectPattern(textSelection: ITextSelection[], negativeSelections: string[] = []): ITextPattern[] {
     if (textSelection.length === 0) {
         return [];
     }
@@ -311,7 +317,7 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
                     const res = extractSelection(patt ,text.str)
                     if (res.missing) return false;
                     return res.matchPos[0] === text.startIndex && res.matchPos[1] === text.endIndex;
-                });
+                }) && negativeSelections.every(negText => extractSelection(patt, negText).missing);
                 if (match) {
                     ans.push(patt)
                 }
@@ -322,20 +328,112 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
         // the literal-union candidate has already been tried against every (ph, pe)
         // combination above, so only the unverified catch-all is left to offer
         const sl = regexgen(uniqueSelections);
-        ans.push({
+        const catchAll: ITextPattern = {
             ph: /.*/,
             pe: /.*/,
             selection: sl,
             pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`),
             selectionType: 'generalize',
             score: 0
-        })
+        };
+        // the catch-all is exempt from positive verification, but never from the
+        // user's explicit exclusions — with contradictory constraints there is
+        // simply no consistent pattern to offer
+        if (negativeSelections.every(negText => extractSelection(catchAll, negText).missing)) {
+            ans.push(catchAll)
+        }
     }
     return ans
 }
 
+/** deterministic PRNG (mulberry32): sampling must be stable across calls for identical input */
+function createSeededRandom(seed: number): () => number {
+    let s = seed >>> 0;
+    return () => {
+        s = (s + 0x6d2b79f5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+/**
+ * Evaluate patterns against the actual column values, decorating each pattern with
+ * match statistics (see ITextPatternStats). Column evidence complements the structural
+ * score: it breaks ranking ties (rank.ts#textPatternScoreCompareWithStats) and gives
+ * the user coverage feedback in the UI.
+ *
+ * Sampling is seeded-random rather than strided: a fixed stride aliases with periodic
+ * data (e.g. alternating rows) and can report a wildly wrong match rate. A fixed seed
+ * keeps results deterministic. `mustInclude` (the positive-selection cell values) is
+ * always added to the sample — a verified candidate matches those rows by construction,
+ * so seeding them prevents a rarely-sampled context from showing up as "0% match" and
+ * winning the fewest-matches tie-break by artifact.
+ */
+export function attachColumnStats<T extends ITextPattern>(
+    patterns: T[],
+    columnValues: string[],
+    sampleLimit: number = 200,
+    mustInclude: string[] = []
+): T[] {
+    const nonEmpty = columnValues.filter((v) => v.length > 0);
+    let sample: string[];
+    if (nonEmpty.length <= sampleLimit) {
+        sample = nonEmpty;
+    } else {
+        const rand = createSeededRandom(0x9e3779b9 ^ nonEmpty.length);
+        const indices = nonEmpty.map((_, i) => i);
+        // partial Fisher-Yates: draw sampleLimit distinct indices
+        for (let i = 0; i < sampleLimit; i++) {
+            const j = i + Math.floor(rand() * (indices.length - i));
+            const tmp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = tmp;
+        }
+        sample = indices.slice(0, sampleLimit).map((i) => nonEmpty[i]);
+    }
+    for (const value of mustInclude) {
+        if (value.length > 0 && !sample.includes(value)) {
+            sample.push(value);
+        }
+    }
+    return patterns.map((patt) => {
+        let matched = 0;
+        const distinctValues = new Set<string>();
+        for (const value of sample) {
+            const res = extractSelection(patt, value);
+            if (!res.missing) {
+                matched++;
+                distinctValues.add(res.matchedText);
+            }
+        }
+        return {
+            ...patt,
+            stats: {
+                total: sample.length,
+                matched,
+                matchRate: sample.length > 0 ? matched / sample.length : 0,
+                distinct: distinctValues.size,
+            },
+        };
+    });
+}
+
 export function textPatternInduction(textList: string[]): IPatternNode[] {
     return induceCandidateNodes(Array.from(new Set(textList)));
+}
+
+/**
+ * Check a (possibly hand-edited) pattern against the user's exclusions.
+ * @returns the first excluded cell value the pattern still matches, or null if clean.
+ */
+export function findViolatedNegative(pattern: ITextPattern, negativeSelections: string[]): string | null {
+    for (const negText of negativeSelections) {
+        if (!extractSelection(pattern, negText).missing) {
+            return negText;
+        }
+    }
+    return null;
 }
 
 type IExtractResult =

@@ -167,7 +167,16 @@
             "generalize": "泛化",
             "specific": "完全匹配",
             "nlp": "NLP(β)",
-            "currentPattern": "当前文本模式"
+            "currentPattern": "当前文本模式",
+            "matchStats": "命中 {rate}% (抽样 {matched}/{total}) · {distinct} 种取值",
+            "invalidRegex": "正则表达式无效。",
+            "editViolatesExclusion": "编辑后的模式命中了已排除的单元格，请调整模式或先清除排除项。",
+            "excludeHint": "点击 ✕（或按住 Alt/Ctrl/⌘ 点击）排除此单元格的匹配",
+            "excludedHint": "已排除，点击 ↺（或按住 Alt/Ctrl/⌘ 点击）恢复",
+            "excludeUsage": "提示：悬停单元格并点击 ✕ 可排除错误匹配",
+            "excludedCount": "已排除 {count} 个单元格取值",
+            "clearExcluded": "清除排除项",
+            "noPatternFound": "没有同时满足所有选择与排除约束的模式，请调整选择或按 ESC 重新开始。"
         },
         "statViewInfo": {
             "title": "统计视图",

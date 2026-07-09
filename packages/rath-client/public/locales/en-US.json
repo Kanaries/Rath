@@ -168,7 +168,16 @@
             "generalize": "Generalize",
             "specific": "Extract Match",
             "nlp": "Semantics",
-            "currentPattern": "Current Pattern"
+            "currentPattern": "Current Pattern",
+            "matchStats": "Matches {rate}% ({matched}/{total} sampled cells) · {distinct} distinct values",
+            "invalidRegex": "Invalid regular expression.",
+            "editViolatesExclusion": "The edited pattern matches an excluded cell. Adjust the pattern or clear exclusions first.",
+            "excludeHint": "Click ✕ (or Alt/Ctrl/⌘ + Click) to exclude this cell from matching",
+            "excludedHint": "Excluded. Click ↺ (or Alt/Ctrl/⌘ + Click) to restore",
+            "excludeUsage": "Tip: hover a cell and click ✕ to exclude a wrong match",
+            "excludedCount": "{count} cell value(s) excluded",
+            "clearExcluded": "Clear exclusions",
+            "noPatternFound": "No pattern satisfies all selections and exclusions. Adjust your selection or press ESC to start over."
         },
         "statViewInfo": {
             "title": "Statistics View",

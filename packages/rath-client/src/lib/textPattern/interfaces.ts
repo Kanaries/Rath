@@ -30,6 +30,18 @@ export interface ITextSelection {
     endIndex: number;
 }
 
+/** how a pattern performs on the actual column data (computed on a sample) */
+export interface ITextPatternStats {
+    /** sampled non-empty cell count */
+    total: number;
+    /** cells where extraction succeeded */
+    matched: number;
+    /** matched / total, 0 when the sample is empty */
+    matchRate: number;
+    /** cardinality of the extracted values */
+    distinct: number;
+}
+
 export interface ITextPattern {
     ph: RegExp;
     pe: RegExp;
@@ -37,4 +49,5 @@ export interface ITextPattern {
     pattern: RegExp;
     selectionType: ITextPatternType;
     score: number;
+    stats?: ITextPatternStats;
 }

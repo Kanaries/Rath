@@ -15,6 +15,7 @@
 
 import { IFieldMeta } from '@kanaries/loa';
 import { ITextPattern } from '../../../lib/textPattern';
+import { textPatternScoreCompareWithStats } from '../../../lib/textPattern/rank';
 import { IFieldMetaWithExtSuggestions } from '../../../interfaces';
 import { IFieldTextPattern } from './components/tpRegexEditor';
 
@@ -92,8 +93,8 @@ export function findFirstExistTextPattern(
     };
     const patterns = createPatternsOfKeys(groupKeys);
     const enhancedPatterns = createPatternsOfKeys(enhanceKeys);
-    patterns.sort((a, b) => b.pattern.score - a.pattern.score);
-    enhancedPatterns.sort((a, b) => b.pattern.score - a.pattern.score);
+    patterns.sort((a, b) => textPatternScoreCompareWithStats(a.pattern, b.pattern));
+    enhancedPatterns.sort((a, b) => textPatternScoreCompareWithStats(a.pattern, b.pattern));
 
     if (enhancedPatterns.length > 0) {
         return enhancedPatterns[0].pos;

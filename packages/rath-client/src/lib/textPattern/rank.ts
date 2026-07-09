@@ -19,6 +19,24 @@ export function textPatternScoreCompare (patternA: ITextPattern, patternB: IText
     return patternB.score - patternA.score
 }
 
+/**
+ * structural score first — it encodes the interaction semantics (knowledge vs literal,
+ * broaden vs narrow) and must not be overridden by data evidence.
+ * Among structural ties, prefer the pattern that matches FEWER cells: candidates tie when
+ * they share the same selection pattern and differ only in context, and the tighter
+ * context is the safer extraction (over-matching corrupts data silently, under-matching
+ * shows up as visibly empty cells and can be fixed by selecting one more example).
+ */
+export function textPatternScoreCompareWithStats (patternA: ITextPattern, patternB: ITextPattern) {
+    if (patternB.score !== patternA.score) {
+        return patternB.score - patternA.score;
+    }
+    if (patternA.stats && patternB.stats && patternA.stats.matched !== patternB.stats.matched) {
+        return patternA.stats.matched - patternB.stats.matched;
+    }
+    return 0;
+}
+
 export function patternNodeCompare (nodeA: IPatternNode, nodeB: IPatternNode) {
     return nodeB.depth / nodeB.specLabel - nodeA.depth / nodeA.specLabel
 }

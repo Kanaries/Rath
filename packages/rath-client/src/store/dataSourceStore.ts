@@ -104,6 +104,10 @@ export class DataSourceStore {
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
     public sourceType = DataSourceType.Unknown;
+    // monotonic token guarding async text-pattern expansions: any newer expansion or an
+    // explicit clear invalidates in-flight ones, so a stale promise cannot resurrect a
+    // preview field after the pattern has been cleared or replaced
+    private textPatternRequestVersion: number = 0;
     constructor() {
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
@@ -117,6 +121,7 @@ export class DataSourceStore {
             fieldMetasRef: false,
             rawDataStorage: false,
             filteredDataStorage: false,
+            textPatternRequestVersion: false,
         });
         this.initStore();
     }
@@ -819,6 +824,7 @@ export class DataSourceStore {
         }
     }
     public clearTextPatternIfExist () {
+        this.textPatternRequestVersion++;
         const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'CC.selection_pattern' && f.stage === 'preview'));
         if (extRemainFields.length !== this.extFields.length) {
             this.extFields = extRemainFields;
@@ -830,7 +836,12 @@ export class DataSourceStore {
             return;
         }
         this.clearTextPatternIfExist();
+        const version = this.textPatternRequestVersion;
         const data = await this.rawDataStorage.getAll();
+        if (version !== this.textPatternRequestVersion) {
+            // superseded by a newer expansion or a clear while loading
+            return;
+        }
         const values: string[] = data.map(d => `${d[fid]}`);
         const newField: IRawField = {
             fid: `${fid}_selection_pattern_${nanoid(2)}`,
@@ -865,7 +876,12 @@ export class DataSourceStore {
             return;
         }
         this.clearTextPatternIfExist();
+        const version = this.textPatternRequestVersion;
         const data = await this.rawDataStorage.getAll();
+        if (version !== this.textPatternRequestVersion) {
+            // superseded by a newer expansion or a clear while loading
+            return;
+        }
         const values: string[] = data.map(d => `${d[fid]}`);
         const newField: IRawField = {
             fid: `${fid}_regex`,
