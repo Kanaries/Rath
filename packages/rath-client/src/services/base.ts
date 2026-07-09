@@ -1,27 +1,27 @@
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import RathEngineWorker from '../workers/engine/index.worker?worker';
+// import RathEngineWorker from '../workers/engine/index.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import InferMetaWorker from '../workers/metaInfer.worker?worker';
+// import InferMetaWorker from '../workers/metaInfer.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import LoaWorker from '../workers/loa/index.worker?worker';
+// import LoaWorker from '../workers/loa/index.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import CleanWorker from '../workers/clean.worker?worker';
+// import CleanWorker from '../workers/clean.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import FilterWorker from '../workers/filterData.worker?worker';
+// import FilterWorker from '../workers/filterData.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import LabDistVisWorker from '../workers/labDistVis.worker?worker';
+// import LabDistVisWorker from '../workers/labDistVis.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';
 
@@ -83,7 +83,7 @@ export function initRathWorker(engineMode: string) {
         // } else {
         //   rathGlobalWorkerRef.current = new RathEngineWorker();
         // }
-        rathGlobalWorkerRef.current = new RathEngineWorker();
+        rathGlobalWorkerRef.current = new Worker(new URL('../workers/engine/index.worker', import.meta.url));
     }
 }
 
@@ -104,7 +104,7 @@ export interface InferMetaServiceProps {
 export async function inferMetaService(props: InferMetaServiceProps): Promise<IRawField[]> {
     let metas: IRawField[] = [];
     try {
-        const worker = new InferMetaWorker();
+        const worker = new Worker(new URL('../workers/metaInfer.worker', import.meta.url));
         const result = await workerService<IRawField[], InferMetaServiceProps>(worker, props);
         if (result.success) {
             metas = result.data;
@@ -132,7 +132,7 @@ export type CleanServiceProps = {
 export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]> {
     let data: IRow[] = [];
     try {
-        const worker = new CleanWorker();
+        const worker = new Worker(new URL('../workers/clean.worker', import.meta.url));
         const result = await workerService<IRow[], CleanServiceProps>(worker, props);
         if (result.success) {
             data = result.data;
@@ -169,7 +169,7 @@ export async function filterDataService(props: FilterServiceProps): Promise<{row
         versionCode: -1
     };
     try {
-        const worker = new FilterWorker();
+        const worker = new Worker(new URL('../workers/filterData.worker', import.meta.url));
         const result = await workerService<{rows: IRow[]; versionCode: number}, FilterServiceProps>(worker, props);
         if (result.success) {
             data = result.data;
@@ -255,7 +255,7 @@ export async function loaEngineService<R = any>(
                 throw new Error(`[result.fail] ${result.message}`);
             }
         } else {
-            const worker = new LoaWorker();
+            const worker = new Worker(new URL('../workers/loa/index.worker', import.meta.url));
             const result = await workerService<R, ILoaProps>(worker, props);
             worker.terminate();
             if (result.success) {
@@ -285,7 +285,7 @@ export async function labDistVisService<
 >(props: P): Promise<R> {
     let data: R;
     try {
-        const worker = new LabDistVisWorker();
+        const worker = new Worker(new URL('../workers/labDistVis.worker', import.meta.url));
         const result = await workerService<R, P>(worker, props);
         if (result.success) {
             data = result.data;
