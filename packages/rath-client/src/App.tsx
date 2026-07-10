@@ -10,6 +10,7 @@ import CrInfo from './components/crInfo';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 import { Spinner } from './components/ui/spinner';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 
 const VisualInterface = lazy(() => import('./pages/manualControl'));
 const DataSourceBoard = lazy(() => import('./pages/dataSource/index'));
@@ -49,11 +50,14 @@ function App() {
 
     return (
         <div>
-            <div className="main-app-container">
-                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
-                    <AppNav />
-                </div>
-                <div className="main-app-content">
+            <SidebarProvider
+                className="main-app-container"
+                open={navMode === 'text'}
+                onOpenChange={(open) => commonStore.setNavMode(open ? 'text' : 'icon')}
+            >
+                <AppNav />
+                <SidebarInset className="main-app-content">
+                    <SidebarTrigger className="fixed left-2 top-2 z-40 border bg-background shadow-sm md:hidden" />
                     <Suspense
                         fallback={
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '2em' }}>
@@ -74,8 +78,8 @@ function App() {
                         {appKey === PIVOT_KEYS.connection && <DataConnection />}
                     </Suspense>
                     <CrInfo />
-                </div>
-            </div>
+                </SidebarInset>
+            </SidebarProvider>
             {showPerformanceWindow && <PerformanceWindow />}
         </div>
     );

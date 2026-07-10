@@ -1,41 +1,39 @@
 import React from 'react';
-import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
+
 import { SUPPORT_LANG } from '../locales';
 import { useGlobalStore } from '../store';
 import { RathIcon } from './icons';
-import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from './ui/sidebar';
 
 const langOptions: Array<{ key: string; text: string }> = SUPPORT_LANG.map((lang) => ({
     key: lang.value,
     text: lang.name,
 }));
 
-const Container = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-`;
 const UserSettings: React.FC = () => {
-    // const target = useRef<HTMLDivElement>(null);
-    const { langStore, commonStore } = useGlobalStore();
-    const { navMode } = commonStore;
-    const navToggleLabel = navMode === 'icon' ? 'Expand navigation' : 'Collapse navigation';
+    const { langStore } = useGlobalStore();
+    const { state, isMobile, openMobile, toggleSidebar } = useSidebar();
+    let navToggleLabel = state === 'collapsed' ? 'Expand navigation' : 'Collapse navigation';
+    if (isMobile) navToggleLabel = openMobile ? 'Close navigation' : 'Open navigation';
+
     return (
-        <Container style={navMode === 'icon' ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}>
-            {navMode === 'text' && (
+        <SidebarMenu>
+            <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button type="button" variant="ghost" size="icon" title="Language" aria-label="Language">
+                        <SidebarMenuButton type="button" tooltip="Language" aria-label="Language">
                             <RathIcon name="LocaleLanguage" />
-                        </Button>
+                            <span>Language</span>
+                        </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="top" align="start">
+                    <DropdownMenuContent side={state === 'collapsed' ? 'right' : 'top'} align="start">
                         {langOptions.map((item) => (
                             <DropdownMenuItem
                                 key={item.key}
                                 onSelect={() => {
-                                    langStore.changeLocalesAndReload(`${item.key}`);
+                                    langStore.changeLocalesAndReload(item.key);
                                 }}
                             >
                                 {item.text}
@@ -43,22 +41,14 @@ const UserSettings: React.FC = () => {
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            )}
-            <div>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    title={navToggleLabel}
-                    aria-label={navToggleLabel}
-                    onClick={() => {
-                        commonStore.setNavMode(navMode === 'icon' ? 'text' : 'icon');
-                    }}
-                >
-                    <RathIcon name={navMode === 'icon' ? 'DecreaseIndentMirrored' : 'DecreaseIndent'} />
-                </Button>
-            </div>
-        </Container>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+                <SidebarMenuButton type="button" tooltip={navToggleLabel} aria-label={navToggleLabel} onClick={toggleSidebar}>
+                    <RathIcon name={state === 'collapsed' ? 'DecreaseIndentMirrored' : 'DecreaseIndent'} />
+                    <span>{navToggleLabel}</span>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu>
     );
 };
 

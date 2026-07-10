@@ -139,3 +139,28 @@ Follow-up audit:
   - `node scripts/audit-fluent-teardown.mjs --strict`
   - `node scripts/verify-icon-map.mjs`
   - TypeScript, 47 client tests, and the production client build
+
+### Sidebar migration
+
+- The application shell now uses the shadcn Sidebar composition:
+  `SidebarProvider`, `Sidebar`, `SidebarHeader`, `SidebarContent`,
+  `SidebarGroup`, `SidebarMenu`, `SidebarFooter`, `SidebarRail`, and
+  `SidebarInset`.
+- Existing navigation behavior remains connected to `CommonStore`:
+  active-page state, Alt shortcuts, EDA/Insiders expansion, language selection,
+  preferences, and desktop expanded/collapsed mode.
+- Desktop uses the default shadcn dimensions: 256 px expanded and 48 px in icon
+  mode. Collapsed items retain their Lucide icons and expose zero-delay
+  tooltips; group pages remain reachable in icon mode.
+- Below the `md` breakpoint the sidebar becomes a Sheet. Selecting an internal
+  page closes the Sheet, while group state and desktop collapse state remain
+  independent.
+- The checked-in sidebar source includes the project-specific compatibility
+  required by React 18 and Tailwind CSS 3: forwarded menu-button refs and
+  explicit `var(--sidebar-width)` arbitrary values.
+- Browser verification covered Insiders expansion, Causal navigation, desktop
+  collapse/restore, tooltip rendering, language dropdown, responsive Sheet
+  open/close, and mobile page selection. No new console errors were observed
+  after the React 18 ref adaptation.
+- Verification passed: migration gates, TypeScript, 47 client tests, and the
+  production client build.

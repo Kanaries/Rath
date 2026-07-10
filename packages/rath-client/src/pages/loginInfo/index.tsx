@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { RathIcon } from '../../components/icons';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/ui/sidebar';
 import { cn } from '../../utils/cn';
 import Setup from './setup';
 
@@ -18,38 +19,6 @@ export interface PreferencesListType {
     icon: string;
     element: () => JSX.Element;
 }
-
-const LoginInfoDiv = styled.div`
-    display: flex;
-    align-items: center;
-    /* flex-direction: column; */
-    border-top-width: 1px;
-    padding: 0.6em 0.8em 0.8em;
-    > div {
-        user-select: none;
-        cursor: pointer;
-    }
-    .user {
-        white-space: nowrap;
-        max-width: 164px;
-        overflow-x: auto;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        font-weight: 400;
-    }
-    .user::-webkit-scrollbar {
-        display: none;
-    }
-    .user-avatar {
-        width: 38px;
-        height: 38px;
-        border-radius: 19px;
-        border: 3px solid #000;
-        margin: 0px 12px;
-        background-size: contain;
-        background-repeat: no-repeat;
-    }
-`;
 
 const Container = styled.div`
     display: flex;
@@ -70,9 +39,10 @@ const Container = styled.div`
 const LoginInfo: FC = () => {
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Setting);
+    const preferencesLabel = intl.get('login.preferences');
 
     return (
-        <LoginInfoDiv>
+        <>
             <Dialog
                 open={showUserPanel}
                 onOpenChange={(nextOpen) => {
@@ -112,15 +82,15 @@ const LoginInfo: FC = () => {
                     </Container>
                 </DialogContent>
             </Dialog>
-            <div
-                className="user"
-                onClick={() => {
-                    setShowUserPanel(true);
-                }}
-            >
-                <RathIcon name="PlayerSettings" />
-            </div>
-        </LoginInfoDiv>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton type="button" tooltip={preferencesLabel} aria-label={preferencesLabel} onClick={() => setShowUserPanel(true)}>
+                        <RathIcon name="PlayerSettings" />
+                        <span>{preferencesLabel}</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </>
     );
 };
 
