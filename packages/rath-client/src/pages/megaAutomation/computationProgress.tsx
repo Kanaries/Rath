@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
-import { ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
+import { Progress } from '../../components/ui/progress';
 import { getStateInStorage, setStateInStorage } from '../../workers/engine/utils';
 import { useGlobalStore } from '../../store';
 
@@ -36,10 +36,10 @@ const ComputationProgress: React.FC = () => {
     return (
         <div>
             {computing && (
-                <ProgressIndicator
-                    description={`${intl.get('megaAuto.computing')}: ${pn > 0 ? Math.round(pn * 100) + '%' : ''}`}
-                    percentComplete={pn > 0 ? pn : undefined}
-                />
+                <div className="space-y-2 text-sm text-muted-foreground">
+                    <div>{`${intl.get('megaAuto.computing')}: ${pn > 0 ? Math.round(pn * 100) + '%' : ''}`}</div>
+                    <Progress value={pn > 0 ? pn * 100 : 0} />
+                </div>
             )}
         </div>
     );

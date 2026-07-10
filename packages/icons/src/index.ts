@@ -1,13 +1,6 @@
-import {
-  MoreHorizontal20Filled,
-  Add24Filled,
-  HomeDatabase24Regular,
-  ArrowHookUpLeft24Filled,
-} from '@fluentui/react-icons'
-
 export {
-    MoreHorizontal20Filled,
-    Add24Filled,
-    HomeDatabase24Regular,
-    ArrowHookUpLeft24Filled,
-}
+  MoreHorizontal as MoreHorizontal20Filled,
+  Plus as Add24Filled,
+  Database as HomeDatabase24Regular,
+  Undo2 as ArrowHookUpLeft24Filled,
+} from 'lucide-react'

@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { DirectionalHint, IconButton, TooltipHost } from '@fluentui/react';
-import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../../metaView/distChart';
 import DropdownSelect from '../../../../components/dropDownSelect';
 import { FieldExtSuggestion, IFieldMeta, IRawField } from '../../../../interfaces';
@@ -11,6 +9,9 @@ import { LiveContainer } from '../../metaView/metaList';
 import FieldExtSuggestions from '../../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../../store';
 import { PIVOT_KEYS } from '../../../../constants';
+import { RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../components/ui/tooltip';
 import StatTable from './components/liteStatTable';
 import StatePlaceholder, { IColStateType } from './components/statePlaceholder';
 import { HEADER_CELL_STYLE_CONFIG, HeaderCellContainer } from './styles';
@@ -80,7 +81,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const { focus, endFocus, startFocus, toggleFocus, setFocus } = useFocus();
     const optionsOfBIFieldType = useBIFieldTypeOptions();
-    const buttonId = useId('edit-button');
+    const buttonId = `edit-button-${useId().replace(/:/g, '')}`;
     const canDelete = !(colType === 'preview') && isExt;
     const intRef = useRef<number>(-1);
 
@@ -107,26 +108,32 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                 <div className="info-container">
                     <div className="header-row">
                         <h3 className="header">
-                            {meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />}
+                            {meta && meta.geoRole !== 'none' && <RathIcon name="globe" size={12} />}
                             {name}
                         </h3>
                         {colType === 'preview' || (
                             <>
                                 <div className="edit-icon">
                                     {focus && (
-                                        <IconButton
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
                                             title={intl.get('dataSource.editName')}
                                             id={buttonId}
-                                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
                                             onClick={() => {
                                                 setShowNameEditor(true);
                                             }}
-                                        />
+                                        >
+                                            <RathIcon name="edit" size={12} />
+                                        </Button>
                                     )}
                                     {meta && (
-                                        <IconButton
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
                                             title={intl.get('dataSource.statViewInfo.explore')}
-                                            iconProps={{ iconName: 'Lightbulb' }}
                                             onClick={() => {
                                                 runInAction(() => {
                                                     commonStore.setAppKey(PIVOT_KEYS.semiAuto);
@@ -137,7 +144,9 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                                     });
                                                 });
                                             }}
-                                        />
+                                        >
+                                            <RathIcon name="Lightbulb" />
+                                        </Button>
                                     )}
                                 </div>
                                 {extSuggestions.length > 0 && (
@@ -147,19 +156,27 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                     </LiveContainer>
                                 )}
                                 {canDelete && (
-                                    <IconButton
-                                        iconProps={HEADER_CELL_STYLE_CONFIG.DELETE_BUTTON}
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-[#c50f1f]"
                                         onClick={() => dataSourceStore.deleteExtField(code)}
-                                    />
+                                    >
+                                        <RathIcon name="Delete" />
+                                    </Button>
                                 )}
                             </>
                         )}
                     </div>
-                    <TooltipHost content={comment} directionalHint={DirectionalHint.bottomLeftEdge}>
-                        <p className="comment-row">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <p className="comment-row">{comment}</p>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" align="start">
                             {comment}
-                        </p>
-                    </TooltipHost>
+                        </TooltipContent>
+                    </Tooltip>
                     <ColNameEditor
                         defaultName={name}
                         setShowNameEditor={setShowNameEditor}

@@ -1,7 +1,8 @@
-import { ActionButton, IconButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../components/ui/button';
+import { RathIcon } from '../../components/icons';
 import FilterCreationPill from '../../components/fieldPill/filterCreationPill';
 import { useGlobalStore } from '../../store';
 import type { DashboardDocument, DashboardDocumentOperators } from '../../store/dashboardStore';
@@ -45,12 +46,9 @@ const FilterCell: FC<FieldCellProps> = ({ field, data, remove }) => {
         <Cell>
             <div>{field.name || field.fid}</div>
             <div>{filterDesc}</div>
-            <IconButton
-                iconProps={{
-                    iconName: 'Delete',
-                }}
-                onClick={remove}
-            />
+            <Button variant="ghost" size="icon" aria-label="Delete" onClick={remove}>
+                <RathIcon name="Delete" />
+            </Button>
         </Cell>
     );
 };
@@ -70,9 +68,10 @@ const FilterList: FC<FilterListProps> = ({ page, operators }) => {
                 fields={fieldMetas}
                 onFilterSubmit={(_, filter) => operators.addDataFilter(filter)}
                 onRenderPill={(text, handleClick) => (
-                    <ActionButton label={text} iconProps={{ iconName: 'Add' }} onClick={handleClick}>
+                    <Button variant="ghost" aria-label={text} onClick={handleClick}>
+                        <RathIcon name="Add" />
                         {text}
-                    </ActionButton>
+                    </Button>
                 )}
             />
             {page.config.filters.map((filter, i) => {

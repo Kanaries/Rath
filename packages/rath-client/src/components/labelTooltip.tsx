@@ -1,15 +1,27 @@
 import React from 'react';
-import { Icon, IconButton, IDropdownProps, Label, Stack, TooltipHost } from '@fluentui/react';
+import { RathIcon } from './icons';
+import { Button } from './ui/button';
+import { Label } from './ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+
+interface LabelRenderProps {
+    label?: React.ReactNode;
+}
 
 export function makeRenderLabelHandler(mp?: string | JSX.Element | JSX.Element[]) {
-    return (props?: IDropdownProps): JSX.Element => {
+    return (props?: LabelRenderProps): JSX.Element => {
         return (
-            <Stack horizontal verticalAlign="center">
+            <div className="flex items-center">
                 <Label>{props?.label}</Label>
-                <TooltipHost content={mp}>
-                    <IconButton iconProps={{ iconName: 'Info' }} styles={{ root: { marginBottom: -3 } }} />
-                </TooltipHost>
-            </Stack>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button type="button" variant="ghost" size="icon" className="mb-[-3px]">
+                            <RathIcon name="Info" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{mp}</TooltipContent>
+                </Tooltip>
+            </div>
         );
     };
 }
@@ -21,13 +33,22 @@ interface LabelWithDescProps {
 export const LabelWithDesc: React.FC<LabelWithDescProps> = (props) => {
     const { label, description } = props;
     return (
-        <div>
-            <Label style={{ display: 'inline-block', textAlign: 'center'}}>{label}{description && (
-                <TooltipHost content={description}>
-                    <Icon style={{ marginLeft: '6px', cursor: 'pointer'}} iconName="Info"/>
-                </TooltipHost>
-            )}</Label>
-            
+        <div className="inline-flex items-center gap-1.5">
+            <Label>{label}</Label>
+            {description && (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button
+                            type="button"
+                            className="inline-flex h-5 w-5 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            aria-label={`More information about ${label}`}
+                        >
+                            <RathIcon name="Info" size={14} />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{description}</TooltipContent>
+                </Tooltip>
+            )}
         </div>
     );
 };

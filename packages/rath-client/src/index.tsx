@@ -6,29 +6,22 @@ import 'buffer';
 
 import React from 'react';
 
-import ReactDOM from 'react-dom';
-import { initializeIcons } from '@fluentui/font-icons-mdl2';
-import { ThemeProvider } from '@fluentui/react';
+import { createRoot } from 'react-dom/client';
 import { inject } from '@vercel/analytics';
 
-import 'office-ui-fabric-core/dist/css/fabric.css';
+import './styles/tokens.css';
 import './index.css';
-import { FluentProvider } from '@fluentui/react-components';
 // @ts-ignore
 // eslint-disable-next-line import/first
 import App from './App';
-import { customLightTheme, mainTheme } from './theme';
+import { TooltipProvider } from './components/ui/tooltip';
 
 inject();
 
-// Initialize icons with local fonts to avoid CORS issues
-initializeIcons('/fonts/');
+const root = createRoot(document.getElementById('root')!);
 
-ReactDOM.render(
-    <ThemeProvider theme={mainTheme}>
-        <FluentProvider theme={customLightTheme}>
-            <App />
-        </FluentProvider>
-    </ThemeProvider>,
-    document.getElementById('root')
+root.render(
+    <TooltipProvider>
+        <App />
+    </TooltipProvider>
 );

@@ -1,6 +1,7 @@
 import intl from 'react-intl-universal';
-import { Slider } from '@fluentui/react';
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
+import { Slider } from '../ui/slider';
 
 interface RangeSelectionProps {
     range: [number, number];
@@ -10,14 +11,21 @@ interface RangeSelectionProps {
     type: 'number' | 'time';
 }
 
-const DateTimeValueLabelStyle = {
-    // monospace
-    fontFamily: 'Courier New',
-    // narrowed
-    letterSpacing: '-0.05em',
-    transform: 'scaleX(0.95)',
-    marginInline: '-1%',
-} as const;
+const Container = styled.div<{ isTime: boolean }>`
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(40px, max-content) minmax(120px, 1fr) minmax(40px, max-content);
+    align-items: center;
+    gap: 8px;
+
+    > output {
+        min-width: 40px;
+        font-family: ${({ isTime }) => isTime ? "'Courier New', monospace" : 'inherit'};
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+`;
 
 const RangeSelection: React.FC<RangeSelectionProps> = (props) => {
     const { range, left, right, onValueChange, type } = props;
@@ -38,38 +46,21 @@ const RangeSelection: React.FC<RangeSelectionProps> = (props) => {
     }, [type]);
 
     return (
-        <Slider
-            label="range"
-            min={range[0]}
-            max={range[1]}
-            value={right}
-            lowerValue={left}
-            valueFormat={formatter}
-            ranged
-            onChange={(_v, r) => {
-                r && onValueChange(r);
-            }}
-            styles={{
-                root: {
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                },
-                container: {
-                    display: 'flex',
-                },
-                slideBox: {
-                    flex: 1,
-                    minWidth: '120px',
-                },
-                valueLabel: {
-                    minWidth: '40px',
-                    width: 'unset',
-                    ...(type === 'time' ? DateTimeValueLabelStyle : {}),
-                },
-            }}
-        />
+        <Container isTime={type === 'time'}>
+            <output aria-label="range start">{formatter(left)}</output>
+            <Slider
+                min={range[0]}
+                max={range[1]}
+                value={[left, right]}
+                thumbLabels={[intl.get('dataSource.filter.range') + ' start', intl.get('dataSource.filter.range') + ' end']}
+                onValueChange={(next) => {
+                    if (next.length >= 2) {
+                        onValueChange([next[0], next[1]]);
+                    }
+                }}
+            />
+            <output aria-label="range end">{formatter(right)}</output>
+        </Container>
     );
 };
 

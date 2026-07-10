@@ -1,8 +1,6 @@
 /**
  * File Icon Mapper
- * Maps file extensions to FluentUI MDL2 icon names (font-based icons)
- * This replaces the image-based icons from @fluentui/react-file-type-icons
- * to avoid dependency on Microsoft's CDN
+ * Maps file extensions to legacy icon names handled by RathIcon.
  */
 
 const fileIconMap: Record<string, string> = {
@@ -122,9 +120,9 @@ const fileIconMap: Record<string, string> = {
 };
 
 /**
- * Get FluentUI MDL2 icon name for a file based on its extension
+ * Get a legacy icon name for a file based on its extension
  * @param fileName - The file name with extension
- * @returns FluentUI MDL2 icon name
+ * @returns legacy file icon name
  */
 export function getFileIconName(fileName: string): string {
     if (!fileName) {
@@ -140,4 +138,3 @@ export function getFileIconName(fileName: string): string {
     const ext = match[1].toLowerCase();
     return fileIconMap[ext] || 'Page';
 }
-

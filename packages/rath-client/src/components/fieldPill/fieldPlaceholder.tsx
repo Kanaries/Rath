@@ -1,14 +1,16 @@
-import { ContextualMenu, IContextualMenuItem, IContextualMenuListProps, IRenderFunction, Icon, SearchBox } from '@fluentui/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../interfaces';
+import { RathIcon } from '../icons';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Input } from '../ui/input';
 
 export const PillPlaceholder = styled.div`
     color: #000;
     -ms-user-select: none;
     -webkit-user-select: none;
-    border-color: rgb(229,231,235);
+    border-color: rgb(229, 231, 235);
     /* border-radius: 10px; */
     border-style: dashed;
     border-radius: 10px;
@@ -32,11 +34,17 @@ export const PillPlaceholder = styled.div`
     }
 `;
 
-export function fields2options (fields: readonly IFieldMeta[]): IContextualMenuItem[] {
+interface FieldOption {
+    key: string;
+    text: string;
+    disabled?: boolean;
+}
+
+export function fields2options(fields: readonly IFieldMeta[]): FieldOption[] {
     return fields.map((f) => ({
         key: f.fid,
         text: f.name || f.fid,
-    }))
+    }));
 }
 
 interface FieldPlaceholderProps {
@@ -47,82 +55,68 @@ const FieldPlaceholder: React.FC<FieldPlaceholderProps> = (props) => {
     const { fields, onAdd } = props;
     const [showContextualMenu, setShowContextualMenu] = useState<boolean>(false);
 
-    const container = useRef<HTMLDivElement>(null);
-    const [fieldOptions, setFieldOptions] = useState<IContextualMenuItem[]>(fields2options(fields));
+    const [fieldOptions, setFieldOptions] = useState<FieldOption[]>(fields2options(fields));
 
     useEffect(() => {
         setFieldOptions(fields2options(fields));
-    }, [fields])
+    }, [fields]);
 
-    const onHideContextualMenu = useCallback(() => {
-        setShowContextualMenu(false);
-    }, []);
+    const onChange = React.useCallback(
+        (ev: React.ChangeEvent<HTMLInputElement>) => {
+            const newValue = ev.target.value;
+            if (newValue === '') {
+                setFieldOptions(fields2options(fields));
+                return;
+            }
+            const filteredItems = fields2options(fields).filter((item) => item.text.toLowerCase().includes(newValue.toLowerCase()));
 
-    const onChange = React.useCallback((ev?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => {
-        if (typeof ev === 'undefined' || typeof newValue === 'undefined' || newValue === '') {
-            setFieldOptions(fields2options(fields))
-            return;
-        }
-        const filteredItems = fieldOptions.filter(
-          item => item.text && item.text.toLowerCase().indexOf(newValue.toLowerCase()) !== -1,
-        );
-    
-        if (!filteredItems || !filteredItems.length) {
-          filteredItems.push({
-            key: 'no_results',
-            onRender: (item, dismissMenu) => (
-              <div key="no_results" >
-                <Icon iconName="SearchIssue" title={intl.get('common.search.notFound')} />
-                <span>No vars found</span>
-              </div>
-            ),
-          });
-        }
-    
-        setFieldOptions(filteredItems);
-      }, [fieldOptions, fields]);
+            if (!filteredItems.length) {
+                filteredItems.push({
+                    key: 'no_results',
+                    text: 'No vars found',
+                    disabled: true,
+                });
+            }
 
-    const renderMenuList = React.useCallback(
-        (menuListProps?: IContextualMenuListProps, defaultRender?: IRenderFunction<IContextualMenuListProps>) => {
-            return (
-                <div>
-                    <div style={{ borderBottom: '1px solid #ccc' }}>
-                        <SearchBox
-                            ariaLabel={intl.get('common.search.searchFields')}
+            setFieldOptions(filteredItems);
+        },
+        [fields]
+    );
+
+    return (
+        <DropdownMenu open={showContextualMenu} onOpenChange={setShowContextualMenu}>
+            <DropdownMenuTrigger asChild>
+                <PillPlaceholder>+ {intl.get('common.addVar')}</PillPlaceholder>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64" align="start">
+                <div className="border-b p-1" onClick={(e) => e.stopPropagation()}>
+                    <div className="relative">
+                        <RathIcon name="Search" className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            className="pl-7"
+                            aria-label={intl.get('common.search.searchFields')}
                             placeholder={intl.get('common.search.searchFields')}
                             onChange={onChange}
-                            onAbort={() => {
-                                setFieldOptions(fields2options(fields))
-                            }}
                         />
                     </div>
-                    {defaultRender && defaultRender(menuListProps)}
                 </div>
-            );
-        },
-        [onChange, fields]
-    );
-    return (
-        <PillPlaceholder
-            ref={container}
-            onClick={(e) => {
-                e.stopPropagation();
-                setShowContextualMenu(true);
-            }}
-        >
-            + {intl.get('common.addVar')}
-            <ContextualMenu
-                items={fieldOptions}
-                onRenderMenuList={renderMenuList}
-                hidden={!showContextualMenu}
-                target={container}
-                onItemClick={(ev, item) => {
-                    item && onAdd(item.key);
-                    onHideContextualMenu();
-                }}
-                onDismiss={onHideContextualMenu}
-            />
-        </PillPlaceholder>
+                {fieldOptions.map((item) => (
+                    <DropdownMenuItem
+                        key={item.key}
+                        disabled={item.disabled}
+                        onSelect={() => {
+                            if (!item.disabled) {
+                                onAdd(item.key);
+                                setShowContextualMenu(false);
+                            }
+                        }}
+                    >
+                        {item.disabled && <RathIcon name="SearchIssue" title={intl.get('common.search.notFound')} className="mr-2" />}
+                        <span className="truncate">{item.text}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 };
 

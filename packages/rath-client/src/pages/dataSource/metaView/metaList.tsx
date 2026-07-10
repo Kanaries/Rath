@@ -1,13 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import {
-    ActionButton,
-    ChoiceGroup,
-    IChoiceGroupOption,
-    IconButton,
-    Separator,
-    Stack,
-    Toggle,
-} from '@fluentui/react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -20,6 +11,12 @@ import { getGlobalStore } from '../../../store';
 import { PIVOT_KEYS } from '../../../constants';
 import { RATH_THEME_CONFIG } from '../../../theme';
 import ColNameEditor from '../dataTable/headerCell/components/colNameEditor';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { Label } from '../../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../../components/ui/radio-group';
+import { Separator } from '../../../components/ui/separator';
+import { Switch } from '../../../components/ui/switch';
 import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
@@ -63,7 +60,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         background-color: ${RATH_THEME_CONFIG.disableColor};
     }
     .preview {
-        background-color: ${RATH_THEME_CONFIG.previewColor}
+        background-color: ${RATH_THEME_CONFIG.previewColor};
     }
     h1 {
         font-weight: 500;
@@ -93,6 +90,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     border-radius: 8px;
     .flex-container {
         display: flex;
+        padding-top: 1rem;
     }
     .operation-column {
         margin-left: 1em;
@@ -142,8 +140,7 @@ const IndicatorCard = styled.div`
     margin-left: 1em;
     .ind-title {
         padding: 5px 0;
-        font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
-            'Helvetica Neue', sans-serif;
+        font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
         font-size: 14px;
         font-weight: 600;
         color: rgb(50, 49, 48);
@@ -207,29 +204,16 @@ interface MetaItemProps {
 }
 
 const MetaItem: React.FC<MetaItemProps> = (props) => {
-    const {
-        colKey,
-        colName,
-        colComment,
-        semanticType,
-        analyticType,
-        dist,
-        disable,
-        onChange,
-        focus,
-        extSuggestions,
-        isPreview,
-        isExt,
-    } = props;
+    const { colKey, colName, colComment, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions, isPreview, isExt } = props;
     const { dataSourceStore, semiAutoStore, commonStore } = getGlobalStore();
     const [editing, setEditing] = React.useState(false);
 
-    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
+    const ANALYTIC_TYPE_CHOICES_LANG = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
         text: intl.get(`common.analyticType.${ch.key}`),
     }));
 
-    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
+    const SEMANTIC_TYPE_CHOICES_LANG = SEMANTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
         text: intl.get(`common.semanticType.${ch.key}`),
     }));
@@ -258,64 +242,60 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
     const canDelete = !isPreview && isExt;
 
     return (
-        <MetaItemContainer className="ms-depth-4" focus={focus} isPreview={isPreview} ref={containerRef}>
+        <MetaItemContainer focus={focus} isPreview={isPreview} ref={containerRef}>
             <div className={`${isPreview ? 'preview' : analyticType} bottom-bar`}>
                 {isPreview && (
                     <>
                         <span>{intl.get('dataSource.preview')}</span>
                         <div>
-                            <IconButton
-                                onClick={() => dataSourceStore.settleExtField(colKey)}
-                                iconProps={{
-                                    iconName: 'CompletedSolid',
-                                    style: {
-                                        color: '#003a8c',
-                                    },
-                                }}
-                            />
-                            <IconButton
-                                onClick={() => dataSourceStore.deleteExtField(colKey)}
-                                iconProps={{
-                                    iconName: 'Delete',
-                                    style: {
-                                        color: '#c50f1f',
-                                    },
-                                }}
-                            />
+                            <Button type="button" variant="ghost" size="icon" onClick={() => dataSourceStore.settleExtField(colKey)}>
+                                <RathIcon name="CompletedSolid" style={{ color: '#003a8c' }} />
+                            </Button>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => dataSourceStore.deleteExtField(colKey)}>
+                                <RathIcon name="Delete" style={{ color: '#c50f1f' }} />
+                            </Button>
                         </div>
                     </>
                 )}
             </div>
             <div style={{ float: 'right' }}>
-                <Stack horizontal tokens={{ childrenGap: 2 }}>
+                <div className="flex items-center gap-1">
                     <FieldFilter fid={colKey} />
-                    <ActionButton
-                        text={intl.get('dataSource.statViewInfo.explore')}
-                        iconProps={{ iconName: 'Lightbulb' }}
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                             runInAction(() => {
                                 commonStore.setAppKey(PIVOT_KEYS.semiAuto);
                                 semiAutoStore.initMainViewWithSingleField(colKey);
                             });
                         }}
-                    />
+                    >
+                        <RathIcon name="Lightbulb" />
+                        {intl.get('dataSource.statViewInfo.explore')}
+                    </Button>
                     {extSuggestions.length > 0 && (
                         <LiveContainer ref={expandBtnRef}>
                             <FieldExtSuggestions fid={colKey} suggestions={extSuggestions} />
                             <div className="badge">{extSuggestions.length}</div>
                         </LiveContainer>
                     )}
-                </Stack>
+                </div>
             </div>
             <div className="col-name-container">
                 <h1>{colName}</h1>
-                <IconButton
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
                     title={intl.get('dataSource.editName')}
-                    iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
                     onClick={() => {
                         setEditing(true);
                     }}
-                />
+                >
+                    <RathIcon name="edit" size={12} />
+                </Button>
                 <ColNameEditor
                     defaultName={colName}
                     setShowNameEditor={setEditing}
@@ -336,59 +316,65 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
             )}
             <Separator />
             <div className="flex-container">
-                <DistributionChart
-                    dataSource={dist}
-                    x="memberName"
-                    y="count"
-                    analyticType={analyticType}
-                    semanticType={semanticType}
-                />
+                <DistributionChart dataSource={dist} x="memberName" y="count" analyticType={analyticType} semanticType={semanticType} />
                 <IndicatorCard>
-                    <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
+                    <div className="ind-title">{intl.get('dataSource.meta.uniqueValue')}</div>
                     <div className="ind-value">{dist.length}</div>
                 </IndicatorCard>
                 <div className="operation-column">
-                    <ChoiceGroup
-                        label={intl.get('dataSource.meta.analyticType')}
-                        options={ANALYTIC_TYPE_CHOICES_LANG}
-                        selectedKey={analyticType}
-                        onChange={(ev, option) => {
-                            onChange && option && onChange(colKey, 'analyticType', option.key);
+                    <Label className="mb-2 block">{intl.get('dataSource.meta.analyticType')}</Label>
+                    <RadioGroup
+                        value={analyticType}
+                        onValueChange={(value) => {
+                            onChange && onChange(colKey, 'analyticType', value);
                         }}
-                    />
+                    >
+                        {ANALYTIC_TYPE_CHOICES_LANG.map((option) => (
+                            <div key={option.key} className="flex items-center gap-2">
+                                <RadioGroupItem id={`${colKey}-analytic-${option.key}`} value={option.key} />
+                                <Label htmlFor={`${colKey}-analytic-${option.key}`}>{option.text}</Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
                 <div className="operation-column">
-                    <ChoiceGroup
-                        label={intl.get('dataSource.meta.semanticType')}
-                        options={SEMANTIC_TYPE_CHOICES_LANG}
-                        selectedKey={semanticType}
-                        onChange={(ev, option) => {
-                            onChange && option && onChange(colKey, 'semanticType', option.key);
+                    <Label className="mb-2 block">{intl.get('dataSource.meta.semanticType')}</Label>
+                    <RadioGroup
+                        value={semanticType}
+                        onValueChange={(value) => {
+                            onChange && onChange(colKey, 'semanticType', value);
                         }}
-                    />
+                    >
+                        {SEMANTIC_TYPE_CHOICES_LANG.map((option) => (
+                            <div key={option.key} className="flex items-center gap-2">
+                                <RadioGroupItem id={`${colKey}-semantic-${option.key}`} value={option.key} />
+                                <Label htmlFor={`${colKey}-semantic-${option.key}`}>{option.text}</Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
                 <div className="operation-column">
-                    <Toggle
-                        label={intl.get('dataSource.meta.disable.title')}
-                        checked={!disable}
-                        onText={intl.get('dataSource.meta.disable.on')}
-                        offText={intl.get('dataSource.meta.disable.off')}
-                        onChange={(ev, checked) => {
-                            onChange && onChange(colKey, 'disable', !checked);
-                        }}
-                    />
+                    <Label htmlFor={`${colKey}-disable-toggle`} className="mb-2 block">
+                        {intl.get('dataSource.meta.disable.title')}
+                    </Label>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            id={`${colKey}-disable-toggle`}
+                            checked={!disable}
+                            onCheckedChange={(checked) => {
+                                onChange && onChange(colKey, 'disable', !checked);
+                            }}
+                        />
+                        <span className="text-sm">{!disable ? intl.get('dataSource.meta.disable.on') : intl.get('dataSource.meta.disable.off')}</span>
+                    </div>
                 </div>
-                <div className="operation-column">
-                </div>
+                <div className="operation-column"></div>
             </div>
             {canDelete && (
                 <div className="remove">
-                    <IconButton
-                        iconProps={{
-                            iconName: 'Delete',
-                        }}
-                        onClick={() => dataSourceStore.deleteExtField(colKey)}
-                    />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => dataSourceStore.deleteExtField(colKey)}>
+                        <RathIcon name="Delete" />
+                    </Button>
                 </div>
             )}
         </MetaItemContainer>

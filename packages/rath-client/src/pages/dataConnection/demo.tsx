@@ -13,13 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Icon, Label } from '@fluentui/react';
-import { FC, useCallback, useMemo, useRef } from 'react';
-import { useId } from "@fluentui/react-hooks";
+import { FC, useCallback, useId, useMemo, useRef } from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
-import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
-import { logDataImport } from '../../loggers/dataImport';
+import { FileTypeIcon } from '../../components/icons';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Label } from '../../components/ui/label';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../constants';
 import { DataSourceTag, IDBMeta } from '../../utils/storage';
@@ -104,20 +103,13 @@ const DemoData: FC<DemoDataProps> = props => {
         requestDemoData(demo.key).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource, `${demo.text}.${RathDemoVirtualExt}`, DataSourceTag.DEMO);
-            logDataImport({
-                dataType: "Demo",
-                name: demo.key,
-                fields,
-                dataSource: [],
-                size: dataSource.length,
-            });
         }).catch((err) => {
             onLoadingFailed(err);
         })
         onClose();
     }, [onClose, onDataLoaded, onLoadingFailed, onStartLoading]);
 
-    const labelId = useId('demo-ds');
+    const labelId = `demo-ds-${useId().replace(/:/g, '')}`;
 
     const listRef = useRef<HTMLDivElement>(null);
     const { width } = useBoundingClientRect(listRef, { width: true });
@@ -130,19 +122,30 @@ const DemoData: FC<DemoDataProps> = props => {
                 {options.map((demo, i) => {
                     return (
                         <Card
-                        role="gridcell"
-                        aria-rowindex={Math.floor(i / colCount) + 1}
-                        aria-colindex={(i % colCount) + 1}
-                        tabIndex={0}
-                        onClick={() => loadDemo(demo)}
-                            appearance="outline"
+                            key={demo.key}
+                            role="gridcell"
+                            aria-rowindex={Math.floor(i / colCount) + 1}
+                            aria-colindex={(i % colCount) + 1}
+                            tabIndex={0}
+                            className="cursor-pointer transition-colors hover:bg-accent/40"
+                            onClick={() => loadDemo(demo)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    loadDemo(demo);
+                                }
+                            }}
                         >
-                            <CardHeader
-                                image={<Icon iconName={getFileIcon('')} />}
-                                header={<Text weight="semibold">{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</Text>}
-                                description={<Caption1>{intl.get(`dataSource.sizeInfo`, demo)}</Caption1>}
-                            />
-                            <p>{intl.get(`dataSource.demoDataset.${demo.key}.description`)}</p>
+                            <CardHeader className="flex-row items-center gap-3 space-y-0">
+                                <FileTypeIcon type={getFileIcon('')} />
+                                <div className="min-w-0">
+                                    <CardTitle className="text-sm">{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</CardTitle>
+                                    <CardDescription className="text-xs">{intl.get(`dataSource.sizeInfo`, demo)}</CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="m-0 text-sm">{intl.get(`dataSource.demoDataset.${demo.key}.description`)}</p>
+                            </CardContent>
                         </Card>
                     );
                 })}

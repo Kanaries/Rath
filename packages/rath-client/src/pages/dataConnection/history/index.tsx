@@ -13,9 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SearchBox } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
+import { RathIcon } from "../../../components/icons";
+import { Input } from "../../../components/ui/input";
 import HistoryList, { IHistoryListProps } from "./history-list";
 
 
@@ -26,14 +27,15 @@ const HistoryPanel: FC<Pick<IHistoryListProps, 'onDataLoaded' | 'onClose' | 'onL
 
     return (
         <>
-            <SearchBox
-                name="dataset_history_search"
-                iconProps={{ iconName: "Search" }}
-                styles={{ root: { margin: '1em 0 1.6em' } }}
-                value={search}
-                onChange={(_, value) => setSearch(value ?? '')}
-                underlined
-            />
+            <div className="relative my-4 mb-6">
+                <RathIcon name="Search" className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    name="dataset_history_search"
+                    className="pl-8"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                />
+            </div>
             <HistoryList
                 onDataLoaded={onDataLoaded}
                 onLoadingFailed={onLoadingFailed}

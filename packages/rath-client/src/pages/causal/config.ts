@@ -1,8 +1,8 @@
-import { IDropdownOption } from "@fluentui/react";
-import type { IFieldMeta } from "../../interfaces";
-import PC_PARAMS from './pc_params.json'
+import type { RathSelectOption } from '../../components/rath-ui/rath-select';
+import type { IFieldMeta } from '../../interfaces';
+import PC_PARAMS from './pc_params.json';
 
-export interface IFormItem{
+export interface IFormItem {
     title: string;
     key: string;
     description?: string;
@@ -11,7 +11,7 @@ export interface IFormItem{
     defaultValue?: any;
     range?: [number, number]; //slider
     step?: number; // slider
-    options?: {text: string; key: any}[] // dropdown or radio or checkbox
+    options?: { text: string; key: any }[]; // dropdown or radio or checkbox
 }
 export interface IForm {
     title: string;
@@ -30,7 +30,7 @@ export type IAlgoSchema = {
 /**
  * @deprecated
  * a number match { -1 | [0, 1] }
- * 
+ *
  * -1 for not connected: src ---x--> tar
  * 1 for must connect: src -------> tar
  * others for confidence level.
@@ -85,7 +85,7 @@ export interface IFunctionalDep {
 export enum UCRule {
     uc_supset = 0,
     maxP = 1,
-    definiteMaxP = 2
+    definiteMaxP = 2,
 }
 
 export enum UCPriority {
@@ -94,13 +94,13 @@ export enum UCPriority {
     biDirected = 1,
     existing = 2,
     stronger = 3,
-    stronger_plus = 4
+    stronger_plus = 4,
 }
 
 export enum ICausalAlgorithm {
     PC = 'PC',
     FCI = 'FCI',
-    CONOD = 'CONOD'
+    CONOD = 'CONOD',
 }
 
 export enum IndepenenceTest {
@@ -111,12 +111,12 @@ export enum IndepenenceTest {
     gSquare = 'gsq',
 }
 // type UCPriority = -1 | 0 | 1 | 2 | 3 | 4;
-// type UCRule = 0 | 1 | 2; 
+// type UCRule = 0 | 1 | 2;
 export enum ICatEncodeType {
     none = 'none',
     oneHot = 'one_hot',
     binary = 'binary',
-    lex = 'lex'
+    lex = 'lex',
 }
 export enum IQuantEncodeType {
     none = 'none',
@@ -125,7 +125,7 @@ export enum IQuantEncodeType {
     order = 'order',
 }
 
-export const CAUSAL_ALGORITHM_OPTIONS: IDropdownOption[] = [
+export const CAUSAL_ALGORITHM_OPTIONS: RathSelectOption[] = [
     // { key: ICausalAlgorithm.PC, text: ICausalAlgorithm.PC },
     // { key: ICausalAlgorithm.FCI, text: ICausalAlgorithm.FCI },
     // { key: ICausalAlgorithm.CONOD, text: ICausalAlgorithm.CONOD },
@@ -133,16 +133,16 @@ export const CAUSAL_ALGORITHM_OPTIONS: IDropdownOption[] = [
 
 export const PC_PARAMS_FORM: IForm = PC_PARAMS as IForm;
 
-export const CAUSAL_ALGORITHM_FORM: { [key in ICausalAlgorithm ]: IForm } = {
+export const CAUSAL_ALGORITHM_FORM: { [key in ICausalAlgorithm]: IForm } = {
     PC: PC_PARAMS_FORM,
     FCI: PC_PARAMS_FORM,
     CONOD: PC_PARAMS_FORM,
-}
+};
 
-export function makeFormInitParams (form: IForm): {[key: string]: any} {
-    const initParams: {[key: string]: any} = {};
-    form.items.forEach(item => {
+export function makeFormInitParams(form: IForm): { [key: string]: any } {
+    const initParams: { [key: string]: any } = {};
+    form.items.forEach((item) => {
         initParams[item.key] = item.defaultValue;
-    })
+    });
     return initParams;
 }

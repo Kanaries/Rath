@@ -13,12 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from '@fluentui/react';
-import { useId } from '@fluentui/react-hooks';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
+import { Button } from '../../../../../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../../components/ui/dialog';
+import { Input } from '../../../../../components/ui/input';
+import { Label } from '../../../../../components/ui/label';
 
 const Container = styled.div`
     padding: 1em;
@@ -30,7 +32,6 @@ const Container = styled.div`
 const FormStyle = {
     marginBlock: '1em',
 };
-const FormTokens = { childrenGap: 12 };
 const BtnGroupStyle = {
     marginTop: '2em',
 };
@@ -45,7 +46,7 @@ interface ColNameEditorProps {
 }
 const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
     const { showNameEditor, setShowNameEditor, defaultName, onNameUpdate, defaultComment, onCommentUpdate } = props;
-    const nameEditorTitleId = useId('name-editor-title');
+    const nameEditorTitleId = `name-editor-title-${useId().replace(/:/g, '')}`;
     const [headerName, setHeaderName] = useState<string>(defaultName);
     useEffect(() => {
         setHeaderName(defaultName);
@@ -55,57 +56,66 @@ const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
         setComment(defaultComment);
     }, [defaultComment]);
     return (
-        <Modal
-            titleAriaId={nameEditorTitleId}
-            isOpen={showNameEditor}
-            onDismiss={() => {
-                setShowNameEditor(false);
-            }}
-        >
-            <Container>
-                <h1 id={nameEditorTitleId}>{intl.get('dataSource.table.edit')}</h1>
-                <Stack style={FormStyle} tokens={FormTokens}>
-                    <TextField
-                        label={intl.get('dataSource.table.fieldName')}
-                        aria-label={intl.get('dataSource.table.fieldName')}
-                        value={headerName}
-                        placeholder={defaultName}
-                        onChange={(e, val) => {
-                            setHeaderName(`${val}`);
-                        }}
-                    />
-                    <TextField
-                        label={intl.get('storage.desc', { mode: intl.get('common.field') })}
-                        aria-label={intl.get('storage.desc', { mode: intl.get('common.field') })}
-                        value={comment}
-                        placeholder={defaultComment}
-                        onChange={(e, val) => {
-                            setComment(val ?? '');
-                        }}
-                    />
-                    <Stack style={BtnGroupStyle} tokens={FormTokens} horizontal>
-                        <PrimaryButton
-                            text={intl.get('function.confirm')}
-                            onClick={() => {
-                                onNameUpdate && onNameUpdate(headerName);
-                                onCommentUpdate && onCommentUpdate(comment);
-                                setShowNameEditor(false);
-                            }}
-                        />
-                        <DefaultButton
-                            text={intl.get('function.cancel')}
-                            onClick={() => {
-                                unstable_batchedUpdates(() => {
+        <Dialog open={showNameEditor} onOpenChange={setShowNameEditor}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle id={nameEditorTitleId}>{intl.get('dataSource.table.edit')}</DialogTitle>
+                </DialogHeader>
+                <Container>
+                    <div style={FormStyle} className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor={`${nameEditorTitleId}-field-name`}>{intl.get('dataSource.table.fieldName')}</Label>
+                            <Input
+                                id={`${nameEditorTitleId}-field-name`}
+                                aria-label={intl.get('dataSource.table.fieldName')}
+                                value={headerName}
+                                placeholder={defaultName}
+                                onChange={(e) => {
+                                    setHeaderName(e.target.value);
+                                }}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor={`${nameEditorTitleId}-comment`}>{intl.get('storage.desc', { mode: intl.get('common.field') })}</Label>
+                            <Input
+                                id={`${nameEditorTitleId}-comment`}
+                                aria-label={intl.get('storage.desc', { mode: intl.get('common.field') })}
+                                value={comment}
+                                placeholder={defaultComment}
+                                onChange={(e) => {
+                                    setComment(e.target.value);
+                                }}
+                            />
+                        </div>
+                        <div style={BtnGroupStyle} className="flex gap-3">
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    onNameUpdate && onNameUpdate(headerName);
+                                    onCommentUpdate && onCommentUpdate(comment);
                                     setShowNameEditor(false);
-                                    setHeaderName(defaultName);
-                                    setComment(defaultComment);
-                                });
-                            }}
-                        />
-                    </Stack>
-                </Stack>
-            </Container>
-        </Modal>
+                                }}
+                            >
+                                {intl.get('function.confirm')}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    unstable_batchedUpdates(() => {
+                                        setShowNameEditor(false);
+                                        setHeaderName(defaultName);
+                                        setComment(defaultComment);
+                                    });
+                                }}
+                            >
+                                {intl.get('function.cancel')}
+                            </Button>
+                        </div>
+                    </div>
+                </Container>
+            </DialogContent>
+        </Dialog>
     );
 };
 

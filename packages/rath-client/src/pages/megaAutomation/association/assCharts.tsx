@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
-import { CommandButton, Spinner } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { IInsightSpace } from 'visual-insights';
+import { Button } from '../../../components/ui/button';
+import { Spinner } from '../../../components/ui/spinner';
+import { RathIcon } from '../../../components/icons';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
@@ -24,20 +26,24 @@ interface AssociationProps {
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
     const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;
     const { semiAutoStore } = useGlobalStore();
-    const { settings: { vizAlgo } } = semiAutoStore;
+    const {
+        settings: { vizAlgo },
+    } = semiAutoStore;
 
     const specList = useMemo(() => {
         if (vizAlgo === 'lite') {
-            return Promise.resolve(vizList.map(view => {
-                const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
-                return distVis({
-                    pattern: { fields: fieldsInView, imp: 0 }
-                });
-            }));
+            return Promise.resolve(
+                vizList.map((view) => {
+                    const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                    return distVis({
+                        pattern: { fields: fieldsInView, imp: 0 },
+                    });
+                })
+            );
         }
         return labDistVisService({
             dataSource,
-            items: vizList.map(view => {
+            items: vizList.map((view) => {
                 const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
                 return {
                     pattern: { fields: fieldsInView, imp: 0 },
@@ -56,26 +62,23 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                     return (
                         <AssoViewContainer key={`associate-row-${i}`} dir="ltr">
                             <div>
-                                <CommandButton
-                                    iconProps={{ iconName: 'Lightbulb' }}
-                                    text={intl.get('megaAuto.analysis')}
-                                    ariaLabel={intl.get('megaAuto.analysis')}
+                                <Button
+                                    variant="ghost"
+                                    aria-label={intl.get('megaAuto.analysis')}
                                     onClick={() => {
                                         onSelectView(view);
                                     }}
-                                />
+                                >
+                                    <RathIcon name="Lightbulb" />
+                                    {intl.get('megaAuto.analysis')}
+                                </Button>
                             </div>
                             {spec ? (
                                 <VisErrorBoundary>
-                                    <ReactVega
-                                        dataSource={dataSource}
-                                        spec={spec}
-                                        actions={false}
-                                        config={themeConfig}
-                                    />
+                                    <ReactVega dataSource={dataSource} spec={spec} actions={false} config={themeConfig} />
                                 </VisErrorBoundary>
                             ) : (
-                                <Spinner />
+                                <Spinner aria-label="Loading" />
                             )}
                         </AssoViewContainer>
                     );

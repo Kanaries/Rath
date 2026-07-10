@@ -1,21 +1,14 @@
 import intl from 'react-intl-universal';
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import styled from "styled-components";
-import {
-    Icon,
-    TextField,
-    Spinner,
-    Stack,
-    ContextualMenu,
-    SpinnerSize,
-    PrimaryButton,
-    DefaultButton,
-    Label,
-    IContextualMenuItem,
-} from "@fluentui/react";
-import { useId } from '@fluentui/react-hooks';
 import { observer } from "mobx-react-lite";
-import { renderServerItem } from '../components/server-dropdown-item';
+import { RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Popover, PopoverAnchor, PopoverContent } from '../../../../components/ui/popover';
+import { Spinner } from '../../../../components/ui/spinner';
+import { renderServerItem, ServerDropdownItem } from '../components/server-dropdown-item';
 
 
 const ErrorMessage = styled.span`
@@ -26,34 +19,6 @@ const ErrorMessage = styled.span`
 const SuccessMessage = styled.span`
     display: flex;
     align-items: center;
-`;
-
-const SquaredDefaultButtonStyle = {
-    width: '32px',
-    minWidth: 'unset',
-    padding: '0',
-    borderLeft: 'none',
-};
-
-const AppendButtonStyle = {
-    width: '32px',
-    minWidth: 'unset',
-    padding: '0',
-};
-
-const FlexibleTextFieldStyle = {
-    root: {
-        flex: 1,
-    },
-    suffix: {
-        padding: 0
-    },
-};
-
-const FullWidthMenuTarget = styled.div`
-    position: absolute;
-    height: 0;
-    width: 100%;
 `;
 
 const AdvancedOptions = observer<{
@@ -83,7 +48,7 @@ const AdvancedOptions = observer<{
         setCustomServer(server);
     }, [server]);
 
-    const id = useId();
+    const id = `advanced-options-${useId().replace(/:/g, '')}`;
 
     const items = useMemo<typeof servers>(() => {
         const letters = customServer.toLowerCase().replaceAll(/[^a-z0-9_.-]/g, '').split('');
@@ -128,18 +93,19 @@ const AdvancedOptions = observer<{
     };
 
     const renderLabel = () => (
-        <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
-            <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
+        <div className="flex items-center gap-5">
+            <Label htmlFor={`${id}-input`} style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
             {!status && (
                 <ErrorMessage>
                     {intl.get('dataSource.connectorEmpty')}
                 </ErrorMessage>
             )}
-            {status === 'pending' && <Spinner size={SpinnerSize.small} />}
+            {status === 'pending' && <Spinner size="sm" />}
             {status === 'fulfilled' && curServer && (
                 <SuccessMessage>
-                    <Icon
-                        iconName="StatusCircleCheckmark"
+                    <RathIcon
+                        name="StatusCircleCheckmark"
+                        size={19}
                         style={{
                             borderRadius: '50%',
                             fontSize: '1.2rem',
@@ -156,21 +122,10 @@ const AdvancedOptions = observer<{
                     {intl.get('dataSource.connectorOffline')}
                 </ErrorMessage>
             )}
-        </Stack>
+        </div>
     );
 
-    const renderSuffix = () => {
-        return (
-            <PrimaryButton
-                disabled={!isInputANewAddress}
-                iconProps={{ iconName: 'Add' }}
-                style={AppendButtonStyle}
-                onClick={submitCustomServer}
-            />
-        );
-    };
-
-    const options = useMemo<IContextualMenuItem[]>(() => {
+    const options = useMemo<ServerDropdownItem[]>(() => {
         if (items.length > 0) {
             return items.map(s => ({
                 key: s.target,
@@ -183,59 +138,88 @@ const AdvancedOptions = observer<{
             key: 'new',
             text: 'new',
             secondaryText: intl.get('dataSource.btn.new_connector'),
+            checked: false,
         }];
     }, [items, server])
 
     return (
-        <Stack horizontal verticalAlign="end" horizontalAlign="stretch" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
-            <TextField
-                label={intl.get('dataSource.connectorService')}
-                value={customServer}
-                onClick={e => {
-                    e.stopPropagation();
-                    setFocused(true);
-                }}
-                onKeyDown={e => {
-                    e.stopPropagation();
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        submitCustomServer();
-                    }
-                }}
-                onChange={(_, val) => {
-                    setCustomServer(val?.replaceAll(/\s+/g, '') ?? '');
-                }}
-                onRenderLabel={renderLabel}
-                onRenderSuffix={renderSuffix}
-                autoComplete="off"
-                styles={FlexibleTextFieldStyle}
-            />
-            {focused && (
-                <>
-                    <DefaultButton
-                        iconProps={{ iconName: 'SyncOccurence' }}
-                        style={SquaredDefaultButtonStyle}
-                        onClick={e => {
-                            e.stopPropagation();
-                            testConnector(...servers.map((_, i) => i));
-                        }}
-                    />
-                    <DefaultButton
-                        iconProps={{ iconName: 'CheckMark' }}
-                        style={SquaredDefaultButtonStyle}
-                        onClick={() => setFocused(false)}
-                    />
-                </>
-            )}
-            <FullWidthMenuTarget aria-hidden id={id} />
-            <ContextualMenu
-                target={`#${id}`}
-                useTargetWidth
-                hidden={!focused}
-                items={options}
-                onRenderContextualMenuItem={renderItem}
-            />
-        </Stack>
+        <Popover open={focused} onOpenChange={setFocused}>
+            <PopoverAnchor asChild>
+                <div className="relative flex items-end" onClick={() => setFocused(false)}>
+                    <div className="flex flex-1 flex-col gap-1.5">
+                        {renderLabel()}
+                        <div className="flex">
+                            <Input
+                                id={`${id}-input`}
+                                title={intl.get('dataSource.connectorService')}
+                                value={customServer}
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    setFocused(true);
+                                }}
+                                onKeyDown={e => {
+                                    e.stopPropagation();
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        submitCustomServer();
+                                    }
+                                }}
+                                onChange={(event) => {
+                                    setCustomServer(event.target.value.replaceAll(/\s+/g, ''));
+                                }}
+                                autoComplete="off"
+                                className="rounded-r-none"
+                            />
+                            <Button
+                                type="button"
+                                disabled={!isInputANewAddress}
+                                className="h-8 w-8 rounded-l-none px-0"
+                                onClick={submitCustomServer}
+                            >
+                                <RathIcon name="Add" />
+                            </Button>
+                        </div>
+                    </div>
+                    {focused && (
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 rounded-l-none"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    testConnector(...servers.map((_, i) => i));
+                                }}
+                            >
+                                <RathIcon name="SyncOccurence" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 rounded-l-none"
+                                onClick={() => setFocused(false)}
+                            >
+                                <RathIcon name="CheckMark" />
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </PopoverAnchor>
+            <PopoverContent
+                align="start"
+                className="w-[var(--radix-popover-trigger-width)] p-1"
+                onClick={e => e.stopPropagation()}
+                onOpenAutoFocus={e => e.preventDefault()}
+            >
+                <div role="listbox">
+                    {options.map(option => (
+                        <div key={option.key}>{renderItem(option)}</div>
+                    ))}
+                </div>
+            </PopoverContent>
+        </Popover>
     );
 });
 

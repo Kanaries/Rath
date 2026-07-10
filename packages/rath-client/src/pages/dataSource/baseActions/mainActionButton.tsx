@@ -1,13 +1,19 @@
-import { IContextualMenuItem, IContextualMenuProps } from '@fluentui/react';
-import { observer, useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
-import { Menu, MenuButtonProps, MenuItem, MenuList, MenuPopover, MenuTrigger, SplitButton } from '@fluentui/react-components';
-import { BarChart3 } from 'lucide-react';
 import va from '@vercel/analytics';
 import { toJS } from 'mobx';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
 import { EXPLORE_MODE, PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
+
+interface AnalysisOption {
+    key: string;
+    text: string;
+    onClick: () => void;
+}
 
 export const useActionModes = function () {
     const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
@@ -30,99 +36,96 @@ export const useActionModes = function () {
     }, [commonStore]);
     const hasResults = megaAutoStore.insightSpaces.length > 0;
 
-    const analysisOptions: IContextualMenuProps = useMemo(() => {
-        return {
-            items: [
-                {
-                    key: 'function.analysis.start',
-                    text: intl.get('function.analysis.start'),
-                    onClick: startMegaAutoAnalysis,
+    const analysisOptions = useMemo<AnalysisOption[]>(() => {
+        return [
+            {
+                key: 'function.analysis.start',
+                text: intl.get('function.analysis.start'),
+                onClick: startMegaAutoAnalysis,
+            },
+            {
+                key: 'function.analysis.checkResult',
+                text: intl.get('function.analysis.checkResult'),
+                onClick: onCheckResults,
+            },
+            {
+                key: 'function.analysis.pattern',
+                text: intl.get('function.analysis.pattern'),
+                onClick: startSemiAutoAnalysis,
+            },
+            {
+                key: 'function.analysis.manual',
+                text: intl.get('function.analysis.manual'),
+                onClick: () => {
+                    commonStore.setAppKey(PIVOT_KEYS.editor);
                 },
-                {
-                    key: 'function.analysis.checkResult',
-                    text: intl.get('function.analysis.checkResult'),
-                    onClick: onCheckResults,
+            },
+            {
+                key: 'function.analysis.causal',
+                text: intl.get('function.analysis.causal'),
+                onClick: () => {
+                    commonStore.setAppKey(PIVOT_KEYS.causal);
                 },
-                {
-                    key: 'function.analysis.pattern',
-                    text: intl.get('function.analysis.pattern'),
-                    onClick: startSemiAutoAnalysis,
-                },
-                {
-                    key: 'function.analysis.manual',
-                    text: intl.get('function.analysis.manual'),
-                    onClick: () => {
-                        commonStore.setAppKey(PIVOT_KEYS.editor);
-                    },
-                },
-                {
-                    key: 'function.analysis.causal',
-                    text: intl.get('function.analysis.causal'),
-                    onClick: () => {
-                        commonStore.setAppKey(PIVOT_KEYS.causal);
-                    },
-                },
-            ],
-        };
+            },
+        ];
     }, [startMegaAutoAnalysis, onCheckResults, startSemiAutoAnalysis, commonStore]);
-    const startMode = useMemo<IContextualMenuItem>(() => {
+    const startMode = useMemo<AnalysisOption>(() => {
         if (exploreMode === EXPLORE_MODE.first || fieldMetas.length > 25) {
-            return analysisOptions.items[2];
+            return analysisOptions[2];
         }
         if (exploreMode === EXPLORE_MODE.manual) {
-            return analysisOptions.items[3];
+            return analysisOptions[3];
         }
         if (hasResults) {
-            return analysisOptions.items[1];
+            return analysisOptions[1];
         }
-        return analysisOptions.items[0];
+        return analysisOptions[0];
     }, [hasResults, exploreMode, analysisOptions, fieldMetas]);
 
-    return useObserver(() => ({
+    return {
         startMode,
         analysisOptions,
         satisfyAnalysisCondition,
-    }));
+    };
 };
 
 const MainActionButton: React.FC = () => {
     const { satisfyAnalysisCondition, startMode, analysisOptions } = useActionModes();
-    const { userStore } = useGlobalStore();
 
     const startHandler = useCallback(() => {
-        startMode.onClick && startMode.onClick();
-        va.track('start_analysis', { userName: userStore.userName, mode: startMode.key });
+        startMode.onClick();
+        va.track('start_analysis', { mode: startMode.key });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startMode]);
 
     return (
-        <Menu positioning="below-end">
-            <MenuTrigger disableButtonEnhancement>
-                {(triggerProps: MenuButtonProps) => (
-                    <SplitButton
+        <div className="inline-flex">
+            <Button type="button" disabled={!satisfyAnalysisCondition} onClick={startHandler} className="gap-1.5 rounded-r-none">
+                <RathIcon name="AnalyticsView" />
+                <span>{intl.get(`${startMode.key}`)}</span>
+            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        type="button"
+                        size="icon"
                         disabled={!satisfyAnalysisCondition}
-                        primaryActionButton={{ onClick: startHandler }}
-                        menuButton={triggerProps}
-                        appearance="primary"
-                        icon={<BarChart3 />}
+                        aria-label="Choose analysis mode"
+                        title="Choose analysis mode"
+                        className="rounded-l-none border-l border-primary-foreground/25 px-0"
                     >
-                        {intl.get(`${startMode.key}`)}
-                    </SplitButton>
-                )}
-            </MenuTrigger>
-
-            <MenuPopover>
-                <MenuList>
-                    {analysisOptions.items.map((item) => {
-                        return (
-                            <MenuItem key={item.key} onClick={item.onClick}>
-                                {item.text}
-                            </MenuItem>
-                        );
-                    })}
-                </MenuList>
-            </MenuPopover>
-        </Menu>
+                        <RathIcon name="CaretSolidDown" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {analysisOptions.map((item) => (
+                        <DropdownMenuItem key={item.key} onSelect={item.onClick}>
+                            {item.text}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
     );
 };
 

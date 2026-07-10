@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce, { enableMapSet } from 'immer';
-import { Icon, Shimmer } from '@fluentui/react';
+import { RathIcon } from '../../../../components/icons';
+import { Skeleton } from '../../../../components/ui/skeleton';
 
 
 enableMapSet();
@@ -56,7 +57,7 @@ const ItemIcon = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    i {
+    svg {
         font-size: 1em;
         &[role="button"] {
             pointer-events: all;
@@ -78,7 +79,7 @@ const ItemText = styled.span`
     }
 `;
 
-const ChevronIcon = styled(Icon).attrs(() => ({ iconName: 'ChevronRight' }))<{ open: boolean }>`
+const ChevronIcon = styled(RathIcon).attrs(() => ({ name: 'ChevronRight' as const }))<{ open: boolean }>`
     font-size: 1em;
     transform: rotate(${({ open }) => open ? 90 : 0}deg) scale(0.6);
     transition: transform 200ms;
@@ -133,7 +134,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                     <Item virtual key={i}>
                         <ItemHeader>
                             <ItemChevron />
-                            <Shimmer width="5em" styles={{ root: { height: '0.75em' }, shimmerWrapper: { height: '0.75em' } }} />
+                            <Skeleton className="h-3 w-20" />
                         </ItemHeader>
                     </Item>
                 ))}
@@ -149,8 +150,8 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                         <ItemChevron />
                         {parent && (
                             <ItemIcon>
-                                <Icon
-                                    iconName="Refresh"
+                                <RathIcon
+                                    name="Refresh"
                                     role="button"
                                     tabIndex={0}
                                     onClick={() => onItemClick?.(parent, path.slice(0, -1))}
@@ -194,7 +195,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                             </ItemChevron>
                             <ItemIcon>
                                 {item.icon ?? (
-                                    <Icon iconName={mayHasChildren ? 'ProductList' : 'Document'} />
+                                    <RathIcon name={mayHasChildren ? 'ProductList' : 'Document'} />
                                 )}
                             </ItemIcon>
                             <ItemText

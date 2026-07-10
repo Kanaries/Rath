@@ -1,8 +1,10 @@
-import { type HTMLAttributes, type FC } from "react";
+import { type HTMLAttributes, type FC, type ReactNode } from "react";
 import S from './components';
 
 
-export interface IStepperProps {}
+export interface IStepperProps {
+    children?: ReactNode;
+}
 
 const Stepper: FC<IStepperProps> = ({ children }) => {
     return (
@@ -12,7 +14,9 @@ const Stepper: FC<IStepperProps> = ({ children }) => {
     );
 };
 
-export interface IBoxProps {}
+export interface IBoxProps {
+    children?: ReactNode;
+}
 
 const Box: FC<IBoxProps> = ({ children }) => {
     return (

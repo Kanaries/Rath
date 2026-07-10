@@ -1,13 +1,14 @@
 import { FC, useState, useRef, useCallback, useEffect } from "react";
-import { PrimaryButton, Toggle } from '@fluentui/react';
 import styled from "styled-components";
 import { observer } from "mobx-react-lite";
 import * as xlsx from 'xlsx';
 import intl from "react-intl-universal";
 import { isExcelFile, loadDataFile, loadExcelFile, loadExcelRaw, parseExcelFile, readRaw, SampleKey } from "../../utils";
-import { dataBackup, logDataImport } from "../../../../loggers/dataImport";
 import { IMuteFieldBase, IRow } from "../../../../interfaces";
 import { DataSourceTag, IDBMeta } from "../../../../utils/storage";
+import { Button } from "../../../../components/ui/button";
+import { Label } from "../../../../components/ui/label";
+import { Switch } from "../../../../components/ui/switch";
 import HistoryList from "../history/history-list";
 import FileUpload from "./file-upload";
 import FileHelper, { Charset } from "./file-helper";
@@ -213,13 +214,6 @@ const FileData: FC<FileDataProps> = (props) => {
             return;
         }
         const { fields, dataSource } = previewOfFile;
-        logDataImport({
-            dataType: 'File',
-            fields,
-            dataSource: dataSource.slice(0, 10),
-            size: dataSource.length
-        });
-        dataBackup(preview);
         onDataLoaded(fields, dataSource, preview.name, DataSourceTag.FILE);
         onClose();
     }, [onClose, onDataLoaded, preview, previewOfFile]);
@@ -230,12 +224,10 @@ const FileData: FC<FileDataProps> = (props) => {
         <Container>
             <header className="upload">
                 <span>{intl.get('dataSource.upload.new')}</span>
-                <Toggle
-                    label={intl.get('dataSource.upload.show_more')}
-                    inlineLabel
-                    checked={showMoreConfig}
-                    onChange={(_, checked) => setShowMoreConfig(Boolean(checked))}
-                />
+                <div className="flex items-center gap-2">
+                    <Label>{intl.get('dataSource.upload.show_more')}</Label>
+                    <Switch checked={showMoreConfig} onCheckedChange={setShowMoreConfig} />
+                </div>
             </header>
             <FileHelper
                 showMoreConfig={showMoreConfig}
@@ -266,11 +258,12 @@ const FileData: FC<FileDataProps> = (props) => {
             />
             {preview && (
                 <div className="action">
-                    <PrimaryButton
-                        text={intl.get('dataSource.importData.load')}
+                    <Button
                         disabled={!previewOfFile}
                         onClick={handleFileSubmit}
-                    />
+                    >
+                        {intl.get('dataSource.importData.load')}
+                    </Button>
                 </div>
             )}
             {!preview && (

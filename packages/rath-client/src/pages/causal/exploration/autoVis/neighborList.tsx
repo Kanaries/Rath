@@ -1,11 +1,10 @@
 import intl from 'react-intl-universal';
-import { DetailsList, IColumn, SelectionMode } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, useMemo } from "react";
-import { useGlobalStore } from "../../../../store";
-import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { PAG_NODE } from "../../config";
-
+import { observer } from 'mobx-react-lite';
+import { FC, useMemo } from 'react';
+import { RathColumn, RathDataTable } from '../../../../components/rath-ui/rath-data-table';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import { PAG_NODE } from '../../config';
 
 const NeighborList: FC = () => {
     const { causalStore } = useGlobalStore();
@@ -18,14 +17,16 @@ const NeighborList: FC = () => {
         if (!mutualMatrix || !causality) {
             return [];
         }
-        return causality.reduce<{
-            cause: string;
-            effect: string;
-            corr: number;
-        }[]>((list, link) => {
-            const isIncluded = [link.src, link.tar].some(fid => selectedFieldGroup.some(f => f.fid === fid));
-            const srcIdx = fields.findIndex(f => f.fid === link.src);
-            const tarIdx = fields.findIndex(f => f.fid === link.tar);
+        return causality.reduce<
+            {
+                cause: string;
+                effect: string;
+                corr: number;
+            }[]
+        >((list, link) => {
+            const isIncluded = [link.src, link.tar].some((fid) => selectedFieldGroup.some((f) => f.fid === fid));
+            const srcIdx = fields.findIndex((f) => f.fid === link.src);
+            const tarIdx = fields.findIndex((f) => f.fid === link.tar);
             const src = fields[srcIdx];
             const tar = fields[tarIdx];
             if (isIncluded && src && tar) {
@@ -40,14 +41,13 @@ const NeighborList: FC = () => {
         }, []);
     }, [mutualMatrix, causality, selectedFieldGroup, fields]);
 
-    const columns = useMemo<IColumn[]>(() => {
+    const columns = useMemo<RathColumn<typeof neighbors[number]>[]>(() => {
         return [
             {
                 key: 'cause',
                 name: intl.get('causal.analyze.cause'),
                 minWidth: 100,
                 maxWidth: 100,
-                isResizable: false,
                 onRender(item: typeof neighbors[number]) {
                     return item.cause;
                 },
@@ -57,7 +57,6 @@ const NeighborList: FC = () => {
                 name: intl.get('causal.analyze.corr'),
                 minWidth: 120,
                 maxWidth: 120,
-                isResizable: false,
                 onRender(item: typeof neighbors[number]) {
                     const value = item.corr;
                     if (typeof value === 'number') {
@@ -77,7 +76,6 @@ const NeighborList: FC = () => {
                 name: intl.get('causal.analyze.effect'),
                 minWidth: 100,
                 maxWidth: 100,
-                isResizable: false,
                 onRender(item: typeof neighbors[number]) {
                     return item.effect;
                 },
@@ -87,17 +85,10 @@ const NeighborList: FC = () => {
 
     return selectedFieldGroup?.length ? (
         <div>
-            <header>
-                {intl.get('causal.analyze.corr_atoms')}
-            </header>
-            <DetailsList
-                items={neighbors}
-                columns={columns}
-                selectionMode={SelectionMode.none}
-            />
+            <header>{intl.get('causal.analyze.corr_atoms')}</header>
+            <RathDataTable items={neighbors} columns={columns} />
         </div>
     ) : null;
 };
-
 
 export default observer(NeighborList);

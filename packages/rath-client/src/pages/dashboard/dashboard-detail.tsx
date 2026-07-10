@@ -1,7 +1,10 @@
-import { ActionButton, Slider } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../components/ui/button';
+import { Label } from '../../components/ui/label';
+import { Slider } from '../../components/ui/slider';
+import { RathIcon } from '../../components/icons';
 import DashboardDraft from './dashboard-draft';
 
 const PageLayout = styled.div`
@@ -65,32 +68,23 @@ const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio, samp
     return (
         <PageLayout>
             <Header>
-                <ActionButton iconProps={{ iconName: 'Back' }} onClick={goBack} />
-                <ActionButton iconProps={{ iconName: mode === 'edit' ? 'AnalyticsView' : 'Edit' }} onClick={toggleMode} />
-                <Slider
-                    label="Resize"
-                    min={Math.min(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
-                    max={Math.max(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
-                    showValue
-                    value={scaleIdx}
-                    onChange={(idx) => setScaleIdx(idx)}
-                    originFromZero
-                    valueFormat={(val) => `${viewScales[val as keyof typeof viewScales] ?? 1}`}
-                    styles={{
-                        root: {
-                            display: 'inline-flex',
-                            marginInline: '1em',
-                        },
-                        titleLabel: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginInline: '0.5em',
-                        },
-                        slideBox: {
-                            width: '12vw',
-                        },
-                    }}
-                />
+                <Button variant="ghost" size="icon" aria-label="Back" onClick={goBack}>
+                    <RathIcon name="Back" />
+                </Button>
+                <Button variant="ghost" size="icon" aria-label={mode === 'edit' ? 'Preview' : 'Edit'} onClick={toggleMode}>
+                    <RathIcon name={mode === 'edit' ? 'AnalyticsView' : 'Edit'} />
+                </Button>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em', marginInline: '1em' }}>
+                    <Label>Resize</Label>
+                    <Slider
+                        min={Math.min(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
+                        max={Math.max(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
+                        value={[scaleIdx]}
+                        onValueChange={(idx) => setScaleIdx(idx[0])}
+                        style={{ width: '12vw' }}
+                    />
+                    <span>{viewScales[scaleIdx as keyof typeof viewScales] ?? 1}</span>
+                </div>
             </Header>
             <DashboardDraft sampleSize={sampleSize} cursor={cursor} mode={mode} ratio={ratio * scale} />
         </PageLayout>

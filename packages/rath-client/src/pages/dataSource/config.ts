@@ -1,57 +1,59 @@
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { IDataSourceType } from "../../global";
+import type { LegacyIconName } from '../../components/icons';
 
+export interface DataSourceTypeOption {
+    key: IDataSourceType;
+    text: string;
+    icon: LegacyIconName;
+    disabled?: boolean;
+}
 
-export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
+export const useDataSourceTypeOptions = function (): DataSourceTypeOption[] {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`);
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
     const historyText = intl.get('common.history');
 
-    const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
+    const options = useMemo<DataSourceTypeOption[]>(() => {
         return [
             {
                 key: IDataSourceType.LOCAL,
                 text: historyText,
-                iconProps: { iconName: "History" },
+                icon: 'History',
             },
             {
                 key: IDataSourceType.FILE,
                 text: fileText,
-                iconProps: { iconName: "FabricUserFolder" },
+                icon: 'FabricUserFolder',
             },
             {
                 key: IDataSourceType.DEMO,
                 text: demoText,
-                iconProps: { iconName: "FileTemplate" },
+                icon: 'FileTemplate',
             },
-            // {
-            //     key: IDataSourceType.CLOUD,
-            //     text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
-            //     iconProps: { iconName: "CloudDownload" },
-            // },
             {
                 key: IDataSourceType.DATABASE,
                 text: dbText,
-                iconProps: { iconName: "Database" }
+                icon: 'Database',
             },
             {
                 key: IDataSourceType.AIRTABLE,
                 text: 'AirTable',
-                iconProps: { iconName: 'Table' },
+                icon: 'Table',
                 disabled: false
             },
             {
                 key: IDataSourceType.RESTFUL,
                 text: restfulText,
-                iconProps: { iconName: "Cloud" },
+                icon: 'Cloud',
             },
             {
                 key: IDataSourceType.OLAP,
                 text: 'OLAP',
-                iconProps: { iconName: "TripleColumn" },
+                icon: 'TripleColumn',
                 disabled: true,
             }
         ];

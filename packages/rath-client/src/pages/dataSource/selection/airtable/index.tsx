@@ -1,10 +1,11 @@
-import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import intl from 'react-intl-universal'
-import { logDataImport } from '../../../../loggers/dataImport';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import { DataSourceTag, IDBMeta } from '../../../../utils/storage';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
 import { fetchAllRecordsFromAirTable } from './utils';
 
 
@@ -36,44 +37,38 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
             .then((ds) => {
                 const name = `airtable-${tableName}-${viewName}`;
                 onDataLoaded(ds.fields, ds.dataSource, name, DataSourceTag.AIR_TABLE);
-                logDataImport({
-                    dataType: 'AirTable',
-                    fields: ds.fields,
-                    dataSource: ds.dataSource.slice(0, 10),
-                    size: ds.dataSource.length
-                });
                 onClose();
             })
             .catch(onLoadingFailed);
     }, [onDataLoaded, onClose, onLoadingFailed, onStartLoading, endPoint, apiKey, tableID, tableName, viewName]);
     return (
         <div>
-            <Stack tokens={{ childrenGap: '4px' }} style={{ maxWidth: '300px' }}>
-                <TextField required label="EndPoint" placeholder="https://api.airtable.com"
-                    onChange={(e, value) => { setEndPoint(`${value}`) }}
-                    value={endPoint}
-                />
-                <TextField required label="API Key" placeholder="key*********"
-                    onChange={(e, value) => { setAPIKey(`${value}`) }}
-                    value={apiKey}
-                />
-                <TextField required label="Table ID" placeholder="app*******"
-                    onChange={(e, value) => { setTableID(`${value}`) }}
-                    value={tableID}
-                />
-                <TextField required label="Table Name"
-                    onChange={(e, value) => { setTableName(`${value}`) }}
-                    value={tableName}
-                />
-                <TextField required label="View Name" placeholder="Gird View"
-                    onChange={(e, value) => { setViewName(`${value}`) }}
-                    value={viewName}
-                />
-                <Stack.Item style={{ marginTop: '1em' }}>
-                    <PrimaryButton onClick={fetchData}>{ intl.get('dataSource.importData.load') }</PrimaryButton>
-                    <DefaultButton style={{ marginLeft: '1em' }} onClick={onClose}>Cancel</DefaultButton>
-                </Stack.Item>
-            </Stack>
+            <div className="flex max-w-[300px] flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="airtable-endpoint">EndPoint</Label>
+                    <Input id="airtable-endpoint" required placeholder="https://api.airtable.com" onChange={(e) => { setEndPoint(e.target.value) }} value={endPoint} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="airtable-api-key">API Key</Label>
+                    <Input id="airtable-api-key" required placeholder="key*********" onChange={(e) => { setAPIKey(e.target.value) }} value={apiKey} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="airtable-table-id">Table ID</Label>
+                    <Input id="airtable-table-id" required placeholder="app*******" onChange={(e) => { setTableID(e.target.value) }} value={tableID} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="airtable-table-name">Table Name</Label>
+                    <Input id="airtable-table-name" required onChange={(e) => { setTableName(e.target.value) }} value={tableName} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="airtable-view-name">View Name</Label>
+                    <Input id="airtable-view-name" required placeholder="Gird View" onChange={(e) => { setViewName(e.target.value) }} value={viewName} />
+                </div>
+                <div className="mt-4 flex gap-3">
+                    <Button type="button" onClick={fetchData}>{ intl.get('dataSource.importData.load') }</Button>
+                    <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                </div>
+            </div>
         </div>
     );
 };

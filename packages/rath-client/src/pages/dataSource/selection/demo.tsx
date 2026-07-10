@@ -1,14 +1,12 @@
-import { Icon, Label } from '@fluentui/react';
-import { FC, useCallback, useMemo, useRef } from 'react';
-import { useId } from "@fluentui/react-hooks";
+import { FC, useCallback, useId } from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
+import { FileTypeIcon } from '../../../components/icons';
+import { Label } from '../../../components/ui/label';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
-import { logDataImport } from '../../../loggers/dataImport';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { DataSourceTag, IDBMeta } from '../../../utils/storage';
-import useBoundingClientRect from '../../../hooks/use-bounding-client-rect';
 import getFileIcon from './history/get-file-icon';
 
 interface DemoDataProps {
@@ -71,16 +69,22 @@ const Container = styled.div`
 
 const List = styled.div`
     margin: 1em 0;
-    min-height: 8em;
     max-height: 50vh;
-    width: 44vw;
+    width: 100%;
     overflow: hidden auto;
     display: grid;
     gap: 0.4em;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     grid-auto-rows: max-content;
 `;
 
-const ListItem = styled.div`
+const ListItem = styled.button`
+    appearance: none;
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    background: transparent;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -115,7 +119,9 @@ const ListItem = styled.div`
                 margin-bottom: 0.4em;
             }
             > span {
-                word-break: break-all;
+                min-width: 0;
+                overflow-wrap: anywhere;
+                word-break: normal;
                 line-height: 1.2em;
                 margin: 0.12em 0;
             }
@@ -127,8 +133,6 @@ const ListItem = styled.div`
     cursor: pointer;
 `;
 
-const ITEM_MIN_WIDTH = 240;
-
 const DemoData: FC<DemoDataProps> = props => {
     const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
     const options = useDemoDataOptions();
@@ -138,41 +142,30 @@ const DemoData: FC<DemoDataProps> = props => {
         requestDemoData(demo.key).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource, `${demo.text}.${RathDemoVirtualExt}`, DataSourceTag.DEMO);
-            logDataImport({
-                dataType: "Demo",
-                name: demo.key,
-                fields,
-                dataSource: [],
-                size: dataSource.length,
-            });
         }).catch((err) => {
             onLoadingFailed(err);
         })
         onClose();
     }, [onClose, onDataLoaded, onLoadingFailed, onStartLoading]);
 
-    const labelId = useId('demo-ds');
-
-    const listRef = useRef<HTMLDivElement>(null);
-    const { width } = useBoundingClientRect(listRef, { width: true });
-    const colCount = useMemo(() => Math.floor((width ?? (window.innerWidth * 0.6)) / ITEM_MIN_WIDTH), [width]);
+    const labelId = `demo-ds-${useId().replace(/:/g, '')}`;
 
     return (
         <Container>
             <Label id={labelId}>{intl.get("dataSource.importData.demo.available")}</Label>
-            <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
-                {options.map((demo, i) => {
+            <List aria-labelledby={labelId}>
+                {options.map((demo) => {
                     return (
                         <ListItem
-                            key={i}
-                            role="gridcell"
-                            aria-rowindex={Math.floor(i / colCount) + 1}
-                            aria-colindex={(i % colCount) + 1}
-                            tabIndex={0}
+                            key={demo.key}
+                            type="button"
+                            aria-label={`${intl.get(`dataSource.demoDataset.${demo.key}.title`)}. ${intl.get(
+                                `dataSource.demoDataset.${demo.key}.description`
+                            )} ${intl.get(`dataSource.sizeInfo`, demo)}`}
                             onClick={() => loadDemo(demo)}
                         >
                             <div className="head">
-                                <Icon iconName={getFileIcon('')} />
+                                <FileTypeIcon type={getFileIcon('')} />
                                 <div>
                                     <header>
                                         <span>{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</span>

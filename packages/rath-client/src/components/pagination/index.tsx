@@ -1,5 +1,5 @@
-import { Icon } from "@fluentui/react";
 import { Fragment, type HTMLAttributes, memo } from "react";
+import { RathIcon } from "../icons";
 import P from './components';
 import { type UsePaginationItem, usePagination } from "./hooks";
 
@@ -59,10 +59,7 @@ const Pagination = memo<IPaginationProps & Omit<HTMLAttributes<HTMLDivElement>, 
             role="button"
             tabIndex={0}
         >
-            <Icon
-                iconName={item.type === 'previous' ? 'ChevronLeft' : 'ChevronRight'}
-                aria-hidden="true"
-            />
+            <RathIcon name={item.type === 'previous' ? 'ChevronLeft' : 'ChevronRight'} />
             <span>
                 {item.type === 'previous' ? prevBtnText : nextBtnText}
             </span>

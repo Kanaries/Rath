@@ -13,9 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DefaultButton, PrimaryButton } from "@fluentui/react";
+import React from 'react';
 import { BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
+import { Button, ButtonProps } from '../../../components/ui/button';
 
 export const DATA_TABLE_STYLE_CONFIG = {
     SELECT_COLOR: '#b7eb8f',
@@ -108,12 +109,24 @@ export const TextPatternCard = styled.div`
         background-color: #fed7aa;
     }
 `;
-export const MiniButton = styled(DefaultButton)`
+interface MiniButtonProps extends Omit<ButtonProps, 'children'> {
+    text?: React.ReactNode;
+}
+
+export const MiniButton = styled(({ text, ...props }: MiniButtonProps) => (
+    <Button type="button" variant="outline" size="sm" {...props}>
+        {text}
+    </Button>
+))`
     height: 26px;
     font-size: 12px;
 `;
 
-export const MiniPrimaryButton = styled(PrimaryButton)`
+export const MiniPrimaryButton = styled(({ text, ...props }: MiniButtonProps) => (
+    <Button type="button" size="sm" {...props}>
+        {text}
+    </Button>
+))`
     height: 26px;
     font-size: 12px;
 `;

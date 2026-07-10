@@ -432,11 +432,13 @@
         "measure": "작업 다시 실행"
     },
     "megaAuto": {
-        "autoAnalysis": "컴퓨팅",
-        "reRun": "시각적 인사이트",
-        "computing": "RATH가 발견한 흥미로운 패턴 및 인사이트가 여기에 있습니다. 관심 있는 내용이 있으면 '차트 편집'을 사용하여 현재 뷰에 대한 자세한 내용을 알아보고 '연계'를 사용하여 관련 인사이트를 탐색해보세요.",
-        "title": "요약",
-        "hintMain": "연계",
+        "autoAnalysis": "자동 분석",
+        "reRun": "작업 다시 실행",
+        "computing": "계산 중",
+        "emptyTitle": "아직 인사이트가 없습니다",
+        "emptyDescription": "분석 작업을 실행하여 이 데이터셋의 패턴과 시각적 인사이트를 찾아보세요.",
+        "title": "시각적 인사이트",
+        "hintMain": "RATH가 발견한 흥미로운 패턴과 인사이트입니다. 차트 편집으로 세부 내용을 확인하거나 연계 기능으로 관련 인사이트를 탐색해 보세요.",
         "summary": "분석",
         "associate": "관련 척도",
         "analysis": "관련 차원",
@@ -526,11 +528,15 @@
         "dataViewInfo": "This is a collection of your favorite views in all segments."
     },
     "collection": {
-        "title": "Cards",
-        "desc": "List",
+        "title": "컬렉션",
+        "desc": "여러 탐색 화면에서 저장한 즐겨찾기 보기를 모아 둔 곳입니다.",
+        "emptyTitle": "저장된 보기가 없습니다",
+        "emptyDescription": "탐색 페이지에서 보기를 저장하면 여기에 표시됩니다.",
+        "searchEmpty": "일치하는 보기가 없습니다",
+        "searchEmptyDescription": "다른 검색어를 사용해 보세요.",
         "viewMode": {
-            "card": "Sample Percent(%)",
-            "list": "Brush Size"
+            "card": "카드",
+            "list": "목록"
         }
     },
     "painter": {

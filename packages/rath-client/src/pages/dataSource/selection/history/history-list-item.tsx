@@ -1,14 +1,15 @@
 import intl from 'react-intl-universal';
-import { Icon, IconButton, TooltipHost } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
+import { observer } from 'mobx-react-lite';
 import dayjs from 'dayjs';
-import type { FC } from "react";
-import styled from "styled-components";
-import { IDBMeta, updateDataStorageUserTagGroup, UserTagGroup, userTagGroupColors } from "../../../../utils/storage";
+import type { FC } from 'react';
+import styled from 'styled-components';
+import { FileTypeIcon, RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../components/ui/tooltip';
+import { IDBMeta, updateDataStorageUserTagGroup, UserTagGroup, userTagGroupColors } from '../../../../utils/storage';
 import { RathDemoVirtualExt } from '../demo';
 import { IDataSourceType } from '../../../../global';
 import getFileIcon from './get-file-icon';
-
 
 const allUserTagGroups = Object.keys(userTagGroupColors) as unknown as UserTagGroup[];
 
@@ -63,7 +64,7 @@ const ListItem = styled.div`
         font-size: 0.5rem;
         color: #888;
     }
-    > button {
+    > .delete-button {
         position: absolute;
         top: 0;
         right: 0;
@@ -80,14 +81,14 @@ const ListItem = styled.div`
             line-height: 1em;
             width: 1em;
             height: 1em;
-            transform: scale(0.4);
+            transform: scale(0.55);
         }
         opacity: 0.5;
         :hover {
             opacity: 1;
         }
     }
-    & .hover-only:not([aria-selected=true]) {
+    & .hover-only:not([aria-selected='true']) {
         visibility: hidden;
     }
     :hover {
@@ -117,12 +118,12 @@ const UserTagGroupContainer = styled.div`
             opacity: 0.95;
             transform: translateY(-4px);
         }
-        &[aria-selected=true] {
+        &[aria-selected='true'] {
             opacity: 1;
             transform: translateY(-3px);
             animation: pull 400ms linear forwards;
         }
-        &[aria-selected=false] {
+        &[aria-selected='false'] {
             transition: transform 100ms;
             filter: saturate(0.75);
         }
@@ -166,46 +167,47 @@ export interface IHistoryListItemProps {
     handleRefresh?: () => void;
 }
 
-const HistoryListItem: FC<IHistoryListItemProps> = ({
-    file, rowIndex, colIndex, handleClick, handleClearClick, handleRefresh,
-}) => {
+const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, handleClick, handleClearClick, handleRefresh }) => {
     const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /\.([^./]+)$/.exec(file.name)?.[1];
     const isRathDemo = ext === RathDemoVirtualExt;
     const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
 
     return (
-        <ListItem
-            role="gridcell"
-            aria-rowindex={rowIndex}
-            aria-colindex={colIndex}
-            onClick={() => handleClick?.(file)}
-        >
+        <ListItem role="gridcell" aria-rowindex={rowIndex} aria-colindex={colIndex} onClick={() => handleClick?.(file)}>
             <div className="head" role="button" tabIndex={0}>
-                <Icon iconName={getFileIcon(isRathDemo ? '' : file.name)} />
+                <FileTypeIcon type={getFileIcon(isRathDemo ? '' : file.name)} />
                 <div>
                     <header>
-                        <TooltipHost content={name}>
-                            <span>{name}</span>
-                        </TooltipHost>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span>{name}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>{name}</TooltipContent>
+                        </Tooltip>
                     </header>
                     <span>
-                        {`${ext ? `${isRathDemo ? `Rath ${intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-                                }` : ext
-                            } - ` : ''}${formatSize(file.size)}`}
+                        {`${
+                            ext ? `${isRathDemo ? `Rath ${intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)}` : ext} - ` : ''
+                        }${formatSize(file.size)}`}
                     </span>
                 </div>
             </div>
             <div className="time">
                 <p>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</p>
             </div>
-            <UserTagGroupContainer onClick={e => e.stopPropagation()}>
-                {allUserTagGroups.map(key => {
+            <UserTagGroupContainer onClick={(e) => e.stopPropagation()}>
+                {allUserTagGroups.map((key) => {
                     const selected = file.userTagGroup === key;
                     return (
                         <svg
-                            key={key} aria-selected={selected} className="hover-only"
-                            width={UserTagGroupSize} height={24} viewBox={`-1 -1 ${UserTagGroupSize + 2} 26`}
-                            fill={userTagGroupColors[key]} stroke="none"
+                            key={key}
+                            aria-selected={selected}
+                            className="hover-only"
+                            width={UserTagGroupSize}
+                            height={24}
+                            viewBox={`-1 -1 ${UserTagGroupSize + 2} 26`}
+                            fill={userTagGroupColors[key]}
+                            stroke="none"
                             onClick={() => {
                                 updateDataStorageUserTagGroup(file.id, selected ? undefined : key);
                                 handleRefresh?.();
@@ -216,15 +218,19 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({
                     );
                 })}
             </UserTagGroupContainer>
-            <IconButton
-                className="hover-only"
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="delete-button hover-only"
                 title="Delete"
-                iconProps={{ iconName: 'Remove' }}
-                onClick={e => {
+                onClick={(e) => {
                     e.stopPropagation();
                     handleClearClick?.(file.id);
                 }}
-            />
+            >
+                <RathIcon name="Remove" />
+            </Button>
         </ListItem>
     );
 };

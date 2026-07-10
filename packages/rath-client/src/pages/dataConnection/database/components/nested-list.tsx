@@ -1,7 +1,7 @@
 import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { Shimmer } from '@fluentui/react';
+import { Skeleton } from '../../../../components/ui/skeleton';
 import NestedListPart, { NestedListPartProps } from './nested-list-item';
 
 
@@ -18,12 +18,10 @@ const Root = styled.div`
     }
 `;
 
-const StyledShimmer = styled(Shimmer).attrs(() => ({ width: '10em' }))`
+const StyledSkeleton = styled(Skeleton)`
     --height: 0.75em;
+    width: 10em;
     height: var(--height);
-    .ms-Shimmer-shimmerWrapper {
-        height: var(--height);
-    }
 `;
 
 const Container = styled.ul<{ open: boolean }>`
@@ -78,7 +76,7 @@ const ShimmerItems = (
             <Item virtual key={i}>
                 <ItemHeader>
                     <ItemChevron />
-                    <StyledShimmer />
+                    <StyledSkeleton />
                 </ItemHeader>
             </Item>
         ))}

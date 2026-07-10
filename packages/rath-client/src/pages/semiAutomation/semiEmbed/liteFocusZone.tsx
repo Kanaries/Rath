@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { IconButton, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { Button } from '../../../components/ui/button';
+import { RathIcon } from '../../../components/icons';
 import { IFieldMeta, IVisSpecType } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
@@ -43,61 +44,75 @@ const LiteFocusZone: React.FC = (props) => {
         <MainViewContainer>
             {dataViewQuery && showMiniFloatView && <MiniFloatCanvas pined={dataViewQuery} />}
             <div className="vis-container">
-                <Stack style={{ borderRight: '1px solid #eee' }}>
-                    <IconButton
+                <div style={{ borderRight: '1px solid #eee' }}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         style={BUTTON_STYLE}
-                        text={intl.get('megaAuto.commandBar.editing')}
-                        iconProps={{ iconName: 'BarChartVerticalEdit' }}
+                        aria-label={intl.get('megaAuto.commandBar.editing')}
+                        title={intl.get('megaAuto.commandBar.editing')}
                         disabled={dataViewQuery === null}
                         onClick={editChart}
-                    />
-                    <IconButton
+                    >
+                        <RathIcon name="BarChartVerticalEdit" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         style={BUTTON_STYLE}
-                        text={intl.get('megaAuto.commandBar.painting')}
-                        iconProps={{ iconName: 'EditCreate' }}
+                        aria-label={intl.get('megaAuto.commandBar.painting')}
+                        title={intl.get('megaAuto.commandBar.painting')}
                         disabled={dataViewQuery === null}
                         onClick={paintChart}
-                    />
+                    >
+                        <RathIcon name="EditCreate" />
+                    </Button>
                     {dataViewQuery && spec && (
-                        <IconButton
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             style={BUTTON_STYLE}
-                            iconProps={{
-                                iconName: collectionStore.collectionContains(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters)
-                                    ? 'FavoriteStarFill'
-                                    : 'FavoriteStar',
-                            }}
-                            text={intl.get('common.star')}
+                            aria-label={intl.get('common.star')}
+                            title={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters); 
+                                collectionStore.toggleCollectState(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters);
                             }}
-                        />
+                        >
+                            <RathIcon
+                                name={
+                                    collectionStore.collectionContains(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters)
+                                        ? 'FavoriteStarFill'
+                                        : 'FavoriteStar'
+                                }
+                            />
+                        </Button>
                     )}
-                    <IconButton
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         style={BUTTON_STYLE}
-                        iconProps={{ iconName: 'Settings' }}
-                        ariaLabel={intl.get('common.settings')}
+                        aria-label={intl.get('common.settings')}
                         title={intl.get('common.settings')}
-                        text={intl.get('common.settings')}
                         onClick={() => {
                             semiAutoStore.setShowSettings(true);
                         }}
-                    />
-                    <IconButton
+                    >
+                        <RathIcon name="Settings" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         style={BUTTON_STYLE}
-                        iconProps={{ iconName: showActions ? 'GroupedAscending' : 'GroupedDescending' }}
-                        ariaLabel={intl.get('common.settings')}
+                        aria-label={intl.get('common.settings')}
                         title={intl.get('common.settings')}
-                        text={intl.get('common.settings')}
                         onClick={() => {
                             setShowActions((v) => !v);
                         }}
-                    />
-                </Stack>
-                <div>
-                    {dataViewQuery && spec && (
-                        <MainCanvas view={dataViewQuery} spec={adviceVisSize(spec, fieldMetas)} />
-                    )}
+                    >
+                        <RathIcon name={showActions ? 'GroupedAscending' : 'GroupedDescending'} />
+                    </Button>
                 </div>
+                <div>{dataViewQuery && spec && <MainCanvas view={dataViewQuery} spec={adviceVisSize(spec, fieldMetas)} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />

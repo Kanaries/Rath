@@ -1,7 +1,8 @@
-import { IconButton } from '@fluentui/react';
 import { FC, Fragment } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { RathIcon } from '../../../../../components/icons';
+import { Button } from '../../../../../components/ui/button';
 
 export type IColStateType = 'preview' | 'source';
 
@@ -47,24 +48,24 @@ const StatePlaceholder: FC<StatePlaceholderProps> = (props) => {
                 <Fragment>
                     <div className="title">{intl.get('common.preview')}</div>
                     <div>
-                        <IconButton
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-[#c50f1f]"
                             onClick={onAcceptExtField}
-                            iconProps={{
-                                iconName: 'CompletedSolid',
-                                style: {
-                                    color: '#c50f1f',
-                                },
-                            }}
-                        />
-                        <IconButton
+                        >
+                            <RathIcon name="CompletedSolid" />
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-[#c50f1f]"
                             onClick={onRejectExtField}
-                            iconProps={{
-                                iconName: 'Delete',
-                                style: {
-                                    color: '#c50f1f',
-                                },
-                            }}
-                        />
+                        >
+                            <RathIcon name="Delete" />
+                        </Button>
                     </div>
                 </Fragment>
             )}

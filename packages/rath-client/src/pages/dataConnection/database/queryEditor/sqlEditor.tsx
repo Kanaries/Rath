@@ -1,9 +1,10 @@
-import { FC, useCallback, useEffect, useRef } from 'react';
-import { DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor, { ChangeHandler, EditorWillMount } from 'react-monaco-editor';
 import { IRange, languages } from 'monaco-editor';
+import { Button } from '../../../../components/ui/button';
+import { Spinner } from '../../../../components/ui/spinner';
 import TablePreview from '../tablePreview';
 import type { TableData } from '../main';
 import type { INestedListItem } from '../components/nested-list-item';
@@ -85,6 +86,7 @@ export interface SQLEditorProps {
     preview: TableData | null;
     doPreview: (q: string) => void;
     items: INestedListItem[];
+    children?: ReactNode;
 }
 
 const emptyPreview = { meta: [], columns: [], rows: [] };
@@ -126,26 +128,25 @@ const SQLEditor: FC<SQLEditorProps> = ({ query, setQuery, preview, doPreview, bu
     const queryRef = useRef(query);
     queryRef.current = query;
 
-    const RunButton = children ? DefaultButton : PrimaryButton;
-
     return (
         <Container>
             <div>
                 <TablePreview name="preview" data={preview ?? emptyPreview} />
             </div>
             <Editor>
-                <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end" tokens={{ childrenGap: 10 }}>
+                <div className="my-2 flex justify-end gap-2 px-4">
                     {children}
-                    <RunButton
+                    <Button
+                        type="button"
+                        variant={children ? 'outline' : 'default'}
                         disabled={busy}
                         onClick={() => {
                             doPreview(query);
                         }}
-                        iconProps={busy ? undefined : { iconName: "Play" }}
                     >
                         {busy ? <Spinner /> : intl.get('common.run')}
-                    </RunButton>
-                </Stack>
+                    </Button>
+                </div>
                 <MonacoEditor language="sql" theme="vs" value={query} onChange={updateCode} editorWillMount={editorWillMount} />
             </Editor>
         </Container>

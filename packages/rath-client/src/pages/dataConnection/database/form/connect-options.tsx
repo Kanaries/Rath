@@ -1,17 +1,19 @@
 import intl from 'react-intl-universal';
-import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { FC, useEffect, useId, useMemo, useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce from 'immer';
-import { useId } from '@fluentui/react-hooks';
-import { ContextualMenu, DefaultButton, Dropdown, Icon, IContextualMenuItem, IDropdownOption, Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
+import { RathIcon } from '../../../../components/icons';
+import { RathSelect } from '../../../../components/rath-ui/rath-select';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Popover, PopoverAnchor, PopoverContent } from '../../../../components/ui/popover';
+import { Textarea } from '../../../../components/ui/textarea';
 import databaseOptions from '../options';
 import type { SupportedDatabaseType } from '../interfaces';
 import { renderDropdownItem, renderDropdownTitle } from '../dropdown';
 import useCachedState from '../../../../hooks/use-cached-state';
-
-
-const InputGroupStackToken = { childrenGap: 10 };
 
 const Form = styled.div`
     display: grid;
@@ -20,48 +22,21 @@ const Form = styled.div`
     row-gap: 0.4em;
 `;
 
-const FlexingTextField = styled(TextField)`
+const FlexingInput = styled(Input)`
     flex-grow: 1;
     flex-shrink: 1;
-    .ms-TextField-fieldGroup {
-        border-radius: 0 4px 4px 0;
-    }
+    border-radius: 0 4px 4px 0;
 `;
 
-const ConnectUriField = styled(FlexingTextField)`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+const ConnectUriField = styled(FlexingInput)`
     position: relative;
-    .ms-TextField-wrapper {
-        width: 100%;
-    }
-    .ms-TextField-fieldGroup {
-        border-radius: 0 4px 4px 0;
-    }
 `;
 
-const DatabaseDropdownStyles: ComponentPropsWithRef<typeof Dropdown>['styles'] = {
-    dropdown: {
-        width: '13.6em',
-        borderRadius: '2px 0 0 2px',
-    },
-    dropdownItems: {
-        paddingBlockStart: '6px',
-        paddingBlockEnd: '6px',
-        maxHeight: '20vh',
-        overflowY: 'scroll',
-    },
-    dropdownItemSelected: {
-        position: 'static',
-        minHeight: '2.2em',
-    },
-    dropdownItem: {
-        position: 'static',
-        minHeight: '2.2em',
-    },
-};
+const CredentialsTextArea = styled(Textarea)`
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 10em;
+`;
 
 const UriStorageKey = '__connect_uri__';
 const MAX_STORE_SIZE = 10;
@@ -78,59 +53,19 @@ interface ConnectOptionsProps {
     markAsReady: (forceReload: boolean) => void;
 }
 
-const MenuItem = styled.div`
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    i {
-        flex-grow: 0;
-        flex-shrink: 0;
-        cursor: pointer;
-        padding-inline: 8px;
-    }
-`;
-
-const TextDisplay = styled.span`
-    display: inline-block;
-    flex-grow: 1;
-    flex-shrink: 1;
-    overflow: hidden;
-    span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-`;
-
-const onRenderContextualMenuItem = (
-    item: IContextualMenuItem | undefined,
-    onDelete: (key: string) => void,
-    defaultRenderer: ((props?: IContextualMenuItem | undefined) => JSX.Element | null) | undefined,
-): JSX.Element => {
-    if (!item) {
-        return <></>;
-    }
-    return (
-        <MenuItem>
-            <TextDisplay>
-                {defaultRenderer?.(item)}
-            </TextDisplay>
-            <Icon
-                iconName="ChromeClose"
-                role="button"
-                tabIndex={0}
-                onClick={() => onDelete(item.key)}
-            />
-        </MenuItem>
-    );
-};
-
 const ConnectOptions: FC<ConnectOptionsProps> = ({
-    disabled, sourceType, setSourceType, connectUri, setConnectUri, credentials, setCredentials, nextStepEnabled, markAsReady,
+    disabled,
+    sourceType,
+    setSourceType,
+    connectUri,
+    setConnectUri,
+    credentials,
+    setCredentials,
+    nextStepEnabled,
+    markAsReady,
 }) => {
     const databaseConfig = useMemo(() => {
-        return databaseOptions.find(which => which.key === sourceType);
+        return databaseOptions.find((which) => which.key === sourceType);
     }, [sourceType]);
 
     useEffect(() => {
@@ -163,7 +98,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         }
     };
 
-    const uriInputId = useId();
+    const uriInputId = `connect-uri-${useId().replace(/:/g, '')}`;
 
     const [storedUriRaw, setStoredUri] = useCachedState<string>(UriStorageKey, '{}');
     const storedUri = useMemo(() => {
@@ -181,13 +116,6 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
     useEffect(() => {
         if (showAutoCompletion) {
             document.getElementById(uriInputId)?.focus();
-            const clickOutsideToDismiss = () => {
-                setShowAutoCompletion(false);
-            };
-            document.body.addEventListener('click', clickOutsideToDismiss);
-            return () => {
-                document.body.removeEventListener('click', clickOutsideToDismiss);
-            };
         }
     }, [showAutoCompletion, uriInputId]);
 
@@ -199,7 +127,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
             markAsReadyRef.current(false);
         }
     }, [sourceType, markAsReady]);
-    
+
     const submit = () => {
         if (!sourceType) {
             return;
@@ -208,20 +136,22 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
             return;
         }
         markAsReady(true);
-        setStoredUri(JSON.stringify(produce(storedUri, draft => {
-            if (!(sourceType in draft)) {
-                draft[sourceType] = [];
-            }
-            if (!draft[sourceType]!.includes(connectUri)) {
-                draft[sourceType]!.unshift(connectUri);
-            }
-            draft[sourceType] = draft[sourceType]!.slice(0, MAX_STORE_SIZE);
-        })));
+        setStoredUri(
+            JSON.stringify(
+                produce(storedUri, (draft) => {
+                    if (!(sourceType in draft)) {
+                        draft[sourceType] = [];
+                    }
+                    if (!draft[sourceType]!.includes(connectUri)) {
+                        draft[sourceType]!.unshift(connectUri);
+                    }
+                    draft[sourceType] = draft[sourceType]!.slice(0, MAX_STORE_SIZE);
+                })
+            )
+        );
     };
 
-    const SubmitButton = nextStepEnabled ? DefaultButton : PrimaryButton;
-
-    const autoCompletionItems = storedList.map(content => ({
+    const autoCompletionItems = storedList.map((content) => ({
         key: content,
         text: content,
         onClick: () => {
@@ -231,67 +161,110 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
     }));
 
     const deleteStoreItem = (key: string) => {
-        setStoredUri(JSON.stringify(produce(storedUri, draft => {
-            draft[sourceType] = (draft[sourceType] ?? []).filter(data => data !== key);
-        })));
+        setStoredUri(
+            JSON.stringify(
+                produce(storedUri, (draft) => {
+                    draft[sourceType] = (draft[sourceType] ?? []).filter((data) => data !== key);
+                })
+            )
+        );
     };
 
     return (
         <>
             <Form>
-                <Label disabled={disabled} required>{intl.get('dataSource.connectUri')}</Label>
-                <Stack horizontal tokens={InputGroupStackToken}>
-                    <Dropdown
-                        title={intl.get('dataSource.databaseType')}
+                <Label aria-disabled={disabled} className={disabled ? 'opacity-50' : undefined}>
+                    {intl.get('dataSource.connectUri')}
+                </Label>
+                <div className="flex min-w-0 items-center gap-2">
+                    <RathSelect
                         ariaLabel={intl.get('dataSource.databaseType')}
+                        className="w-[13.6em] shrink-0"
+                        triggerClassName="rounded-r-none"
                         disabled={disabled}
-                        styles={DatabaseDropdownStyles}
                         options={databaseOptions}
                         selectedKey={sourceType}
-                        onRenderOption={renderDropdownItem as (e?: IDropdownOption) => JSX.Element}
-                        onRenderTitle={renderDropdownTitle as (e?: IDropdownOption[]) => JSX.Element}
-                        onChange={(_, item) => {
-                            if (item) {
-                                setSourceType(item.key as SupportedDatabaseType);
-                            }
+                        renderItem={(option) => renderDropdownItem(option as typeof databaseOptions[number])}
+                        renderValue={(option) => renderDropdownTitle(option ? [option as typeof databaseOptions[number]] : undefined)}
+                        onChange={(key) => {
+                            setSourceType(key as SupportedDatabaseType);
                         }}
                     />
-                    <ConnectUriField
-                        id={uriInputId}
-                        title={intl.get('dataSource.connectUri')}
-                        aria-required
-                        disabled={disabled || !databaseConfig || databaseConfig.key === 'demo'}
-                        value={connectUri}
-                        placeholder={databaseConfig?.rule}
-                        onChange={(_, uri) => setConnectUri(uri ?? '')}
-                        autoComplete="off"
-                        onClick={e => {
-                            e.stopPropagation();
-                            setShowAutoCompletion(true);
-                        }}
-                    />
-                    <ContextualMenu
-                        target={`#${uriInputId}`}
-                        useTargetWidth
-                        hidden={!showAutoCompletion}
-                        items={autoCompletionItems}
-                        onRenderContextualMenuItem={(item, defaultRenderer) => onRenderContextualMenuItem(item, deleteStoreItem, defaultRenderer)}
-                        shouldFocusOnMount={false}
-                    />
-                    <SubmitButton disabled={sourceType !== 'demo' && !connectUri} text={intl.get('common.submit')} onClick={submit} />
-                </Stack>
+                    <Popover open={showAutoCompletion} onOpenChange={setShowAutoCompletion}>
+                        <PopoverAnchor asChild>
+                            <div className="flex flex-1">
+                                <ConnectUriField
+                                    id={uriInputId}
+                                    title={intl.get('dataSource.connectUri')}
+                                    aria-required
+                                    disabled={disabled || !databaseConfig || databaseConfig.key === 'demo'}
+                                    value={connectUri}
+                                    placeholder={databaseConfig?.rule}
+                                    onChange={(event) => setConnectUri(event.target.value)}
+                                    autoComplete="off"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowAutoCompletion(true);
+                                    }}
+                                />
+                            </div>
+                        </PopoverAnchor>
+                        {autoCompletionItems.length > 0 && (
+                            <PopoverContent
+                                align="start"
+                                className="w-[var(--radix-popover-trigger-width)] p-1"
+                                onClick={(e) => e.stopPropagation()}
+                                onOpenAutoFocus={(e) => e.preventDefault()}
+                            >
+                                <div role="listbox">
+                                    {autoCompletionItems.map((item) => (
+                                        <div key={item.key} className="flex items-center rounded-sm hover:bg-accent">
+                                            <button
+                                                type="button"
+                                                role="option"
+                                                aria-selected={item.key === connectUri}
+                                                className="min-w-0 flex-1 truncate px-2 py-1.5 text-left text-sm"
+                                                onClick={() => item.onClick()}
+                                            >
+                                                {item.text}
+                                            </button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 shrink-0"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteStoreItem(item.key);
+                                                }}
+                                            >
+                                                <RathIcon name="ChromeClose" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </PopoverContent>
+                        )}
+                    </Popover>
+                    <Button
+                        type="button"
+                        variant={nextStepEnabled ? 'outline' : 'default'}
+                        disabled={sourceType !== 'demo' && !connectUri}
+                        onClick={submit}
+                    >
+                        {intl.get('common.submit')}
+                    </Button>
+                </div>
             </Form>
             {databaseConfig?.credentials === 'json' && (
-                <FlexingTextField
-                    multiline
+                <CredentialsTextArea
                     autoComplete="false"
                     title="Credentials (JSON)"
-                    label="Credentials"
                     required
                     aria-required
                     value={credentialsRaw}
                     placeholder="{}"
-                    onChange={(_, content) => setCredentialsRaw(content ?? '')}
+                    onChange={(event) => setCredentialsRaw(event.target.value)}
                     onBlur={() => {
                         submitCredentials();
                     }}
@@ -300,6 +273,5 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         </>
     );
 };
-
 
 export default observer(ConnectOptions);

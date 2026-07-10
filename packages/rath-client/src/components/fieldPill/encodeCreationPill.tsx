@@ -1,11 +1,3 @@
-import {
-    Callout,
-    Dropdown,
-    IDropdownOption,
-    Stack,
-    PrimaryButton,
-    DefaultButton,
-} from '@fluentui/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
@@ -13,6 +5,9 @@ import produce from 'immer';
 import { IFieldEncode } from '@kanaries/loa';
 import { IFieldMeta } from '../../interfaces';
 import { AGGREGATION_LIST } from '../../global';
+import { RathSelect, RathSelectOption } from '../rath-ui/rath-select';
+import { Button } from '../ui/button';
+import { Popover, PopoverAnchor, PopoverContent } from '../ui/popover';
 import BasePillPlaceholder from './basePillPlaceholder';
 
 const Cont = styled.div`
@@ -28,109 +23,97 @@ const EncodeCreationPill: React.FC<EncodeCreationPillProps> = (props) => {
     const container = useRef<HTMLDivElement>(null);
     const [show, setShow] = useState(false);
     const [encode, setEncode] = useState<IFieldEncode>({
-        aggregate: 'sum'
-    })
-
+        aggregate: 'sum',
+    });
 
     const toggleShow = useCallback(() => {
         setShow((v) => !v);
     }, []);
-    const fieldOptions = useMemo<IDropdownOption[]>(() => {
-        return fields.map((f) => ({
-            key: f.fid,
-            text: f.name || f.fid,
-        })).concat({
-            key: '',
-            text: 'none'
-        });
+    const fieldOptions = useMemo<RathSelectOption[]>(() => {
+        return fields
+            .map((f) => ({
+                key: f.fid,
+                text: f.name || f.fid,
+            }))
+            .concat({
+                key: '',
+                text: 'none',
+            });
     }, [fields]);
 
-    const aggregatorOptions = useMemo<IDropdownOption[]>(() => {
+    const aggregatorOptions = useMemo<RathSelectOption[]>(() => {
         return AGGREGATION_LIST.map((f) => ({
             key: f.key,
-            text: f.text
+            text: f.text,
         }));
     }, []);
 
     const submitResult = () => {
-        onSubmit(encode)
+        onSubmit(encode);
         toggleShow();
-    }
+    };
 
     return (
         <div ref={container}>
-            <BasePillPlaceholder text={intl.get('common.addEncode')} onClick={toggleShow} />
-            {show && (
-                <Callout
-                    target={container}
-                    role="dialog"
-                    gapSpace={0}
-                    onDismiss={() => {
-                        setShow(false);
-                    }}
-                    setInitialFocus
-                >
+            <Popover open={show} onOpenChange={setShow}>
+                <PopoverAnchor asChild>
+                    <div>
+                        <BasePillPlaceholder text={intl.get('common.addEncode')} onClick={toggleShow} />
+                    </div>
+                </PopoverAnchor>
+                <PopoverContent className="w-auto p-0">
                     <Cont>
-                        <Stack tokens={{ childrenGap: 10 }}>
-                            <Stack.Item>
-                                <Dropdown
+                        <div className="flex flex-col gap-[10px]">
+                            <div>
+                                <RathSelect
                                     label={intl.get('common.field')}
                                     options={fieldOptions}
                                     selectedKey={encode.field}
-                                    onChange={(e, op) => {
-                                        if (op) {
-                                            if (op.key === '') {
-                                                setEncode({
-                                                    aggregate: 'count'
-                                                })
-                                                return;
-                                            }
-                                            const targetField = fields.find((f) => f.fid === op.key);
-                                            if (targetField) {
-                                                setEncode((f) => {
-                                                    const nextF = produce(f, (draft) => {
-                                                        draft.field = targetField.fid;
-                                                    });
-                                                    return nextF;
-                                                });
-                                            }
+                                    onChange={(key) => {
+                                        if (key === '') {
+                                            setEncode({
+                                                aggregate: 'count',
+                                            });
+                                            return;
                                         }
-                                    }}
-                                />
-                            </Stack.Item>
-                            <Stack.Item>
-                                <Dropdown
-                                    label={intl.get('common.aggregation')}
-                                    options={aggregatorOptions}
-                                    selectedKey={encode.aggregate}
-                                    onChange={(e, op) => {
-                                        if (op) {
+                                        const targetField = fields.find((f) => f.fid === key);
+                                        if (targetField) {
                                             setEncode((f) => {
                                                 const nextF = produce(f, (draft) => {
-                                                    draft.aggregate = op.key as any;
+                                                    draft.field = targetField.fid;
                                                 });
                                                 return nextF;
                                             });
                                         }
                                     }}
                                 />
-                            </Stack.Item>
+                            </div>
+                            <div>
+                                <RathSelect
+                                    label={intl.get('common.aggregation')}
+                                    options={aggregatorOptions}
+                                    selectedKey={encode.aggregate}
+                                    onChange={(key) => {
+                                        setEncode((f) => {
+                                            const nextF = produce(f, (draft) => {
+                                                draft.aggregate = key as any;
+                                            });
+                                            return nextF;
+                                        });
+                                    }}
+                                />
+                            </div>
 
-                            <Stack.Item>
-                                <Stack horizontal>
-                                    <PrimaryButton text={intl.get('dataSource.filter.submit')} onClick={submitResult} />
-                                    <DefaultButton
-                                        style={{ marginLeft: '1em' }}
-                                        text={intl.get('dataSource.filter.cancel')}
-                                        onClick={toggleShow}
-                                    />
-                                </Stack>
-                            </Stack.Item>
-                        </Stack>
-                        
+                            <div className="flex flex-row gap-[1em]">
+                                <Button onClick={submitResult}>{intl.get('dataSource.filter.submit')}</Button>
+                                <Button variant="outline" onClick={toggleShow}>
+                                    {intl.get('dataSource.filter.cancel')}
+                                </Button>
+                            </div>
+                        </div>
                     </Cont>
-                </Callout>
-            )}
+                </PopoverContent>
+            </Popover>
         </div>
     );
 };

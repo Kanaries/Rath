@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
-import { Stack, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { Button, Tab, TabList } from '@fluentui/react-components';
-import { List, BarChart3, Database, Table } from 'lucide-react';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import { notify } from '../../components/error';
+import { RathIcon } from '../../components/icons';
+import { Button } from '../../components/ui/button';
+import { Spinner } from '../../components/ui/spinner';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -79,21 +80,25 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             <div>
                 <ImportStorage />
                 <FastSelection />
-                <Stack horizontal>
+                <div className="flex flex-row items-center">
                     <MainActionButton />
                     <Button
-                        appearance={rawDataMetaInfo.length === 0 ? 'primary' : 'secondary'}
+                        variant={rawDataMetaInfo.length === 0 ? 'default' : 'secondary'}
                         onClick={() => {
                             dataSourceStore.setShowDataImportSelection(true);
                         }}
                         style={MARGIN_LEFT}
-                        icon={<Database />}
+                        className="gap-1.5"
                     >
+                        <RathIcon name="Database" />
                         {intl.get('dataSource.importData.buttonName')}
                     </Button>
 
                     {dataPrepProgressTag !== IDataPrepProgressTag.none && (
-                        <Spinner style={MARGIN_LEFT} label={dataPrepProgressTag} ariaLive="assertive" labelPosition="right" />
+                        <div className="ml-[1em] flex items-center gap-2" aria-live="assertive">
+                            <Spinner />
+                            <span className="text-sm">{dataPrepProgressTag}</span>
+                        </div>
                     )}
 
                     <Selection
@@ -106,24 +111,24 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         onLoadingFailed={onSelectLoadingFailed}
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
-                </Stack>
+                </div>
                 <hr style={{ margin: '1em 0em 0em 0em' }} />
-                <TabList
-                    selectedValue={dataPreviewMode}
-                    onTabSelect={(e, item) => {
-                        item.value && dataSourceStore.setDataPreviewMode(item.value as IDataPreviewMode);
-                    }}
-                >
-                    <Tab value={IDataPreviewMode.data} icon={<Table />}>
-                        {intl.get('dataSource.dataView')}
-                    </Tab>
-                    <Tab value={IDataPreviewMode.meta} icon={<List />}>
-                        {intl.get('dataSource.metaView')}
-                    </Tab>
-                    <Tab value={IDataPreviewMode.stat} icon={<BarChart3 />}>
-                        {intl.get('dataSource.statView')}
-                    </Tab>
-                </TabList>
+                <Tabs value={dataPreviewMode} onValueChange={(value) => dataSourceStore.setDataPreviewMode(value as IDataPreviewMode)}>
+                    <TabsList>
+                        <TabsTrigger value={IDataPreviewMode.data} className="gap-1.5">
+                            <RathIcon name="Table" />
+                            {intl.get('dataSource.dataView')}
+                        </TabsTrigger>
+                        <TabsTrigger value={IDataPreviewMode.meta} className="gap-1.5">
+                            <RathIcon name="ViewList" />
+                            {intl.get('dataSource.metaView')}
+                        </TabsTrigger>
+                        <TabsTrigger value={IDataPreviewMode.stat} className="gap-1.5">
+                            <RathIcon name="AnalyticsView" />
+                            {intl.get('dataSource.statView')}
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
                 {rawDataMetaInfo.length > 0 && <DataOperations />}
                 <DataInfo />
                 {rawDataMetaInfo.length > 0 && <Advice />}

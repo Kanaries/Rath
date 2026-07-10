@@ -1,21 +1,27 @@
-import { CommandBar, IButtonProps, ICommandBarItemProps } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '../../../components/ui/dropdown-menu';
 import { useGlobalStore } from '../../../store';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
 
 const Cont = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
 `;
-
-const overflowProps: IButtonProps = {
-    ariaLabel: 'More commands',
-  };
-
-const overflowItems: ICommandBarItemProps[] = []
 
 const DataOperations: React.FC = () => {
     const { dataSourceStore/*, commonStore*/ } = useGlobalStore();
@@ -47,102 +53,85 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
-    const items = useMemo<ICommandBarItemProps[]>(() => {
-        return [
-            {
-                key: 'clean',
-                text: `${intl.get('dataSource.cleanMethod')}`,
-                iconProps: { iconName: 'Broom' },
-                subMenuProps: {
-                    items: cleanMethodListLang.map((m) => ({
-                        key: m.key + '',
-                        text: m.text,
-                        canCheck: true,
-                        isChecked: m.key === cleanMethod,
-                        onClick: () => {
-                            dataSourceStore.setCleanMethod(m.key);
-                        },
-                    })),
-                },
-            },
-            {
-                key: 'export',
-                text: intl.get('dataSource.downloadData.title'),
-                iconProps: { iconName: 'download' },
-                subMenuProps: {
-                    items: [
-                        {
-                            key: 'downloadCSV',
-                            text: intl.get('dataSource.downloadData.downloadCSV'),
-                            onClick: exportDataAsCSV,
-                        },
-                        {
-                            key: 'downloadJSON',
-                            text: intl.get('dataSource.downloadData.downloadJSON'),
-                            onClick: exportDataAsJson,
-                        },
-                        {
-                            key: 'downloadJSONMeta',
-                            text: intl.get('dataSource.downloadData.downloadJSONMeta'),
-                            onClick: exportDataset,
-                        },
-                        {
-                            key: 'downloadRATHDS',
-                            text: intl.get('dataSource.downloadData.downloadRATHDS'),
-                            onClick: exportDataAsRATHDS,
-                        },
-                    ],
-                },
-                disabled: mutFields.length === 0,
-            },
-            {
-                key: 'fastSelection',
-                text: intl.get('dataSource.fastSelection.title'),
-                disabled: mutFields.length === 0,
-                iconProps: { iconName: 'filter' },
-                onClick: () => {
-                    dataSourceStore.setShowFastSelection(true);
-                },
-            },
-            {
-                key: 'enableAll',
-                text: intl.get('dataSource.operations.selectAll'),
-                iconProps: { iconName: 'CheckboxComposite' },
-                onClick: () => {
-                    dataSourceStore.setAllMutFieldsDisable(false);
-                },
-            },
-            {
-                key: 'disableAll',
-                text: intl.get('dataSource.operations.disableAll'),
-                iconProps: { iconName: 'Checkbox' },
-                onClick: () => {
-                    dataSourceStore.setAllMutFieldsDisable(true);
-                },
-            },
-        ];
-    }, [
-        cleanMethod,
-        cleanMethodListLang,
-        dataSourceStore,
-        exportDataset,
-        exportDataAsCSV,
-        exportDataAsJson,
-        mutFields.length,
-        exportDataAsRATHDS,
-    ]);
     return (
         <Cont>
-            <CommandBar
-                overflowButtonProps={overflowProps}
-                styles={{
-                    root: {
-                        padding: 0,
-                    },
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="ghost" className="gap-1.5">
+                        <RathIcon name="Broom" />
+                        <span>{intl.get('dataSource.cleanMethod')}</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                    {cleanMethodListLang.map((method) => (
+                        <DropdownMenuCheckboxItem
+                            key={method.key}
+                            checked={method.key === cleanMethod}
+                            onCheckedChange={() => {
+                                dataSourceStore.setCleanMethod(method.key);
+                            }}
+                        >
+                            {method.text}
+                        </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="ghost" disabled={mutFields.length === 0} className="gap-1.5">
+                        <RathIcon name="download" />
+                        <span>{intl.get('dataSource.downloadData.title')}</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                    <DropdownMenuItem onSelect={exportDataAsCSV}>
+                        {intl.get('dataSource.downloadData.downloadCSV')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={exportDataAsJson}>
+                        {intl.get('dataSource.downloadData.downloadJSON')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={exportDataset}>
+                        {intl.get('dataSource.downloadData.downloadJSONMeta')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={exportDataAsRATHDS}>
+                        {intl.get('dataSource.downloadData.downloadRATHDS')}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+                type="button"
+                variant="ghost"
+                disabled={mutFields.length === 0}
+                className="gap-1.5"
+                onClick={() => {
+                    dataSourceStore.setShowFastSelection(true);
                 }}
-                overflowItems={overflowItems}
-                items={items}
-            />
+            >
+                <RathIcon name="filter" />
+                <span>{intl.get('dataSource.fastSelection.title')}</span>
+            </Button>
+            <Button
+                type="button"
+                variant="ghost"
+                className="gap-1.5"
+                onClick={() => {
+                    dataSourceStore.setAllMutFieldsDisable(false);
+                }}
+            >
+                <RathIcon name="CheckboxComposite" />
+                <span>{intl.get('dataSource.operations.selectAll')}</span>
+            </Button>
+            <Button
+                type="button"
+                variant="ghost"
+                className="gap-1.5"
+                onClick={() => {
+                    dataSourceStore.setAllMutFieldsDisable(true);
+                }}
+            >
+                <RathIcon name="Checkbox" />
+                <span>{intl.get('dataSource.operations.disableAll')}</span>
+            </Button>
         </Cont>
     );
 };

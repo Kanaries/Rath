@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
-import { PrimaryButton } from '@fluentui/react';
 import { FC, memo, CSSProperties, Fragment, useMemo } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../../components/ui/button';
 import type { TableData } from './main';
 
 
@@ -163,10 +163,12 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
         </Container>
         {submit && (
             <ButtonContainer>
-                <PrimaryButton
-                    text={intl.get('dataSource.btn.use_table')}
+                <Button
+                    type="button"
                     onClick={() => submit(name, data)}
-                />
+                >
+                    {intl.get('dataSource.btn.use_table')}
+                </Button>
             </ButtonContainer>
         )}
     </>);

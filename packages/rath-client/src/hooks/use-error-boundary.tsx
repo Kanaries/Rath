@@ -1,4 +1,4 @@
-import { FC, PureComponent, useCallback, useRef } from "react";
+import { FC, PureComponent, ReactNode, useCallback, useRef } from "react";
 
 
 interface ErrorBoundaryProps<D extends any[]> {
@@ -6,6 +6,7 @@ interface ErrorBoundaryProps<D extends any[]> {
     /** retry when any dependency changes */
     deps: Readonly<D>;
     shouldHandlerRetry?: (prevDeps: Readonly<D>, nextDeps: Readonly<D>) => boolean;
+    children?: ReactNode;
 }
 
 interface ErrorBoundaryState<D extends any[]> {
@@ -66,14 +67,14 @@ const useErrorBoundary = <D extends any[]>(
     fallback: ErrorBoundaryProps<D>['fallback'],
     deps: ErrorBoundaryProps<D>['deps'],
     shouldHandlerRetry?: ErrorBoundaryProps<D>['shouldHandlerRetry'],
-): FC => {
+): FC<{ children?: ReactNode }> => {
     const fallbackRef = useRef(fallback);
     fallbackRef.current = fallback;
     const depsRef = useRef(deps);
     depsRef.current = deps;
     const shouldHandlerRetryRef = useRef(shouldHandlerRetry);
     shouldHandlerRetryRef.current = shouldHandlerRetry;
-    return useCallback<FC>(function ErrorBoundaryRoot ({ children }) {
+    return useCallback<FC<{ children?: ReactNode }>>(function ErrorBoundaryRoot ({ children }) {
         return (
             <ErrorBoundary fallback={fallbackRef.current} deps={depsRef.current} shouldHandlerRetry={shouldHandlerRetryRef.current}>
                 {children}

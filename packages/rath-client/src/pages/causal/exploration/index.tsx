@@ -1,11 +1,13 @@
 import intl from 'react-intl-universal';
-import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
 import type { Specification } from 'visual-insights';
+import { Button } from '../../../components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs';
+import { RathIcon } from '../../../components/icons';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
@@ -16,7 +18,6 @@ import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
 import AutoVis from './autoVis';
 // import CausalBlame from './causalBlame';
-
 
 const Container = styled.div`
     flex-grow: 1;
@@ -43,9 +44,12 @@ export interface Subtree {
     }[];
 }
 
-const Exploration = forwardRef<{
-    onSubtreeSelected?: (subtree: Subtree | null) => void;
-}, {}>(function ManualAnalyzer (_, ref) {
+const Exploration = forwardRef<
+    {
+        onSubtreeSelected?: (subtree: Subtree | null) => void;
+    },
+    {}
+>(function ManualAnalyzer(_, ref) {
     const { dataSourceStore, langStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const [showSemiClue, setShowSemiClue] = useState(false);
@@ -107,18 +111,16 @@ const Exploration = forwardRef<{
         // };
     }, [selectedFieldGroup]);
 
-    const predictPanelRef = useRef<{ updateInput?: (input: {
-        features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[]
-    }) => void }>({});
+    const predictPanelRef = useRef<{ updateInput?: (input: { features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[] }) => void }>({});
 
     useImperativeHandle(ref, () => ({
         onSubtreeSelected: (subtree) => {
             if (viewContext?.explorationKey === 'predict' && subtree && subtree.neighbors.length > 0) {
-                const features = subtree.neighbors.filter(neighbor => {
-                    return !(
-                        [PAG_NODE.BLANK, PAG_NODE.CIRCLE].includes(neighbor.rootType) && neighbor.neighborType === PAG_NODE.ARROW
-                    );
-                }).map(cause => cause.field);
+                const features = subtree.neighbors
+                    .filter((neighbor) => {
+                        return !([PAG_NODE.BLANK, PAG_NODE.CIRCLE].includes(neighbor.rootType) && neighbor.neighborType === PAG_NODE.ARROW);
+                    })
+                    .map((cause) => cause.field);
                 predictPanelRef.current.updateInput?.({
                     features,
                     targets: [subtree.node],
@@ -131,97 +133,98 @@ const Exploration = forwardRef<{
         viewContext?.clearSelected();
     }, [viewContext]);
 
-    const removeSelectedField = useCallback((fid: string) => {
-        viewContext?.toggleNodeSelected(fid);
-    }, [viewContext]);
+    const removeSelectedField = useCallback(
+        (fid: string) => {
+            viewContext?.toggleNodeSelected(fid);
+        },
+        [viewContext]
+    );
 
     const ExplorationOptions = useMemo(() => {
-        return ExplorationKeys.map(key => ({
+        return ExplorationKeys.map((key) => ({
             key,
             text: intl.get(`causal.exploration.${key}`),
         }));
     }, []);
 
-    return viewContext && (
-        <Container>
-            <Pivot
-                style={{ marginBottom: '0.4em' }}
-                selectedKey={viewContext.explorationKey}
-                onLinkClick={(item) => {
-                    item && viewContext.setExplorationKey(item.props.itemKey as ExplorationKey);
-                }}
-            >
-                {ExplorationOptions.map(mode => (
-                    <PivotItem key={mode.key} itemKey={mode.key} headerText={mode.text} />
-                ))}
-            </Pivot>
-            <Stack horizontal>
-                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
-                    <SemiEmbed
-                        view={clueView}
-                        show={showSemiClue}
-                        toggleShow={() => {
-                            setShowSemiClue((v) => !v);
-                        }}
-                        neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
-                    />
-                )}
-                {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
-                    <ActionButton
-                        iconProps={{ iconName: 'Delete' }}
-                        text={intl.get('causal.actions.clear_fields')}
-                        disabled={selectedFieldGroup.length === 0}
-                        onClick={clearFieldGroup}
-                    />
-                )}
-            </Stack>
-            <div className="body">
-                {{
-                    // [ExplorationKey.CAUSAL_BLAME]: (
-                    //     <CausalBlame />
-                    // ),
-                    [ExplorationKey.AUTO_VIS]: (
-                        <AutoVis />
-                    ),
-                    [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
-                        <CrossFilter
-                            fields={selectedFieldGroup}
-                            dataSource={visSample}
-                            onVizClue={(fid) => {
-                                const field = fields.find((f) => f.fid === fid);
-                                if (field) {
-                                    setClueView({
-                                        fields: [field],
-                                        filters: [...filters],
-                                        imp: 0,
-                                    });
-                                    setShowSemiClue(true);
-                                }
+    return (
+        viewContext && (
+            <Container>
+                <Tabs
+                    value={viewContext.explorationKey}
+                    onValueChange={(value) => viewContext.setExplorationKey(value as ExplorationKey)}
+                    className="mb-1"
+                >
+                    <TabsList>
+                        {ExplorationOptions.map((mode) => (
+                            <TabsTrigger key={mode.key} value={mode.key}>
+                                {mode.text}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+                <div className="flex items-center gap-2">
+                    {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
+                        <SemiEmbed
+                            view={clueView}
+                            show={showSemiClue}
+                            toggleShow={() => {
+                                setShowSemiClue((v) => !v);
                             }}
-                            onVizDelete={removeSelectedField}
+                            neighborKeys={clueView ? clueView.fields.slice(0, 1).map((f) => f.fid) : []}
                         />
-                    ),
-                    [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && (
-                        <RExplainer />
-                    ),
-                    [ExplorationKey.GRAPHIC_WALKER]: (
-                        /* 小心这里的内存占用 */
-                        <GraphicWalker
-                            dataSource={visSample.slice(0)}
-                            rawFields={fieldMetas}
-                            spec={initialSpec}
-                            i18nLang={langStore.lang}
-                            keepAlive={false}
-                            dark="light"
-                            fieldKeyGuard={false}
-                        />
-                    ),
-                    [ExplorationKey.PREDICT]: (
-                        <PredictPanel ref={predictPanelRef} />
-                    ),
-                }[viewContext.explorationKey]}
-            </div>
-        </Container>
+                    )}
+                    {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
+                        <Button variant="ghost" disabled={selectedFieldGroup.length === 0} onClick={clearFieldGroup}>
+                            <RathIcon name="Delete" />
+                            {intl.get('causal.actions.clear_fields')}
+                        </Button>
+                    )}
+                </div>
+                <div className="body">
+                    {
+                        {
+                            // [ExplorationKey.CAUSAL_BLAME]: (
+                            //     <CausalBlame />
+                            // ),
+                            [ExplorationKey.AUTO_VIS]: <AutoVis />,
+                            [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
+                                <CrossFilter
+                                    fields={selectedFieldGroup}
+                                    dataSource={visSample}
+                                    onVizClue={(fid) => {
+                                        const field = fields.find((f) => f.fid === fid);
+                                        if (field) {
+                                            setClueView({
+                                                fields: [field],
+                                                filters: [...filters],
+                                                imp: 0,
+                                            });
+                                            setShowSemiClue(true);
+                                        }
+                                    }}
+                                    onVizDelete={removeSelectedField}
+                                />
+                            ),
+                            [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && <RExplainer />,
+                            [ExplorationKey.GRAPHIC_WALKER]: (
+                                /* 小心这里的内存占用 */
+                                <GraphicWalker
+                                    dataSource={visSample.slice(0)}
+                                    rawFields={fieldMetas}
+                                    spec={initialSpec}
+                                    i18nLang={langStore.lang}
+                                    keepAlive={false}
+                                    dark="light"
+                                    fieldKeyGuard={false}
+                                />
+                            ),
+                            [ExplorationKey.PREDICT]: <PredictPanel ref={predictPanelRef} />,
+                        }[viewContext.explorationKey]
+                    }
+                </div>
+            </Container>
+        )
     );
 });
 

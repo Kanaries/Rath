@@ -1,8 +1,10 @@
-import { PrimaryButton, Spinner } from '@fluentui/react';
 import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { RathIcon } from '../icons';
+import { Button } from '../ui/button';
+import { Spinner } from '../ui/spinner';
 import type { TableInfo } from '../../pages/dataConnection/database/interfaces';
 import Link from './link';
 import { IDBGraph } from './localTypes';
@@ -440,13 +442,12 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ busy = false, disabled = 
             <span>
                 {sql}
             </span>
-            <PrimaryButton
+            <Button
                 disabled={busy || disabled || tables.length === 0 || !sql}
                 onClick={preview}
-                iconProps={busy ? undefined : { iconName: "Play" }}
             >
-                {busy ? <Spinner /> : intl.get('common.run')}
-            </PrimaryButton>
+                {busy ? <Spinner /> : <><RathIcon name="Play" className="mr-1" />{intl.get('common.run')}</>}
+            </Button>
         </Output>
     </>);
 });

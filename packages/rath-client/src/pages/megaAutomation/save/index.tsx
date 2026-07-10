@@ -1,9 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { Button } from '../../../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import { useGlobalStore } from '../../../store';
 import { setStorageByIdInLocal } from '../../../utils/storage';
 import { notify } from '../../../components/error';
@@ -44,25 +47,41 @@ const SaveModal: React.FC = (props) => {
     }, [megaAutoStore]);
 
     return (
-        <Modal isOpen={showSaveModal} onDismiss={closeModal}>
-            <Container>
-                <h2>{intl.get('function.save.title')}</h2>
-                <div className="form-row">
-                    <TextField
-                        placeholder="Name"
-                        label={intl.get('common.name')}
-                        value={name}
-                        onChange={(e, value) => {
-                            value && setName(value);
-                        }}
-                    />
-                </div>
-                <Stack horizontal>
-                    <PrimaryButton className="form-button" text={intl.get('function.confirm')} onClick={saveInIndexDB} />
-                    <DefaultButton className="form-button" text={intl.get('function.cancel')} onClick={closeModal} />
-                </Stack>
-            </Container>
-        </Modal>
+        <Dialog
+            open={showSaveModal}
+            onOpenChange={(open) => {
+                if (!open) {
+                    closeModal();
+                }
+            }}
+        >
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{intl.get('function.save.title')}</DialogTitle>
+                </DialogHeader>
+                <Container>
+                    <div className="form-row">
+                        <Label htmlFor="mega-auto-save-name">{intl.get('common.name')}</Label>
+                        <Input
+                            id="mega-auto-save-name"
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                            }}
+                        />
+                    </div>
+                    <div className="flex">
+                        <Button className="form-button" onClick={saveInIndexDB}>
+                            {intl.get('function.confirm')}
+                        </Button>
+                        <Button className="form-button" variant="outline" onClick={closeModal}>
+                            {intl.get('function.cancel')}
+                        </Button>
+                    </div>
+                </Container>
+            </DialogContent>
+        </Dialog>
     );
 };
 

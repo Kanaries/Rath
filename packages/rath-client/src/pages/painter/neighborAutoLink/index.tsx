@@ -1,4 +1,3 @@
-import { DefaultButton, Label, PrimaryButton, Spinner, SpinnerSize, Stack, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -10,6 +9,11 @@ import { useGlobalStore } from '../../../store';
 import { deepcopy } from '../../../utils';
 import { LABEL_FIELD_KEY } from '../constants';
 import { Card } from '../../../components/card';
+import { Button } from '../../../components/ui/button';
+import { Label } from '../../../components/ui/label';
+import { Spinner } from '../../../components/ui/spinner';
+import { Switch } from '../../../components/ui/switch';
+import { RathIcon } from '../../../components/icons';
 
 const LoadingLayer = styled.div`
     position: absolute;
@@ -89,46 +93,54 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                 <LoadingLayer>
                     <div className="cont">
                         <Label>Search for relative patterns</Label>
-                        <Spinner label="Linking..." size={SpinnerSize.large} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 8 }}>
+                            <Spinner className="h-5 w-5" />
+                            <span>Linking...</span>
+                        </div>
                     </div>
                 </LoadingLayer>
             )}
-            <div>
-                <Toggle
-                    label={intl.get('painter.autoSearch')}
-                    inlineLabel
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1em' }}>
+                <Switch
+                    id="painter-auto-search"
                     checked={autoLink}
-                    onChange={(e, checked) => {
+                    onCheckedChange={(checked) => {
                         painterStore.setAutoLinkMode(Boolean(checked));
                     }}
                 />
+                <Label htmlFor="painter-auto-search">{intl.get('painter.autoSearch')}</Label>
             </div>
-            <Stack horizontal tokens={{ childrenGap: 10, padding: '0em 0em 2em 0em' }}>
-                <PrimaryButton
-                    text={intl.get('painter.search')}
-                    iconProps={{ iconName: 'Search' }}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0em 0em 2em 0em' }}>
+                <Button
                     onClick={() => {
                         getNearFields(dataSource);
                     }}
-                />
-                <DefaultButton
-                    text={intl.get('painter.last')}
-                    iconProps={{ iconName: 'Back' }}
+                >
+                    <RathIcon name="Search" />
+                    {intl.get('painter.search')}
+                </Button>
+                <Button
+                    variant="outline"
                     onClick={() => {
                         setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
                     }}
-                />
-                <DefaultButton
-                    text={intl.get('painter.next')}
-                    iconProps={{ iconName: 'Forward' }}
+                >
+                    <RathIcon name="Back" />
+                    {intl.get('painter.last')}
+                </Button>
+                <Button
+                    variant="outline"
                     onClick={() => {
                         setNearIndex((v) => (v + 1) % nearFields.length);
                     }}
-                />
+                >
+                    <RathIcon name="Forward" />
+                    {intl.get('painter.next')}
+                </Button>
                 <span className="state-description">
                     {nearIndex + 1} of {nearFields.length}
                 </span>
-            </Stack>
+            </div>
             {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} config={commonStore.themeConfig} />}
         </Card>
     );

@@ -1,56 +1,50 @@
-import React, { useCallback, useEffect, useRef } from  'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from '@fluentui/react';
 import ConnectionStatus from '../../../components/connectionStatus';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
-import { logDataImport } from '../../../loggers/dataImport';
 import { notify } from '../../../components/error';
 import { DataSourceTag } from '../../../utils/storage';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Spinner } from '../../../components/ui/spinner';
+import { RathSelect, RathSelectOption } from '../../../components/rath-ui/rath-select';
 
-const StackTokens = {
-    childrenGap: 1
-}
-
-const PROTOCOL_LIST: IDropdownOption[] = [
+const PROTOCOL_LIST: RathSelectOption[] = [
     { text: 'https', key: 'https' },
-    { text: 'http', key: 'http' }
-]
+    { text: 'http', key: 'http' },
+];
 interface OLAPDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: undefined, tag: DataSourceTag) => void;
 }
 
-const OLAPData: React.FC<OLAPDataProps> = props => {
+const OLAPData: React.FC<OLAPDataProps> = (props) => {
     const { onDataLoaded, onClose } = props;
     const { clickHouseStore } = useGlobalStore();
 
     const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config, proxyConfig } = clickHouseStore;
     const { protocol, user, password, host, port } = config;
-    const { protocol: proxyProtocol, host: proxyHost, port: proxyPort } = proxyConfig
+    const { protocol: proxyProtocol, host: proxyHost, port: proxyPort } = proxyConfig;
 
-    const dbOptions: IDropdownOption[] = databases.map(db => ({
+    const dbOptions: RathSelectOption[] = databases.map((db) => ({
         key: db,
-        text: db
-    }))
+        text: db,
+    }));
 
-    const viewOptions: IDropdownOption[] = viewNames.map(v => ({
+    const viewOptions: RathSelectOption[] = viewNames.map((v) => ({
         key: v,
-        text: v
-    }))
+        text: v,
+    }));
 
     const linkInfoRef = useRef({ config, proxyConfig });
     linkInfoRef.current = { config, proxyConfig };
 
     const loadData = useCallback(() => {
-        clickHouseStore.loadSampleData()
-            .then(({ fieldMetas, data}) => {
-                logDataImport({
-                    dataType: 'OLAP',
-                    fields: fieldMetas,
-                    dataSource: data.slice(0, 10),
-                    size: data.length
-                });
+        clickHouseStore
+            .loadSampleData()
+            .then(({ fieldMetas, data }) => {
                 onDataLoaded(fieldMetas, data, undefined, DataSourceTag.OLAP);
                 onClose();
             })
@@ -58,106 +52,184 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
                 notify({
                     title: 'Clickhouse Sample Data Load Error',
                     type: 'error',
-                    content: `${err}\n Fail to load sample data from clickhouse.`
-                })
-            })
-    }, [clickHouseStore, onDataLoaded, onClose])
+                    content: `${err}\n Fail to load sample data from clickhouse.`,
+                });
+            });
+    }, [clickHouseStore, onDataLoaded, onClose]);
 
     useEffect(() => {
-        clickHouseStore.getDefaultConfig()
-        .catch((err) => {
-            notify({
-                title: 'Failed to load OLAP Config from server',
-                type: 'warning',
-                content: `${err}\n using default config instead.`
-            })
-        })
-        .finally(() => {
-            clickHouseStore.testConnection().then(() => {
-                return clickHouseStore.loadDBList();
-            }).catch((err) => {
+        clickHouseStore
+            .getDefaultConfig()
+            .catch((err) => {
                 notify({
-                    title: 'Clickhouse Connection Error',
-                    type: 'error',
-                    content: `Fail to Connect Clickhouse. \n ${err}`
-                })
+                    title: 'Failed to load OLAP Config from server',
+                    type: 'warning',
+                    content: `${err}\n using default config instead.`,
+                });
             })
-        })
-    }, [clickHouseStore])
+            .finally(() => {
+                clickHouseStore
+                    .testConnection()
+                    .then(() => {
+                        return clickHouseStore.loadDBList();
+                    })
+                    .catch((err) => {
+                        notify({
+                            title: 'Clickhouse Connection Error',
+                            type: 'error',
+                            content: `Fail to Connect Clickhouse. \n ${err}`,
+                        });
+                    });
+            });
+    }, [clickHouseStore]);
 
-
-    return <div>
-        <Stack horizontal tokens={StackTokens}>
-            <Dropdown options={PROTOCOL_LIST}
-                label="Protocol"
-                selectedKey={proxyProtocol}
-                onChange={(e, option) => {
-                    clickHouseStore.setProxyConfig('protocol', option?.key as string)
+    return (
+        <div>
+            <div className="flex flex-wrap items-end gap-2">
+                <RathSelect
+                    options={PROTOCOL_LIST}
+                    label="Protocol"
+                    selectedKey={proxyProtocol}
+                    onChange={(key) => {
+                        clickHouseStore.setProxyConfig('protocol', key as string);
+                    }}
+                />
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="olap-proxy-host">Proxy Host</Label>
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm text-muted-foreground">://</span>
+                        <Input
+                            id="olap-proxy-host"
+                            value={proxyHost}
+                            onChange={(e) => {
+                                clickHouseStore.setProxyConfig('host', e.target.value);
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="flex w-20 flex-col gap-1.5">
+                    <Label htmlFor="olap-proxy-port">Port</Label>
+                    <Input
+                        id="olap-proxy-port"
+                        value={proxyPort}
+                        onChange={(e) => {
+                            clickHouseStore.setProxyConfig('port', e.target.value);
+                        }}
+                    />
+                </div>
+            </div>
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+                <RathSelect
+                    options={PROTOCOL_LIST}
+                    label="Protocol"
+                    selectedKey={protocol}
+                    onChange={(key) => {
+                        clickHouseStore.setConfig('protocol', key as string);
+                    }}
+                />
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="olap-host">Host</Label>
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm text-muted-foreground">://</span>
+                        <Input
+                            id="olap-host"
+                            value={host}
+                            onChange={(e) => {
+                                clickHouseStore.setConfig('host', e.target.value);
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="flex w-20 flex-col gap-1.5">
+                    <Label htmlFor="olap-port">Port</Label>
+                    <Input
+                        id="olap-port"
+                        value={port}
+                        onChange={(e) => {
+                            clickHouseStore.setConfig('port', e.target.value);
+                        }}
+                    />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="olap-user">User</Label>
+                    <Input
+                        id="olap-user"
+                        value={user}
+                        onChange={(e) => {
+                            clickHouseStore.setConfig('user', e.target.value);
+                        }}
+                    />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="olap-password">Password</Label>
+                    <Input
+                        id="olap-password"
+                        type="password"
+                        value={password}
+                        placeholder="Empty(Default)"
+                        onChange={(e) => {
+                            clickHouseStore.setConfig('password', e.target.value);
+                        }}
+                    />
+                </div>
+            </div>
+            <div style={{ marginTop: '1em' }}>
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                        clickHouseStore.testConnection();
+                    }}
+                >
+                    Test Connection & update config
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="ml-4"
+                    onClick={() => {
+                        clickHouseStore.loadDBList();
+                    }}
+                >
+                    Fetch DB List
+                </Button>
+            </div>
+            <ConnectionStatus status={connectStatus} />
+            {loadingDBs && (
+                <div className="my-2 flex items-center gap-2 text-sm">
+                    <Spinner size="sm" />
+                    loading database list from clickhouse
+                </div>
+            )}
+            <RathSelect
+                options={dbOptions}
+                selectedKey={currentDB}
+                label="Database"
+                onChange={(key) => {
+                    clickHouseStore.chooseDB(key as string);
                 }}
             />
-            <TextField prefix={`://`} label="Proxy Host" value={proxyHost}
-                onChange={(e, v) => { clickHouseStore.setProxyConfig('host', v); }}
-            />
-            <TextField label="Port" style={{ width: '80px' }} value={proxyPort}
-                onChange={(e, v) => { clickHouseStore.setProxyConfig('port', v); }}
-            />
-        </Stack>
-        <Stack horizontal tokens={StackTokens}>
-            <Dropdown options={PROTOCOL_LIST}
-                label="Protocol"
-                selectedKey={protocol}
-                onChange={(e, option) => {
-                    clickHouseStore.setConfig('protocol', option?.key as string)
+            {loadingViews && (
+                <div className="my-2 flex items-center gap-2 text-sm">
+                    <Spinner size="sm" />
+                    loading table/view list from clickhouse
+                </div>
+            )}
+            <RathSelect
+                options={viewOptions}
+                selectedKey={currentView}
+                label="Table or View"
+                onChange={(key) => {
+                    clickHouseStore.chooseView(key as string);
                 }}
             />
-            <TextField prefix={`://`} label="Host" value={host}
-                onChange={(e, v) => { clickHouseStore.setConfig('host', v); }}
-            />
-            <TextField style={{ width: '80px' }} label="Port" value={port}
-                onChange={(e, v) => { clickHouseStore.setConfig('port', v); }}
-            />
-            <TextField label="User" value={user}
-                onChange={(e, v) => { clickHouseStore.setConfig('user', v); }}
-            />
-            <TextField label="Password" type="password" value={password} placeholder="Empty(Default)"
-                onChange={(e, v) => { clickHouseStore.setConfig('password', v); }}
-            />
-        </Stack>
-        <div style={{ marginTop: '1em'}}>
-            <DefaultButton text="Test Connection & update config"
-                onClick={() => { clickHouseStore.testConnection(); }}
-            />
-            <DefaultButton text="Fetch DB List" style={{ marginLeft: '1em' }}
-                onClick={() => {clickHouseStore.loadDBList(); }}
-            />
+            <div style={{ marginTop: '1em' }}>
+                <Button type="button" disabled={currentDB === null || currentView === null} onClick={loadData}>
+                    Load
+                </Button>
+            </div>
         </div>
-        <ConnectionStatus status={connectStatus} />
-        { loadingDBs && <ProgressIndicator label="loading" description="loading database list from clickhouse" />}
-        <Dropdown
-            options={dbOptions}
-            selectedKey={currentDB}
-            label="Database"
-            onChange={(e, item) => {
-                item && clickHouseStore.chooseDB(item.key as string)
-            }}
-        />
-        { loadingViews && <ProgressIndicator label="loading" description="loading table/view list from clickhouse" />}
-        <Dropdown
-            options={viewOptions}
-            selectedKey={currentView}
-            label="Table or View"
-            onChange={(e, item) => {
-                item && clickHouseStore.chooseView(item.key as string)
-            }}
-        />
-        <div style={{ marginTop: '1em' }}>
-            <PrimaryButton
-                disabled={currentDB === null || currentView === null}
-                text="Load"
-                onClick={loadData}
-            />
-        </div>
-    </div>
-}
+    );
+};
 
 export default observer(OLAPData);

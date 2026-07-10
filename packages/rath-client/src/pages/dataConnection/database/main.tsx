@@ -2,15 +2,14 @@ import { FC, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
-import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { DataSourceTag } from '../../../utils/storage';
 import useAsyncState from '../../../hooks/use-async-state';
 import useCachedState from '../../../hooks/use-cached-state';
 import { notify } from '../../../components/error';
-import { logDataImport } from '../../../loggers/dataImport';
+import { Button } from '../../../components/ui/button';
+import { Spinner } from '../../../components/ui/spinner';
 import { rawData2DataWithBaseMetas } from '../../dataSource/utils';
-import databaseOptions from './options';
 import type { SupportedDatabaseType } from './interfaces';
 import { checkServerConnection } from './service';
 import AdvancedOptions from './form/advanced-options';
@@ -20,28 +19,6 @@ import QueryOptions, { QueryOptionsHandlerRef } from './form/query-options';
 export const StackTokens = {
     childrenGap: 20,
 };
-
-const iconPathPrefix = '/assets/icons/';
-
-registerIcons({
-    icons: Object.fromEntries(
-        databaseOptions.map<[string, JSX.Element]>(opt => [
-            opt.key,
-            opt.icon ? (
-                <img
-                    role="presentation"
-                    aria-hidden
-                    src={`${iconPathPrefix}${opt.icon}`}
-                    alt={opt.text}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                    }}
-                />
-            ) : (<></>)
-        ])
-    ),
-});
 
 export type TableLabels = {
     key: string;
@@ -135,14 +112,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 )
             );
             const { dataSource, fields } = data;
-
-            logDataImport({
-                dataType: `Database/${sourceType}`,
-                name,
-                fields,
-                dataSource: dataSource.slice(0, 10),
-                size: dataSource.length,
-            });
             onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
 
             onClose();
@@ -214,7 +183,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     };
 
     return (
-        <Stack tokens={StackTokens} style={{ paddingBlock: '1em', flexGrow: 1 }}>
+        <div className="flex flex-1 flex-col gap-5 py-4">
             <AdvancedOptions
                 servers={serverList}
                 appendServer={target => {
@@ -260,17 +229,18 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 ref={queryOptionsHandlerRef}
             >
                 {editorPreview && (
-                    <Stack horizontal horizontalAlign="end">
-                        <PrimaryButton
+                    <div className="flex justify-end">
+                        <Button
+                            type="button"
                             onClick={() => submit()}
                             disabled={submitting}
                         >
                             {submitting ? <Spinner /> : intl.get('common.apply')}
-                        </PrimaryButton>
-                    </Stack>
+                        </Button>
+                    </div>
                 )}
             </QueryOptions>
-        </Stack>
+        </div>
     );
 };
 

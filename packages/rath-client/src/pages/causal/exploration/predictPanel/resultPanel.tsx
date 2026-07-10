@@ -1,17 +1,20 @@
 import intl from 'react-intl-universal';
-import { Checkbox, DefaultButton, DetailsList, IColumn, Icon, SelectionMode } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
-import { useGlobalStore } from "../../../../store";
-import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { PredictAlgorithms } from "../../predict";
-
+import { observer } from 'mobx-react-lite';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
+import { RathColumn, RathDataTable } from '../../../../components/rath-ui/rath-data-table';
+import { Button } from '../../../../components/ui/button';
+import { Checkbox } from '../../../../components/ui/checkbox';
+import { RathIcon } from '../../../../components/icons';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import { PredictAlgorithms } from '../../predict';
 
 const TableContainer = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
-    overflow: auto;
+    min-width: 0;
+    overflow: hidden;
 `;
 
 const ResultPanel: FC = () => {
@@ -32,11 +35,11 @@ const ResultPanel: FC = () => {
     const [comparison, setComparison] = useState<null | [string] | [string, string]>(null);
 
     useEffect(() => {
-        setComparison(group => {
+        setComparison((group) => {
             if (!group) {
                 return null;
             }
-            const next = group.filter(id => predictCache.some(rec => rec.id === id));
+            const next = group.filter((id) => predictCache.some((rec) => rec.id === id));
             if (next.length === 0) {
                 return null;
             }
@@ -44,29 +47,29 @@ const ResultPanel: FC = () => {
         });
     }, [predictCache]);
 
-    const resultTableCols = useMemo<IColumn[]>(() => {
+    const resultTableCols = useMemo<RathColumn<typeof sortedResults[number]>[]>(() => {
         return [
             {
                 key: 'selected',
                 name: intl.get('causal.analyze.diff_title'),
                 onRender: (item) => {
                     const record = item as typeof sortedResults[number];
-                    const selected = (comparison ?? [] as string[]).includes(record.id);
+                    const selected = (comparison ?? ([] as string[])).includes(record.id);
                     return (
                         <Checkbox
                             checked={selected}
-                            onChange={(_, checked) => {
+                            onCheckedChange={(checked) => {
                                 if (checked) {
-                                    setComparison(group => {
+                                    setComparison((group) => {
                                         if (group === null) {
                                             return [record.id];
                                         }
                                         return [group[0], record.id];
                                     });
                                 } else if (selected) {
-                                    setComparison(group => {
-                                        if (group?.some(id => id === record.id)) {
-                                            return group.length === 1 ? null : group.filter(id => id !== record.id) as [string];
+                                    setComparison((group) => {
+                                        if (group?.some((id) => id === record.id)) {
+                                            return group.length === 1 ? null : (group.filter((id) => id !== record.id) as [string]);
                                         }
                                         return null;
                                     });
@@ -75,7 +78,6 @@ const ResultPanel: FC = () => {
                         />
                     );
                 },
-                isResizable: false,
                 minWidth: 30,
                 maxWidth: 30,
             },
@@ -84,9 +86,8 @@ const ResultPanel: FC = () => {
                 name: intl.get('causal.analyze.run_idx'),
                 minWidth: 70,
                 maxWidth: 70,
-                isResizable: false,
                 onRender(_, index) {
-                    return <>{index !== undefined ? (sortedResults.length - index) : ''}</>;
+                    return <>{index !== undefined ? sortedResults.length - index : ''}</>;
                 },
             },
             {
@@ -95,7 +96,7 @@ const ResultPanel: FC = () => {
                 minWidth: 70,
                 onRender(item) {
                     const record = item as typeof sortedResults[number];
-                    return <>{PredictAlgorithms.find(which => which.key === record.algo)?.text}</>
+                    return <>{PredictAlgorithms.find((which) => which.key === record.algo)?.text}</>;
                 },
             },
             {
@@ -108,10 +109,13 @@ const ResultPanel: FC = () => {
                     }
                     const record = item as typeof sortedResults[number];
                     const previous = sortedResults[index + 1];
-                    const comparison: 'better' | 'worse' | 'same' | null = previous ? (
-                        previous.data.accuracy === record.data.accuracy ? 'same'
-                            : record.data.accuracy > previous.data.accuracy ? 'better' : 'worse'
-                    ) : null;
+                    const comparison: 'better' | 'worse' | 'same' | null = previous
+                        ? previous.data.accuracy === record.data.accuracy
+                            ? 'same'
+                            : record.data.accuracy > previous.data.accuracy
+                            ? 'better'
+                            : 'worse'
+                        : null;
                     return (
                         <span
                             style={{
@@ -125,12 +129,14 @@ const ResultPanel: FC = () => {
                             }}
                         >
                             {comparison && (
-                                <Icon
-                                    iconName={{
-                                        better: 'CaretSolidUp',
-                                        worse: 'CaretSolidDown',
-                                        same: 'ChromeMinimize',
-                                    }[comparison]}
+                                <RathIcon
+                                    name={
+                                        {
+                                            better: 'CaretSolidUp',
+                                            worse: 'CaretSolidDown',
+                                            same: 'ChromeMinimize',
+                                        }[comparison]
+                                    }
                                     style={{
                                         transform: 'scale(0.8)',
                                         transformOrigin: '0 50%',
@@ -148,8 +154,8 @@ const ResultPanel: FC = () => {
 
     const diff = useMemo(() => {
         if (comparison?.length === 2) {
-            const before = sortedResults.find(res => res.id === comparison[0]);
-            const after = sortedResults.find(res => res.id === comparison[1]);
+            const before = sortedResults.find((res) => res.id === comparison[0]);
+            const after = sortedResults.find((res) => res.id === comparison[1]);
             if (before && after) {
                 const temp: unknown[] = [];
                 for (let i = 0; i < before.data.result.length; i += 1) {
@@ -157,10 +163,9 @@ const ResultPanel: FC = () => {
                     const prev = before.data.result[i][1];
                     const next = after.data.result[i][1];
                     if (next === 1 && prev === 0) {
-                        temp.push(Object.fromEntries(Object.entries(row).map(([k, v]) => [
-                            allFieldsRef.current.find(f => f.fid === k)?.name ?? k,
-                            v,
-                        ])));
+                        temp.push(
+                            Object.fromEntries(Object.entries(row).map(([k, v]) => [allFieldsRef.current.find((f) => f.fid === k)?.name ?? k, v]))
+                        );
                     }
                 }
                 return temp;
@@ -178,24 +183,26 @@ const ResultPanel: FC = () => {
 
     return (
         <>
-            <DefaultButton
-                iconProps={{ iconName: 'Delete' }}
+            <Button
+                variant="outline"
                 disabled={predictCache.length === 0}
                 onClick={() => viewContext?.clearPredictResults()}
                 style={{ width: 'max-content' }}
             >
+                <RathIcon name="Delete" />
                 {intl.get('causal.analyze.clear_records')}
-            </DefaultButton>
+            </Button>
             <TableContainer>
-                <DetailsList
+                <RathDataTable
                     items={sortedResults}
                     columns={resultTableCols}
-                    selectionMode={SelectionMode.none}
+                    getRowKey={(record) => record.id}
+                    maxHeight={320}
+                    virtualizationThreshold={40}
                 />
             </TableContainer>
         </>
     );
 };
-
 
 export default observer(ResultPanel);

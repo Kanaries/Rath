@@ -1,7 +1,7 @@
-import { Icon } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import { createElement, forwardRef, ForwardRefExoticComponent, Fragment, PropsWithoutRef, RefAttributes, useMemo } from "react";
+import { createElement, forwardRef, ForwardRefExoticComponent, Fragment, PropsWithoutRef, ReactNode, RefAttributes, useMemo } from "react";
 import styled, { StyledComponentProps } from "styled-components";
+import { RathIcon } from "../../../../components/icons";
 import type { IFieldMeta } from "../../../../interfaces";
 
 
@@ -62,7 +62,7 @@ const Renderer: { [type: string]: (context: IVisTextProps['context'], text: stri
 
         return (
             <FieldToken className={attrs.join(' ')} onClick={handleClick}>
-                <Icon iconName="Tag" style={{ transform: 'scale(0.8)', userSelect: 'none' }} />
+                <RathIcon name="Tag" style={{ transform: 'scale(0.8)', userSelect: 'none' }} />
                 {name}
             </FieldToken>
         );
@@ -83,7 +83,7 @@ const VisText = forwardRef<RefType[AllowedDOMType], IVisTextProps<AllowedDOMType
         if (typeof children !== 'string') {
             return null;
         }
-        const list: unknown[] = [];
+        const list: ReactNode[] = [];
         let temp = children;
         while (temp.length) {
             const nextPattern = /(?<type>((field)|(score)))(?<attrs>(\.[a-zA-Z]+)*)\((?<value>[^)]*)\)/.exec(temp);

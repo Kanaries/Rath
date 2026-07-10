@@ -1,120 +1,79 @@
-import { ActionButton, Callout, CommandButton } from "@fluentui/react";
-import { useId } from "@fluentui/react-hooks";
-import { observer } from "mobx-react-lite";
-import { FC, useEffect, useState } from "react";
+import { observer } from 'mobx-react-lite';
+import { FC, useState } from 'react';
 import intl from 'react-intl-universal';
-import styled from "styled-components";
-import type { FieldExtSuggestion } from "../../interfaces";
-
+import styled from 'styled-components';
+import type { FieldExtSuggestion } from '../../interfaces';
+import { RathIcon } from '../icons';
+import { Button } from '../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 export interface FieldExtSuggestionsProps {
-  fid: string;
-  suggestions: FieldExtSuggestion[];
+    fid: string;
+    suggestions: FieldExtSuggestion[];
 }
 
 const Container = styled.div({
-  padding: '1em',
-  minWidth: '400px',
-  maxWidth: '40vw',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'stretch',
+    padding: '0.5rem',
+    width: 'min(32rem, calc(100vw - 2rem))',
+    maxWidth: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
 
-  '> *': {
-    flexGrow: 0,
-    flexShrink: 0,
-    width: '100%',
+    '> *': {
+        flexGrow: 0,
+        flexShrink: 0,
+        width: '100%',
 
-    '& small': {
-      display: 'block',
+        '& small': {
+            display: 'block',
+        },
     },
-  },
 });
 
 const FieldExtSuggestions: FC<FieldExtSuggestionsProps> = ({ fid, suggestions }) => {
-  const btnId = useId('field-ext-suggestion-btn');
+    const [open, setOpen] = useState(false);
 
-  const [open, setOpen] = useState(false);
+    return (
+        <div onClick={(e) => e.stopPropagation()}>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        className="h-auto px-2"
+                        style={{
+                            animation: 'live-polite 4s infinite',
+                        }}
+                    >
+                        <RathIcon name="AppIconDefaultAdd" className="mr-1" />
+                        {intl.get('dataSource.extend.auto')}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" collisionPadding={16} className="w-auto max-w-[calc(100vw-2rem)] p-0">
+                    <Container onClick={() => setOpen(false)}>
+                        {suggestions.map((sug) => {
+                            const [title, desc] = intl.get(`dataSource.extend.suggestion.${sug.type}`).split('|');
 
-  useEffect(() => {
-    if (open) {
-      const close = () => setOpen(false);
-
-      document.body.addEventListener('click', close);
-      document.body.addEventListener('wheel', close);
-
-      return () => {
-        document.body.removeEventListener('click', close);
-        document.body.removeEventListener('wheel', close);
-      };
-    }
-  }, [open]);
-
-  return (
-    <div onClick={e => e.stopPropagation()}>
-      <ActionButton
-        style={{
-          animation: 'live-polite 4s infinite',
-        }}
-        id={btnId}
-        iconProps={{
-          iconName: 'AppIconDefaultAdd',
-        }}
-        text={intl.get('dataSource.extend.auto')}
-        onClick={() => setOpen(true)}
-      />
-      {open && (
-        <Callout target={`#${btnId}`}>
-          <Container onClick={() => setOpen(false)}>
-            {suggestions.map(((sug, i) => {
-              const [title, desc] = intl.get(`dataSource.extend.suggestion.${sug.type}`).split('|');
-
-              return (
-                <CommandButton
-                  key={i}
-                  iconProps={{
-                    iconName: 'AutoEnhanceOn',
-                  }}
-                  styles={{
-                    root: {
-                      height: 'max-content',
-                    },
-                    rootHovered: {
-                      backgroundColor: '#1890ff10',
-                    },
-                    flexContainer: {
-                      paddingBlockStart: '0.6em',
-                      paddingBlockEnd: '0.8em',
-                      paddingInline: '0.5em',
-                      alignItems: 'baseline',
-                      textAlign: 'start',
-                      height: 'max-content',
-                    },
-                    icon: {
-                      marginInlineEnd: '0.8em',
-                    },
-                  }}
-                  onClick={() => sug.apply(fid)}
-                >
-                  <div>
-                    <span>
-                      {title}
-                    </span>
-                    {desc && (
-                      <small style={{ marginBlockStart: '0.5em' }}>
-                        {desc}
-                      </small>
-                    )}
-                  </div>
-                </CommandButton>
-              );
-            }))}
-          </Container>
-        </Callout>
-      )}
-    </div>
-  );
+                            return (
+                                <Button
+                                    key={sug.type}
+                                    variant="ghost"
+                                    className="h-auto w-full items-start justify-start whitespace-normal px-2 py-2 text-left hover:bg-accent"
+                                    onClick={() => sug.apply(fid)}
+                                >
+                                    <RathIcon name="AutoEnhanceOn" className="mr-3 mt-0.5 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                        <span className="block font-medium leading-5">{title}</span>
+                                        {desc && <small className="mt-1 block break-words leading-5 text-muted-foreground">{desc}</small>}
+                                    </div>
+                                </Button>
+                            );
+                        })}
+                    </Container>
+                </PopoverContent>
+            </Popover>
+        </div>
+    );
 };
-
 
 export default observer(FieldExtSuggestions);

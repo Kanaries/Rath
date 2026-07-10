@@ -1,9 +1,12 @@
-import { Dropdown, DropdownMenuItemType, IDropdownOption, TextField, Toggle } from '@fluentui/react';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { RathSelect, RathSelectOption } from '../../components/rath-ui/rath-select';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Switch } from '../../components/ui/switch';
 import type { IFieldMeta, IVegaChannel, IVegaSubset } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { DashboardPanelProps } from './dashboard-panel';
@@ -54,14 +57,14 @@ const EncodingField: FC<{
     const { field, title, bin, aggregate } = value ?? {};
     const target = value && !field && aggregate === 'count' ? Count : field;
 
-    const fieldOptions = useMemo(() => {
+    const fieldOptions = useMemo<RathSelectOption[]>(() => {
         return [
             { key: Disabled, text: 'None' },
-            { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
-            { key: 'Stat', text: 'Statistics', itemType: DropdownMenuItemType.Header },
+            { key: 'divider_1', text: '-', itemType: 'divider' },
+            { key: 'Stat', text: 'Statistics', itemType: 'header' },
             { key: Count, text: 'Count' },
-            { key: 'divider_2', text: '-', itemType: DropdownMenuItemType.Divider },
-            { key: 'Field', text: 'Field', itemType: DropdownMenuItemType.Header },
+            { key: 'divider_2', text: '-', itemType: 'divider' },
+            { key: 'Field', text: 'Field', itemType: 'header' },
             ...fieldsMeta.map((f) => ({
                 key: f.fid,
                 text: f.name || f.fid,
@@ -70,8 +73,7 @@ const EncodingField: FC<{
     }, [fieldsMeta]);
 
     const handleSelectField = useCallback(
-        (_: unknown, item?: IDropdownOption) => {
-            const { key } = item ?? {};
+        (key: string | number) => {
             if (!key) {
                 return;
             }
@@ -107,30 +109,31 @@ const EncodingField: FC<{
             <label>{id}</label>
             <div>
                 {target && (
-                    <TextField
-                        label="Title"
-                        value={title}
-                        onChange={(_, val) =>
-                            value &&
-                            onChange({
-                                ...value,
-                                title: val,
-                            })
-                        }
-                    />
+                    <div className="grid gap-2">
+                        <Label>Title</Label>
+                        <Input
+                            value={title}
+                            onChange={(e) =>
+                                value &&
+                                onChange({
+                                    ...value,
+                                    title: e.target.value,
+                                })
+                            }
+                        />
+                    </div>
                 )}
-                <Dropdown label="Target" selectedKey={target} onChange={handleSelectField} options={fieldOptions} />
+                <RathSelect label="Target" selectedKey={target} onChange={handleSelectField} options={fieldOptions} />
                 {field && (
-                    <Dropdown
+                    <RathSelect
                         label="Aggregation"
                         selectedKey={aggregate}
-                        onChange={(_, item) =>
+                        onChange={(key) =>
                             value &&
-                            item &&
-                            (AggregationTypes as readonly string[]).includes(item.key as string) &&
+                            (AggregationTypes as readonly string[]).includes(key as string) &&
                             onChange({
                                 ...value,
-                                aggregate: item.key === Disabled ? undefined : (item.key as string),
+                                aggregate: key === Disabled ? undefined : (key as string),
                             })
                         }
                         options={AggregationTypes.map((key) => ({
@@ -140,18 +143,20 @@ const EncodingField: FC<{
                     />
                 )}
                 {field && (
-                    <Toggle
-                        label="Bin"
-                        inlineLabel
-                        checked={bin === true}
-                        onChange={(_, checked) =>
-                            value &&
-                            onChange({
-                                ...value,
-                                bin: checked,
-                            })
-                        }
-                    />
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor={`dashboard-bin-${id}`}>Bin</Label>
+                        <Switch
+                            id={`dashboard-bin-${id}`}
+                            checked={bin === true}
+                            onCheckedChange={(checked) =>
+                                value &&
+                                onChange({
+                                    ...value,
+                                    bin: checked,
+                                })
+                            }
+                        />
+                    </div>
                 )}
             </div>
         </EncodingFieldContainer>
@@ -181,17 +186,15 @@ const EditPanel: FC<DashboardPanelProps> = ({ card }) => {
     return (
         <Container>
             <EncodingFieldContainer>
-                <Dropdown
+                <RathSelect
                     label="Mark"
                     selectedKey={(mark as undefined | { type: typeof mark & string })?.type}
-                    onChange={(_, item) =>
+                    onChange={(key) =>
                         card &&
-                        item &&
                         dashboardStore.runInAction(() => {
-                            const key = item.key as typeof MarkTypes[number];
                             card.content.chart = produce(toJS(chart), (draft) => {
                                 draft.subset.mark = {
-                                    type: key,
+                                    type: key as typeof MarkTypes[number],
                                     tooltip: true,
                                 };
                             });

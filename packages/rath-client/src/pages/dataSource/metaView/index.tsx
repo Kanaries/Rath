@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
-import { ActionButton, DefaultButton, MessageBar, MessageBarType } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
+import { RathIcon } from '../../../components/icons';
+import { Alert } from '../../../components/ui/alert';
+import { Button } from '../../../components/ui/button';
 import MetaList from './metaList';
 
 
@@ -78,74 +80,38 @@ const MetaView: React.FC = props => {
                     backgroundColor: '#fff',
                 }}
             >
-                <MessageBar
-                    messageBarType={MessageBarType.warning}
-                    isMultiline={false}
-                    messageBarIconProps={{
-                        iconName: 'AutoEnhanceOn',
-                        style: {
-                            color: 'rgb(0, 120, 212)',
-                            fontWeight: 800,
-                        },
-                    }}
-                    actions={
+                <Alert className="box-border w-auto border-transparent bg-[rgba(0,120,212,0.12)] text-[#0078d4]">
+                    <div className="flex items-center gap-2">
+                        <RathIcon name="AutoEnhanceOn" className="shrink-0 font-extrabold" />
+                        <span className="grow">
+                            {intl.get('dataSource.extend.autoExtend', { count: fieldsCanExpand.length })}
+                        </span>
                         <div>
-                            <DefaultButton
-                                toggle
-                                checked={onlyAutoExtent}
+                            <Button
+                                variant="ghost"
+                                className={onlyAutoExtent ? 'h-6 px-3 opacity-90' : 'h-6 px-3 opacity-70'}
                                 onClick={() => setOnlyAutoExtent(!onlyAutoExtent)}
-                                style={{
-                                    padding: '0 12px',
-                                    height: '24px',
-                                    border: 'none',
-                                    filter: onlyAutoExtent ? 'contrast(0.9)' : 'opacity(0.7)',
-                                }}
                             >
                                 {intl.get('dataSource.extend.checkThem')}
-                            </DefaultButton>
-                            <ActionButton
-                                style={{
-                                    padding: '0 12px',
-                                    height: '24px',
-                                }}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="h-6 px-3"
                                 onClick={focusNext}
                             >
                                 {intl.get('dataSource.extend.findThem')}
-                            </ActionButton>
+                            </Button>
                         </div>
-                    }
-                    styles={{
-                        root: {
-                            boxSizing: 'border-box',
-                            width: 'unset',
-                            color: 'rgb(0, 120, 212)',
-                            backgroundColor: 'rgba(0, 120, 212, 0.12)',
-                            // border: '1px solid rgba(0, 120, 212, 0.5)',
-                        },
-                    }}
-                >
-                    <span>
-                        {intl.get('dataSource.extend.autoExtend', { count: fieldsCanExpand.length })}
-                    </span>
-                </MessageBar>
+                    </div>
+                </Alert>
             </div>
         )}
         {fieldsNotDecided.length > 0 && (
-            <MessageBar
-                messageBarType={MessageBarType.warning}
-                isMultiline={false}
-                styles={{
-                    root: {
-                        boxSizing: 'border-box',
-                        width: 'unset',
-                        margin: '2px 0 1em 0',
-                    },
-                }}
-            >
+            <Alert className="my-[2px] mb-[1em] box-border w-auto">
                 <span>
                     {intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}
                 </span>
-            </MessageBar>
+            </Alert>
         )}
         <MetaList onlyExt={onlyAutoExtent} metas={fields} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
     </div>

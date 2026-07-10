@@ -1,8 +1,11 @@
 import intl from 'react-intl-universal';
-import { ActionButton, IconButton, Pivot, PivotItem, Stack, TextField } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { RathIcon } from '../../components/icons';
 import { useGlobalStore } from '../../store';
 import DashboardList from './dashboard-list';
 import dashboardGallery from './dashboard-gallery';
@@ -98,9 +101,9 @@ export const EditableCell: FC<{ value: string; placeholder: string; onChange: (v
     return (
         <Editable>
             {isEditing ? (
-                <TextField
+                <Input
                     value={data}
-                    onChange={(_, d) => setData(d ?? '')}
+                    onChange={(e) => setData(e.target.value)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
@@ -119,14 +122,18 @@ export const EditableCell: FC<{ value: string; placeholder: string; onChange: (v
                 <span>{value || placeholder}</span>
             )}
             {isEditing || (
-                <IconButton
-                    iconProps={{ iconName: 'Edit' }}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Edit"
                     autoFocus
                     onClick={(e) => {
                         e.stopPropagation();
                         setEditing(true);
                     }}
-                />
+                >
+                    <RathIcon name="Edit" />
+                </Button>
             )}
         </Editable>
     );
@@ -180,37 +187,38 @@ const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
     return (
         <PageLayout onClick={clearActiveEditableCell}>
             <WorkspaceView>
-                <Stack>
+                <div>
                     <WorkspaceName>
                         <EditableCell value={name} onChange={(n) => dashboardStore.setName(n)} placeholder="(dashboard list)" />
                     </WorkspaceName>
                     <WorkspaceDesc>
                         <EditableCell value={description} onChange={(desc) => dashboardStore.setDesc(desc)} placeholder="(description)" />
                     </WorkspaceDesc>
-                </Stack>
+                </div>
             </WorkspaceView>
             <DocumentListView>
                 <div>
-                    <ActionButton iconProps={{ iconName: 'Add' }} onClick={() => dashboardStore.newPage()}>
+                    <Button variant="ghost" onClick={() => dashboardStore.newPage()}>
+                        <RathIcon name="Add" />
                         New Dashboard
-                    </ActionButton>
+                    </Button>
                 </div>
                 <div>
-                    <TextField iconProps={{ iconName: 'Search' }} value={search} onChange={(_, d) => setSearch(d ?? '')} />
+                    <div className="relative max-w-xs">
+                        <RathIcon className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" name="Search" />
+                        <Input className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
+                    </div>
                 </div>
-                <Pivot
-                    selectedKey={viewMode}
-                    onLinkClick={(item) => {
-                        if (item) {
-                            setViewMode(item.props.itemKey as ViewMode);
-                        }
-                    }}
-                    style={{ margin: '1em 0' }}
-                >
-                    {VIEW_MODES.map((mode) => (
-                        <PivotItem key={mode.key} itemKey={mode.key} headerText={intl.get(`common.${mode.key}`)} itemIcon={mode.icon} />
-                    ))}
-                </Pivot>
+                <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)} className="my-4">
+                    <TabsList>
+                        {VIEW_MODES.map((mode) => (
+                            <TabsTrigger key={mode.key} value={mode.key}>
+                                <RathIcon name={mode.icon} className="mr-1" />
+                                {intl.get(`common.${mode.key}`)}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
                 <List openDocument={openDocument} pages={filteredPages} />
             </DocumentListView>
         </PageLayout>

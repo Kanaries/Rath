@@ -1,31 +1,23 @@
-import { DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, Layer, SelectionMode } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
+import { RathColumn, RathDataTable } from '../../components/rath-ui/rath-data-table';
+import { Button } from '../../components/ui/button';
+import { RathIcon } from '../../components/icons';
 import { useGlobalStore } from '../../store';
 import type { DashboardDocument } from '../../store/dashboardStore';
 import DocumentPreview from './document-preview';
 import { EditableCell } from './dashboard-homepage';
 
-
 const TableContainer = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
+    min-height: 0;
     overflow: hidden;
-    overflow-y: auto;
     margin-block: 1em;
     padding-bottom: 1em;
-`;
-
-const CustomRow = styled.div`
-    .button-group {
-        opacity: 0;
-    }
-    :hover .button-group {
-        opacity: 1;
-    }
-    position: relative;
 `;
 
 const ButtonGroup = styled.div`
@@ -61,28 +53,6 @@ const PreviewPopup = styled.div`
     }
 `;
 
-const Row = observer(function Row({
-    content,
-    handleMouseOn,
-    handleMouseOut,
-}: {
-    content: IDetailsRowProps;
-    handleMouseOn: (x: number, y: number) => void;
-    handleMouseOut: () => void;
-}) {
-    return (
-        <CustomRow
-            onMouseEnter={(e) => {
-                const { y } = (e.target as HTMLDivElement).getBoundingClientRect();
-                handleMouseOn(e.clientX, y);
-            }}
-            onMouseLeave={handleMouseOut}
-        >
-            <DetailsRow {...content} />
-        </CustomRow>
-    );
-});
-
 export type FlatDocumentInfo = {
     index: number;
     name: DashboardDocument['info']['name'];
@@ -113,19 +83,23 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
         position: [number, number];
     } | null>(null);
 
-    const items = useMemo(() => pages.map<FlatDocumentInfo>((p, i) => ({
-        index: i,
-        name: p.info.name,
-        source: p.data.source,
-        description: p.info.description,
-        createTime: p.info.createTime,
-        lastModifyTime: p.info.lastModifyTime,
-    })), [pages]);
+    const items = useMemo(
+        () =>
+            pages.map<FlatDocumentInfo>((p, i) => ({
+                index: i,
+                name: p.info.name,
+                source: p.data.source,
+                description: p.info.description,
+                createTime: p.info.createTime,
+                lastModifyTime: p.info.lastModifyTime,
+            })),
+        [pages]
+    );
 
     const openDocumentRef = useRef(openDocument);
     openDocumentRef.current = openDocument;
 
-    const columns = useMemo<(IColumn & { key: keyof FlatDocumentInfo | 'action'; fieldName?: keyof FlatDocumentInfo })[]>(() => {
+    const columns = useMemo<RathColumn<FlatDocumentInfo>[]>(() => {
         return [
             {
                 key: 'action',
@@ -134,11 +108,21 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
                     return (
-                        <ButtonGroup className="button-group" onClick={(e) => e.stopPropagation()}>
-                            <IconButton iconProps={{ iconName: 'BarChartVerticalEdit' }} onClick={() => openDocumentRef.current((item as FlatDocumentInfo).index)} />
-                            <IconButton iconProps={{ iconName: 'Copy' }} onClick={operators.copy} />
-                            {/* <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} /> */}
-                            <IconButton iconProps={{ iconName: 'Delete', style: { color: '#f21044' } }} onClick={operators.remove} />
+                        <ButtonGroup className="opacity-0 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Edit"
+                                onClick={() => openDocumentRef.current((item as FlatDocumentInfo).index)}
+                            >
+                                <RathIcon name="BarChartVerticalEdit" />
+                            </Button>
+                            <Button variant="ghost" size="icon" aria-label="Copy" onClick={operators.copy}>
+                                <RathIcon name="Copy" />
+                            </Button>
+                            <Button variant="ghost" size="icon" aria-label="Delete" onClick={operators.remove}>
+                                <RathIcon name="Delete" style={{ color: '#f21044' }} />
+                            </Button>
                         </ButtonGroup>
                     );
                 },
@@ -148,6 +132,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 name: 'source' || intl.get(''),
                 fieldName: 'source',
                 minWidth: 100,
+                isSortable: true,
                 isResizable: true,
                 isSorted: sortMode.key === 'source',
                 isSortedDescending: sortMode.direction === 'descending',
@@ -157,6 +142,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 name: 'name' || intl.get(''),
                 fieldName: 'name',
                 minWidth: 180,
+                isSortable: true,
                 isResizable: true,
                 isSorted: sortMode.key === 'name',
                 isSortedDescending: sortMode.direction === 'descending',
@@ -182,6 +168,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 fieldName: 'createTime',
                 minWidth: 120,
                 maxWidth: 120,
+                isSortable: true,
                 isSorted: sortMode.key === 'createTime',
                 isSortedDescending: sortMode.direction === 'descending',
                 onRender(item) {
@@ -194,6 +181,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 fieldName: 'lastModifyTime',
                 minWidth: 120,
                 maxWidth: 120,
+                isSortable: true,
                 isSorted: sortMode.key === 'lastModifyTime',
                 isSortedDescending: sortMode.direction === 'descending',
                 onRender(item) {
@@ -247,38 +235,34 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
 
     return (
         <>
-            <TableContainer onScroll={() => setPreviewSource(null)}>
-                <DetailsList
+            <TableContainer>
+                <RathDataTable
                     items={sortedItems}
                     columns={columns}
-                    onColumnHeaderClick={(_, col) => col && toggleSort(col.key as typeof sortMode.key)}
-                    selectionMode={SelectionMode.none}
-                    onRenderRow={props => {
-                        if (props) {
-                            return (
-                                <Row
-                                    content={props}
-                                    handleMouseOn={(x, y) =>
-                                        setPreviewSource({
-                                            source: (props.item as FlatDocumentInfo).index,
-                                            position: [x, y],
-                                        })
-                                    }
-                                    handleMouseOut={() => setPreviewSource(null)}
-                                />
-                            );
-                        }
-                        return null;
+                    getRowKey={(item) => item.index}
+                    maxHeight="100%"
+                    virtualizationThreshold={40}
+                    onScroll={() => setPreviewSource(null)}
+                    onColumnHeaderClick={(col) => toggleSort(col.key as typeof sortMode.key)}
+                    rowClassName={() => 'group'}
+                    onRowMouseEnter={(item, _index, event) => {
+                        const { y } = event.currentTarget.getBoundingClientRect();
+                        setPreviewSource({
+                            source: item.index,
+                            position: [event.clientX, y],
+                        });
                     }}
+                    onRowMouseLeave={() => setPreviewSource(null)}
                 />
             </TableContainer>
-            <Layer>
-                {previewSource && pages.length > previewSource.source && (
+            {previewSource &&
+                pages.length > previewSource.source &&
+                createPortal(
                     <PreviewPopup style={popupLayout}>
                         <DocumentPreview index={previewSource.source} />
-                    </PreviewPopup>
+                    </PreviewPopup>,
+                    document.body
                 )}
-            </Layer>
         </>
     );
 };

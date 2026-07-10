@@ -3,7 +3,8 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction, toJS } from 'mobx';
-import { DefaultButton, PrimaryButton } from '@fluentui/react';
+import { Button } from '../../components/ui/button';
+import { RathIcon } from '../../components/icons';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import EditorCore from '../editor/core';
@@ -66,6 +67,8 @@ const LTSPage: React.FC = () => {
 
     const { visualConfig, mainViewSpecSource } = megaAutoStore;
     const { taskMode } = commonStore;
+    const { computing } = ltsPipeLineStore;
+    const hasInsights = megaAutoStore.insightSpaces.length > 0;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
@@ -98,56 +101,82 @@ const LTSPage: React.FC = () => {
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <Card>
-                <DefaultButton
+                <Button
+                    variant="outline"
+                    className="gap-1.5"
                     style={{ float: 'right' }}
-                    iconProps={{ iconName: 'Settings' }}
-                    text={intl.get('preference.config')}
-                    ariaLabel={intl.get('preference.config')}
+                    aria-label={intl.get('preference.config')}
                     onClick={() => {
                         runInAction(() => {
                             megaAutoStore.showPreferencePannel = true;
                         });
                     }}
-                />
-                <PrimaryButton
+                >
+                    <RathIcon name="Settings" />
+                    {intl.get('preference.config')}
+                </Button>
+                <Button
+                    className="gap-1.5"
                     style={{ float: 'right', marginRight: '1em' }}
-                    iconProps={{ iconName: 'Rerun' }}
-                    text={intl.get('megaAuto.reRun')}
-                    ariaLabel={intl.get('megaAuto.reRun')}
+                    aria-label={intl.get(hasInsights ? 'megaAuto.reRun' : 'megaAuto.autoAnalysis')}
+                    disabled={computing}
                     onClick={startTask}
-                />
+                >
+                    <RathIcon name="Rerun" />
+                    {intl.get(hasInsights ? 'megaAuto.reRun' : 'megaAuto.autoAnalysis')}
+                </Button>
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
-                <VizPagination />
-                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
-                <InsightContainer>
-                    <div className="ope-container">
-                        <OperationBar handler={handler} />
-                    </div>
-                    <div className="flex-container">
-                        <div className="spec-container">
-                            {mainViewSpecSource === 'custom' && (
-                                <EditorCore
-                                    actionButtons={
-                                        <DefaultButton
-                                            text={intl.get('megaAuto.exitEditor')}
-                                            onClick={() => {
-                                                megaAutoStore.setMainViewSpecSource('default');
-                                            }}
+                {hasInsights ? (
+                    <>
+                        <VizPagination />
+                        <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+                        <InsightContainer>
+                            <div className="ope-container">
+                                <OperationBar handler={handler} />
+                            </div>
+                            <div className="flex-container">
+                                <div className="spec-container">
+                                    {mainViewSpecSource === 'custom' && (
+                                        <EditorCore
+                                            actionButtons={
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        megaAutoStore.setMainViewSpecSource('default');
+                                                    }}
+                                                >
+                                                    {intl.get('megaAuto.exitEditor')}
+                                                </Button>
+                                            }
                                         />
-                                    }
-                                />
-                            )}
-                        </div>
-                        <MainCanvas handler={handler} />
-                        <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
+                                    )}
+                                </div>
+                                <MainCanvas handler={handler} />
+                                <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
+                            </div>
+                            <div>
+                                <FieldContainer />
+                            </div>
+                        </InsightContainer>
+                    </>
+                ) : (
+                    <div role="status" className="rounded-lg border border-dashed bg-muted/20 px-6 py-12 text-center">
+                        <RathIcon name="Lightbulb" size={28} className="mx-auto mb-3 text-muted-foreground" />
+                        <h2 className="text-sm font-medium">{intl.get(computing ? 'megaAuto.computing' : 'megaAuto.emptyTitle')}</h2>
+                        {!computing && (
+                            <>
+                                <p className="mt-1 text-sm text-muted-foreground">{intl.get('megaAuto.emptyDescription')}</p>
+                                <Button className="mt-4 gap-1.5" onClick={startTask}>
+                                    <RathIcon name="Rerun" />
+                                    {intl.get('megaAuto.autoAnalysis')}
+                                </Button>
+                            </>
+                        )}
                     </div>
-                    <div>
-                        <FieldContainer />
-                    </div>
-                </InsightContainer>
+                )}
             </Card>
         </div>
     );

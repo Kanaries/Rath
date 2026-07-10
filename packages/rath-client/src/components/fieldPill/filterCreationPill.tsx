@@ -1,15 +1,4 @@
-import {
-    Callout,
-    ChoiceGroup,
-    Dropdown,
-    IDropdownOption,
-    Stack,
-    Selection,
-    SelectionMode,
-    PrimaryButton,
-    DefaultButton,
-} from '@fluentui/react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import produce from 'immer';
@@ -17,6 +6,11 @@ import { IFilter } from '@kanaries/loa';
 import { IFieldMeta } from '../../interfaces';
 import SetSelection from '../fieldFilter/setSelection';
 import RangeSelection from '../fieldFilter/rangeSelection';
+import { Button } from '../ui/button';
+import { Label } from '../ui/label';
+import { Popover, PopoverAnchor, PopoverContent } from '../ui/popover';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { RathSelect, RathSelectOption } from '../rath-ui/rath-select';
 import BasePillPlaceholder from './basePillPlaceholder';
 
 function getFieldRange(field: IFieldMeta): [number, number] {
@@ -31,18 +25,20 @@ const Cont = styled.div`
 interface FilterCreationPillProps {
     fields: readonly IFieldMeta[];
     onFilterSubmit: (field: IFieldMeta, filter: IFilter) => void;
-    onRenderPill?: (text: string, handleClick: () => void) => void;
+    onRenderPill?: (text: string, handleClick: () => void) => React.ReactNode;
 }
 const DefaultPill: FilterCreationPillProps['onRenderPill'] = (text, handleClick) => <BasePillPlaceholder text={text} onClick={handleClick} />;
 const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
     const { fields, onFilterSubmit, onRenderPill = DefaultPill } = props;
     const container = useRef<HTMLDivElement>(null);
+    const optionId = `filter-creation-${useId().replace(/:/g, '')}`;
     const [show, setShow] = useState(false);
     const [filter, setFilter] = useState<IFilter>({
         fid: '',
         type: 'set',
         values: [],
     });
+    const [selectedSetValues, setSelectedSetValues] = useState<string[]>([]);
 
     const curField = useMemo<IFieldMeta | undefined>(() => {
         return fields.find((f) => f.fid === filter.fid);
@@ -51,20 +47,12 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
     const toggleShow = useCallback(() => {
         setShow((v) => !v);
     }, []);
-    const fieldOptions = useMemo<IDropdownOption[]>(() => {
+    const fieldOptions = useMemo<RathSelectOption[]>(() => {
         return fields.map((f) => ({
             key: f.fid,
             text: f.name || f.fid,
         }));
     }, [fields]);
-    const selection = useMemo(() => {
-        return new Selection({
-            selectionMode: SelectionMode.multiple,
-            onSelectionChanged: () => {},
-            // items: meta.distribution,
-            // getKey: () => ''
-        });
-    }, []);
     const onRangeValueChange = useCallback((r: [number, number]) => {
         setFilter((f) => {
             const nextF = produce(f, (draft) => {
@@ -83,91 +71,83 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
 
     const submitResult = () => {
         if (curField) {
-            const ansFilter = produce(filter, draft => {
+            const ansFilter = produce(filter, (draft) => {
                 if (draft.type === 'set') {
-                    draft.values = selection.getSelectedIndices().map(i => curField.distribution[i].memberName)
+                    draft.values = selectedSetValues;
                 }
-            })
+            });
             onFilterSubmit(curField, ansFilter);
             toggleShow();
         }
     };
     return (
         <div ref={container}>
-            {onRenderPill(intl.get('common.addFilter'), toggleShow)}
-            {show && (
-                <Callout
-                    target={container}
-                    role="dialog"
-                    gapSpace={0}
-                    onDismiss={() => {
-                        setShow(false);
-                    }}
-                    setInitialFocus
-                >
+            <Popover open={show} onOpenChange={setShow}>
+                <PopoverAnchor asChild>
+                    <div>{onRenderPill(intl.get('common.addFilter'), toggleShow)}</div>
+                </PopoverAnchor>
+                <PopoverContent className="w-auto p-0">
                     <Cont>
-                        <Stack tokens={{ childrenGap: 10 }}>
-                            <Stack.Item>
-                                <Dropdown
+                        <div className="flex flex-col gap-[10px]">
+                            <div>
+                                <RathSelect
                                     label={intl.get('common.field')}
                                     options={fieldOptions}
                                     selectedKey={filter.fid}
-                                    onChange={(e, op) => {
-                                        if (op) {
-                                            const targetField = fields.find((f) => f.fid === op.key);
-                                            if (targetField) {
-                                                setFilter((f) => {
-                                                    const nextF = produce(f, (draft) => {
-                                                        draft.fid = op.key as string;
-                                                        draft.type =
-                                                            targetField.semanticType === 'quantitative'
-                                                                ? 'range'
-                                                                : 'set';
-                                                        if (draft.type === 'set') {
-                                                            draft.values = [];
-                                                        } else {
-                                                            draft.range = getFieldRange(targetField);
-                                                        }
-                                                    });
-                                                    return nextF;
+                                    onChange={(key) => {
+                                        const targetField = fields.find((f) => f.fid === key);
+                                        if (targetField) {
+                                            setFilter((f) => {
+                                                const nextF = produce(f, (draft) => {
+                                                    draft.fid = key as string;
+                                                    draft.type = targetField.semanticType === 'quantitative' ? 'range' : 'set';
+                                                    if (draft.type === 'set') {
+                                                        draft.values = [];
+                                                        setSelectedSetValues([]);
+                                                    } else {
+                                                        draft.range = getFieldRange(targetField);
+                                                    }
                                                 });
-                                            }
+                                                return nextF;
+                                            });
                                         }
                                     }}
                                 />
-                            </Stack.Item>
+                            </div>
                             {curField && (
-                                <Stack.Item>
-                                    <ChoiceGroup
-                                        label={intl.get('dataSource.filter.key')}
-                                        options={[
-                                            { key: 'range', text: intl.get('dataSource.filter.range') },
-                                            { key: 'set', text: intl.get('dataSource.filter.set') },
-                                        ]}
-                                        selectedKey={filter.type}
-                                        onChange={(ev, op) => {
-                                            if (op) {
-                                                const targetField = fields.find((f) => f.fid === op.key);
-                                                if (targetField) {
-                                                    setFilter((f) => {
-                                                        const nextF = produce(f, (draft) => {
-                                                            draft.type = op.key as any;
-                                                            if (draft.type === 'set') {
-                                                                draft.values = [];
-                                                            } else {
-                                                                draft.range = getFieldRange(targetField);
-                                                            }
-                                                        });
-                                                        return nextF;
-                                                    });
-                                                }
-                                            }
+                                <div>
+                                    <Label>{intl.get('dataSource.filter.key')}</Label>
+                                    <RadioGroup
+                                        className="mt-2 flex gap-4"
+                                        value={filter.type}
+                                        onValueChange={(value) => {
+                                            setFilter((f) => {
+                                                const nextF = produce(f, (draft) => {
+                                                    draft.type = value as any;
+                                                    if (draft.type === 'set') {
+                                                        draft.values = [];
+                                                        setSelectedSetValues([]);
+                                                    } else {
+                                                        draft.range = getFieldRange(curField);
+                                                    }
+                                                });
+                                                return nextF;
+                                            });
                                         }}
-                                    />
-                                </Stack.Item>
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <RadioGroupItem id={`${optionId}-range`} value="range" />
+                                            <Label htmlFor={`${optionId}-range`}>{intl.get('dataSource.filter.range')}</Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <RadioGroupItem id={`${optionId}-set`} value="set" />
+                                            <Label htmlFor={`${optionId}-set`}>{intl.get('dataSource.filter.set')}</Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
                             )}
                             {filter.type === 'set' && curField && (
-                                <SetSelection dist={curField.distribution} selection={selection} />
+                                <SetSelection dist={curField.distribution} selectedKeys={selectedSetValues} onChange={setSelectedSetValues} />
                             )}
                             {filter.type === 'range' && curField && (
                                 <RangeSelection
@@ -178,21 +158,16 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
                                     type={curField.semanticType === 'temporal' ? 'time' : 'number'}
                                 />
                             )}
-                            <Stack.Item>
-                                <Stack horizontal>
-                                    <PrimaryButton text={intl.get('dataSource.filter.submit')} onClick={submitResult} />
-                                    <DefaultButton
-                                        style={{ marginLeft: '1em' }}
-                                        text={intl.get('dataSource.filter.cancel')}
-                                        onClick={toggleShow}
-                                    />
-                                </Stack>
-                            </Stack.Item>
-                        </Stack>
-                        
+                            <div className="flex flex-row gap-[1em]">
+                                <Button onClick={submitResult}>{intl.get('dataSource.filter.submit')}</Button>
+                                <Button variant="outline" onClick={toggleShow}>
+                                    {intl.get('dataSource.filter.cancel')}
+                                </Button>
+                            </div>
+                        </div>
                     </Cont>
-                </Callout>
-            )}
+                </PopoverContent>
+            </Popover>
         </div>
     );
 };

@@ -1,6 +1,5 @@
-import { useId } from '@fluentui/react-hooks';
 import { observer } from 'mobx-react-lite';
-import { forwardRef, useEffect } from 'react';
+import { forwardRef, useEffect, useId } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';
 import { DashboardDocument } from '../../../store/dashboardStore';
 import Card, { CardProps } from './card';
@@ -48,7 +47,7 @@ const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(fun
     { page, editor, renderRatio = scaleRatio, dataLimit = 1000, ...props },
     ref
 ) {
-    const id = useId();
+    const id = `dashboard-renderer-${useId().replace(/:/g, '')}`;
 
     useEffect(() => {
         if (page.version !== rendererVersion) {
