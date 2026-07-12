@@ -33,8 +33,7 @@
   "author": "Observed Observer",
   "packageManager": "yarn@1.22.22",
   "engines": {
-    "node": ">=24 <25",
-    "yarn": ">=1.22.22 <2"
+    "node": "24.x"
   },
   "bugs": {
     "url": "https://github.com/Kanaries/Rath/issues"
