@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@emotion/is-prop-valid": "1.4.0",
-    "@kanaries/graphic-walker": "0.5.1",
+    "@kanaries/graphic-walker": "0.5.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "styled-components": "6.4.3"
@@ -17,8 +17,5 @@
     "@playwright/test": "1.61.1",
     "@vitejs/plugin-react": "6.0.3",
     "vite": "8.1.4"
-  },
-  "resolutions": {
-    "@kanaries/react-beautiful-dnd": "file:/tmp/kanaries-rbd-0.2.0.tgz"
   }
 }

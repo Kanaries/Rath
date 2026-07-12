@@ -11,7 +11,7 @@
         "@antv/g6": "4.8.25",
         "@emotion/is-prop-valid": "1.4.0",
         "@kanaries/causal": "0.1.1",
-        "@kanaries/graphic-walker": "0.5.1",
+        "@kanaries/graphic-walker": "0.5.2",
         "@kanaries/loa": "^0.0.16",
         "@kanaries/web-data-loader": "0.1.7",
         "@radix-ui/react-alert-dialog": "^1.1.19",

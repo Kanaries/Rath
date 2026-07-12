@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import semver from 'semver';
 
 const root = new URL('../', import.meta.url);
 const clientRoot = new URL('../packages/rath-client/', import.meta.url);
@@ -12,7 +13,7 @@ const expectedCandidateVersions = {
     'react-is': '19.2.7',
     '@types/react': '19.2.17',
     '@types/react-dom': '19.2.3',
-    '@kanaries/graphic-walker': '0.5.1',
+    '@kanaries/graphic-walker': '0.5.2',
     '@vercel/analytics': '2.0.1',
     mobx: '6.16.1',
     'mobx-react-lite': '4.1.1',
@@ -78,7 +79,6 @@ const compatibilityPackages = [
     'react-leaflet',
     'react-resizable-panels',
     'react-resize-detector',
-    'use-memo-one',
 ];
 const compatibility = [];
 for (const name of compatibilityPackages) {
@@ -91,23 +91,62 @@ for (const name of compatibilityPackages) {
     });
 }
 
-const declaresReact19 = (range) => range.includes('19') || /<\s*20(?:\D|$)/.test(range);
-const incompatiblePeerDeclarations = compatibility.filter(({ reactPeer }) => reactPeer !== '(none)' && !declaresReact19(reactPeer));
+async function installedReactPeerDeclarations(nodeModulesDirectory, seen = new Set()) {
+    const declarations = [];
+    for (const entry of await readdir(nodeModulesDirectory, { withFileTypes: true })) {
+        if ((!entry.isDirectory() && !entry.isSymbolicLink()) || entry.name === '.bin') {
+            continue;
+        }
+        const entryPath = join(nodeModulesDirectory, entry.name);
+        if (entry.name.startsWith('@')) {
+            declarations.push(...(await installedReactPeerDeclarations(entryPath, seen)));
+            continue;
+        }
+        const manifestPath = join(entryPath, 'package.json');
+        try {
+            const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+            const identity = `${manifest.name}@${manifest.version}`;
+            if (!seen.has(identity)) {
+                seen.add(identity);
+                const reactPeer = manifest.peerDependencies?.react;
+                if (reactPeer) {
+                    declarations.push({ name: manifest.name, version: manifest.version, reactPeer });
+                }
+            }
+        } catch {
+            // A node_modules entry without a readable package manifest is not an installed package.
+        }
+        const nestedNodeModules = join(entryPath, 'node_modules');
+        try {
+            declarations.push(...(await installedReactPeerDeclarations(nestedNodeModules, seen)));
+        } catch {
+            // Most hoisted packages do not have a nested node_modules directory.
+        }
+    }
+    return declarations;
+}
+
+const installedReactPeers = await installedReactPeerDeclarations(fileURLToPath(new URL('node_modules/', root)));
+const incompatiblePeerDeclarations = installedReactPeers.filter(({ reactPeer }) => !semver.satisfies(expectedCandidateVersions.react, reactPeer, { includePrerelease: true }));
 const candidatePassed = versionProblems.length === 0 && apiProblems.length === 0;
+const dependencyClean = incompatiblePeerDeclarations.length === 0;
 
 console.log('React 19 readiness audit');
 console.log(`- React 19 candidate versions: ${candidatePassed ? 'PASS' : 'FAIL'}`);
 console.log(`- Removed React API scan: ${apiProblems.length === 0 ? 'PASS' : 'FAIL'}`);
 console.table(compatibility);
 console.log(`- React 19 compatibility probe: ${candidatePassed ? 'PASS' : 'FAIL'}`);
-console.log('- Final dependency-clean gate: DEFERRED');
-console.log(`  React 18-only peer declarations: ${incompatiblePeerDeclarations.map(({ name, version, reactPeer }) => `${name}@${version} (${reactPeer})`).join('; ')}`);
+console.log(`- Installed React peer scan: ${installedReactPeers.length} declarations checked`);
+console.log(`- Final dependency-clean gate: ${dependencyClean ? 'PASS' : 'FAIL'}`);
+if (!dependencyClean) {
+    console.log(`  React 19-incompatible peer declarations: ${incompatiblePeerDeclarations.map(({ name, version, reactPeer }) => `${name}@${version} (${reactPeer})`).join('; ')}`);
+}
 console.log('  Canary evidence: pocs/react19-graphic-walker/README.md');
 
 for (const problem of [...versionProblems, ...apiProblems]) {
     console.error(`ERROR: ${problem}`);
 }
 
-if (!candidatePassed || (process.argv.includes('--react19-gate') && incompatiblePeerDeclarations.length > 0)) {
+if (!candidatePassed || (process.argv.includes('--react19-gate') && !dependencyClean)) {
     process.exitCode = 1;
 }

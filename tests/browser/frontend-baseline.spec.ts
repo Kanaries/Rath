@@ -209,7 +209,10 @@ test('DataSource table preserves virtual scrolling, styling and text-pattern int
     await scroller.evaluate((element) => {
         element.scrollTop = 0;
     });
-    const cellContent = table.locator(':scope > tbody > tr .cell-content').first();
+    await expect.poll(() => scroller.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }))).toEqual({ left: 0, top: 0 });
+    await expect(table.locator(':scope > thead')).toContainText('Name');
+    const cellContent = table.locator(':scope > tbody > tr .cell-content').filter({ hasText: 'chevrolet chevelle malibu' });
+    await expect(cellContent).toHaveCount(1);
     await expect(cellContent).toBeVisible();
     await cellContent.evaluate((element) => {
         const textNode = element.firstChild;
