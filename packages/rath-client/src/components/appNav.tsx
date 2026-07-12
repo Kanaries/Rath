@@ -132,12 +132,12 @@ const AppNav: React.FC = () => {
                 isExpanded: expandedGroups.eda,
                 links: getLinks([PIVOT_KEYS.editor, PIVOT_KEYS.semiAuto, PIVOT_KEYS.megaAuto, PIVOT_KEYS.painter]),
             },
-            library: getLinks([PIVOT_KEYS.collection, PIVOT_KEYS.dashboard]),
+            library: getLinks([PIVOT_KEYS.collection, PIVOT_KEYS.dashboard, PIVOT_KEYS.causal]),
             insiders: {
                 key: 'dev-mode' as const,
                 name: intl.get('menu.devCollection'),
                 isExpanded: expandedGroups['dev-mode'] || altKeyPressed,
-                links: getLinks([PIVOT_KEYS.causal, PIVOT_KEYS.dashBoardDesigner]),
+                links: getLinks([PIVOT_KEYS.dashBoardDesigner]),
             },
             support: [
                 {

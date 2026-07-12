@@ -558,6 +558,15 @@
         "next": "Next",
         "addLabel": "Add Label",
         "newField": "Paint Field",
+        "empty": {
+            "title": "No visualization selected",
+            "description": "Data Painter works on an existing chart. Explore your data first, then send a visualization here to annotate and segment it.",
+            "step1": "Open Semi-auto or Fully-auto exploration",
+            "step2": "Find a chart worth inspecting",
+            "step3": "Send it to Data Painter to start painting",
+            "semiAutoDesc": "Interactively refine patterns and pick a focused view",
+            "megaAutoDesc": "Browse automated insights and choose a chart"
+        },
         "tools": {
             "move": "Move",
             "color": "Color",

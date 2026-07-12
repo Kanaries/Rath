@@ -57,7 +57,7 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
 
     return (
         <Card
-            className={appearance === 'outline' ? undefined : 'bg-muted/40'}
+            className={`cursor-pointer${appearance === 'outline' ? '' : ' bg-muted/40'}`}
             onClick={() => handleClick?.(file)}
         >
             <CardHeader className="flex-row items-center gap-3 space-y-0">
