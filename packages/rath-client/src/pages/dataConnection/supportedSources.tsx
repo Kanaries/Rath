@@ -15,6 +15,7 @@
 
 import React from 'react';
 import intl from 'react-intl-universal';
+import { publicAssetUrl } from 'runtime-env';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { IDataSourceType } from '../../global';
 
@@ -33,28 +34,28 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
             key: IDataSourceType.FILE,
             text: fileText,
             // iconImage: () => <FolderIcon />,
-            iconImage: () => <img className="h-12 w-12 rounded" src="/assets/icons/folders.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/folders.svg')} alt="" />,
         },
         {
             key: IDataSourceType.DEMO,
             text: demoText,
-            iconImage: () => <img className="h-12 w-12 rounded" src="/assets/icons/joystick.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/joystick.svg')} alt="" />,
         },
         {
             key: IDataSourceType.DATABASE,
             text: dbText,
-            iconImage: () => <img className="h-12 w-12 rounded" src="/assets/icons/data-server.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/data-server.svg')} alt="" />,
         },
         {
             key: IDataSourceType.AIRTABLE,
             text: 'AirTable',
-            iconImage: () => <img className="h-12 w-12 rounded" src="/assets/icons/airtable.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/airtable.svg')} alt="" />,
             disabled: false,
         },
         {
             key: IDataSourceType.RESTFUL,
             text: restfulText,
-            iconImage: () => <img className="h-12 w-12 rounded" src="/assets/icons/cloud-computing.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/cloud-computing.svg')} alt="" />,
         },
     ];
 

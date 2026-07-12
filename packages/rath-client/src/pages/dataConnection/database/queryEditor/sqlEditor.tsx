@@ -96,7 +96,7 @@ const SQLEditor: FC<SQLEditorProps> = ({ query, setQuery, preview, doPreview, bu
         setQuery(newValue);
     };
 
-    const monacoRef = useRef<Monaco>();
+    const monacoRef = useRef<Monaco | undefined>(undefined);
 
     const editorWillMount = useCallback<EditorWillMount>(monaco => {
         monacoRef.current = monaco;

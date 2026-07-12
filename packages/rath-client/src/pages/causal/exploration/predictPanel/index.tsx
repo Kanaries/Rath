@@ -80,7 +80,7 @@ const PredictPanel = forwardRef<
     const [running, setRunning] = useState(false);
 
     const canExecute = predictInput.features.length > 0 && predictInput.targets.length > 0;
-    const pendingRef = useRef<Promise<unknown>>();
+    const pendingRef = useRef<Promise<unknown> | undefined>(undefined);
 
     useEffect(() => {
         pendingRef.current = undefined;

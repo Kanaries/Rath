@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import type { JSX } from 'react';
 import { RathIcon } from '../../../../components/icons';
 import { Button } from '../../../../components/ui/button';
 import { Spinner } from '../../../../components/ui/spinner';

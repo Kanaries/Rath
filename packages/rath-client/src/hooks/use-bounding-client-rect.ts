@@ -16,7 +16,7 @@ const useBoundingClientRect = <
     E extends Exclude<M[keyof M], never> & keyof DOMRect = Exclude<M[keyof M], never> & keyof DOMRect,
     R extends { readonly [key in E]?: DOMRect[key] } = { readonly [key in E]?: DOMRect[key] },
 >(
-    ref: RefObject<HTMLElement>,
+    ref: RefObject<HTMLElement | null>,
     /** @default {height:true,width:true,x:true,y:true,bottom:true,left:true,right:true,top:true} */
     attributes: T = {
         height: true,
@@ -36,7 +36,7 @@ const useBoundingClientRect = <
 
     const [box, setBox] = useState<R>({} as R);
 
-    const prevRectRef = useRef<DOMRect>();
+    const prevRectRef = useRef<DOMRect | undefined>(undefined);
     const shouldReportRef = useRef<(next: DOMRect) => boolean>(() => true);
     shouldReportRef.current = (next: DOMRect): boolean => {
         return !prevRectRef.current || compareKeysRef.current.some(k => next[k] !== prevRectRef.current![k]);

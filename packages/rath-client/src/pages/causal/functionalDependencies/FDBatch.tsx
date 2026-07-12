@@ -72,7 +72,7 @@ const FDBatch: FC = () => {
         setDisplayPreview(true);
     }, [causalStore]);
 
-    const pendingRef = useRef<Promise<unknown>>();
+    const pendingRef = useRef<Promise<unknown> | undefined>(undefined);
     useEffect(() => {
         if (!displayPreview) {
             pendingRef.current = undefined;

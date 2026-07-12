@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { GraphicWalker } from '@kanaries/graphic-walker';
+import { GraphicWalker } from '../../../components/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
 import type { Specification } from 'visual-insights';

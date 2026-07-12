@@ -402,7 +402,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r, sampl
         }
     }, [focus, page.cards]);
 
-    const getRefLinesCache = useRef<[number, RefLine[]]>();
+    const getRefLinesCache = useRef<[number, RefLine[]] | undefined>(undefined);
 
     const getRefLines = useCallback(
         (selfIdx: number): RefLine[] => {

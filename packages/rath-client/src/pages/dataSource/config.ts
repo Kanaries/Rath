@@ -1,5 +1,6 @@
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { publicAssetUrl, runtimeEnv } from 'runtime-env';
 import { IDataSourceType } from "../../global";
 import type { LegacyIconName } from '../../components/icons';
 
@@ -61,7 +62,7 @@ export const useDataSourceTypeOptions = function (): DataSourceTypeOption[] {
     return options;
 };
 
-export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
+export const DemoDataAssets = runtimeEnv.isProduction ? {
     CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
@@ -73,17 +74,17 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     BIKE_SHARING_DC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/bike_dc-dataset-service.json'
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
-    CARS: "/datasets/ds-cars-service.json",
+    CARS: publicAssetUrl('datasets/ds-cars-service.json'),
     // CARS: "/datasets/test.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
-    STUDENTS: "/datasets/ds-students-service.json",
-    BTC_GOLD: "/datasets/ds_btc_gold_service.json",
-    BIKE_SHARING: '/datasets/ds-bikesharing-service.json',
-    CAR_SALES: '/datasets/ds-carsales-service.json',
-    COLLAGE: '/datasets/ds-collage-service.json',
-    TITANIC: '/datasets/ds-titanic-service.json',
-    KEPLER: '/datasets/ds-kelper-service.json',
-    BIKE_SHARING_DC: '/datasets/bike_dc-dataset-service.json'
+    STUDENTS: publicAssetUrl('datasets/ds-students-service.json'),
+    BTC_GOLD: publicAssetUrl('datasets/ds_btc_gold_service.json'),
+    BIKE_SHARING: publicAssetUrl('datasets/ds-bikesharing-service.json'),
+    CAR_SALES: publicAssetUrl('datasets/ds-carsales-service.json'),
+    COLLAGE: publicAssetUrl('datasets/ds-collage-service.json'),
+    TITANIC: publicAssetUrl('datasets/ds-titanic-service.json'),
+    KEPLER: publicAssetUrl('datasets/ds-kelper-service.json'),
+    BIKE_SHARING_DC: publicAssetUrl('datasets/bike_dc-dataset-service.json')
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;

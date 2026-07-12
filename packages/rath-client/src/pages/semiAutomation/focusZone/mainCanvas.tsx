@@ -10,7 +10,7 @@ import ErrorBoundary from '../../../components/visErrorBoundary';
 interface MainCanvasProps {
     view: IPattern;
     spec: IVegaSubset;
-    handler?: RefObject<IReactVegaHandler>;
+    handler?: RefObject<IReactVegaHandler | null>;
 }
 const MainCanvas: React.FC<MainCanvasProps> = (props) => {
     const { view, spec, handler } = props;

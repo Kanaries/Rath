@@ -28,7 +28,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
     title, data, mainField, mainFieldAggregation, indexKey, subspace, interactive, handleFilter, normalize,
 }) => {
     const container = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<View>();
+    const viewRef = useRef<View | undefined>(undefined);
     const handleFilterRef = useRef(handleFilter);
     handleFilterRef.current = handleFilter;
 

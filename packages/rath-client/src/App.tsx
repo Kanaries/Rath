@@ -1,7 +1,5 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState, type JSX } from 'react';
 import { observer } from 'mobx-react-lite';
-import './normalize.css';
-import './App.css';
 import { useGlobalStore, StoreWrapper } from './store/index';
 import AppNav from './components/appNav';
 import { destroyRathWorker, initRathWorker } from './services/index';
@@ -57,7 +55,7 @@ function App() {
             >
                 <AppNav />
                 <SidebarInset className="main-app-content">
-                    <SidebarTrigger className="fixed left-2 top-2 z-40 border bg-background shadow-sm md:hidden" />
+                    <SidebarTrigger className="fixed left-2 top-2 z-40 border bg-background shadow-xs md:hidden" />
                     <Suspense
                         fallback={
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '2em' }}>

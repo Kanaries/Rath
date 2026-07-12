@@ -159,7 +159,7 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, entryDi
 
     const view = list[cursor];
 
-    const pendingRef = useRef<Promise<IRInsightExplainResult>>();
+    const pendingRef = useRef<Promise<IRInsightExplainResult> | undefined>(undefined);
 
     const calculate = (measure: string) => {
         const [current, other] = subspaces;

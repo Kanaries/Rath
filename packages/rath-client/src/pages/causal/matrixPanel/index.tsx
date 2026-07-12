@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { FC, useState } from 'react';
+import { FC, useState, type JSX } from 'react';
 import styled from 'styled-components';
 import { Button } from '../../../components/ui/button';
 import { Spinner } from '../../../components/ui/spinner';

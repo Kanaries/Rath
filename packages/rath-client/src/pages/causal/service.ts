@@ -1,9 +1,6 @@
 import { IRow } from 'visual-insights';
 import { IFieldMeta } from '../../interfaces';
 import { workerService } from '../../services';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import CausalComputationWorker from './computation.worker.js?worker';
 
 type ICausalProps = {

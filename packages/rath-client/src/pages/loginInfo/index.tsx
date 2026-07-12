@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, type JSX } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
@@ -65,7 +65,7 @@ const LoginInfo: FC = () => {
                                     type="button"
                                     aria-current={tab === PreferencesType.Setting ? 'page' : undefined}
                                     className={cn(
-                                        'flex h-8 w-full items-center gap-2 rounded-sm px-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                                        'flex h-8 w-full items-center gap-2 rounded-xs px-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring',
                                         tab === PreferencesType.Setting && 'bg-accent font-medium text-accent-foreground'
                                     )}
                                     onClick={(event) => {

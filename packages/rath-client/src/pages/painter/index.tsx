@@ -341,7 +341,7 @@ const Painter: React.FC = (props) => {
     }
     return (
         <Cont style={{ padding: '1em' }}>
-            <div className="cursor rounded"></div>
+            <div className="cursor rounded-sm"></div>
             <Card>
                 <PainterContainer>
                     <div
@@ -394,7 +394,7 @@ const Painter: React.FC = (props) => {
                                                     role="radio"
                                                     aria-checked={selected}
                                                     className={cn(
-                                                        'h-7 w-7 rounded-full border border-border transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                                        'h-7 w-7 rounded-full border border-border transition-transform focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                                                         selected ? 'scale-105 ring-2 ring-ring ring-offset-2' : 'hover:scale-105'
                                                     )}
                                                     style={{ backgroundColor: cell.color }}

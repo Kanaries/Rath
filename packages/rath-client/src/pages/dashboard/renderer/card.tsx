@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { CSSProperties, FC, useMemo } from 'react';
+import { CSSProperties, FC, useMemo, type JSX } from 'react';
 import styled from 'styled-components';
 import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocumentOperators } from '../../../store/dashboardStore';
 import type { IFilter } from '../../../interfaces';
@@ -84,7 +84,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     background-color: #fff;
     border: calc(1px * var(--ratio)) solid transparent;
     padding: calc(var(--padding) * var(--ratio));
-    ${({ appearance }) =>
+    ${({ appearance }: { appearance: DashboardCardAppearance }) =>
         ((
             {
                 transparent: `

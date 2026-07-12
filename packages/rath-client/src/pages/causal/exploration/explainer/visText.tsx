@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
-import { createElement, forwardRef, ForwardRefExoticComponent, Fragment, PropsWithoutRef, ReactNode, RefAttributes, useMemo } from "react";
-import styled, { StyledComponentProps } from "styled-components";
+import { createElement, forwardRef, ForwardRefExoticComponent, Fragment, PropsWithoutRef, ReactNode, RefAttributes, useMemo, type ComponentPropsWithoutRef, type JSX } from "react";
+import styled from "styled-components";
 import { RathIcon } from "../../../../components/icons";
 import type { IFieldMeta } from "../../../../interfaces";
 
@@ -16,7 +16,7 @@ type RefType = {
 };
 
 export type IVisTextProps<T extends AllowedDOMType = 'p'> = Omit<
-    StyledComponentProps<T, {}, {}, never>, 'ref'
+    ComponentPropsWithoutRef<T>, 'ref' | 'children'
 > & (T extends 'p' ? {
     /** @default "p" */
     as?: T;

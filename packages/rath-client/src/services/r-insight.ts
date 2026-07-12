@@ -1,5 +1,3 @@
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
 import RInsightWorker from '../workers/insight/r-insight.worker?worker';
 import type { IRInsightExplainProps, IRInsightExplainResult } from '../workers/insight/r-insight.worker';
 import { getGlobalStore } from '../store';

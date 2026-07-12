@@ -89,7 +89,6 @@ const NestedList: FC<INestedListProps> = ({ loading, title, items, isFailed, isU
     return (
         <Root>
             {loading && (
-                // @ts-expect-error css variable
                 <Container open style={{ '--level': 0 }}>
                     {ShimmerItems}
                 </Container>

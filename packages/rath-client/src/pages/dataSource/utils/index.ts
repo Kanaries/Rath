@@ -10,9 +10,6 @@ import { IRathStorage, RathStorageParse } from "../../../utils/storage";
 import { workerService } from "../../../services/index";
 
 
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import FileDataTransformWorker from './transFileData.worker?worker';
 
 export enum SampleKey {

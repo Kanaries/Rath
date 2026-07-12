@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, useEffect, Dispatch } from 'react';
+import { runtimeEnv } from 'runtime-env';
 
 
 export type AsyncDispatch<A> = (value: A) => Promise<A>;
@@ -37,7 +38,7 @@ const useAsyncState = <T>(
 
     const dispatcher = useCallback<AsyncDispatch<T | Promise<T> | ((prevState: T) => T | Promise<T>)>>(next => {
         if (unmountedRef.current) {
-            if (process.env.NODE_ENV === 'development') {
+            if (runtimeEnv.isDevelopment) {
                 console.error('Warning: Can\'t perform a React state update on an unmounted component.');
             }
             return new Promise<T>(() => void 0);

@@ -45,7 +45,7 @@ const RExplainer: FC = () => {
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
     const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
 
-    const pendingRef = useRef<Promise<IRInsightExplainResult>>();
+    const pendingRef = useRef<Promise<IRInsightExplainResult> | undefined>(undefined);
 
     const calculate = useCallback(() => {
         viewContext?.clearLocalWeights();

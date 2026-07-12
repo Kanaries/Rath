@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type JSX } from 'react';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
@@ -96,9 +96,9 @@ const Selection: React.FC<SelectionProps> = (props) => {
                                 id={`data-source-tab-${option.key}`}
                                 disabled={option.disabled}
                                 className={cn(
-                                    'relative flex min-h-24 flex-col items-center justify-center gap-2 rounded-sm border bg-muted/40 px-2 py-3 text-sm transition-colors',
-                                    'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                                    selected && 'border-foreground bg-background shadow-sm',
+                                    'relative flex min-h-24 flex-col items-center justify-center gap-2 rounded-xs border bg-muted/40 px-2 py-3 text-sm transition-colors',
+                                    'hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                    selected && 'border-foreground bg-background shadow-xs',
                                     option.disabled && 'cursor-not-allowed opacity-40'
                                 )}
                                 onClick={() => setDataSourceType(option.key)}

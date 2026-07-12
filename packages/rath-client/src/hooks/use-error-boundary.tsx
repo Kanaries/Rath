@@ -1,4 +1,5 @@
-import { FC, PureComponent, ReactNode, useCallback, useRef } from "react";
+import { FC, PureComponent, ReactNode, useCallback, useRef, type JSX } from "react";
+import { runtimeEnv } from 'runtime-env';
 
 
 interface ErrorBoundaryProps<D extends any[]> {
@@ -34,7 +35,7 @@ class ErrorBoundary<D extends any[] = any[]> extends PureComponent<ErrorBoundary
 
     static getDerivedStateFromProps<D extends any[]>(nextProps: ErrorBoundaryProps<D>, prevState: ErrorBoundaryState<D>): Partial<ErrorBoundaryState<D>> {
         if (nextProps.deps.length !== prevState.deps.length) {
-            if (process.env.NODE_ENV !== 'production') {
+            if (!runtimeEnv.isProduction) {
                 console.error(new Error('Length of dependency list changed, retrial is disabled.'));
             }
             return {};

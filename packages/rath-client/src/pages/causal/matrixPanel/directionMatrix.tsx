@@ -1,6 +1,7 @@
 import intl from 'react-intl-universal';
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { runtimeEnv } from 'runtime-env';
 import styled from 'styled-components';
 import embed from 'vega-embed';
 import { RathIcon } from '../../../components/icons';
@@ -115,7 +116,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
                         axis: { grid: true, tickBand: 'extent' },
                     },
                 },
-                { actions: process.env.NODE_ENV !== 'production' }
+                { actions: !runtimeEnv.isProduction }
             ).then((res) => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {

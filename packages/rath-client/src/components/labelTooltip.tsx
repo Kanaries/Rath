@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import { RathIcon } from './icons';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
@@ -40,7 +40,7 @@ export const LabelWithDesc: React.FC<LabelWithDescProps> = (props) => {
                     <TooltipTrigger asChild>
                         <button
                             type="button"
-                            className="inline-flex h-5 w-5 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            className="inline-flex h-5 w-5 items-center justify-center rounded-xs text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                             aria-label={`More information about ${label}`}
                         >
                             <RathIcon name="Info" size={14} />

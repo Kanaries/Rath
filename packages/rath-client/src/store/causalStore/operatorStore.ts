@@ -1,5 +1,6 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { distinctUntilChanged, Subject, switchAll } from 'rxjs';
+import { runtimeEnv } from 'runtime-env';
 import { getGlobalStore } from '..';
 import { notify } from '../../components/error';
 import type { RathSelectOption } from '../../components/rath-ui/rath-select';
@@ -183,7 +184,7 @@ export default class CausalOperatorStore {
                 const causalPag = resolveCausality(causalMatrix, inputFields);
                 causality = { raw: causalMatrix, pag: causalPag };
                 const unmatched = findUnmatchedCausalResults(assertions, causalPag);
-                if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+                if (unmatched.length > 0 && !runtimeEnv.isProduction) {
                     const getFieldName = (fid: string) => {
                         const field = inputFields.find((f) => f.fid === fid);
                         return field?.name ?? fid;

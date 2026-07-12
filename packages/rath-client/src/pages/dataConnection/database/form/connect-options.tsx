@@ -218,7 +218,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                             >
                                 <div role="listbox">
                                     {autoCompletionItems.map((item) => (
-                                        <div key={item.key} className="flex items-center rounded-sm hover:bg-accent">
+                                        <div key={item.key} className="flex items-center rounded-xs hover:bg-accent">
                                             <button
                                                 type="button"
                                                 role="option"

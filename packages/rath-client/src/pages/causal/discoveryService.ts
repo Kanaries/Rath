@@ -1,8 +1,5 @@
 import { workerService } from '../../services';
 import type { CausalDiscoveryRequest, CausalDiscoveryResult } from './discoveryTypes';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import CausalDiscoveryWorker from './discovery.worker.ts?worker';
 
 function normalizeCellValue(value: unknown): unknown {

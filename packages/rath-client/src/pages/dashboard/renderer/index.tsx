@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import { forwardRef, useEffect, useId } from 'react';
-import styled, { StyledComponentProps } from 'styled-components';
+import { forwardRef, useEffect, useId, type ComponentPropsWithoutRef } from 'react';
+import styled from 'styled-components';
 import { DashboardDocument } from '../../../store/dashboardStore';
 import Card, { CardProps } from './card';
 import { scaleRatio } from './constant';
@@ -28,18 +28,13 @@ const Draft = styled.div`
     cursor: crosshair;
 `;
 
-export type DashboardRendererProps = StyledComponentProps<
-    'div',
-    {},
-    {
+export type DashboardRendererProps = ComponentPropsWithoutRef<'div'> & {
         page: DashboardDocument;
         editor?: (index: number) => CardProps['editor'];
         renderRatio?: number;
         /** @default 1000 */
         dataLimit?: number;
-    },
-    never
->;
+};
 
 const rendererVersion = 1;
 

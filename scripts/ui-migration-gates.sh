@@ -36,5 +36,6 @@ report_count "fabric css import" "$(count_matches "office-ui-fabric-core" "$SRC"
 report_count "initializeIcons" "$(count_matches "initializeIcons" "$SRC")"
 report_count "fluent package references across workspaces" "$(count_matches "@fluentui/(react|react-components|react-icons)" packages --glob 'package.json' --glob '*.{ts,tsx,js,jsx}')"
 report_count "fabric icon font assets" "$(find packages -type f -iname '*fabric-icon*' | wc -l | tr -d ' ')"
+report_count "ali-react-table references" "$(count_matches "ali-react-table" "$SRC" packages/rath-client/package.json)"
 
 exit "$fail"

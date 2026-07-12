@@ -1,4 +1,4 @@
-FROM node:16 AS build-stage
+FROM node:24.14.0 AS build-stage
 
 COPY . /app
 

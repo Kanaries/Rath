@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type JSX } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';

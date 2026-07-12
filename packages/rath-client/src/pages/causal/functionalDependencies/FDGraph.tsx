@@ -101,7 +101,7 @@ const FDGraph: React.FC<{
         [setFunctionalDependencies]
     );
 
-    const graphRef = useRef<Graph>();
+    const graphRef = useRef<Graph | undefined>(undefined);
     const renderData = useRenderData({
         mode: 'edit',
         fields,

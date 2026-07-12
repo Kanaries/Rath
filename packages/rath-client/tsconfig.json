@@ -17,14 +17,17 @@
     "module": "esnext",
     "moduleResolution": "node",
     "baseUrl": "src",
+    "paths": {
+      "components/*": ["components/*"],
+      "hooks/*": ["hooks/*"],
+      "lib/*": ["lib/*"],
+      "utils/*": ["utils/*"]
+    },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
   },
   "include": [
     "src"

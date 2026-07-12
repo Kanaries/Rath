@@ -1,3 +1,5 @@
+import { runtimeEnv } from 'runtime-env';
+
 export function checkExpandEnv(): string {
     if (typeof window === 'object') {
         const url = new URL(window.location.href).searchParams.get('expand');
@@ -6,6 +8,6 @@ export function checkExpandEnv(): string {
             return url;
         } else return '';
     }
-    if (process.env.EXPAND_ENV) return process.env.EXPAND_ENV;
+    if (runtimeEnv.expandEnv) return runtimeEnv.expandEnv;
     else return '';
 }

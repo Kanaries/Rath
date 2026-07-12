@@ -108,7 +108,7 @@ const FileData: FC<FileDataProps> = (props) => {
         }
     }, [excelFile]);
 
-    const filePreviewPendingRef = useRef<Promise<unknown>>();
+    const filePreviewPendingRef = useRef<Promise<unknown> | undefined>(undefined);
 
     const inputRef = useRef<{ reset: () => void }>(null);
 

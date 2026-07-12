@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled, { StyledComponentProps } from 'styled-components';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type ComponentPropsWithoutRef } from 'react';
+import styled from 'styled-components';
 import { Graph } from '@antv/g6';
 import { observer } from 'mobx-react-lite';
 import { RathSelect } from '../../../components/rath-ui/rath-select';
@@ -36,10 +36,7 @@ const Container = styled.div`
 `;
 
 export type GraphViewProps = Omit<
-    StyledComponentProps<
-        'div',
-        {},
-        {
+    ComponentPropsWithoutRef<'div'> & {
             cutThreshold: number;
             limit: number;
             mode: 'explore' | 'edit';
@@ -52,8 +49,6 @@ export type GraphViewProps = Omit<
             handleSubtreeSelected?: (subtree: Subtree | null) => void;
             allowZoom: boolean;
         },
-        never
-    >,
     'onChange' | 'ref'
 >;
 
@@ -116,7 +111,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(
             return map;
         }, [causality, fields, mutualMatrix]);
 
-        const graphRef = useRef<Graph>();
+        const graphRef = useRef<Graph | undefined>(undefined);
         const renderData = useRenderData({
             mode,
             fields,

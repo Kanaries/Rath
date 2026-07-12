@@ -11,7 +11,7 @@ import type { IReactVegaHandler } from '../../../components/react-vega';
 import { PIVOT_KEYS } from '../../../constants';
 
 interface OperationBarProps {
-    handler: React.RefObject<IReactVegaHandler>;
+    handler: React.RefObject<IReactVegaHandler | null>;
 }
 const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
     const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore, semiAutoStore } = useGlobalStore();

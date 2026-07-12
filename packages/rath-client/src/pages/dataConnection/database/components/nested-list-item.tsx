@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce, { enableMapSet } from 'immer';
@@ -128,7 +128,6 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
 
     if (isUnloaded) {
         return (
-            // @ts-expect-error css variable
             <Container open={open} style={{ '--level': level }}>
                 {[0, 0, 0].map((_, i) => (
                     <Item virtual key={i}>
@@ -143,7 +142,6 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
     } else if (isFailed) {
         const parent = path.at(-1);
         return (
-            // @ts-expect-error css variable
             <Container open={open} style={{ '--level': level }}>
                 <Item virtual>
                     <ItemHeader>
@@ -166,7 +164,6 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
     }
 
     return (
-        // @ts-expect-error css variable
         <Container open={open} style={{ '--level': level }}>
             {items.map(item => {
                 const mayHasChildren = item.children || item.isUnloaded || item.isFailed;
