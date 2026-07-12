@@ -1,9 +1,6 @@
 import { IRow } from 'visual-insights';
 import { IRawField } from '../interfaces';
 import { workerService } from '../services';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import ExpandDateTimeWorker from './workers/dateTimeExpand.worker.js?worker';
 import { dateTimeExpand, doTest } from './workers/engine/dateTimeExpand';
 import { checkExpandEnv } from './workers/engine/checkExpandEnv';

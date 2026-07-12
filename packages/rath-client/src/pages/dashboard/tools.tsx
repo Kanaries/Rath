@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useCallback, forwardRef } from 'react';
-import { IconButton } from '@fluentui/react';
+import { Button } from '../../components/ui/button';
+import { RathIcon } from '../../components/icons';
 import type { DashboardCard } from '../../store/dashboardStore';
 import Divider from '../../components/divider';
 
@@ -111,48 +112,43 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
 
     return (
         <ToolGroup>
-            <IconButton
-                onClick={clearPage}
-                iconProps={{
-                    iconName: 'DeleteTable',
-                    style: {
+            <Button variant="ghost" size="icon" aria-label="Clear dashboard" onClick={clearPage}>
+                <RathIcon
+                    name="DeleteTable"
+                    style={{
                         color: '#fff',
                         backgroundColor: '#c50f1f',
                         padding: '6px',
                         boxSizing: 'content-box',
                         borderRadius: '6px',
-                    },
-                }}
-            />
+                    }}
+                />
+            </Button>
             <Divider />
-            <IconButton
-                disabled={items.length === 0}
-                onClick={open}
-                iconProps={{
-                    iconName: 'OpenInNewWindow',
-                    style: {
+            <Button variant="ghost" size="icon" aria-label="Open preview" disabled={items.length === 0} onClick={open}>
+                <RathIcon
+                    name="OpenInNewWindow"
+                    style={{
                         color: items.length === 0 ? '#666' : '#fff',
                         backgroundColor: items.length === 0 ? 'unset' : '#4f6bed',
                         padding: '6px',
                         boxSizing: 'content-box',
                         borderRadius: '6px',
-                    },
-                }}
-            />
-            <IconButton
-                disabled={items.length === 0}
-                onClick={download}
-                iconProps={{
-                    iconName: 'PhotoCollection',
-                    style: {
+                    }}
+                />
+            </Button>
+            <Button variant="ghost" size="icon" aria-label="Download dashboard" disabled={items.length === 0} onClick={download}>
+                <RathIcon
+                    name="PhotoCollection"
+                    style={{
                         color: items.length === 0 ? '#666' : '#fff',
                         backgroundColor: items.length === 0 ? 'unset' : '#546fd2',
                         padding: '6px',
                         boxSizing: 'content-box',
                         borderRadius: '6px',
-                    },
-                }}
-            />
+                    }}
+                />
+            </Button>
         </ToolGroup>
     );
 });

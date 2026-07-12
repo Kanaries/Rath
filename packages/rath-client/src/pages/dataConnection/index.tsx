@@ -14,17 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { useCallback, useState } from 'react';
-import { IBreadcrumbItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import intl from 'react-intl-universal';
-import { Button } from '@fluentui/react-components';
-import { Plus, Database } from 'lucide-react';
-import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import { notify } from '../../components/error';
+import { RathIcon } from '../../components/icons';
+import { Button } from '../../components/ui/button';
 import HistoryPanel from './history';
 import ConnectionCreation from './create';
 
@@ -47,7 +44,6 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const { dataSourceStore, commonStore, megaAutoStore, semiAutoStore } = useGlobalStore();
     // const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, toggleLoadingAnimation } = props;
     const [dsPageKey, setDsPageKey] = useState<DS_PAGE_KEYS>(DS_PAGE_KEYS.display);
-    const [dataSourceType, setDataSourceType] = useState<IDataSourceType | null>(null);
 
     const onSelectPannelClose = useCallback(() => {
         // dataSourceStore.setShowDataImportSelection(false);
@@ -79,42 +75,30 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         [dataSourceStore]
     );
 
-    const _onBreadcrumbItemClicked = useCallback((ev?: React.MouseEvent<HTMLElement>, item?: IBreadcrumbItem) => {
-        if (item && item.key === 'connection') {
-            setDataSourceType(null);
-        }
-    }, []);
-
-    const items: IBreadcrumbItem[] = [
-        { text: intl.get('dataSource.dataSourceConnection.types'), key: 'connection', onClick: _onBreadcrumbItemClicked },
-    ];
-
-    if (dataSourceType !== null) {
-        items.push({ text: intl.get(`dataSource.importData.type.${dataSourceType}`), key: dataSourceType, onClick: _onBreadcrumbItemClicked });
-    }
-
     return (
         <div className="content-container">
             <div>
                 {dsPageKey === DS_PAGE_KEYS.display && (
                     <Button
-                        appearance="primary"
+                        type="button"
+                        className="gap-1.5"
                         onClick={() => {
                             setDsPageKey(DS_PAGE_KEYS.create);
                         }}
-                        icon={<Plus />}
                     >
+                        <RathIcon name="Add" />
                         Create DataSource
                     </Button>
                 )}
                 {dsPageKey === DS_PAGE_KEYS.create && (
                     <Button
-                        appearance="primary"
+                        type="button"
+                        className="gap-1.5"
                         onClick={() => {
                             setDsPageKey(DS_PAGE_KEYS.display);
                         }}
-                        icon={<Database />}
                     >
+                        <RathIcon name="Database" />
                         My Data
                     </Button>
                 )}

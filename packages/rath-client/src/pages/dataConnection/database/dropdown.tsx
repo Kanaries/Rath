@@ -1,7 +1,9 @@
-import { Icon } from '@fluentui/react';
 import styled from 'styled-components';
+import { DatabaseBrandIcon, RathIcon } from '../../../components/icons';
 import databaseOptions from './options';
 
+
+type DatabaseOption = typeof databaseOptions[number];
 
 const ItemContainer = styled.div`
     display: flex;
@@ -10,7 +12,10 @@ const ItemContainer = styled.div`
     justify-content: flex-start;
 `;
 
-const StyledIcon = styled(Icon)`
+const StyledIcon = styled.span`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     line-height: 20px;
     width: 20px;
     height: 20px;
@@ -19,21 +24,20 @@ const StyledIcon = styled(Icon)`
     overflow: hidden;
 `;
 
-export const renderDropdownTitle: React.FC<typeof databaseOptions | undefined> = ([item]) => {
+export const renderDropdownTitle = (items?: DatabaseOption[]) => {
+    const [item] = items ?? [];
+
     if (!item) {
         return null;
     }
 
-    const { icon, text, key } = item;
+    const { icon, text } = item;
 
     return (
         <ItemContainer>
-            <StyledIcon
-                iconName={icon ? key : 'database'}
-                role="presentation"
-                aria-hidden
-                title={text}
-            />
+            <StyledIcon title={text}>
+                {icon ? <DatabaseBrandIcon icon={icon} label={text} /> : <RathIcon name="database" />}
+            </StyledIcon>
             <span style={{ flexGrow: 1 }}>
                 {text}
             </span>
@@ -41,21 +45,18 @@ export const renderDropdownTitle: React.FC<typeof databaseOptions | undefined> =
     );
 };
 
-export const renderDropdownItem: React.FC<typeof databaseOptions[0] | undefined> = props => {
+export const renderDropdownItem = (props?: DatabaseOption) => {
     if (!props) {
         return null;
     }
 
-    const { icon, text, key } = props;
+    const { icon, text } = props;
 
     return (
         <ItemContainer>
-            <StyledIcon
-                iconName={icon ? key : 'database'}
-                role="presentation"
-                aria-hidden
-                title={text}
-            />
+            <StyledIcon title={text}>
+                {icon ? <DatabaseBrandIcon icon={icon} label={text} /> : <RathIcon name="database" />}
+            </StyledIcon>
             <span style={{ flexGrow: 1 }}>
                 {text}
             </span>

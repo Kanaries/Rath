@@ -1,4 +1,21 @@
-/* @import '~office-ui-fabric-core/dist/css/fabric.css'; */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './styles/tokens.css';
+@import './normalize.css' layer(base);
+@import './App.css' layer(components);
+
+/* Preserve Tailwind 3's implicit border color until every legacy border has
+   an explicit semantic color. */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
+    }
+}
+
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",

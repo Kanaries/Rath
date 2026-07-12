@@ -14,13 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import intl from 'react-intl-universal';
-import { Icon } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import dayjs from 'dayjs';
 import type { FC } from 'react';
 import styled from 'styled-components';
-import { Caption1, Card, CardHeader, Text } from '@fluentui/react-components';
 // import { MoreHorizontal } from 'lucide-react';
+import { FileTypeIcon } from '../../../components/icons';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
 import { IDBMeta } from '../../../utils/storage';
 import { RathDemoVirtualExt } from '../demo';
 import { IDataSourceType } from '../../../global';
@@ -57,22 +57,21 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({ file, rowIndex, colIndex, 
 
     return (
         <Card
-            // className={styles.card}
+            className={appearance === 'outline' ? undefined : 'bg-muted/40'}
             onClick={() => handleClick?.(file)}
-            appearance={appearance}
         >
-            <CardHeader
-                image={<Icon iconName={getFileIcon(isRathDemo ? '' : file.name)} />}
-                header={<Text weight="semibold">{name}</Text>}
-                description={
-                    <Caption1>{`${
+            <CardHeader className="flex-row items-center gap-3 space-y-0">
+                <FileTypeIcon type={getFileIcon(isRathDemo ? '' : file.name)} />
+                <div className="min-w-0">
+                    <CardTitle className="truncate text-sm">{name}</CardTitle>
+                    <CardDescription className="text-xs">{`${
                         ext ? `${isRathDemo ? `Rath ${intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)}` : ext} - ` : ''
-                    }${formatSize(file.size)}`}</Caption1>
-                }
-                // action={<Button appearance="transparent" icon={<MoreHorizontal />} aria-label="More options" />}
-            />
-
-            <Desc>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</Desc>
+                    }${formatSize(file.size)}`}</CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Desc>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</Desc>
+            </CardContent>
         </Card>
     );
 };

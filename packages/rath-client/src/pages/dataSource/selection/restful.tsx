@@ -1,13 +1,14 @@
-import { PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components'
 import intl from 'react-intl-universal'
 import MonacoEditor from 'react-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
-import { logDataImport } from '../../../loggers/dataImport';
 import { DataSourceTag } from '../../../utils/storage';
-import { useGlobalStore } from '../../../store';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 
 function requestAPIData (api: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
@@ -53,32 +54,32 @@ interface RestFulProps {
 const RestFul: React.FC<RestFulProps> = props => {
     const { onClose, onStartLoading, onLoadingFailed, onDataLoaded } = props;
     const [api, setAPI] = useState<string>('');
-    const { userStore } = useGlobalStore();
 
     const loadData = useCallback(() => {
         onStartLoading();
         requestAPIData(api).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
-            logDataImport({
-                dataType: "Restful API",
-                name: api,
-                fields,
-                dataSource: [],
-                size: dataSource.length,
-            });
         }).catch((err) => {
             onLoadingFailed(err);
         })
         onClose();
-    }, [api, onDataLoaded, onClose, onStartLoading, onLoadingFailed, userStore])
+    }, [api, onDataLoaded, onClose, onStartLoading, onLoadingFailed])
     return <Cont>
-        <Stack className="inner-stack">
-            <TextField label="API" value={api} onChange={(e, val) => {
-                setAPI(`${val}`);
-            }} />
-        </Stack>
-        <PrimaryButton iconProps={{ iconName: 'CloudDownload' }} text={`${intl.get('dataSource.importData.restful.requestData')}`} className="inner-button" onClick={loadData} />
+        <div className="inner-stack flex flex-col gap-1">
+            <Label htmlFor="restful-api-input">API</Label>
+            <Input
+                id="restful-api-input"
+                value={api}
+                onChange={event => {
+                    setAPI(event.target.value);
+                }}
+            />
+        </div>
+        <Button className="inner-button" onClick={loadData}>
+            <RathIcon name="CloudDownload" className="mr-1" />
+            {intl.get('dataSource.importData.restful.requestData')}
+        </Button>
         <h1>{intl.get('dataSource.importData.restful.exampleDataStruct')}</h1>
         <MonacoEditor width="600" height="300" language="json" theme="vs" value={JSON.stringify(EXAMPLE_DATA, null, 2)} />
     </Cont>

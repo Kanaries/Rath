@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface EBProps {
-
+    children?: React.ReactNode;
 }
 class ErrorBoundary extends React.Component<EBProps, {hasError: boolean}> {
     constructor(props: EBProps) {

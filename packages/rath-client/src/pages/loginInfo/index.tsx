@@ -1,12 +1,14 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useState, type JSX } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, INavLinkGroup, Icon, Nav } from '@fluentui/react';
 import styled from 'styled-components';
+import { RathIcon } from '../../components/icons';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/ui/sidebar';
+import { cn } from '../../utils/cn';
 import Setup from './setup';
 
 export enum PreferencesType {
-    Account = 'account',
     Info = 'info',
     Setting = 'setting',
     Header = 'header',
@@ -17,38 +19,6 @@ export interface PreferencesListType {
     icon: string;
     element: () => JSX.Element;
 }
-
-const LoginInfoDiv = styled.div`
-    display: flex;
-    align-items: center;
-    /* flex-direction: column; */
-    border-top-width: 1px;
-    padding: 0.6em 0.8em 0.8em;
-    > div {
-        user-select: none;
-        cursor: pointer;
-    }
-    .user {
-        white-space: nowrap;
-        max-width: 164px;
-        overflow-x: auto;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        font-weight: 400;
-    }
-    .user::-webkit-scrollbar {
-        display: none;
-    }
-    .user-avatar {
-        width: 38px;
-        height: 38px;
-        border-radius: 19px;
-        border: 3px solid #000;
-        margin: 0px 12px;
-        background-size: contain;
-        background-repeat: no-repeat;
-    }
-`;
 
 const Container = styled.div`
     display: flex;
@@ -69,77 +39,58 @@ const Container = styled.div`
 const LoginInfo: FC = () => {
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Setting);
-
-    const settingMenuList = useMemo<INavLinkGroup[]>(() => {
-        return [
-            {
-                links: [
-                    // Account no more supported.
-                    // {
-                    //     url: `#preference/${PreferencesType.Account}`,
-                    //     key: PreferencesType.Account,
-                    //     name: PreferencesType.Account,
-                    //     icon: 'Home',
-                    //     forceAnchor: true,
-                    //     iconProps: { iconName: 'Home' },
-                    //     onClick(e: any) {
-                    //         e.preventDefault();
-                    //         setTab(PreferencesType.Account);
-                    //     },
-                    // },
-                    {
-                        url: `#preference/${PreferencesType.Setting}`,
-                        key: PreferencesType.Setting,
-                        name: PreferencesType.Setting,
-                        icon: 'Settings',
-                        forceAnchor: true,
-                        iconProps: { iconName: 'Settings' },
-                        onClick(e: any) {
-                            e.preventDefault();
-                            setTab(PreferencesType.Setting);
-                        },
-                    },
-                ],
-            },
-        ];
-    }, []);
+    const preferencesLabel = intl.get('login.preferences');
 
     return (
-        <LoginInfoDiv>
+        <>
             <Dialog
-                modalProps={{
-                    isBlocking: true,
-                    // to make an error message closable
-                    isClickableOutsideFocusTrap: true,
+                open={showUserPanel}
+                onOpenChange={(nextOpen) => {
+                    setShowUserPanel(nextOpen);
                 }}
-                hidden={!showUserPanel}
-                onDismiss={() => {
-                    setShowUserPanel(false);
-                }}
-                dialogContentProps={{ title: intl.get('login.preferences') }}
-                minWidth={550}
             >
-                <Container>
-                    <div className="nav-menu">
-                        <Nav selectedKey={tab} groups={settingMenuList} />
-                    </div>
-                    <div className="nav-content">
-                        {/* {tab === PreferencesType.Account && <Account />} */}
-                        {tab === PreferencesType.Setting && <Setup />}
-                    </div>
-                </Container>
+                <DialogContent
+                    className="min-w-[550px]"
+                    onInteractOutside={(event) => {
+                        event.preventDefault();
+                    }}
+                >
+                    <DialogHeader>
+                        <DialogTitle>{intl.get('login.preferences')}</DialogTitle>
+                    </DialogHeader>
+                    <Container>
+                        <div className="nav-menu">
+                            <nav aria-label={intl.get('login.preferences')} className="min-w-[140px] p-1">
+                                <button
+                                    type="button"
+                                    aria-current={tab === PreferencesType.Setting ? 'page' : undefined}
+                                    className={cn(
+                                        'flex h-8 w-full items-center gap-2 rounded-xs px-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring',
+                                        tab === PreferencesType.Setting && 'bg-accent font-medium text-accent-foreground'
+                                    )}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        setTab(PreferencesType.Setting);
+                                    }}
+                                >
+                                    <RathIcon name="Settings" />
+                                    {PreferencesType.Setting}
+                                </button>
+                            </nav>
+                        </div>
+                        <div className="nav-content">{tab === PreferencesType.Setting && <Setup />}</div>
+                    </Container>
+                </DialogContent>
             </Dialog>
-            <div
-                className="user"
-                onClick={() => {
-                    setShowUserPanel(true);
-                }}
-            >
-                <Icon
-                    iconName="PlayerSettings"
-                />
-            </div>
-        </LoginInfoDiv>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton type="button" tooltip={preferencesLabel} aria-label={preferencesLabel} onClick={() => setShowUserPanel(true)}>
+                        <RathIcon name="PlayerSettings" />
+                        <span>{preferencesLabel}</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </>
     );
 };
 

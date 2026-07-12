@@ -1,7 +1,7 @@
-import { IconButton } from "@fluentui/react";
-import type { FC } from "react";
-import styled from "styled-components";
-
+import type { FC } from 'react';
+import styled from 'styled-components';
+import { Button } from '../../../../components/ui/button';
+import { RathIcon } from '../../../../components/icons';
 
 const Container = styled.div`
     position: absolute;
@@ -31,13 +31,11 @@ export interface DeleteButtonProps {
 const DeleteButton: FC<DeleteButtonProps> = ({ remove }) => {
     return (
         <Container>
-            <IconButton
-                iconProps={{ iconName: 'Delete' }}
-                onClick={remove}
-            />
+            <Button variant="ghost" size="icon" aria-label="Delete" onClick={remove}>
+                <RathIcon name="Delete" />
+            </Button>
         </Container>
     );
 };
-
 
 export default DeleteButton;

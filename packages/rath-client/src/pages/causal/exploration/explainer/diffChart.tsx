@@ -23,7 +23,7 @@ const DiffGroup2Key = '__diff_group_2__';
 
 const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField, mainFieldAggregation, dimension, mode }) => {
     const container = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<View>();
+    const viewRef = useRef<View | undefined>(undefined);
 
     const subspacesRef = useRef(subspaces);
     subspacesRef.current = subspaces;

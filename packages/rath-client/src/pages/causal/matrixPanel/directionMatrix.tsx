@@ -1,9 +1,11 @@
 import intl from 'react-intl-universal';
-import { Icon, ITooltipProps, TooltipDelay, TooltipHost } from '@fluentui/react';
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { runtimeEnv } from 'runtime-env';
 import styled from 'styled-components';
 import embed from 'vega-embed';
+import { RathIcon } from '../../../components/icons';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../components/ui/tooltip';
 import type { IFieldMeta, IRow } from '../../../interfaces';
 import { CausalLinkDirection, describeDirection, stringifyDirection } from '../../../utils/resolve-causal';
 
@@ -45,25 +47,21 @@ const Container = styled.div`
     }
 `;
 
-const tooltipProps: ITooltipProps = {
-    onRenderContent: () => (
-        <ul style={{ margin: 10, padding: 0 }}>
-            {[
-                CausalLinkDirection.none,
-                CausalLinkDirection.directed,
-                CausalLinkDirection.reversed,
-                CausalLinkDirection.undirected,
-                CausalLinkDirection.bidirected,
-                CausalLinkDirection.weakDirected,
-                CausalLinkDirection.weakReversed,
-            ].map(direction => (
-                <li key={direction}>
-                    {`${stringifyDirection(direction)}: ${describeDirection(direction)}`}
-                </li>
-            ))}
-        </ul>
-    ),
-};
+const tooltipContent = (
+    <ul style={{ margin: 10, padding: 0 }}>
+        {[
+            CausalLinkDirection.none,
+            CausalLinkDirection.directed,
+            CausalLinkDirection.reversed,
+            CausalLinkDirection.undirected,
+            CausalLinkDirection.bidirected,
+            CausalLinkDirection.weakDirected,
+            CausalLinkDirection.weakReversed,
+        ].map((direction) => (
+            <li key={direction}>{`${stringifyDirection(direction)}: ${describeDirection(direction)}`}</li>
+        ))}
+    </ul>
+);
 
 const DirectionMatrix: React.FC<Props> = (props) => {
     const { data, fields, onSelect, mark } = props;
@@ -101,41 +99,45 @@ const DirectionMatrix: React.FC<Props> = (props) => {
     }, [data, fields, linkTypeName]);
     useEffect(() => {
         if (container.current) {
-            embed(container.current, {
-                data: { values },
-                mark: { type: mark, tooltip: { content: 'encoding' } },
-                transform: [{ calculate: 'abs(datum.directed)', as: 'weight' }],
-                encoding: {
-                    y: { field: 'A', type: 'nominal' },
-                    x: { field: 'B', type: 'nominal' },
-                    color: { field: linkTypeName, type: 'nominal' },
-                    size: { field: 'weight', type: 'quantitative', scale: { domain: [-1, 1] }, title: null, legend: null },
-                    opacity: { condition: { test: 'datum.value == 0', value: 0 } },
+            embed(
+                container.current,
+                {
+                    data: { values },
+                    mark: { type: mark, tooltip: { content: 'encoding' } },
+                    transform: [{ calculate: 'abs(datum.directed)', as: 'weight' }],
+                    encoding: {
+                        y: { field: 'A', type: 'nominal' },
+                        x: { field: 'B', type: 'nominal' },
+                        color: { field: linkTypeName, type: 'nominal' },
+                        size: { field: 'weight', type: 'quantitative', scale: { domain: [-1, 1] }, title: null, legend: null },
+                        opacity: { condition: { test: 'datum.value == 0', value: 0 } },
+                    },
+                    config: {
+                        axis: { grid: true, tickBand: 'extent' },
+                    },
                 },
-                config: {
-                    axis: { grid: true, tickBand: 'extent' }
-                },
-            }, { actions: process.env.NODE_ENV !== 'production' }).then(res => {
+                { actions: !runtimeEnv.isProduction }
+            ).then((res) => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
                         selectHandlerRef.current?.(item.datum.X_FID, item.datum.Y_FID);
                     }
-                })
+                });
             });
         }
     }, [values, mark, linkTypeName]);
 
     return (
         <Container>
-            <TooltipHost
-                tooltipProps={tooltipProps}
-                delay={TooltipDelay.zero}
-            >
-                <span>
-                    <Icon iconName="Help" />
-                    {linkTypeName}
-                </span>
-            </TooltipHost>
+            <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                    <span>
+                        <RathIcon name="Help" />
+                        {linkTypeName}
+                    </span>
+                </TooltipTrigger>
+                <TooltipContent>{tooltipContent}</TooltipContent>
+            </Tooltip>
             <div ref={container} />
         </Container>
     );

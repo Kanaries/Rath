@@ -54,6 +54,7 @@ interface IDropDownSelect {
     value?: string | number | readonly string[] | undefined;
     onChange?: React.ChangeEventHandler<HTMLSelectElement>;
     border?: boolean;
+    children?: React.ReactNode;
 }
 
 const DropDownSelect: React.FC<IDropDownSelect> = props => {

@@ -1,28 +1,30 @@
 import intl from 'react-intl-universal';
-import { ActionButton, Icon, Toggle, TooltipHost } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import { useId } from '@fluentui/react-hooks';
-import type { IFieldMeta, IRow } from "../../../../interfaces";
-import { useGlobalStore } from "../../../../store";
-import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../../workers/insight/r-insight.worker";
+import { observer } from 'mobx-react-lite';
+import { FC, Fragment, useCallback, useEffect, useId, useRef, useState } from 'react';
+import styled from 'styled-components';
+import { Button } from '../../../../components/ui/button';
+import { Label } from '../../../../components/ui/label';
+import { Switch } from '../../../../components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../components/ui/tooltip';
+import type { IFieldMeta, IRow } from '../../../../interfaces';
+import { RathIcon } from '../../../../components/icons';
+import { useGlobalStore } from '../../../../store';
+import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../../services/r-insight';
-import DiffChart from "./diffChart";
-import ExplainChart from "./explainChart";
+import DiffChart from './diffChart';
+import ExplainChart from './explainChart';
 import VisText, { IVisTextProps } from './visText';
-
 
 export interface IRInsightViewProps {
     data: readonly IRow[];
     result: IRInsightExplainResult;
     mainField: IFieldMeta;
     entryDimension: IFieldMeta | null;
-    mode: "full" | "other" | "two-group";
+    mode: 'full' | 'other' | 'two-group';
     indices: [number[], number[]];
     subspaces: [IRInsightExplainSubspace, IRInsightExplainSubspace];
-    aggr: "sum" | "mean" | "count" | null;
-    serviceMode: "worker" | "server";
+    aggr: 'sum' | 'mean' | 'count' | null;
+    serviceMode: 'worker' | 'server';
 }
 
 const Container = styled.div`
@@ -41,11 +43,11 @@ const TabList = styled.div<{ light?: boolean }>`
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden auto;
-    border-right: ${({ light }) => light ? 'none' : '1px solid #8884'};
+    border-right: ${({ light }) => (light ? 'none' : '1px solid #8884')};
     > .tools {
         border-right: 1px solid #8884;
     }
-    > *[role=tab] {
+    > *[role='tab'] {
         user-select: none;
         cursor: pointer;
         display: flex;
@@ -53,7 +55,7 @@ const TabList = styled.div<{ light?: boolean }>`
         overflow: hidden;
         flex-wrap: wrap;
         padding: 0.5em 1em;
-        border-top: ${({ light }) => light ? 'none' : '1px solid #8888'};
+        border-top: ${({ light }) => (light ? 'none' : '1px solid #8888')};
         background-color: #fff;
         position: relative;
         z-index: 10;
@@ -67,7 +69,7 @@ const TabList = styled.div<{ light?: boolean }>`
             flex-grow: 0;
             flex-shrink: 1;
         }
-        &[aria-selected=true] {
+        &[aria-selected='true'] {
             background-color: #fffe;
             position: sticky;
             top: 0;
@@ -90,7 +92,7 @@ const TabList = styled.div<{ light?: boolean }>`
             color: orange;
         }
     }
-    > *[role=tabpanel] {
+    > *[role='tabpanel'] {
         position: relative;
         margin: 1em;
         padding: 0 1em 1em;
@@ -130,10 +132,7 @@ const ExploreQueue = styled.div`
     }
 `;
 
-const RInsightView: FC<IRInsightViewProps> = ({
-    data, result, mainField, entryDimension,
-    mode, indices, subspaces, serviceMode,
-}) => {
+const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, entryDimension, mode, indices, subspaces, serviceMode }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fields, sample } = causalStore.dataset;
@@ -141,10 +140,12 @@ const RInsightView: FC<IRInsightViewProps> = ({
     const [normalize, setNormalize] = useState<boolean>(true);
     const [cursor, setCursor] = useState(0);
 
-    const [localIrResult, setLocalIrResult] = useState<{
-        addedMeasure: string;
-        result: IRInsightExplainResult;
-    }[]>([]);
+    const [localIrResult, setLocalIrResult] = useState<
+        {
+            addedMeasure: string;
+            result: IRInsightExplainResult;
+        }[]
+    >([]);
 
     useEffect(() => {
         setLocalIrResult([]);
@@ -158,52 +159,62 @@ const RInsightView: FC<IRInsightViewProps> = ({
 
     const view = list[cursor];
 
-    const pendingRef = useRef<Promise<IRInsightExplainResult>>();
+    const pendingRef = useRef<Promise<IRInsightExplainResult> | undefined>(undefined);
 
     const calculate = (measure: string) => {
         const [current, other] = subspaces;
         if (!current) {
             return;
         }
-        const p = new Promise<IRInsightExplainResult>(resolve => {
+        const p = new Promise<IRInsightExplainResult>((resolve) => {
             const fieldsInSight = new Set(
-                current.predicates.map(pdc => pdc.fid).concat(localIrResult.map(step => step.addedMeasure)).concat(
-                    [mainField.fid, measure]
-                )
+                current.predicates
+                    .map((pdc) => pdc.fid)
+                    .concat(localIrResult.map((step) => step.addedMeasure))
+                    .concat([mainField.fid, measure])
             );
-            sample.getAll().then(data => {
-                RInsightService({
-                    data,
-                    fields,
-                    causalModel: {
-                        funcDeps: functionalDependencies,
-                        edges: mergedPag,
+            sample.getAll().then((data) => {
+                RInsightService(
+                    {
+                        data,
+                        fields,
+                        causalModel: {
+                            funcDeps: functionalDependencies,
+                            edges: mergedPag,
+                        },
+                        groups: {
+                            current,
+                            other,
+                        },
+                        view: {
+                            dimensions: [...fieldsInSight],
+                            measures: [measure].map((fid) => ({
+                                fid: fid,
+                                op: null,
+                            })),
+                        },
                     },
-                    groups: {
-                        current,
-                        other,
-                    },
-                    view: {
-                        dimensions: [...fieldsInSight],
-                        measures: [measure].map(fid => ({
-                            fid: fid,
-                            op: null,
-                        })),
-                    },
-                }, serviceMode).then(resolve);
+                    serviceMode
+                ).then(resolve);
             });
         });
         pendingRef.current = p;
-        p.then(res => {
+        p.then((res) => {
             if (pendingRef.current === p) {
-                setLocalIrResult(list => list.concat([{
-                    addedMeasure: measure,
-                    result: {
-                        causalEffects: res.causalEffects.filter(
-                            item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
-                        ).sort((a, b) => b.responsibility - a.responsibility),
-                    }
-                }]));
+                setLocalIrResult((list) =>
+                    list.concat([
+                        {
+                            addedMeasure: measure,
+                            result: {
+                                causalEffects: res.causalEffects
+                                    .filter(
+                                        (item) => Number.isFinite(item.responsibility) // && item.responsibility !== 0
+                                    )
+                                    .sort((a, b) => b.responsibility - a.responsibility),
+                            },
+                        },
+                    ])
+                );
             }
         }).finally(() => {
             pendingRef.current = undefined;
@@ -212,18 +223,20 @@ const RInsightView: FC<IRInsightViewProps> = ({
 
     const visTextContext: IVisTextProps['context'] = {
         fields: fieldMetas,
-        onClickField: fid => {
+        onClickField: (fid) => {
             calculate(fid);
         },
     };
 
-    const tabIdPrefix = useId();
+    const tabIdPrefix = `r-insight-tab-${useId().replace(/:/g, '')}`;
     const getTabId = useCallback((cursor: number) => `${tabIdPrefix}_${cursor}`, [tabIdPrefix]);
 
     useEffect(() => {
-        const activeTab = document.getElementById(getTabId(cursor)) as null | (HTMLDivElement & {
-            scrollIntoViewIfNeeded?: HTMLDivElement['scrollIntoView'] | undefined;
-        });
+        const activeTab = document.getElementById(getTabId(cursor)) as
+            | null
+            | (HTMLDivElement & {
+                  scrollIntoViewIfNeeded?: HTMLDivElement['scrollIntoView'] | undefined;
+              });
         activeTab?.['scrollIntoViewIfNeeded' in activeTab ? 'scrollIntoViewIfNeeded' : 'scrollIntoView']?.({
             behavior: 'smooth',
             block: 'center',
@@ -236,59 +249,65 @@ const RInsightView: FC<IRInsightViewProps> = ({
             {/* TODO: 这里面手风琴 + TOC 的设计个人比较满意，有时间可以优化下样式然后作为组件抽出去 */}
             <ExploreQueue>
                 <div className="tool">
-                    <TooltipHost
-                        content={(
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span>
+                                <RathIcon name="BulletedList" style={{ color: 'rgb(16,110,190)', cursor: 'pointer', padding: '0 0.4em' }} />
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
                             <TabList role="tablist" light>
                                 {list.map((res, i) => {
-                                    const dim = fieldMetas.find(f => f.fid === res.src);
-                                    const tar = fieldMetas.find(f => f.fid === res.tar);
-        
-                                    return dim && tar && (
-                                        <Fragment key={dim.fid}>
-                                            <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
-                                                {res.description?.title && (
-                                                    <span className="title">
-                                                        {intl.get(`RInsight.explanation.title.${res.description.title}`)}
-                                                    </span>
-                                                )}
-                                                <span>
-                                                    {dim.name || dim.fid}
-                                                </span>
-                                            </div>
-                                        </Fragment>
+                                    const dim = fieldMetas.find((f) => f.fid === res.src);
+                                    const tar = fieldMetas.find((f) => f.fid === res.tar);
+
+                                    return (
+                                        dim &&
+                                        tar && (
+                                            <Fragment key={dim.fid}>
+                                                <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
+                                                    {res.description?.title && (
+                                                        <span className="title">
+                                                            {intl.get(`RInsight.explanation.title.${res.description.title}`)}
+                                                        </span>
+                                                    )}
+                                                    <span>{dim.name || dim.fid}</span>
+                                                </div>
+                                            </Fragment>
+                                        )
                                     );
                                 })}
                             </TabList>
-                        )}
-                    >
-                        <Icon iconName="BulletedList" style={{ color: 'rgb(16,110,190)', cursor: 'pointer', padding: '0 0.4em' }} />
-                    </TooltipHost>
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
-                <ActionButton
+                <Button
+                    variant="ghost"
                     onClick={() => localIrResult.length === 0 || setLocalIrResult([])}
                     style={localIrResult.length === 0 ? { pointerEvents: 'none', fontWeight: 600 } : undefined}
                 >
                     {mainField.name || mainField.fid}
                     {entryDimension && (
                         <>
-                            <Icon iconName="Link" style={{ margin: '0 0.4em' }} />
+                            <RathIcon name="Link" style={{ margin: '0 0.4em' }} />
                             {`${entryDimension.name || entryDimension.fid}`}
                         </>
                     )}
-                </ActionButton>
+                </Button>
                 {localIrResult.map((step, i, arr) => {
-                    const measure = fieldMetas.find(f => f.fid === step.addedMeasure);
+                    const measure = fieldMetas.find((f) => f.fid === step.addedMeasure);
                     const isCurrent = i === arr.length - 1;
                     return (
                         <Fragment key={i}>
                             <span>{'>'}</span>
-                            <ActionButton
-                                iconProps={{ iconName: 'BranchMerge' }}
+                            <Button
+                                variant="ghost"
                                 onClick={() => isCurrent || setLocalIrResult(localIrResult.slice(0, i + 1))}
                                 style={isCurrent ? { pointerEvents: 'none', fontWeight: 600 } : undefined}
                             >
+                                <RathIcon name="BranchMerge" />
                                 {measure?.name || step.addedMeasure}
-                            </ActionButton>
+                            </Button>
                         </Fragment>
                     );
                 })}
@@ -299,64 +318,65 @@ const RInsightView: FC<IRInsightViewProps> = ({
                 ) : (
                     <TabList role="tablist">
                         {list.map((res, i) => {
-                            const dim = fieldMetas.find(f => f.fid === res.src);
-                            const tar = fieldMetas.find(f => f.fid === res.tar);
+                            const dim = fieldMetas.find((f) => f.fid === res.src);
+                            const tar = fieldMetas.find((f) => f.fid === res.tar);
 
-                            return dim && tar && (
-                                <Fragment key={dim.fid}>
-                                    <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
-                                        {res.description?.title && (
-                                            <span className="title">
-                                                {intl.get(`RInsight.explanation.title.${res.description.title}`)}
-                                            </span>
-                                        )}
-                                        <span>
-                                            {dim.name || dim.fid}
-                                        </span>
-                                        <small>
-                                            {Math.abs(res.responsibility).toPrecision(2)}
-                                        </small>
-                                    </div>
-                                    {i === cursor && (
-                                        <div role="tabpanel" id={getTabId(i)}>
-                                            <Toggle
-                                                label={intl.get('causal.analyze.normalize_stack')}
-                                                inlineLabel
-                                                checked={normalize}
-                                                onChange={(_, checked) => setNormalize(Boolean(checked))}
-                                            />
-                                            <br />
-                                            <ExplainChart
-                                                title={intl.get('causal.analyze.global_dist')}
-                                                data={data}
-                                                mainField={tar}
-                                                mainFieldAggregation={null}
-                                                indexKey={dim}
-                                                interactive={false}
-                                                normalize={normalize}
-                                            />
-                                            <DiffChart
-                                                title={intl.get('causal.analyze.diff_dist')}
-                                                data={data}
-                                                subspaces={indices}
-                                                mainField={tar}
-                                                mainFieldAggregation={null}
-                                                dimension={dim}
-                                                mode={mode}
-                                            />
-                                            {view.description && (
-                                                <VisText context={visTextContext}>
-                                                    {intl.get(`RInsight.explanation.desc.${view.description.key}`, {
-                                                        ...view.description.data,
-                                                        responsibility: view.responsibility,
-                                                        mainField: tar.fid,
-                                                        dimension: dim.fid,
-                                                    })}
-                                                </VisText>
+                            return (
+                                dim &&
+                                tar && (
+                                    <Fragment key={dim.fid}>
+                                        <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
+                                            {res.description?.title && (
+                                                <span className="title">{intl.get(`RInsight.explanation.title.${res.description.title}`)}</span>
                                             )}
+                                            <span>{dim.name || dim.fid}</span>
+                                            <small>{Math.abs(res.responsibility).toPrecision(2)}</small>
                                         </div>
-                                    )}
-                                </Fragment>
+                                        {i === cursor && (
+                                            <div role="tabpanel" id={getTabId(i)}>
+                                                <div className="flex items-center gap-2">
+                                                    <Label htmlFor={`causal-normalize-stack-${i}`}>
+                                                        {intl.get('causal.analyze.normalize_stack')}
+                                                    </Label>
+                                                    <Switch
+                                                        id={`causal-normalize-stack-${i}`}
+                                                        checked={normalize}
+                                                        onCheckedChange={(checked) => setNormalize(Boolean(checked))}
+                                                    />
+                                                </div>
+                                                <br />
+                                                <ExplainChart
+                                                    title={intl.get('causal.analyze.global_dist')}
+                                                    data={data}
+                                                    mainField={tar}
+                                                    mainFieldAggregation={null}
+                                                    indexKey={dim}
+                                                    interactive={false}
+                                                    normalize={normalize}
+                                                />
+                                                <DiffChart
+                                                    title={intl.get('causal.analyze.diff_dist')}
+                                                    data={data}
+                                                    subspaces={indices}
+                                                    mainField={tar}
+                                                    mainFieldAggregation={null}
+                                                    dimension={dim}
+                                                    mode={mode}
+                                                />
+                                                {view.description && (
+                                                    <VisText context={visTextContext}>
+                                                        {intl.get(`RInsight.explanation.desc.${view.description.key}`, {
+                                                            ...view.description.data,
+                                                            responsibility: view.responsibility,
+                                                            mainField: tar.fid,
+                                                            dimension: dim.fid,
+                                                        })}
+                                                    </VisText>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Fragment>
+                                )
                             );
                         })}
                     </TabList>
@@ -365,6 +385,5 @@ const RInsightView: FC<IRInsightViewProps> = ({
         </>
     );
 };
-
 
 export default observer(RInsightView);

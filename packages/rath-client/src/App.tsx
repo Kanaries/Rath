@@ -1,8 +1,5 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState, type JSX } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Spinner, SpinnerSize } from '@fluentui/react';
-import './normalize.css';
-import './App.css';
 import { useGlobalStore, StoreWrapper } from './store/index';
 import AppNav from './components/appNav';
 import { destroyRathWorker, initRathWorker } from './services/index';
@@ -10,6 +7,8 @@ import { PIVOT_KEYS } from './constants';
 import CrInfo from './components/crInfo';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
+import { Spinner } from './components/ui/spinner';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 
 const VisualInterface = lazy(() => import('./pages/manualControl'));
 const DataSourceBoard = lazy(() => import('./pages/dataSource/index'));
@@ -35,25 +34,36 @@ function App() {
 
     const [showPerformanceWindow, setShowPerformanceWindow] = useState(false);
     useHotKey({
-        'Control+Shift+P': () => setShowPerformanceWindow(on => !on),
+        'Control+Shift+P': () => setShowPerformanceWindow((on) => !on),
     });
 
     if (!langStore.loaded) {
         return (
-            <div style={{ marginTop: '6em' }}>
-                <Spinner label="Initializing Rath..." size={SpinnerSize.large} />
+            <div style={{ marginTop: '6em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Spinner className="h-5 w-5" />
+                <span>Initializing Rath...</span>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="main-app-container">
-                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
-                    <AppNav />
-                </div>
-                <div className="main-app-content">
-                    <Suspense fallback={<Spinner label="Loading..." size={SpinnerSize.large} />}>
+            <SidebarProvider
+                className="main-app-container"
+                open={navMode === 'text'}
+                onOpenChange={(open) => commonStore.setNavMode(open ? 'text' : 'icon')}
+            >
+                <AppNav />
+                <SidebarInset className="main-app-content">
+                    <SidebarTrigger className="fixed left-2 top-2 z-40 border bg-background shadow-xs md:hidden" />
+                    <Suspense
+                        fallback={
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '2em' }}>
+                                <Spinner className="h-5 w-5" />
+                                <span>Loading...</span>
+                            </div>
+                        }
+                    >
                         {appKey === PIVOT_KEYS.dataSource && <DataSourceBoard />}
                         {appKey === PIVOT_KEYS.editor && <VisualInterface />}
                         {appKey === PIVOT_KEYS.megaAuto && <LTSPage />}
@@ -66,8 +76,8 @@ function App() {
                         {appKey === PIVOT_KEYS.connection && <DataConnection />}
                     </Suspense>
                     <CrInfo />
-                </div>
-            </div>
+                </SidebarInset>
+            </SidebarProvider>
             {showPerformanceWindow && <PerformanceWindow />}
         </div>
     );

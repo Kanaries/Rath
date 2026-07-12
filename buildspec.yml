@@ -3,17 +3,16 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14.x
+      nodejs: 24.x
     commands:
       - echo Install deps
-      - n 16
-      - npm install --global yarn
+      - npm install --global yarn@1.22.22
       - yarn install
   build:
     commands:
       - echo Building...
-      - yarn workspace rath-client build2
+      - yarn workspace rath-client build
 artifacts:
   files:
-    - 'packages/rath-client/build/*'
+    - 'packages/rath-client/build/**/*'
   name: 'rath/$AWS_REGION-$(date +%Y-%m-%d)'

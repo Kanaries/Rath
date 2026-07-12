@@ -1,26 +1,8 @@
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import RathEngineWorker from '../workers/engine/index.worker?worker';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import InferMetaWorker from '../workers/metaInfer.worker?worker';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import LoaWorker from '../workers/loa/index.worker?worker';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import CleanWorker from '../workers/clean.worker?worker';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import FilterWorker from '../workers/filterData.worker?worker';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import LabDistVisWorker from '../workers/labDistVis.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';

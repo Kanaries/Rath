@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Dropdown, IDropdownOption, Pivot, PivotItem, Stack } from '@fluentui/react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { SUPPORT_LANG } from '../../locales';
 import { useGlobalStore } from '../../store';
 import AnalysisSettings from '../../components/analysisSettings';
+import { RathSelect, RathSelectOption } from '../../components/rath-ui/rath-select';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import DesignSegment from './design';
 
-const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
+const langOptions: RathSelectOption[] = SUPPORT_LANG.map((lang) => ({
     key: lang.value,
     text: lang.name,
 }));
@@ -30,31 +31,26 @@ function Setup() {
     const [configKey, setConfigKey] = useState<CONFIG_KEY>(CONFIG_KEY.basic);
     return (
         <SetUpDiv>
-            <Pivot
-                selectedKey={configKey}
-                onLinkClick={(item) => {
-                    if (item?.props.itemKey) {
-                        setConfigKey(item.props.itemKey as CONFIG_KEY);
-                    }
-                }}
-            >
-                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.basic}`)} itemKey={CONFIG_KEY.basic}></PivotItem>
-                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.design}`)} itemKey={CONFIG_KEY.design}></PivotItem>
-                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.analysis}`)} itemKey={CONFIG_KEY.analysis}></PivotItem>
-            </Pivot>
+            <Tabs value={configKey} onValueChange={(value) => setConfigKey(value as CONFIG_KEY)}>
+                <TabsList>
+                    <TabsTrigger value={CONFIG_KEY.basic}>{intl.get(`login.configKeys.${CONFIG_KEY.basic}`)}</TabsTrigger>
+                    <TabsTrigger value={CONFIG_KEY.design}>{intl.get(`login.configKeys.${CONFIG_KEY.design}`)}</TabsTrigger>
+                    <TabsTrigger value={CONFIG_KEY.analysis}>{intl.get(`login.configKeys.${CONFIG_KEY.analysis}`)}</TabsTrigger>
+                </TabsList>
+            </Tabs>
             <hr />
 
             {configKey === CONFIG_KEY.basic && (
-                <Stack>
-                    <Dropdown
+                <div>
+                    <RathSelect
                         label="Language"
                         selectedKey={langStore.lang}
                         options={langOptions}
-                        onChange={(e, op) => {
-                            op && langStore.changeLocalesAndReload(op.key as string);
+                        onChange={(key) => {
+                            langStore.changeLocalesAndReload(key as string);
                         }}
                     />
-                </Stack>
+                </div>
             )}
             {configKey === CONFIG_KEY.design && <DesignSegment />}
             {configKey === CONFIG_KEY.analysis && <AnalysisSettings />}

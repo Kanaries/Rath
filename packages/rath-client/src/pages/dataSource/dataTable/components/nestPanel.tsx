@@ -1,7 +1,7 @@
-import { DefaultButton, Stack } from '@fluentui/react';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { Button } from '../../../../components/ui/button';
 
 const Cont = styled.div`
     background-color: #fff;
@@ -33,6 +33,7 @@ const Cont = styled.div`
 interface NestPanelProps {
     show: boolean;
     onClose: () => void;
+    children?: ReactNode;
 }
 const NestPanel: FC<NestPanelProps> = props => {
     const { show = true, onClose } = props;
@@ -43,9 +44,9 @@ const NestPanel: FC<NestPanelProps> = props => {
         }
         </div>
         <div className="action-bar">
-            <Stack tokens={{ childrenGap: 10 }}>
-                <DefaultButton text={intl.get('common.cancel')} onClick={onClose} />
-            </Stack>
+            <div className="flex flex-col gap-[10px]">
+                <Button variant="outline" onClick={onClose}>{intl.get('common.cancel')}</Button>
+            </div>
         </div>
     </Cont>
 }

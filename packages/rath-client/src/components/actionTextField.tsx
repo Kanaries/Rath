@@ -1,26 +1,22 @@
-import React from 'react';
+import React, { useId } from 'react';
 import styled from 'styled-components';
-import { PrimaryButton, TextField } from '@fluentui/react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 const ActionButton = styled.div`
-    > label {
-        font-weight: 600;
-        display: inline-block;
-        color: rgb(50, 49, 48);
-        font-size: 14px;
+    > .action-text-field-label {
+        display: inline-flex;
         padding: 5px 0;
-        font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
-            'Helvetica Neue', sans-serif;
-        -webkit-font-smoothing: antialiased;
     }
-    > div {
+    > .action-text-field-row {
         display: flex;
-        > div:first-child {
-            /* width: 200px; */
+        gap: 10px;
+        > .action-text-field-input {
+            flex: 0 1 auto;
         }
-        > div:last-child {
+        > .action-text-field-button {
             flex: 1;
-            margin-left: 10px;
         }
     }
 `;
@@ -36,23 +32,26 @@ interface ActionTextFieldProps {
 }
 const ActionTextField: React.FC<ActionTextFieldProps> = (props) => {
     const { label, placeholder, buttonLabel, value, isDisable, onButtonClick, onChange } = props;
+    const inputId = useId();
+
     return (
         <ActionButton>
-            <label>{label}</label>
-            <div>
-                <div>
-                    <TextField
+            <Label className="action-text-field-label" htmlFor={inputId}>{label}</Label>
+            <div className="action-text-field-row">
+                <div className="action-text-field-input">
+                    <Input
+                        id={inputId}
                         value={value}
                         placeholder={placeholder}
-                        onChange={(e, data) => {
-                            onChange && onChange(data);
+                        onChange={(e) => {
+                            onChange?.(e.currentTarget.value);
                         }}
                     />
                 </div>
-                <div>
-                    <PrimaryButton style={{ width: '100%' }} disabled={isDisable} onClick={onButtonClick}>
+                <div className="action-text-field-button">
+                    <Button className="w-full" disabled={isDisable} onClick={onButtonClick}>
                         {buttonLabel}
-                    </PrimaryButton>
+                    </Button>
                 </div>
             </div>
         </ActionButton>

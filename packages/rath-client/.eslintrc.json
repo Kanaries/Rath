@@ -7,7 +7,8 @@
     "rules": {
         "no-console": ["warn", { "allow": ["warn", "error"] }],
         "no-param-reassign": "off",
-        "import/order": "warn"
+        "import/order": "warn",
+        "no-restricted-imports": ["error", { "patterns": ["@fluentui/*", "office-ui-fabric-core*"] }]
     },
     "parserOptions": {
         "project": "./tsconfig.json"

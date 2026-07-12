@@ -1,25 +1,28 @@
 // Copyright (C) 2023 observedobserver
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { ActionButton, Icon, Pivot, PivotItem, TooltipHost } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { loadDataFile } from '../../dataSource/utils';
 import { notify } from '../../../components/error';
+import { FileTypeIcon, RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../components/ui/tooltip';
 import getFileIcon from '../history/get-file-icon';
 
 const Container = styled.div`
@@ -261,35 +264,41 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
                 {preview ? (
                     <FileOutput>
                         <div className="head">
-                            <Icon iconName={getFileIcon(preview.name)} />
+                            <FileTypeIcon type={getFileIcon(preview.name)} />
                             <div>
                                 <header>
-                                    <TooltipHost content={preview.name}>
-                                        <span>{preview.name}</span>
-                                    </TooltipHost>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <span>{preview.name}</span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>{preview.name}</TooltipContent>
+                                    </Tooltip>
                                 </header>
                                 <span>{formatSize(preview.size)}</span>
                             </div>
                         </div>
                         <div className="action">
-                            <ActionButton text={intl.get('dataSource.upload.change')} iconProps={{ iconName: 'Refresh' }} onClick={handleReset} />
+                            <Button type="button" variant="ghost" size="sm" onClick={handleReset}>
+                                <RathIcon name="Refresh" />
+                                {intl.get('dataSource.upload.change')}
+                            </Button>
                         </div>
                     </FileOutput>
                 ) : (
                     <InputButton role="button" tabIndex={0} onClick={handleButtonClick}>
-                        <Icon iconName="Upload" style={{ fontSize: '2rem' }} />
+                        <RathIcon name="Upload" size={32} />
                     </InputButton>
                 )}
             </Input>
             <ActionGroup>
                 {preview ? (
-                    <Pivot
-                        selectedKey={previewTab}
-                        onLinkClick={(item) => {
-                            item && setPreviewTab(item.props.itemKey as typeof previewTab);
-                        }}
-                    >
-                        <PivotItem itemKey="parsed" headerText={intl.get('dataSource.upload.preview_parsed')}>
+                    <Tabs value={previewTab} onValueChange={(value) => setPreviewTab(value as typeof previewTab)}>
+                        <TabsList>
+                            <TabsTrigger value="parsed">{intl.get('dataSource.upload.preview_parsed')}</TabsTrigger>
+                            {previewOfFull && <TabsTrigger value="full">{intl.get('dataSource.upload.preview_full')}</TabsTrigger>}
+                            <TabsTrigger value="raw">{intl.get('dataSource.upload.preview_raw')}</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="parsed">
                             {previewOfFile ? (
                                 <PreviewArea>
                                     <tbody>
@@ -310,9 +319,9 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
                             ) : (
                                 <p>{intl.get('dataSource.upload.data_is_empty')}</p>
                             )}
-                        </PivotItem>
+                        </TabsContent>
                         {previewOfFull && (
-                            <PivotItem itemKey="full" headerText={intl.get('dataSource.upload.preview_full')}>
+                            <TabsContent value="full">
                                 <PreviewArea>
                                     <tbody>
                                         <tr>
@@ -329,12 +338,12 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
                                         ))}
                                     </tbody>
                                 </PreviewArea>
-                            </PivotItem>
+                            </TabsContent>
                         )}
-                        <PivotItem itemKey="raw" headerText={intl.get('dataSource.upload.preview_raw')}>
+                        <TabsContent value="raw">
                             <RawArea>{previewOfRaw}</RawArea>
-                        </PivotItem>
-                    </Pivot>
+                        </TabsContent>
+                    </Tabs>
                 ) : (
                     <p>{intl.get('dataSource.upload.fileTypes')}</p>
                 )}

@@ -8,7 +8,7 @@ import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
 
 
 export interface IReactiveGraphProps {
-    containerRef: RefObject<HTMLDivElement>;
+    containerRef: RefObject<HTMLDivElement | null>;
     width: number;
     graphRef: MutableRefObject<Graph | undefined>;
     options: ReturnType<typeof useGraphOptions>;

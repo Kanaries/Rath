@@ -1,14 +1,13 @@
 import intl from 'react-intl-universal';
-import { DetailsList, IColumn, SelectionMode, Stack } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, useCallback, useMemo, useRef } from "react";
-import styled from "styled-components";
-import useBoundingClientRect from "../../../../hooks/use-bounding-client-rect";
-import { useGlobalStore } from "../../../../store";
-import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import FullDistViz from "../../../dataSource/profilingView/fullDistViz";
-import { PAG_NODE } from "../../config";
-
+import { observer } from 'mobx-react-lite';
+import { FC, useCallback, useMemo, useRef } from 'react';
+import styled from 'styled-components';
+import { RathColumn, RathDataTable } from '../../../../components/rath-ui/rath-data-table';
+import useBoundingClientRect from '../../../../hooks/use-bounding-client-rect';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import FullDistViz from '../../../dataSource/profilingView/fullDistViz';
+import { PAG_NODE } from '../../config';
 
 const Section = styled.div`
     display: flex;
@@ -36,49 +35,53 @@ const CausalBlame: FC = () => {
         // hello world
     }, []);
 
-    const neighbors = useMemo<{
-        cause: string | undefined;
-        causeWeight: number | undefined;
-        causeCorr: number;
-        effect: string | undefined;
-        effectWeight: number | undefined;
-        effectCorr: number;
-    }[]>(() => {
-        return selectedField ? fields.filter(f => f.fid !== selectedField.fid).map(f => {
-            const cause = causality?.find(link => {
-                if (![link.src, link.tar].every(node => [selectedField.fid, f.fid].includes(node))) {
-                    return false;
-                }
-                const currType = link.tar === f.fid ? link.tar_type : link.src_type;
-                return currType !== PAG_NODE.ARROW;
-            });
-            const effect = causality?.find(link => {
-                if (![link.src, link.tar].every(node => [selectedField.fid, f.fid].includes(node))) {
-                    return false;
-                }
-                const targetType = link.src === selectedField.fid ? link.src_type : link.tar_type;
-                return targetType !== PAG_NODE.ARROW;
-            });
-            const selectedIdx = fields.findIndex(which => which.fid === selectedField.fid);
-            const currIdx = fields.findIndex(which => which.fid === f.fid);
-            return {
-                cause: cause ? (f.name || f.fid) : undefined,
-                causeWeight: cause ? -1 : undefined,
-                causeCorr: mutualMatrix?.[currIdx]?.[selectedIdx] ?? -1,
-                effect: effect ? (f.name || f.fid) : undefined,
-                effectWeight: effect ? -1 : undefined,
-                effectCorr: mutualMatrix?.[selectedIdx]?.[currIdx] ?? -1,
-            };
-        }) : [];
+    const neighbors = useMemo<
+        {
+            cause: string | undefined;
+            causeWeight: number | undefined;
+            causeCorr: number;
+            effect: string | undefined;
+            effectWeight: number | undefined;
+            effectCorr: number;
+        }[]
+    >(() => {
+        return selectedField
+            ? fields
+                  .filter((f) => f.fid !== selectedField.fid)
+                  .map((f) => {
+                      const cause = causality?.find((link) => {
+                          if (![link.src, link.tar].every((node) => [selectedField.fid, f.fid].includes(node))) {
+                              return false;
+                          }
+                          const currType = link.tar === f.fid ? link.tar_type : link.src_type;
+                          return currType !== PAG_NODE.ARROW;
+                      });
+                      const effect = causality?.find((link) => {
+                          if (![link.src, link.tar].every((node) => [selectedField.fid, f.fid].includes(node))) {
+                              return false;
+                          }
+                          const targetType = link.src === selectedField.fid ? link.src_type : link.tar_type;
+                          return targetType !== PAG_NODE.ARROW;
+                      });
+                      const selectedIdx = fields.findIndex((which) => which.fid === selectedField.fid);
+                      const currIdx = fields.findIndex((which) => which.fid === f.fid);
+                      return {
+                          cause: cause ? f.name || f.fid : undefined,
+                          causeWeight: cause ? -1 : undefined,
+                          causeCorr: mutualMatrix?.[currIdx]?.[selectedIdx] ?? -1,
+                          effect: effect ? f.name || f.fid : undefined,
+                          effectWeight: effect ? -1 : undefined,
+                          effectCorr: mutualMatrix?.[selectedIdx]?.[currIdx] ?? -1,
+                      };
+                  })
+            : [];
     }, [fields, selectedField, mutualMatrix, causality]);
 
-    const columns = useMemo<IColumn[]>(() => {
+    const columns = useMemo<RathColumn<typeof neighbors[number]>[]>(() => {
         return [
             {
                 key: 'cause',
                 name: 'Cause',
-                iconName: 'AlignHorizontalLeft',
-                isResizable: false,
                 minWidth: 80,
                 maxWidth: 80,
                 onRender(item) {
@@ -88,7 +91,6 @@ const CausalBlame: FC = () => {
             {
                 key: 'causeWeight',
                 name: 'Responsibility',
-                isResizable: false,
                 minWidth: 120,
                 maxWidth: 120,
                 onRender(item) {
@@ -98,7 +100,6 @@ const CausalBlame: FC = () => {
             {
                 key: 'causeCorr',
                 name: 'Correlation',
-                isResizable: false,
                 minWidth: 120,
                 maxWidth: 120,
                 onRender(item) {
@@ -108,7 +109,6 @@ const CausalBlame: FC = () => {
             {
                 key: 'effectCorr',
                 name: 'Correlation',
-                isResizable: false,
                 minWidth: 120,
                 maxWidth: 120,
                 onRender(item) {
@@ -118,7 +118,6 @@ const CausalBlame: FC = () => {
             {
                 key: 'effectWeight',
                 name: 'Responsibility',
-                isResizable: false,
                 minWidth: 120,
                 maxWidth: 120,
                 onRender(item) {
@@ -128,8 +127,6 @@ const CausalBlame: FC = () => {
             {
                 key: 'effect',
                 name: 'Effect',
-                iconName: 'AlignHorizontalRight',
-                isResizable: false,
                 minWidth: 80,
                 maxWidth: 80,
                 onRender(item) {
@@ -140,7 +137,7 @@ const CausalBlame: FC = () => {
     }, []);
 
     return selectedField ? (
-        <Stack tokens={{ childrenGap: 20 }}>
+        <div className="grid gap-5">
             <Section ref={metaViewContainerRef}>
                 <header>{intl.get('causal.analyze.single_dim')}</header>
                 <FullDistViz
@@ -157,15 +154,10 @@ const CausalBlame: FC = () => {
             </Section>
             <Section>
                 <header>{intl.get('causal.analyze.corr_atoms')}</header>
-                <DetailsList
-                    items={neighbors}
-                    columns={columns}
-                    selectionMode={SelectionMode.none}
-                />
+                <RathDataTable items={neighbors} columns={columns} />
             </Section>
-        </Stack>
+        </div>
     ) : null;
 };
-
 
 export default observer(CausalBlame);

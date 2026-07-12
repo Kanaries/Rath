@@ -118,22 +118,16 @@ h2, h3 {
   bottom: 0px;
   left: 0px;
   right: 0px;
-}
-
-.main-app-container > .main-app-nav{
-  /* position: fixed;
-  left: 0px;
-  bottom: 0px; */
-  /* flex-basis: 220px; */
-  flex-grow: 0;
-  flex-shrink: 0;
-  background-color: #fff;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .main-app-container > .main-app-content{
   flex-basis: 800px;
   flex-grow: 1;
   flex-shrink: 1;
+  min-width: 0;
+  min-height: 0;
   overflow: auto;
 }
 

@@ -1,8 +1,9 @@
 import intl from 'react-intl-universal';
-import { ActionButton } from '@fluentui/react';
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
+import { Button } from '../../../components/ui/button';
+import { RathIcon } from '../../../components/icons';
 import { IFieldMeta, IRow } from '../../../interfaces';
 
 interface Props {
@@ -22,7 +23,7 @@ type GraphData = {
 const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
     const value = useMemo<File>(() => {
         const graph: GraphData = {
-            nodes: fields.map(f => ({ id: f.name || f.fid, name: f.name || f.fid })),
+            nodes: fields.map((f) => ({ id: f.name || f.fid, name: f.name || f.fid })),
             edges: [],
         };
         for (let i = 0; i < data.length; i++) {
@@ -54,9 +55,10 @@ const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
         a.remove();
     }, [value.name]);
     return (
-        <ActionButton iconProps={{ iconName: 'Download' }} onClick={handleExport}>
+        <Button variant="ghost" onClick={handleExport}>
+            <RathIcon name="Download" />
             {intl.get('causal.actions.export_diagram')}
-        </ActionButton>
+        </Button>
     );
 };
 
@@ -72,7 +74,7 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
                     y: fields[j].name || fields[j].fid,
                     X_FID: fields[i].fid,
                     Y_FID: fields[j].fid,
-                    value: i===j ? 0 : data[i][j],
+                    value: i === j ? 0 : data[i][j],
                 });
             }
         }
@@ -80,28 +82,32 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
     }, [data, fields]);
     useEffect(() => {
         if (container.current) {
-            embed(container.current, {
-                data: { values },
-                mark: { type: mark as any, tooltip: true },
-                transform: !absolute ? [{ calculate: 'abs(datum.value)', as: 'abs_value' }] : [],
-                encoding: {
-                    y: { field: 'x', type: 'nominal' },
-                    x: { field: 'y', type: 'nominal' },
-                    color: { field: 'value', type: 'quantitative', scale: { scheme: absolute ? 'yellowgreenblue' : 'redblue' } },
-                    size: { field: absolute ? 'value' : 'abs_value' , type: 'quantitative', scale: { domain: [0, 1]} },
+            embed(
+                container.current,
+                {
+                    data: { values },
+                    mark: { type: mark as any, tooltip: true },
+                    transform: !absolute ? [{ calculate: 'abs(datum.value)', as: 'abs_value' }] : [],
+                    encoding: {
+                        y: { field: 'x', type: 'nominal' },
+                        x: { field: 'y', type: 'nominal' },
+                        color: { field: 'value', type: 'quantitative', scale: { scheme: absolute ? 'yellowgreenblue' : 'redblue' } },
+                        size: { field: absolute ? 'value' : 'abs_value', type: 'quantitative', scale: { domain: [0, 1] } },
+                    },
+                    config: {
+                        axis: { grid: true, tickBand: 'extent' },
+                    },
                 },
-                config: {
-                    axis: { grid: true, tickBand: 'extent' }
-                },
-            }, { actions: true }).then(res => {
+                { actions: true }
+            ).then((res) => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
                         onSelect && onSelect(item.datum.X_FID, item.datum.Y_FID);
                     }
-                })
+                });
             });
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values, absolute, mark]);
     return (
         <>

@@ -1,7 +1,9 @@
-import styled from "styled-components";
-import { Icon, IconButton, Spinner, IContextualMenuItem, SpinnerSize } from "@fluentui/react";
+import styled from 'styled-components';
+import type { JSX } from 'react';
+import { RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Spinner } from '../../../../components/ui/spinner';
 import { defaultServers } from '../main';
-
 
 const ServerItem = styled.div`
     cursor: pointer;
@@ -11,7 +13,7 @@ const ServerItem = styled.div`
     :hover {
         background-color: #eee;
     }
-    &[aria-checked="true"] {
+    &[aria-selected='true'] {
         cursor: default;
         background-color: #f3f3f3;
     }
@@ -61,33 +63,31 @@ const ActionGroup = styled.div`
     cursor: unset;
     button {
         cursor: pointer;
-        &[aria-disabled="true"] {
+        &[aria-disabled='true'] {
             cursor: default;
         }
     }
 `;
 
+export interface ServerDropdownItem {
+    checked: boolean;
+    key: string;
+    text: 'unknown' | 'pending' | 'fulfilled' | 'rejected' | 'new';
+    secondaryText: string;
+}
+
 export const renderServerItem = (
     onClick: (target: string) => void,
     onDelete: (target: string) => void,
     onRefresh: (target: string) => void,
-    props: IContextualMenuItem | undefined,
+    props: ServerDropdownItem | undefined
 ): JSX.Element => {
     if (!props) {
         return <></>;
     }
-    const { checked, key: target, text: status, secondaryText } = props as {
-        checked: boolean;
-        key: string;
-        text: 'unknown' | 'pending' | 'fulfilled' | 'rejected' | 'new';
-        secondaryText: string;
-    };
+    const { checked, key: target, text: status, secondaryText } = props;
     if (status === 'new') {
-        return (
-            <TipsText>
-                {secondaryText}
-            </TipsText>
-        );
+        return <TipsText>{secondaryText}</TipsText>;
     }
     const lag = Number(secondaryText);
 
@@ -98,42 +98,64 @@ export const renderServerItem = (
         <ServerItem
             role="option"
             tabIndex={0}
-            aria-checked={checked}
-            onClick={e => {
+            aria-selected={checked}
+            onClick={(e) => {
                 e.stopPropagation();
                 onClick(target);
             }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClick(target);
+                }
+            }}
         >
             <StatusIconContainer>
-                {status && status !== 'unknown' && {
-                    fulfilled: (
-                        <Icon
-                            iconName="StatusCircleCheckmark"
-                            style={{
-                                borderRadius: '50%',
-                                color: 'green',
-                            }}
-                        />
-                    ),
-                    rejected: <Icon iconName="StatusCircleErrorX" style={{ color: 'red' }} />,
-                    pending: <Spinner size={SpinnerSize.small} style={{ margin: '3px 0' }} />,
-                }[status]}
+                {status &&
+                    status !== 'unknown' &&
+                    {
+                        fulfilled: (
+                            <RathIcon
+                                name="StatusCircleCheckmark"
+                                size={18}
+                                style={{
+                                    borderRadius: '50%',
+                                    color: 'green',
+                                }}
+                            />
+                        ),
+                        rejected: <RathIcon name="StatusCircleErrorX" size={18} style={{ color: 'red' }} />,
+                        pending: <Spinner size="sm" style={{ margin: '3px 0' }} />,
+                    }[status]}
             </StatusIconContainer>
             <div>
                 <label>{target}</label>
                 <LagText>{status === 'fulfilled' ? `${lag}ms` : '-'}</LagText>
             </div>
-            <ActionGroup onClick={e => e.stopPropagation()}>
-                <IconButton
+            <ActionGroup onClick={(e) => e.stopPropagation()}>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
                     disabled={status === 'pending'}
-                    iconProps={{ iconName: 'SyncOccurence' }}
+                    aria-label={`Refresh ${target}`}
+                    title={`Refresh ${target}`}
                     onClick={() => onRefresh(target)}
-                />
-                <IconButton
+                >
+                    <RathIcon name="SyncOccurence" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
                     disabled={!canDelete}
-                    iconProps={{ iconName: 'Delete', style: { color: canDelete ? 'red' : undefined } }}
+                    aria-label={`Delete ${target}`}
+                    title={`Delete ${target}`}
                     onClick={() => onDelete(target)}
-                />
+                >
+                    <RathIcon name="Delete" style={{ color: canDelete ? 'red' : undefined }} />
+                </Button>
             </ActionGroup>
         </ServerItem>
     );

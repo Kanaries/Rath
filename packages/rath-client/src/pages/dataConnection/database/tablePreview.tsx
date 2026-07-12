@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
-import { PrimaryButton } from '@fluentui/react';
 import { FC, memo, CSSProperties, Fragment, useMemo } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../../components/ui/button';
 import type { TableData } from './main';
 
 
@@ -109,7 +109,6 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
     }, [data.rows]);
 
     return (<>
-        {/* @ts-expect-error css variable */}
         <Container style={{ '--n-cols': columns.length || 1, '--n-rows': headIndices.length + tailIndices.length }}>
             <Corner />
             {columns.map((col, i) => <TableHeader key={i}>{col.key}</TableHeader>)}
@@ -163,10 +162,12 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
         </Container>
         {submit && (
             <ButtonContainer>
-                <PrimaryButton
-                    text={intl.get('dataSource.btn.use_table')}
+                <Button
+                    type="button"
                     onClick={() => submit(name, data)}
-                />
+                >
+                    {intl.get('dataSource.btn.use_table')}
+                </Button>
             </ButtonContainer>
         )}
     </>);

@@ -1,23 +1,26 @@
 // Copyright (C) 2023 observedobserver
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import intl from 'react-intl-universal';
-import { ChoiceGroup, Dropdown, IChoiceGroupOption, Label, SpinButton, TextField } from '@fluentui/react';
 import { FC, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
+import { RathSelect } from '../../../components/rath-ui/rath-select';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../../components/ui/radio-group';
 import { SampleKey, useSampleOptions } from '../../dataSource/utils';
 
 export const charsetOptions = [
@@ -59,18 +62,6 @@ const Container = styled.div`
         font-weight: 400;
         margin-right: 1em;
         text-transform: capitalize;
-    }
-    & [role='radiogroup'] {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        > div {
-            display: flex;
-            flex-direction: row;
-            > * {
-                margin: 0;
-            }
-        }
     }
     > * {
         margin-bottom: 0.8em;
@@ -143,48 +134,34 @@ const FileHelper: FC<IFileHelperProps> = ({
     const sampleOptions = useSampleOptions();
     const [customizeSeparator, setCustomizeSeparator] = useState('');
 
-    const separatorOptions = useMemo<IChoiceGroupOption[]>(() => {
+    const separatorOptions = useMemo(() => {
         return [
             { key: ',', text: intl.get('dataSource.upload.separator.comma') },
             { key: '\t', text: intl.get('dataSource.upload.separator.tab') },
             { key: ';', text: intl.get('dataSource.upload.separator.semicolon') },
-            {
-                key: '',
-                text: intl.get('dataSource.upload.separator.other'),
-                onRenderField(props, defaultRenderer) {
-                    return (
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            {defaultRenderer?.(props)}
-                            <TextField
-                                value={customizeSeparator}
-                                name="rath_upload_file_col_separator"
-                                onChange={(_, value) => {
-                                    setCustomizeSeparator(value ?? '');
-                                    if (value) {
-                                        setSeparator(value);
-                                    }
-                                }}
-                            />
-                        </div>
-                    );
-                },
-            },
+            { key: '', text: intl.get('dataSource.upload.separator.other') },
         ];
-    }, [customizeSeparator, setSeparator]);
+    }, []);
 
     const selectedSeparatorKey = separatorOptions.find((opt) => opt.key === separator)?.key ?? '';
+    const updateNumber = (value: string, next: (n: number) => void) => {
+        const parsed = Number(value);
+        if (!Number.isNaN(parsed)) {
+            next(parsed);
+        }
+    };
 
     return (
         <Container>
             {showMoreConfig && (
                 <>
                     <Label>{intl.get('dataSource.charset')}</Label>
-                    <Dropdown
-                        style={{ maxWidth: '120px' }}
+                    <RathSelect
+                        className="max-w-[120px]"
                         options={charsetOptions.slice()}
                         selectedKey={charset}
-                        onChange={(_, item) => {
-                            item && setCharset(item.key as Charset);
+                        onChange={(key) => {
+                            setCharset(key as Charset);
                         }}
                     />
                 </>
@@ -194,44 +171,61 @@ const FileHelper: FC<IFileHelperProps> = ({
                     {showMoreConfig && (
                         <>
                             <Label>{intl.get('dataSource.separator')}</Label>
-                            <ChoiceGroup
-                                options={separatorOptions}
-                                selectedKey={selectedSeparatorKey}
-                                onChange={(_, option) => {
-                                    if (option) {
-                                        setSeparator(option.key);
-                                    }
+                            <RadioGroup
+                                value={`${selectedSeparatorKey}`}
+                                onValueChange={(value) => {
+                                    setSeparator(value);
                                 }}
-                            />
+                                className="flex flex-wrap items-center gap-3"
+                            >
+                                {separatorOptions.map((option) => (
+                                    <div key={option.key || 'custom'} className="flex items-center gap-2">
+                                        <RadioGroupItem id={`connection-file-separator-${option.key || 'custom'}`} value={option.key} />
+                                        <Label htmlFor={`connection-file-separator-${option.key || 'custom'}`}>{option.text}</Label>
+                                    </div>
+                                ))}
+                                <Input
+                                    className="h-7 w-24"
+                                    value={customizeSeparator}
+                                    name="rath_upload_file_col_separator"
+                                    onChange={(event) => {
+                                        const { value } = event.target;
+                                        setCustomizeSeparator(value);
+                                        if (value) {
+                                            setSeparator(value);
+                                        }
+                                    }}
+                                />
+                            </RadioGroup>
                         </>
                     )}
                     {(!preview || preview.type === 'text/csv') && separator === ',' && (
                         <>
                             <Label>{intl.get('dataSource.upload.sampling')}</Label>
-                            <ChoiceGroup
-                                options={sampleOptions}
-                                selectedKey={sampleMethod}
-                                onChange={(_, option) => {
-                                    if (option) {
-                                        setSampleMethod(option.key as SampleKey);
-                                    }
+                            <RadioGroup
+                                value={sampleMethod}
+                                onValueChange={(value) => {
+                                    setSampleMethod(value as SampleKey);
                                 }}
-                            />
+                                className="flex flex-wrap items-center gap-3"
+                            >
+                                {sampleOptions.map((option) => (
+                                    <div key={option.key} className="flex items-center gap-2">
+                                        <RadioGroupItem id={`connection-file-sample-${option.key}`} value={option.key} />
+                                        <Label htmlFor={`connection-file-sample-${option.key}`}>{option.text}</Label>
+                                    </div>
+                                ))}
+                            </RadioGroup>
                             {sampleMethod === SampleKey.reservoir && (
                                 <>
                                     <Label>{intl.get('dataSource.upload.percentSize')}</Label>
-                                    <SpinButton
+                                    <Input
+                                        type="number"
                                         min={0}
                                         step={1}
                                         value={sampleSize.toString()}
-                                        onValidate={(value) => {
-                                            setSampleSize(Number(value));
-                                        }}
-                                        onIncrement={() => {
-                                            setSampleSize((v) => v + 1);
-                                        }}
-                                        onDecrement={() => {
-                                            setSampleSize((v) => Math.max(v - 1, 0));
+                                        onChange={(event) => {
+                                            updateNumber(event.target.value, setSampleSize);
                                         }}
                                     />
                                 </>
@@ -243,11 +237,15 @@ const FileHelper: FC<IFileHelperProps> = ({
             {sheetNames && (
                 <>
                     <Label>{intl.get('dataSource.upload.sheet')}</Label>
-                    <Dropdown
-                        style={{ maxWidth: '20em' }}
+                    <RathSelect
+                        className="max-w-[20em]"
                         options={sheetNames.map((name, i) => ({ key: `${i}`, text: name }))}
                         selectedKey={`${selectedSheetIdx}`}
-                        onChange={(_, option) => option?.key && setSelectedSheetIdx(Number(option.key))}
+                        onChange={(key) => {
+                            if (key) {
+                                setSelectedSheetIdx(Number(key));
+                            }
+                        }}
                     />
                 </>
             )}
@@ -255,67 +253,75 @@ const FileHelper: FC<IFileHelperProps> = ({
                 <>
                     <Label>{intl.get('dataSource.upload.excel_range')}</Label>
                     <div className="spin-group">
-                        <SpinButton
+                        <Input
+                            type="number"
                             value={String(excelRange[0][0])}
                             min={excelRef[0][0]}
                             max={Math.min(excelRef[1][0], excelRange[1][0])}
                             step={1}
-                            style={{ maxWidth: '4em' }}
-                            onChange={(_, str) =>
-                                str &&
-                                setExcelRange(
-                                    produce(excelRange, (draft) => {
-                                        draft[0][0] = Number(str);
-                                    })
-                                )
+                            className="w-16"
+                            onChange={(event) =>
+                                updateNumber(event.target.value, (value) => {
+                                    setExcelRange(
+                                        produce(excelRange, (draft) => {
+                                            draft[0][0] = value;
+                                        })
+                                    );
+                                })
                             }
                         />
                         <span>,</span>
-                        <SpinButton
+                        <Input
+                            type="number"
                             value={String(excelRange[0][1])}
                             min={excelRef[0][1]}
                             max={Math.min(excelRef[1][1], excelRange[1][1])}
                             step={1}
-                            style={{ maxWidth: '4em' }}
-                            onChange={(_, str) =>
-                                str &&
-                                setExcelRange(
-                                    produce(excelRange, (draft) => {
-                                        draft[0][1] = Number(str);
-                                    })
-                                )
+                            className="w-16"
+                            onChange={(event) =>
+                                updateNumber(event.target.value, (value) => {
+                                    setExcelRange(
+                                        produce(excelRange, (draft) => {
+                                            draft[0][1] = value;
+                                        })
+                                    );
+                                })
                             }
                         />
                         <span>{'-'}</span>
-                        <SpinButton
+                        <Input
+                            type="number"
                             value={String(excelRange[1][0])}
                             min={Math.max(excelRef[0][0], excelRange[0][0])}
                             max={excelRef[1][0]}
                             step={1}
-                            style={{ maxWidth: '4em' }}
-                            onChange={(_, str) =>
-                                str &&
-                                setExcelRange(
-                                    produce(excelRange, (draft) => {
-                                        draft[1][0] = Number(str);
-                                    })
-                                )
+                            className="w-16"
+                            onChange={(event) =>
+                                updateNumber(event.target.value, (value) => {
+                                    setExcelRange(
+                                        produce(excelRange, (draft) => {
+                                            draft[1][0] = value;
+                                        })
+                                    );
+                                })
                             }
                         />
                         <span>,</span>
-                        <SpinButton
+                        <Input
+                            type="number"
                             value={String(excelRange[1][1])}
                             min={Math.max(excelRef[0][1], excelRange[0][1])}
                             max={excelRef[1][1]}
                             step={1}
-                            style={{ maxWidth: '4em' }}
-                            onChange={(_, str) =>
-                                str &&
-                                setExcelRange(
-                                    produce(excelRange, (draft) => {
-                                        draft[1][1] = Number(str);
-                                    })
-                                )
+                            className="w-16"
+                            onChange={(event) =>
+                                updateNumber(event.target.value, (value) => {
+                                    setExcelRange(
+                                        produce(excelRange, (draft) => {
+                                            draft[1][1] = value;
+                                        })
+                                    );
+                                })
                             }
                         />
                     </div>

@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DefaultButton, PrimaryButton } from "@fluentui/react";
-import { BaseTable, Classes } from "ali-react-table";
+import React from 'react';
 import styled from "styled-components";
+import { Button, ButtonProps } from '../../../components/ui/button';
 
 export const DATA_TABLE_STYLE_CONFIG = {
     SELECT_COLOR: '#b7eb8f',
@@ -26,21 +26,22 @@ export const DATA_TABLE_STYLE_CONFIG = {
     }
 } as const;
 
-export const CustomBaseTable = styled(BaseTable)`
-    --header-bgcolor: #ffffff !important;
-    --bgcolor: rgba(0, 0, 0, 0);
-    --border-color: #f2f2f2;
-    --row-height: 38px;
-    .${Classes.tableHeaderCell} {
-        position: relative;
+export const DataSourceTableContainer = styled.div`
+    min-width: 0;
+    flex: 1 1 auto;
+
+    table {
+        border-color: #f2f2f2;
+        background-color: transparent;
     }
-    thead {
+    thead th {
+        position: relative;
         vertical-align: top;
-        th {
-            padding: 0px 0px 8px 0px;
-        }
+        background-color: #fff;
+        padding: 0px 0px 8px 0px;
     }
     td {
+        height: 38px;
         cursor: text;
         .tp-exclude-btn {
             opacity: 0;
@@ -108,12 +109,24 @@ export const TextPatternCard = styled.div`
         background-color: #fed7aa;
     }
 `;
-export const MiniButton = styled(DefaultButton)`
+interface MiniButtonProps extends Omit<ButtonProps, 'children'> {
+    text?: React.ReactNode;
+}
+
+export const MiniButton = styled(({ text, ...props }: MiniButtonProps) => (
+    <Button type="button" variant="outline" size="sm" {...props}>
+        {text}
+    </Button>
+))`
     height: 26px;
     font-size: 12px;
 `;
 
-export const MiniPrimaryButton = styled(PrimaryButton)`
+export const MiniPrimaryButton = styled(({ text, ...props }: MiniButtonProps) => (
+    <Button type="button" size="sm" {...props}>
+        {text}
+    </Button>
+))`
     height: 26px;
     font-size: 12px;
 `;

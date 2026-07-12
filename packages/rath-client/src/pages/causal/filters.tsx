@@ -1,13 +1,13 @@
-import { IconButton } from "@fluentui/react";
-import type { FC } from "react";
-import styled from "styled-components";
-import type { IFieldMeta, IFilter } from "../../interfaces";
-
+import type { FC } from 'react';
+import styled from 'styled-components';
+import { Button } from '../../components/ui/button';
+import { RathIcon } from '../../components/icons';
+import type { IFieldMeta, IFilter } from '../../interfaces';
 
 interface FieldCellProps {
-  field: IFieldMeta;
-  data: IFilter;
-  remove: () => void;
+    field: IFieldMeta;
+    data: IFilter;
+    remove: () => void;
 }
 
 const Cell = styled.div`
@@ -36,22 +36,16 @@ const Cell = styled.div`
     }
 `;
 
-
 export const FilterCell: FC<FieldCellProps> = ({ field, data, remove }) => {
-    const filterDesc = `∈ ${
-        data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map(v => JSON.stringify(v)).join(',')}}`
-    }`;
+    const filterDesc = `∈ ${data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map((v) => JSON.stringify(v)).join(',')}}`}`;
 
     return (
         <Cell>
             <div>{field.name || field.fid}</div>
             <div>{filterDesc}</div>
-            <IconButton
-                iconProps={{
-                    iconName: 'Delete',
-                }}
-                onClick={remove}
-            />
+            <Button variant="ghost" size="icon" aria-label="Delete" onClick={remove}>
+                <RathIcon name="Delete" />
+            </Button>
         </Cell>
     );
 };

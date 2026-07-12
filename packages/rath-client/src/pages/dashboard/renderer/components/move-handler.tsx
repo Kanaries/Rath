@@ -1,6 +1,6 @@
-import { Icon } from "@fluentui/react";
 import { FC, MouseEvent as MEvent, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
+import { RathIcon } from "../../../../components/icons";
 import type { DashboardCard } from "../../../../store/dashboardStore";
 
 
@@ -94,7 +94,7 @@ const MoveHandler: FC<MoveHandlerProps> = ({ layout, transformCoord, onDragStart
             dragging={isDragging}
             onMouseDown={handleMouseDown}
         >
-            <Icon iconName="Move" />
+            <RathIcon name="Move" />
         </Container>
     );
 };

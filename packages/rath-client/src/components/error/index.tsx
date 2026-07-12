@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom';
-import Stack from './stack';
+import { createRoot } from 'react-dom/client';
+import ErrorStack from './stack';
 import { IErrorInfo, getErrorStore } from './store';
 
 const containerRef: { ref: HTMLDivElement | null } = {
@@ -11,7 +11,7 @@ export function notify (message: IErrorInfo) {
     if (containerRef.ref === null) {
         const container = document.createElement('div');
         document.getElementsByTagName('body')[0].appendChild(container)
-        ReactDOM.render(<Stack />, container);
+        createRoot(container).render(<ErrorStack />);
         containerRef.ref = container;
 
     }

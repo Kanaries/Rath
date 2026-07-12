@@ -14,15 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { FC, useState, useRef, useCallback, useEffect } from "react";
-import { PrimaryButton, Toggle } from '@fluentui/react';
 import styled from "styled-components";
 import { observer } from "mobx-react-lite";
 import * as xlsx from 'xlsx';
 import intl from "react-intl-universal";
 import { isExcelFile, loadDataFile, loadExcelFile, loadExcelRaw, parseExcelFile, readRaw, SampleKey } from "../../dataSource/utils"
-import { dataBackup, logDataImport } from "../../../loggers/dataImport";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
 import { DataSourceTag, IDBMeta } from "../../../utils/storage"
+import { Button } from "../../../components/ui/button";
+import { Label } from "../../../components/ui/label";
+import { Switch } from "../../../components/ui/switch";
 import HistoryList from "../history/history-list";
 import FileUpload from "./file-upload";
 import FileHelper, { Charset } from "./file-helper";
@@ -107,7 +108,7 @@ const FileData: FC<FileDataProps> = (props) => {
         }
     }, [excelFile]);
 
-    const filePreviewPendingRef = useRef<Promise<unknown>>();
+    const filePreviewPendingRef = useRef<Promise<unknown> | undefined>(undefined);
 
     const inputRef = useRef<{ reset: () => void }>(null);
 
@@ -227,13 +228,6 @@ const FileData: FC<FileDataProps> = (props) => {
             return;
         }
         const { fields, dataSource } = previewOfFile;
-        logDataImport({
-            dataType: 'File',
-            fields,
-            dataSource: dataSource.slice(0, 10),
-            size: dataSource.length
-        });
-        dataBackup(preview);
         onDataLoaded(fields, dataSource, preview.name, DataSourceTag.FILE);
         onClose();
     }, [onClose, onDataLoaded, preview, previewOfFile]);
@@ -244,12 +238,14 @@ const FileData: FC<FileDataProps> = (props) => {
         <Container>
             <header className="upload">
                 <span>{intl.get('dataSource.upload.new')}</span>
-                <Toggle
-                    label={intl.get('dataSource.upload.show_more')}
-                    inlineLabel
-                    checked={showMoreConfig}
-                    onChange={(_, checked) => setShowMoreConfig(Boolean(checked))}
-                />
+                <div className="flex items-center gap-2">
+                    <Switch
+                        id="connection-file-show-more"
+                        checked={showMoreConfig}
+                        onCheckedChange={setShowMoreConfig}
+                    />
+                    <Label htmlFor="connection-file-show-more">{intl.get('dataSource.upload.show_more')}</Label>
+                </div>
             </header>
             <FileHelper
                 showMoreConfig={showMoreConfig}
@@ -281,10 +277,9 @@ const FileData: FC<FileDataProps> = (props) => {
             {preview ? (
                 previewOfFile && (
                     <div className="action">
-                        <PrimaryButton
-                            text={intl.get('dataSource.importData.load')}
-                            onClick={handleFileSubmit}
-                        />
+                        <Button type="button" onClick={handleFileSubmit}>
+                            {intl.get('dataSource.importData.load')}
+                        </Button>
                     </div>
                 )
             ) : (

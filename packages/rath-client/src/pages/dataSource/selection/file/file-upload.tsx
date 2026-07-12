@@ -1,12 +1,14 @@
-import { ActionButton, Icon, Pivot, PivotItem, TooltipHost } from "@fluentui/react";
 import intl from 'react-intl-universal';
-import { observer } from "mobx-react-lite";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import styled from "styled-components";
-import type { loadDataFile } from "../../utils";
-import { notify } from "../../../../components/error";
-import getFileIcon from "../history/get-file-icon";
-
+import { observer } from 'mobx-react-lite';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import styled from 'styled-components';
+import type { loadDataFile } from '../../utils';
+import { notify } from '../../../../components/error';
+import { FileTypeIcon, RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../components/ui/tooltip';
+import getFileIcon from '../history/get-file-icon';
 
 const Container = styled.div`
     display: flex;
@@ -46,15 +48,16 @@ const ActionGroup = styled.div`
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        & [role=tab] {
+        & [role='tab'] {
             margin: 0;
-            &, & * {
+            &,
+            & * {
                 height: max-content;
                 min-height: unset;
                 line-height: 2em;
             }
         }
-        > [role=tabpanel] {
+        > [role='tabpanel'] {
             flex-grow: 1;
             flex-shrink: 1;
             overflow: hidden;
@@ -139,7 +142,8 @@ const FileOutput = styled.div`
         display: flex;
         align-items: center;
         justify-content: center;
-        > button, > button i {
+        > button,
+        > button i {
             font-size: 0.8rem;
         }
     }
@@ -159,7 +163,8 @@ const PreviewArea = styled.table`
     & th {
         font-weight: 550;
     }
-    & th, & td {
+    & th,
+    & td {
         padding: 0.1em 1em 0.1em 0.4em;
         :nth-child(even) {
             background-color: #8881;
@@ -193,8 +198,9 @@ export interface IFileUploadProps {
     onFileUpload: (file: File | null) => void;
 }
 
-const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function FileUpload (
-    { preview, previewOfFile, previewOfFull, previewOfRaw, onFileUpload }, ref
+const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function FileUpload(
+    { preview, previewOfFile, previewOfFull, previewOfRaw, onFileUpload },
+    ref
 ) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -243,100 +249,88 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
                 {preview ? (
                     <FileOutput>
                         <div className="head">
-                            <Icon iconName={getFileIcon(preview.name)} />
+                            <FileTypeIcon type={getFileIcon(preview.name)} />
                             <div>
                                 <header>
-                                    <TooltipHost content={preview.name}>
-                                        <span>{preview.name}</span>
-                                    </TooltipHost>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <span>{preview.name}</span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>{preview.name}</TooltipContent>
+                                    </Tooltip>
                                 </header>
                                 <span>{formatSize(preview.size)}</span>
                             </div>
                         </div>
                         <div className="action">
-                            <ActionButton
-                                text={intl.get('dataSource.upload.change')}
-                                iconProps={{ iconName: 'Refresh' }}
-                                onClick={handleReset}
-                            />
+                            <Button variant="ghost" className="px-2" onClick={handleReset}>
+                                <RathIcon name="Refresh" className="mr-1" />
+                                {intl.get('dataSource.upload.change')}
+                            </Button>
                         </div>
                     </FileOutput>
                 ) : (
-                    <InputButton
-                        role="button"
-                        tabIndex={0}
-                        onClick={handleButtonClick}
-                    >
-                        <Icon iconName="Upload" style={{ fontSize: '2rem' }} />
+                    <InputButton role="button" tabIndex={0} onClick={handleButtonClick}>
+                        <RathIcon name="Upload" size={32} />
                     </InputButton>
                 )}
             </Input>
             <ActionGroup>
                 {preview ? (
-                    <Pivot
-                        selectedKey={previewTab}
-                        onLinkClick={(item) => {
-                            item && setPreviewTab(item.props.itemKey as typeof previewTab);
-                        }}
-                    >
-                        <PivotItem itemKey="parsed" headerText={intl.get('dataSource.upload.preview_parsed')} >
+                    <Tabs value={previewTab} onValueChange={(value) => setPreviewTab(value as typeof previewTab)}>
+                        <TabsList>
+                            <TabsTrigger value="parsed">{intl.get('dataSource.upload.preview_parsed')}</TabsTrigger>
+                            {previewOfFull && <TabsTrigger value="full">{intl.get('dataSource.upload.preview_full')}</TabsTrigger>}
+                            <TabsTrigger value="raw">{intl.get('dataSource.upload.preview_raw')}</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="parsed">
                             {previewOfFile ? (
                                 <PreviewArea>
                                     <tbody>
                                         <tr>
-                                            {previewOfFile.fields.map(f => (
-                                                <th key={f.fid}>
-                                                    {f.name || f.fid}
-                                                </th>
+                                            {previewOfFile.fields.map((f) => (
+                                                <th key={f.fid}>{f.name || f.fid}</th>
                                             ))}
                                         </tr>
                                         {previewOfFile.dataSource.slice(0, 20).map((row, i) => (
                                             <tr key={i}>
-                                                {previewOfFile.fields.map(f => (
-                                                    <td key={f.fid}>
-                                                        {JSON.stringify(row[f.fid])}
-                                                    </td>
+                                                {previewOfFile.fields.map((f) => (
+                                                    <td key={f.fid}>{JSON.stringify(row[f.fid])}</td>
                                                 ))}
                                             </tr>
                                         ))}
                                     </tbody>
                                 </PreviewArea>
                             ) : (
-                                <p>{intl.get("dataSource.upload.data_is_empty")}</p>
+                                <p>{intl.get('dataSource.upload.data_is_empty')}</p>
                             )}
-                        </PivotItem>
+                        </TabsContent>
                         {previewOfFull && (
-                            <PivotItem itemKey="full" headerText={intl.get('dataSource.upload.preview_full')} >
+                            <TabsContent value="full">
                                 <PreviewArea>
                                     <tbody>
                                         <tr>
-                                            {previewOfFull.fields.map(f => (
-                                                <th key={f.fid}>
-                                                    {f.name || f.fid}
-                                                </th>
+                                            {previewOfFull.fields.map((f) => (
+                                                <th key={f.fid}>{f.name || f.fid}</th>
                                             ))}
                                         </tr>
                                         {previewOfFull.dataSource.slice(0, 20).map((row, i) => (
                                             <tr key={i}>
-                                                {previewOfFull.fields.map(f => (
-                                                    <td key={f.fid}>
-                                                        {JSON.stringify(row[f.fid])}
-                                                    </td>
+                                                {previewOfFull.fields.map((f) => (
+                                                    <td key={f.fid}>{JSON.stringify(row[f.fid])}</td>
                                                 ))}
                                             </tr>
                                         ))}
                                     </tbody>
                                 </PreviewArea>
-                            </PivotItem>
+                            </TabsContent>
                         )}
-                        <PivotItem itemKey="raw" headerText={intl.get('dataSource.upload.preview_raw')} >
-                            <RawArea>
-                                {previewOfRaw}
-                            </RawArea>
-                        </PivotItem>
-                    </Pivot>
+                        <TabsContent value="raw">
+                            <RawArea>{previewOfRaw}</RawArea>
+                        </TabsContent>
+                    </Tabs>
                 ) : (
-                    <p>{intl.get("dataSource.upload.fileTypes")}</p>
+                    <p>{intl.get('dataSource.upload.fileTypes')}</p>
                 )}
             </ActionGroup>
         </Container>

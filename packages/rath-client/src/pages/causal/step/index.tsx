@@ -1,12 +1,12 @@
 import intl from 'react-intl-universal';
-import { DefaultButton, Icon, IconButton } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import styled from "styled-components";
+import { observer } from 'mobx-react-lite';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
+import { Button } from '../../../components/ui/button';
+import { RathIcon } from '../../../components/icons';
 import CausalDatasetConfig from './datasetConfig';
 import CausalFDConfig from './FDConfig';
-import CausalModel from "./causalModel";
-
+import CausalModel from './causalModel';
 
 const Container = styled.div`
     flex-grow: 1;
@@ -21,14 +21,16 @@ const Container = styled.div`
 `;
 
 const StepHeader = styled.div`
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
     padding: 1em 0 0;
 `;
 
 const StepHint = styled.p<{ isCurrentStep: boolean }>`
     font-size: 0.8rem;
-    opacity: ${({ isCurrentStep }) => isCurrentStep ? 0.8 : 0.6};
+    opacity: ${({ isCurrentStep }) => (isCurrentStep ? 0.8 : 0.6)};
     padding: 1em 0;
     > i {
         margin: 0 2px;
@@ -38,10 +40,12 @@ const StepHint = styled.p<{ isCurrentStep: boolean }>`
 const StepList = styled.div`
     display: flex;
     flex-direction: row;
-    margin: 0 2em;
     align-items: center;
+    justify-content: center;
+    min-width: 0;
+    overflow-x: auto;
     > span {
-        margin: 0 1.5em;
+        margin: 0 0.75em;
         user-select: none;
         pointer-events: none;
         opacity: 0.3;
@@ -49,21 +53,23 @@ const StepList = styled.div`
 `;
 
 const StepItem = styled.div<{ active: boolean; completed: boolean }>`
-    padding: 0 1em;
-    cursor: ${({ active }) => active ? 'default' : 'pointer'};
-    font-weight: ${({ active }) => active ? 500 : 400};
-    opacity: ${({ active, completed }) => active || completed ? 1 : 0.5};
+    padding: 0 0.5em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    white-space: nowrap;
+    cursor: ${({ active }) => (active ? 'default' : 'pointer')};
+    font-weight: ${({ active }) => (active ? 500 : 400)};
+    opacity: ${({ active, completed }) => (active || completed ? 1 : 0.5)};
     :hover {
-        opacity: ${({ active, completed }) => active || completed ? 1 : 0.75};
+        opacity: ${({ active, completed }) => (active || completed ? 1 : 0.75)};
     }
     position: relative;
 `;
 
 const Badge = styled.div`
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: translate(50%, -30%);
+    display: inline-flex;
+    align-items: center;
 `;
 
 const StepPanel = styled.div`
@@ -87,13 +93,9 @@ export type CausalStepOption = {
     help: string;
 };
 
-const allCausalSteps = [
-    CausalStep.DATASET_CONFIG,
-    CausalStep.FD_CONFIG,
-    CausalStep.CAUSAL_MODEL,
-] as const;
+const allCausalSteps = [CausalStep.DATASET_CONFIG, CausalStep.FD_CONFIG, CausalStep.CAUSAL_MODEL] as const;
 
-export const CausalStepPager = observer(function CausalStepPager () {
+export const CausalStepPager = observer(function CausalStepPager() {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
     const [showHelp, setShowHelp] = useState<CausalStep>(stepKey);
 
@@ -102,15 +104,15 @@ export const CausalStepPager = observer(function CausalStepPager () {
     }, [stepKey]);
 
     const CausalSteps = useMemo(() => {
-        return allCausalSteps.map<CausalStepOption>(step => ({
+        return allCausalSteps.map<CausalStepOption>((step) => ({
             key: step,
             title: intl.get(`causal.analyze.${step}.title`),
             help: intl.get(`causal.analyze.${step}.help`),
         }));
     }, []);
 
-    const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [CausalSteps, stepKey]);
-    const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [CausalSteps, showHelp]);
+    const curStep = useMemo(() => CausalSteps.find((s) => s.key === stepKey)!, [CausalSteps, stepKey]);
+    const hintStep = useMemo(() => CausalSteps.find((s) => s.key === showHelp)!, [CausalSteps, showHelp]);
 
     const [skipFDEdit, setSkipFDEdit] = useState(true);
 
@@ -151,18 +153,17 @@ export const CausalStepPager = observer(function CausalStepPager () {
     return (
         <Container>
             <StepHeader>
-                <DefaultButton disabled={!goPreviousStep} onClick={goPreviousStep} iconProps={{ iconName: 'Previous' }}>
+                <Button className="gap-1.5" variant="outline" disabled={!goPreviousStep} onClick={goPreviousStep}>
+                    <RathIcon name="Previous" />
                     {intl.get('causal.actions.prev_step')}
-                </DefaultButton>
+                </Button>
                 <StepList>
                     {CausalSteps.map((step, i, arr) => {
                         const active = step.key === stepKey;
-                        const completed = arr.slice(i + 1).some(opt => opt.key === stepKey);
+                        const completed = arr.slice(i + 1).some((opt) => opt.key === stepKey);
                         return (
                             <Fragment key={step.key}>
-                                {i !== 0 && (
-                                    <span>{'>'}</span>
-                                )}
+                                {i !== 0 && <span>{'>'}</span>}
                                 <StepItem
                                     active={active}
                                     completed={completed}
@@ -173,16 +174,26 @@ export const CausalStepPager = observer(function CausalStepPager () {
                                     <span>{step.title}</span>
                                     {step.key === CausalStep.FD_CONFIG && (
                                         <Badge>
-                                            <IconButton
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 rounded-full border"
                                                 title="Bypass"
-                                                iconProps={{ iconName: "DoubleChevronRight", style: { fontWeight: 'bold' } }}
-                                                onClick={e => {
+                                                onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSkipFDEdit(!skipFDEdit);
                                                 }}
-                                                aria-checked={skipFDEdit}
-                                                styles={{ root: { transform: 'scale(0.6)', background: skipFDEdit ? undefined : 'linear-gradient(135deg, transparent 47%, #000 47%, #000 53%, transparent 53%)', border: '1px solid', borderRadius: '50%' } }}
-                                            />
+                                                aria-pressed={skipFDEdit}
+                                                style={{
+                                                    background: skipFDEdit
+                                                        ? undefined
+                                                        : 'linear-gradient(135deg, transparent 47%, #000 47%, #000 53%, transparent 53%)',
+                                                    border: '1px solid',
+                                                    borderRadius: '50%',
+                                                }}
+                                            >
+                                                <RathIcon name="DoubleChevronRight" style={{ fontWeight: 'bold' }} />
+                                            </Button>
                                         </Badge>
                                     )}
                                 </StepItem>
@@ -190,25 +201,24 @@ export const CausalStepPager = observer(function CausalStepPager () {
                         );
                     })}
                 </StepList>
-                <DefaultButton primary disabled={!goNextStep} onClick={goNextStep} iconProps={{ iconName: 'Next' }}>
+                <Button className="gap-1.5" disabled={!goNextStep} onClick={goNextStep}>
+                    <RathIcon name="Next" />
                     {intl.get('causal.actions.continue')}
-                </DefaultButton>
+                </Button>
             </StepHeader>
             <StepHint isCurrentStep={hintStep.key === stepKey}>
-                <Icon iconName={hintStep.key === stepKey ? "Info" : "InfoSolid"} />
+                <RathIcon name={hintStep.key === stepKey ? 'Info' : 'InfoSolid'} />
                 {hintStep.help}
             </StepHint>
             <hr className="card-line" />
             <StepPanel>
-                {{
-                    [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig />,
-                    [CausalStep.FD_CONFIG]: (
-                        <CausalFDConfig />
-                    ),
-                    [CausalStep.CAUSAL_MODEL]: (
-                        <CausalModel />
-                    ),
-                }[curStep.key]}
+                {
+                    {
+                        [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig />,
+                        [CausalStep.FD_CONFIG]: <CausalFDConfig />,
+                        [CausalStep.CAUSAL_MODEL]: <CausalModel />,
+                    }[curStep.key]
+                }
             </StepPanel>
         </Container>
     );

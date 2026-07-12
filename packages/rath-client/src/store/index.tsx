@@ -10,7 +10,6 @@ import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
 import CausalStore from './causalStore/mainStore';
-import UserStore from './userStore';
 import { EditorStore } from './editorStore';
 export interface StoreCollection {
     langStore: LangStore;
@@ -18,7 +17,6 @@ export interface StoreCollection {
     ltsPipeLineStore: LTSPipeLine;
     megaAutoStore: MegaAutomationStore;
     commonStore: CommonStore;
-    userStore: UserStore;
     clickHouseStore: ClickHouseStore;
     semiAutoStore: SemiAutomationStore;
     painterStore: PainterStore;
@@ -30,7 +28,6 @@ export interface StoreCollection {
 
 const langStore = new LangStore();
 const commonStore = new CommonStore();
-const userStore = new UserStore();
 const dataSourceStore = new DataSourceStore();
 const clickHouseStore = new ClickHouseStore();
 const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHouseStore);
@@ -44,7 +41,6 @@ const editorStore = new EditorStore();
 
 const storeCol: StoreCollection = {
     commonStore,
-    userStore,
     langStore,
     dataSourceStore,
     ltsPipeLineStore,
@@ -60,7 +56,7 @@ const storeCol: StoreCollection = {
 
 const StoreContext = React.createContext<StoreCollection>(null!);
 
-const StoreWrapper: React.FC = props => {
+const StoreWrapper = (props: { children: React.ReactNode }) => {
     return <StoreContext.Provider value={storeCol}>
         { props.children }
     </StoreContext.Provider>

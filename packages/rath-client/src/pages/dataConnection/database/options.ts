@@ -1,6 +1,5 @@
-import type { IDropdownOption } from '@fluentui/react';
-import type { SupportedDatabaseType } from "./interfaces";
-
+import type { RathSelectOption } from '../../../components/rath-ui/rath-select';
+import type { SupportedDatabaseType } from './interfaces';
 
 export type DatabaseLevelType = 'database' | 'schema' | 'table';
 
@@ -11,14 +10,14 @@ export type DatabaseLevelConfig<T extends DatabaseLevelType = DatabaseLevelType>
 };
 
 const databaseOptions: Array<
-    & IDropdownOption
-    & {
+    RathSelectOption & {
         key: SupportedDatabaseType;
         icon?: string;
         rule: string;
         levels: DatabaseLevelConfig[];
         credentials?: 'json' | undefined;
-}> = [
+    }
+> = [
     {
         text: 'PostgreSQL',
         key: 'postgres',
@@ -54,7 +53,7 @@ const databaseOptions: Array<
                 enumerable: false,
             },
         ],
-        icon: 'kylin.png'
+        icon: 'kylin.png',
     },
     {
         text: 'Oracle',

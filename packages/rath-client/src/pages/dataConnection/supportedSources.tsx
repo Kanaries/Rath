@@ -15,44 +15,9 @@
 
 import React from 'react';
 import intl from 'react-intl-universal';
-import { Button, Card, CardHeader, makeStyles, shorthands, tokens, Text, Caption1 } from '@fluentui/react-components';
-import { MoreHorizontal } from 'lucide-react';
+import { publicAssetUrl } from 'runtime-env';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { IDataSourceType } from '../../global';
-
-const useStyles = makeStyles({
-    main: {
-        ...shorthands.gap('22px'),
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
-
-    title: {
-        ...shorthands.margin(0, 0, '12px'),
-    },
-
-    description: {
-        ...shorthands.margin(0, 0, '12px'),
-    },
-
-    card: {
-        width: '480px',
-        maxWidth: '100%',
-    },
-
-    caption: {
-        color: tokens.colorNeutralForeground3,
-    },
-
-    logo: {
-        ...shorthands.borderRadius('4px'),
-        width: '48px',
-        height: '48px',
-    },
-
-    text: {
-        ...shorthands.margin(0),
-    },
-});
 
 interface SupportedSourceProps {
     onSelected: (key: string | number) => void;
@@ -68,93 +33,63 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
         {
             key: IDataSourceType.FILE,
             text: fileText,
-            iconProps: { iconName: 'FabricUserFolder' },
             // iconImage: () => <FolderIcon />,
-            iconImage: () => <img className={styles.logo} src="/assets/icons/folders.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/folders.svg')} alt="" />,
         },
         {
             key: IDataSourceType.DEMO,
             text: demoText,
-            iconProps: { iconName: 'FileTemplate' },
-            iconImage: () => <img className={styles.logo} src="/assets/icons/joystick.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/joystick.svg')} alt="" />,
         },
-        // {
-        //     key: IDataSourceType.CLOUD,
-        //     text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
-        //     iconProps: { iconName: 'CloudDownload' },
-        //     iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-folder.svg" alt="" />,
-        // },
         {
             key: IDataSourceType.DATABASE,
             text: dbText,
-            iconProps: { iconName: 'Database' },
-            iconImage: () => <img className={styles.logo} src="/assets/icons/data-server.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/data-server.svg')} alt="" />,
         },
         {
             key: IDataSourceType.AIRTABLE,
             text: 'AirTable',
-            iconProps: { iconName: 'Table' },
-            iconImage: () => <img className={styles.logo} src="/assets/icons/airtable.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/airtable.svg')} alt="" />,
             disabled: false,
         },
         {
             key: IDataSourceType.RESTFUL,
             text: restfulText,
-            iconProps: { iconName: 'Cloud' },
-            iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-computing.svg" alt="" />,
+            iconImage: () => <img className="h-12 w-12 rounded-sm" src={publicAssetUrl('assets/icons/cloud-computing.svg')} alt="" />,
         },
-        // {
-        //     key: IDataSourceType.OLAP,
-        //     text: 'OLAP',
-        //     iconProps: { iconName: 'TripleColumn' },
-        //     iconImage: () => <img className={styles.logo} src="/assets/icons/cloud-computing_1.svg" alt="" />,
-        //     disabled: true,
-        // },
     ];
-    const styles = useStyles();
 
     return (
-        <div className={styles.main}>
-            {/* <CardGrid>
-                {options.map((op) => (
-                    <OptionCard
-                        key={op.key}
-                        role="button"
-                        aria-disabled={op.disabled}
-                        tabIndex={0}
-                        onClick={() => {
-                            if (!op.disabled) {
-                                onSelected(op.key);
-                            }
-                        }}
-                    >
-                        <div className="op-logo">
-                            {op.iconImage && op.iconImage()}
-                            {!op.iconImage && <Icon className="logo-icon" {...op.iconProps} />}
-                        </div>
-                        <div className="op-content">{op.text}</div>
-                    </OptionCard>
-                ))}
-            </CardGrid> */}
+        <div className="flex flex-wrap gap-[22px]">
             {options.map((op) => (
                 <Card
                     key={op.key}
-                    {...props}
-                    className={styles.card}
+                    role="button"
+                    aria-disabled={op.disabled}
+                    tabIndex={op.disabled ? -1 : 0}
+                    className="w-[480px] max-w-full cursor-pointer transition-colors hover:bg-accent/40 aria-disabled:cursor-default aria-disabled:opacity-50"
                     onClick={() => {
                         if (!op.disabled) {
                             onSelected(op.key);
                         }
                     }}
+                    onKeyDown={(event) => {
+                        if (!op.disabled && (event.key === 'Enter' || event.key === ' ')) {
+                            event.preventDefault();
+                            onSelected(op.key);
+                        }
+                    }}
                 >
-                    <CardHeader
-                        image={op.iconImage && op.iconImage()}
-                        header={<Text weight="semibold">{op.text}</Text>}
-                        description={<Caption1 className={styles.caption}>Developer</Caption1>}
-                        action={<Button appearance="transparent" icon={<MoreHorizontal />} aria-label="More options" />}
-                    />
-
-                    <p className={styles.text}>{intl.get(`dataSource.importData.sources.${op.key}.desc`)}</p>
+                    <CardHeader className="flex-row items-center gap-3 space-y-0">
+                        {op.iconImage && op.iconImage()}
+                        <div className="min-w-0">
+                            <CardTitle className="text-sm">{op.text}</CardTitle>
+                            <CardDescription className="text-xs">Developer</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="m-0 text-sm">{intl.get(`dataSource.importData.sources.${op.key}.desc`)}</p>
+                    </CardContent>
                 </Card>
             ))}
         </div>

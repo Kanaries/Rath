@@ -3,14 +3,15 @@ import styled from 'styled-components';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactVega from '../../components/react-vega';
 
 import { IFieldMeta } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
 import { useGlobalStore } from '../../store';
-
+import { RathIcon } from '../../components/icons';
+import { Button } from '../../components/ui/button';
+import { RathSelect, RathSelectOption } from '../../components/rath-ui/rath-select';
 
 const Segment = styled.div`
     display: flex;
@@ -156,9 +157,7 @@ const ProgressiveDashboard: React.FC = (props) => {
         (viewIndex: number, fieldKey: string) => {
             const targetView = originSpecList[viewIndex];
             const val: IFieldMeta | '*' = (fieldKey === '*' ? '*' : fieldMetas.find((f) => f.fid === fieldKey))!;
-            const targetFieldIndex = targetView.fields.findIndex(
-                (f) => f === val || (f as IFieldMeta).fid === (val as IFieldMeta).fid
-            );
+            const targetFieldIndex = targetView.fields.findIndex((f) => f === val || (f as IFieldMeta).fid === (val as IFieldMeta).fid);
             if (targetFieldIndex > -1) {
                 setOriginSpecList((sl) => {
                     const nextSl = produce(sl, (draft) => {
@@ -189,13 +188,13 @@ const ProgressiveDashboard: React.FC = (props) => {
 
     const deleteView = useCallback((viewIndex: number) => {
         setOriginSpecList((sl) => {
-            const nextSl = [...sl]
+            const nextSl = [...sl];
             nextSl.splice(viewIndex, 1);
-            return nextSl
+            return nextSl;
         });
     }, []);
 
-    const selectableFields = useMemo<IDropdownOption[]>(() => {
+    const selectableFields = useMemo<RathSelectOption[]>(() => {
         return [
             {
                 key: '*',
@@ -211,23 +210,26 @@ const ProgressiveDashboard: React.FC = (props) => {
         );
     }, [fieldMetas]);
 
-    const toggleViewLocked = useCallback((viewIndex) => {
-        setOriginSpecList((sl) => {
-            const nextSl = produce(sl, (draft) => {
-                draft[viewIndex].locked = !draft[viewIndex].locked;
-                draft[viewIndex].fields = recommendVisList[viewIndex].fields
-                const unLockIndex = draft.findIndex(v => v.locked === false)
-                if (unLockIndex > -1) {
-                    const t = draft[unLockIndex];
-                    draft[unLockIndex] = draft[viewIndex]
-                    draft[viewIndex] = t;
-                }
+    const toggleViewLocked = useCallback(
+        (viewIndex: number) => {
+            setOriginSpecList((sl) => {
+                const nextSl = produce(sl, (draft) => {
+                    draft[viewIndex].locked = !draft[viewIndex].locked;
+                    draft[viewIndex].fields = recommendVisList[viewIndex].fields;
+                    const unLockIndex = draft.findIndex((v) => v.locked === false);
+                    if (unLockIndex > -1) {
+                        const t = draft[unLockIndex];
+                        draft[unLockIndex] = draft[viewIndex];
+                        draft[viewIndex] = t;
+                    }
+                });
+                return nextSl;
             });
-            return nextSl;
-        });
-    }, [recommendVisList]);
+        },
+        [recommendVisList]
+    );
 
-    const toggleVisSetting = useCallback((viewIndex) => {
+    const toggleVisSetting = useCallback((viewIndex: number) => {
         setVisSettingList((l) => {
             const nl = [...l];
             nl[viewIndex] = !nl[viewIndex];
@@ -246,26 +248,40 @@ const ProgressiveDashboard: React.FC = (props) => {
                     {/* {
                     <ReactJson src={vis} />
                 } */}
-                    <Stack horizontal>
-                        <IconButton
-                            iconProps={{ iconName: originSpecList[visIndex].locked ? 'PinSolid12' : 'Pin' }}
+                    <div style={{ display: 'flex' }}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={originSpecList[visIndex].locked ? 'Unlock view' : 'Lock view'}
+                            aria-pressed={originSpecList[visIndex].locked}
                             onClick={() => {
                                 toggleViewLocked(visIndex);
                             }}
-                        />
-                        <IconButton
-                            iconProps={{ iconName: 'Settings' }}
+                        >
+                            <RathIcon name={originSpecList[visIndex].locked ? 'PinSolid12' : 'Pin'} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={visSettingList[visIndex] ? 'Hide view settings' : 'Show view settings'}
+                            aria-pressed={visSettingList[visIndex]}
                             onClick={() => {
                                 toggleVisSetting(visIndex);
                             }}
-                        />
-                        <IconButton
-                            iconProps={{ iconName: 'Delete' }}
+                        >
+                            <RathIcon name="Settings" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Delete view"
                             onClick={() => {
                                 deleteView(visIndex);
                             }}
-                        />
-                    </Stack>
+                        >
+                            <RathIcon name="Delete" />
+                        </Button>
+                    </div>
                     <div className="vis-container">
                         <ReactVega
                             dataSource={cleanedData}
@@ -280,7 +296,7 @@ const ProgressiveDashboard: React.FC = (props) => {
                     </div>
                     {visSettingList[visIndex] && (
                         <div className="operation-container">
-                            <Stack tokens={{ childrenGap: 10 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {originSpecList[visIndex].fields.map((f, fIndex) => {
                                     const selectedKey =
                                         originSpecList[visIndex].fields[fIndex] === '*'
@@ -289,49 +305,70 @@ const ProgressiveDashboard: React.FC = (props) => {
                                     const fieldSizeMatch = originSpecList[visIndex].fields.length === recommendVisList[visIndex].fields.length;
                                     let selectedName: string | null = null;
                                     if (fieldSizeMatch) {
-                                        selectedName = ((recommendVisList[visIndex].fields[fIndex] as IFieldMeta).name || (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).fid)
+                                        selectedName =
+                                            (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).name ||
+                                            (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).fid;
                                     }
                                     return (
-                                        <Stack.Item key={fIndex}>
-                                            <Stack horizontal>
-                                                <IconButton
-                                                    iconProps={{ iconName: 'Delete' }}
+                                        <div key={fIndex}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    aria-label={`Remove field ${fIndex + 1}`}
                                                     onClick={() => {
                                                         removeFieldsFromView(visIndex, selectedKey);
                                                     }}
-                                                />
-                                                <Dropdown
-                                                    style={{ minWidth: '200px' }}
+                                                >
+                                                    <RathIcon name="Delete" />
+                                                </Button>
+                                                <RathSelect
+                                                    className="min-w-[200px]"
                                                     options={selectableFields}
                                                     selectedKey={selectedKey}
-                                                    onChange={(e, newItem) => {
-                                                        newItem &&
-                                                            updateFieldsInView(visIndex, fIndex, newItem.key + '');
+                                                    onChange={(key) => {
+                                                        updateFieldsInView(visIndex, fIndex, key + '');
                                                     }}
                                                 />
-                                                <ActionButton disabled={selectedName === null} text={selectedName || 'NULL'} iconProps={{ iconName: 'ExportMirrored'}} onClick={() => {
-                                                    updateFieldsInView(visIndex, fIndex, (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).fid)
-                                                }} />
-                                            </Stack>
-                                        </Stack.Item>
+                                                <Button
+                                                    variant="ghost"
+                                                    disabled={selectedName === null}
+                                                    onClick={() => {
+                                                        updateFieldsInView(
+                                                            visIndex,
+                                                            fIndex,
+                                                            (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).fid
+                                                        );
+                                                    }}
+                                                >
+                                                    <RathIcon name="ExportMirrored" />
+                                                    {selectedName || 'NULL'}
+                                                </Button>
+                                            </div>
+                                        </div>
                                     );
                                 })}
-                                <Stack.Item>
-                                    <DefaultButton
-                                        iconProps={{ iconName: 'Add' }}
-                                        text="Add Field"
+                                <div>
+                                    <Button
+                                        variant="outline"
                                         onClick={() => {
                                             addFields2View(visIndex, '*');
                                         }}
-                                    />
-                                </Stack.Item>
-                            </Stack>
+                                    >
+                                        <RathIcon name="Add" />
+                                        Add Field
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </Cont>
             ))}
             <Cont>
-                <DefaultButton text="Add View" iconProps={{ iconName: 'ReportAdd' }} onClick={addView} />
+                <Button variant="outline" onClick={addView}>
+                    <RathIcon name="ReportAdd" />
+                    Add View
+                </Button>
             </Cont>
         </Segment>
     );

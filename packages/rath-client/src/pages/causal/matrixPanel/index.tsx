@@ -1,8 +1,12 @@
 import intl from 'react-intl-universal';
-import { Dropdown, Pivot, PivotItem, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useState } from 'react';
+import { FC, useState, type JSX } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../../components/ui/button';
+import { Spinner } from '../../../components/ui/spinner';
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs';
+import { RathIcon } from '../../../components/icons';
+import { RathSelect } from '../../../components/rath-ui/rath-select';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import DirectionMatrix from './directionMatrix';
@@ -42,7 +46,7 @@ const MATRIX_PIVOT_LIST = [
         text: MATRIX_TYPE.conditionalMutualInfo,
         taskLabel: 'compute',
     },
-    { itemKey: MATRIX_TYPE.causal, text: MATRIX_TYPE.causal, taskLabel: MATRIX_TYPE.causal, iconName: 'Relationship' },
+    { itemKey: MATRIX_TYPE.causal, text: MATRIX_TYPE.causal, taskLabel: MATRIX_TYPE.causal, icon: 'Relationship' },
 ];
 
 const VIEW_LABELS = [
@@ -74,45 +78,40 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
     const { busy } = causalStore.operator;
 
-    const viewOptions = VIEW_LABELS.map(opt => ({
+    const viewOptions = VIEW_LABELS.map((opt) => ({
         key: opt.key,
         text: intl.get(`causal.analyze.${opt.text}`),
     }));
 
-    const markOptions = MARK_LABELS.map(opt => ({
+    const markOptions = MARK_LABELS.map((opt) => ({
         key: opt.key,
         text: intl.get(`causal.analyze.${opt.text}`),
     }));
 
     return (
         <Cont>
-            <Pivot
-                style={{ marginBottom: '1em' }}
-                selectedKey={selectedKey}
-                onLinkClick={(item) => {
-                    if (item) {
-                        setSelectedKey(item.props.itemKey as MATRIX_TYPE);
-                        setViewType(item.props.itemKey === MATRIX_TYPE.causal ? VIEW_TYPE.diagram : VIEW_TYPE.matrix);
-                    }
+            <Tabs
+                value={selectedKey}
+                onValueChange={(value) => {
+                    const key = value as MATRIX_TYPE;
+                    setSelectedKey(key);
+                    setViewType(key === MATRIX_TYPE.causal ? VIEW_TYPE.diagram : VIEW_TYPE.matrix);
                 }}
+                className="mb-4"
             >
-                {MATRIX_PIVOT_LIST.map((item) => {
-                    return <PivotItem key={item.itemKey} headerText={intl.get(`causal.analyze.${item.text}`)} itemKey={item.itemKey} itemIcon={item.iconName} />;
-                })}
-            </Pivot>
-            <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
-                <PrimaryButton
-                    text={intl.get(`causal.actions.${
-                        MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel
-                    }`)}
-                    onRenderText={(props, defaultRenderer) => {
+                <TabsList>
+                    {MATRIX_PIVOT_LIST.map((item) => {
                         return (
-                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
-                                {busy && <Spinner style={{ transform: 'scale(0.75)' }} />}
-                                {defaultRenderer?.(props)}
-                            </div>
+                            <TabsTrigger key={item.itemKey} value={item.itemKey}>
+                                {item.icon && <RathIcon name={item.icon} className="mr-1" />}
+                                {intl.get(`causal.analyze.${item.text}`)}
+                            </TabsTrigger>
                         );
-                    }}
+                    })}
+                </TabsList>
+            </Tabs>
+            <div style={{ display: 'grid', gap: 10, marginBottom: '1em' }}>
+                <Button
                     disabled={busy}
                     onClick={() => {
                         if (busy) {
@@ -120,84 +119,55 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                         }
                         onCompute(selectedKey);
                     }}
-                    iconProps={busy ? undefined : { iconName: 'Rerun' }}
                     style={{ width: 'max-content', transition: 'width 400ms' }}
-                />
+                >
+                    {busy ? <Spinner aria-hidden="true" /> : <RathIcon name="Rerun" />}
+                    {intl.get(`causal.actions.${MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}`)}
+                </Button>
                 {selectedKey === MATRIX_TYPE.causal && (
-                    <Dropdown
+                    <RathSelect
                         options={viewOptions}
                         label={intl.get('causal.analyze.view')}
                         selectedKey={viewType}
-                        onChange={(e, op) => {
-                            op && setViewType(op.key as VIEW_TYPE);
+                        onChange={(key) => {
+                            setViewType(key as VIEW_TYPE);
                         }}
-                        style={{
-                            width: '250px',
-                        }}
-                        styles={{
-                            root: {
-                                display: 'flex',
-                                flexDirection: 'row',
-                            },
-                            label: {
-                                margin: '0 1em',
-                            },
-                        }}
+                        className="flex w-[250px] flex-row items-center gap-4"
                     />
                 )}
                 {viewType === VIEW_TYPE.matrix && (
-                    <Dropdown
+                    <RathSelect
                         options={markOptions}
                         label={intl.get('causal.analyze.mark')}
                         selectedKey={markType}
-                        onChange={(e, op) => {
-                            op && setMarkType(op.key as 'circle' | 'square');
+                        onChange={(key) => {
+                            setMarkType(key as 'circle' | 'square');
                         }}
-                        styles={{
-                            root: {
-                                display: 'flex',
-                                flexDirection: 'row',
-                            },
-                            label: {
-                                margin: '0 1em',
-                            },
-                        }}
+                        className="flex flex-row items-center gap-4"
                     />
                 )}
-            </Stack>
+            </div>
 
             <div>
-            {selectedKey === MATRIX_TYPE.mutualInfo && mutualMatrix && showMatrix(fields, mutualMatrix, busy) && (
-                <RelationMatrixHeatMap
-                    mark={markType}
-                    absolute
-                    fields={fields}
-                    data={mutualMatrix}
-                    onSelect={onMatrixPointClick}
-                />
-            )}
-            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && condMutualMatrix && showMatrix(fields, condMutualMatrix, busy) && (
-                <RelationMatrixHeatMap
-                    mark={markType}
-                    absolute
-                    fields={fields}
-                    data={condMutualMatrix}
-                    onSelect={onMatrixPointClick}
-                />
-            )}
-            {selectedKey === MATRIX_TYPE.causal && (
-                viewType === VIEW_TYPE.diagram ? (
-                    busy || diagram
-                ) : causalityRaw && showMatrix(fields, causalityRaw, busy) && (
-                    <DirectionMatrix
-                        mark={markType}
-                        fields={fields}
-                        data={causalityRaw}
-                        onSelect={onMatrixPointClick}
-                    />
-                )
-            )}
-            {busy && <Spinner label="computing" />}
+                {selectedKey === MATRIX_TYPE.mutualInfo && mutualMatrix && showMatrix(fields, mutualMatrix, busy) && (
+                    <RelationMatrixHeatMap mark={markType} absolute fields={fields} data={mutualMatrix} onSelect={onMatrixPointClick} />
+                )}
+                {selectedKey === MATRIX_TYPE.conditionalMutualInfo && condMutualMatrix && showMatrix(fields, condMutualMatrix, busy) && (
+                    <RelationMatrixHeatMap mark={markType} absolute fields={fields} data={condMutualMatrix} onSelect={onMatrixPointClick} />
+                )}
+                {selectedKey === MATRIX_TYPE.causal &&
+                    (viewType === VIEW_TYPE.diagram
+                        ? busy || diagram
+                        : causalityRaw &&
+                          showMatrix(fields, causalityRaw, busy) && (
+                              <DirectionMatrix mark={markType} fields={fields} data={causalityRaw} onSelect={onMatrixPointClick} />
+                          ))}
+                {busy && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Spinner aria-hidden="true" />
+                        <span>computing</span>
+                    </div>
+                )}
             </div>
         </Cont>
     );

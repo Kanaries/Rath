@@ -1,10 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import { FC, ReactNode, useEffect, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { DefaultButton, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
+import { RathIcon } from '../../../components/icons';
+import { Alert } from '../../../components/ui/alert';
+import { Button } from '../../../components/ui/button';
 
 const Container = styled.div`
     .action-bar {
@@ -46,13 +48,16 @@ const EditorCore: FC<EditorCoreProps> = (props) => {
     return (
         <Container>
             {actionPosition === 'top' && (
-                <Stack horizontal tokens={{ childrenGap: 10 }}>
-                    <DefaultButton text={intl.get('common.run')} iconProps={{ iconName: 'Play' }} onClick={updateCode} />
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <Button variant="outline" onClick={updateCode}>
+                        <RathIcon name="Play" />
+                        {intl.get('common.run')}
+                    </Button>
                     {actionButtons}
-                </Stack>
+                </div>
             )}
             {actionPosition === 'top' && <hr />}
-            {notValid && <MessageBar messageBarType={MessageBarType.error}>Not Valid Specification.</MessageBar>}
+            {notValid && <Alert variant="destructive">Not Valid Specification.</Alert>}
             <MonacoEditor
                 width="500px"
                 height="500"
@@ -65,10 +70,13 @@ const EditorCore: FC<EditorCoreProps> = (props) => {
             />
             {actionPosition === 'bottom' && <hr />}
             {actionPosition === 'bottom' && (
-                <Stack horizontal tokens={{ childrenGap: 10 }}>
-                    <DefaultButton text={intl.get('common.run')} iconProps={{ iconName: 'Play' }} onClick={updateCode} />
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <Button variant="outline" onClick={updateCode}>
+                        <RathIcon name="Play" />
+                        {intl.get('common.run')}
+                    </Button>
                     {actionButtons}
-                </Stack>
+                </div>
             )}
         </Container>
     );

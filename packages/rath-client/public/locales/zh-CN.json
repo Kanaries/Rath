@@ -359,7 +359,8 @@
             "range": "区间",
             "set": "集合",
             "submit": "应用",
-            "cancel": "取消"
+            "cancel": "取消",
+            "reset": "重置"
         },
         "operations": {
             "title": "快捷操作",
@@ -406,6 +407,8 @@
         "autoAnalysis": "自动分析",
         "reRun": "重新计算",
         "computing": "计算中",
+        "emptyTitle": "暂无洞察",
+        "emptyDescription": "运行分析任务，发现当前数据集中的规律和可视化洞察。",
         "title": "洞察推荐",
         "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'编辑图表'来进行更定制化的分析或使用'联想'来探索与当前图表相关的内容。",
         "summary": "概览",
@@ -499,6 +502,10 @@
     "collection": {
         "title": "收藏夹",
         "desc": "这里会存放你在各个模块收藏的可视化视图。",
+        "emptyTitle": "还没有收藏的视图",
+        "emptyDescription": "在探索页面收藏视图后，它会显示在这里。",
+        "searchEmpty": "没有匹配的视图",
+        "searchEmptyDescription": "请尝试其他搜索词。",
         "viewMode": {
             "card": "卡片",
             "list": "列表"

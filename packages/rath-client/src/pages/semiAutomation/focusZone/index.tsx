@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { ActionButton, CommandButton, DefaultButton, IContextualMenuProps } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { Button } from '../../../components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
+import { RathIcon } from '../../../components/icons';
 import { IFieldMeta, IVisSpecType } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
@@ -48,30 +50,6 @@ const FocusZone: React.FC = () => {
         return mainViewSpecSource === 'custom' ? muteSpec : spec;
     }, [spec, muteSpec, mainViewSpecSource]);
 
-    const ChartEditButtonProps = useMemo<IContextualMenuProps>(() => {
-        return {
-            items: [
-                {
-                    key: 'editingInGW',
-                    text: intl.get('megaAuto.commandBar.editInGW'),
-                    iconProps: { iconName: 'BarChartVerticalEdit' },
-                    onClick: editChart,
-                },
-                {
-                    key: 'editingInEditor',
-                    text: intl.get('megaAuto.commandBar.editInEditor'),
-                    iconProps: { iconName: 'Edit' },
-                    onClick: () => {
-                        if (spec) {
-                            editorStore.syncSpec(IVisSpecType.vegaSubset, spec);
-                            semiAutoStore.changeMainViewSpecSource();
-                        }
-                    },
-                },
-            ],
-        };
-    }, [editChart, editorStore, spec, semiAutoStore]);
-
     const handler = useRef<IReactVegaHandler>(null);
 
     return (
@@ -83,12 +61,14 @@ const FocusZone: React.FC = () => {
                         <EditorCore
                             actionPosition="bottom"
                             actionButtons={
-                                <DefaultButton
-                                    text={intl.get('megaAuto.exitEditor')}
+                                <Button
+                                    variant="outline"
                                     onClick={() => {
                                         semiAutoStore.setMainViewSpecSource('default');
                                     }}
-                                />
+                                >
+                                    {intl.get('megaAuto.exitEditor')}
+                                </Button>
                             }
                         />
                     )}
@@ -179,55 +159,78 @@ const FocusZone: React.FC = () => {
                 )}
             </div>
             <div className="action-buttons">
-                <CommandButton
-                    style={BUTTON_STYLE}
-                    text={intl.get('megaAuto.commandBar.editing')}
-                    iconProps={{ iconName: 'BarChartVerticalEdit' }}
-                    disabled={dataViewQuery === null}
-                    menuProps={ChartEditButtonProps}
-                />
-                <ActionButton
-                    style={BUTTON_STYLE}
-                    text={intl.get('megaAuto.commandBar.painting')}
-                    iconProps={{ iconName: 'EditCreate' }}
-                    disabled={dataViewQuery === null}
-                    onClick={paintChart}
-                />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" style={BUTTON_STYLE} disabled={dataViewQuery === null}>
+                            <RathIcon name="BarChartVerticalEdit" />
+                            {intl.get('megaAuto.commandBar.editing')}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                        <DropdownMenuItem onSelect={() => editChart()}>
+                            <RathIcon name="BarChartVerticalEdit" className="mr-2" />
+                            {intl.get('megaAuto.commandBar.editInGW')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onSelect={() => {
+                                if (spec) {
+                                    editorStore.syncSpec(IVisSpecType.vegaSubset, spec);
+                                    semiAutoStore.changeMainViewSpecSource();
+                                }
+                            }}
+                        >
+                            <RathIcon name="Edit" className="mr-2" />
+                            {intl.get('megaAuto.commandBar.editInEditor')}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <Button variant="ghost" style={BUTTON_STYLE} disabled={dataViewQuery === null} onClick={paintChart}>
+                    <RathIcon name="EditCreate" />
+                    {intl.get('megaAuto.commandBar.painting')}
+                </Button>
                 {dataViewQuery && spec && (
-                    <ActionButton
+                    <Button
+                        variant="ghost"
                         style={BUTTON_STYLE}
-                        iconProps={{
-                            iconName: collectionStore.collectionContains(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters)
-                                ? 'FavoriteStarFill'
-                                : 'FavoriteStar',
-                        }}
-                        text={intl.get('common.star')}
                         onClick={() => {
-                                collectionStore.toggleCollectState(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters);
+                            collectionStore.toggleCollectState(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters);
                         }}
-                    />
+                    >
+                        <RathIcon
+                            name={
+                                collectionStore.collectionContains(fieldMetas, spec, IVisSpecType.vegaSubset, dataViewQuery.filters)
+                                    ? 'FavoriteStarFill'
+                                    : 'FavoriteStar'
+                            }
+                        />
+                        {intl.get('common.star')}
+                    </Button>
                 )}
-                <ActionButton
+                <Button
+                    variant="ghost"
                     style={BUTTON_STYLE}
-                    iconProps={{ iconName: 'Settings' }}
-                    ariaLabel={intl.get('common.settings')}
+                    aria-label={intl.get('common.settings')}
                     title={intl.get('common.settings')}
-                    text={intl.get('common.settings')}
                     onClick={() => {
                         semiAutoStore.setShowSettings(true);
                     }}
-                />
-                <ActionButton
+                >
+                    <RathIcon name="Settings" />
+                    {intl.get('common.settings')}
+                </Button>
+                <Button
+                    variant="ghost"
                     style={{ marginTop: BUTTON_STYLE.marginTop }}
-                    iconProps={{ iconName: 'Download' }}
-                    ariaLabel={intl.get('megaAuto.commandBar.download')}
+                    aria-label={intl.get('megaAuto.commandBar.download')}
                     title={intl.get('megaAuto.commandBar.download')}
-                    text={intl.get('megaAuto.commandBar.download')}
                     disabled={dataViewQuery === null}
                     onClick={() => {
                         handler.current?.exportImage();
                     }}
-                />
+                >
+                    <RathIcon name="Download" />
+                    {intl.get('megaAuto.commandBar.download')}
+                </Button>
             </div>
         </MainViewContainer>
     );

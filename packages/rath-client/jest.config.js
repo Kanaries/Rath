@@ -5,4 +5,8 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^runtime-env$': '<rootDir>/test-stubs/runtime-env.ts',
+    '^utils/(.*)$': '<rootDir>/src/utils/$1',
+  },
 };

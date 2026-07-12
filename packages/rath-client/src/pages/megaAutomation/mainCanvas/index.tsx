@@ -1,6 +1,6 @@
-import { Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import type { FC, Ref } from 'react';
+import { Spinner } from '../../../components/ui/spinner';
 import ReactVega, { IReactVegaHandler } from '../../../components/react-vega';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IResizeMode } from '../../../interfaces';
@@ -18,7 +18,10 @@ const MainCanvas: FC<{ handler?: Ref<IReactVegaHandler> }> = ({ handler }) => {
         <div className="insight-viz">
             {rendering && (
                 <LoadingLayer>
-                    <Spinner label="Rendering..." />
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Spinner aria-hidden="true" />
+                        <span>Rendering...</span>
+                    </div>
                 </LoadingLayer>
             )}
             {mainView.spec && (

@@ -2,16 +2,16 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
-import { DefaultButton } from '@fluentui/react';
 import styled from 'styled-components';
 import produce from 'immer';
+import { Button } from '../../../components/ui/button';
+import { RathIcon } from '../../../components/icons';
 import { useGlobalStore } from '../../../store';
 import { useRenderData, useGraphOptions } from '../explorer/graph-utils';
 import { useReactiveGraph } from '../explorer/graph-helper';
 import { transformFuncDepsToPag } from '../../../store/causalStore/pag';
 import type { IFunctionalDep } from '../config';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
-
 
 const Container = styled.div`
     height: 600px;
@@ -39,10 +39,7 @@ const Container = styled.div`
 const FDGraph: React.FC<{
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
-}> = ({
-    functionalDependencies,
-    setFunctionalDependencies,
-}) => {
+}> = ({ functionalDependencies, setFunctionalDependencies }) => {
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const functionalDependenciesAsPag = transformFuncDepsToPag(functionalDependencies);
@@ -51,48 +48,60 @@ const FDGraph: React.FC<{
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 
-    const onLinkTogether = useCallback((srcFid: string, tarFid: string) => {
-        setFunctionalDependencies(list => produce(list ?? [], draft => {
-            const linked = draft.find(fd => fd.fid === tarFid);
-            if (linked && !linked.params.some(prm => prm.fid === srcFid)) {
-                linked.params.push({ fid: srcFid });
-                if (!linked.func) {
-                    linked.func = '<user-defined>';
-                } else if (linked.func !== '<user-defined>') {
-                    linked.func = '<mixed>';
-                }
-            } else {
-                draft.push({
-                    fid: tarFid,
-                    params: [{
-                        fid: srcFid,
-                    }],
-                    func: '<user-defined>',
-                });
-            }
-        }));
-    }, [setFunctionalDependencies]);
-
-    const onRemoveLink = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
-        if (edge) {
-            setFunctionalDependencies(list => produce(list ?? [], draft => {
-                const linkedIdx = draft.findIndex(fd => fd.fid === edge.tarFid && fd.params.some(prm => prm.fid === edge.srcFid));
-                if (linkedIdx !== -1) {
-                    const linked = draft[linkedIdx];
-                    if (linked.params.length > 1) {
-                        linked.params = linked.params.filter(prm => prm.fid !== edge.srcFid);
-                        if (linked.func !== '<user-defined>') {
+    const onLinkTogether = useCallback(
+        (srcFid: string, tarFid: string) => {
+            setFunctionalDependencies((list) =>
+                produce(list ?? [], (draft) => {
+                    const linked = draft.find((fd) => fd.fid === tarFid);
+                    if (linked && !linked.params.some((prm) => prm.fid === srcFid)) {
+                        linked.params.push({ fid: srcFid });
+                        if (!linked.func) {
+                            linked.func = '<user-defined>';
+                        } else if (linked.func !== '<user-defined>') {
                             linked.func = '<mixed>';
                         }
                     } else {
-                        draft.splice(linkedIdx, 1);
+                        draft.push({
+                            fid: tarFid,
+                            params: [
+                                {
+                                    fid: srcFid,
+                                },
+                            ],
+                            func: '<user-defined>',
+                        });
                     }
-                }
-            }));
-        }
-    }, [setFunctionalDependencies]);
+                })
+            );
+        },
+        [setFunctionalDependencies]
+    );
 
-    const graphRef = useRef<Graph>();
+    const onRemoveLink = useCallback(
+        (edge: { srcFid: string; tarFid: string } | null) => {
+            if (edge) {
+                setFunctionalDependencies((list) =>
+                    produce(list ?? [], (draft) => {
+                        const linkedIdx = draft.findIndex((fd) => fd.fid === edge.tarFid && fd.params.some((prm) => prm.fid === edge.srcFid));
+                        if (linkedIdx !== -1) {
+                            const linked = draft[linkedIdx];
+                            if (linked.params.length > 1) {
+                                linked.params = linked.params.filter((prm) => prm.fid !== edge.srcFid);
+                                if (linked.func !== '<user-defined>') {
+                                    linked.func = '<mixed>';
+                                }
+                            } else {
+                                draft.splice(linkedIdx, 1);
+                            }
+                        }
+                    })
+                );
+            }
+        },
+        [setFunctionalDependencies]
+    );
+
+    const graphRef = useRef<Graph | undefined>(undefined);
     const renderData = useRenderData({
         mode: 'edit',
         fields,
@@ -143,17 +152,18 @@ const FDGraph: React.FC<{
         <Container>
             <div ref={containerRef} />
             <div className="tools">
-                <DefaultButton
+                <Button
+                    variant="outline"
                     style={{
                         marginBottom: '1em',
                         padding: '0.4em 0',
                         height: 'unset',
                     }}
                     onClick={handleForceLayout}
-                    iconProps={{ iconName: 'Play' }}
                 >
+                    <RathIcon name="Play" />
                     {intl.get('causal.actions.relayout')}
-                </DefaultButton>
+                </Button>
             </div>
         </Container>
     );

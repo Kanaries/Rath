@@ -13,13 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useCallback, useState } from 'react';
-import { Breadcrumb, IBreadcrumbItem, ProgressIndicator } from '@fluentui/react';
+import React, { useCallback, useState, type JSX } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
-import { Button, Card } from '@fluentui/react-components';
-import { CornerUpLeft } from 'lucide-react';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -27,6 +24,18 @@ import DataLoadingStatus from '../dataSource/dataLoadingStatus';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import { notify } from '../../components/error';
+import { RathIcon } from '../../components/icons';
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '../../components/ui/breadcrumb';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Spinner } from '../../components/ui/spinner';
 import DatabaseConnector from './database/main';
 import FileData from './file';
 import DemoData from './demo';
@@ -147,49 +156,50 @@ const ConnectionCreation: React.FC<ConnectionCreationProps> = (props) => {
         ),
     };
 
-    const _onBreadcrumbItemClicked = useCallback((ev?: React.MouseEvent<HTMLElement>, item?: IBreadcrumbItem) => {
-        if (item && item.key === 'connection') {
-            setDataSourceType(null);
-        }
-    }, []);
-
-    const items: IBreadcrumbItem[] = [
-        { text: intl.get('dataSource.dataSourceConnection.types'), key: 'connection', onClick: _onBreadcrumbItemClicked, role: 'text' },
-    ];
-
-    if (dataSourceType !== null) {
-        items.push({ text: intl.get(`dataSource.importData.type.${dataSourceType}`), key: dataSourceType, onClick: _onBreadcrumbItemClicked });
-    }
-
     return (
         <div style={{ marginTop: '1em' }}>
             {dataSourceType !== null && (
                 <Card>
-                    <Breadcrumb
-                        items={items}
-                        maxDisplayedItems={10}
-                        styles={{
-                            itemLink: {
-                                fontSize: '1em',
-                            },
-                        }}
-                    />
-                    <hr style={{ marginTop: '1em' }} />
-                    <div style={{ margin: '2px 0em' }}>
+                    <CardHeader>
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <button type="button" onClick={() => setDataSourceType(null)}>
+                                            {intl.get('dataSource.dataSourceConnection.types')}
+                                        </button>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage>{intl.get(`dataSource.importData.type.${dataSourceType}`)}</BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    </CardHeader>
+                    <CardContent>
                         <Button
-                            icon={<CornerUpLeft />}
+                            type="button"
+                            variant="outline"
+                            className="gap-1.5"
                             onClick={() => {
                                 setDataSourceType(null);
                             }}
                         >
+                            <RathIcon name="Back" />
                             {intl.get('common.return')}
                         </Button>
-                    </div>
-                    <Content open={Boolean(dataSourceType)}>
-                        {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
-                        {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
-                        {dataSourceType && formMap[dataSourceType]}
-                    </Content>
+                        <Content open={Boolean(dataSourceType)}>
+                            {loading && dataSourceType !== IDataSourceType.FILE && (
+                                <div className="my-2 flex items-center gap-2 text-sm">
+                                    <Spinner size="sm" />
+                                    loading
+                                </div>
+                            )}
+                            {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
+                            {dataSourceType && formMap[dataSourceType]}
+                        </Content>
+                    </CardContent>
                 </Card>
             )}
 

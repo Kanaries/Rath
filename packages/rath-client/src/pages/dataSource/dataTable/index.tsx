@@ -1,17 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArtColumn } from 'ali-react-table';
 import { observer } from 'mobx-react-lite';
-import { IconButton, Label, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IFieldMeta, IRow } from '../../../interfaces';
 import { attachColumnStats, extractSelection, findViolatedNegative, intersectPattern } from '../../../lib/textPattern';
+import { RathIcon } from '../../../components/icons';
+import { Alert } from '../../../components/ui/alert';
+import { Button } from '../../../components/ui/button';
+import { Label } from '../../../components/ui/label';
+import { RathDataTable, type RathColumn } from '../../../components/rath-ui/rath-data-table';
 import HeaderCell from './headerCell';
 import NestPanel from './components/nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
 import { IColStateType } from './headerCell/components/statePlaceholder';
-import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
+import { DataSourceTableContainer, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, pickFieldMetaFromFieldMetaWithSuggestions, uniquePattern } from './utils';
 // import regexgen from 'regexgen';
 
@@ -311,7 +314,7 @@ const DataTable: React.FC = (props) => {
         };
     }, []);
 
-    const columns: ArtColumn[] = displayList.map((f, i) => {
+    const columns: RathColumn<IRow>[] = displayList.map((f, i) => {
         const fm: IFieldMeta | undefined = pickFieldMetaFromFieldMetaWithSuggestions(fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid));
         const suggestions = fields.find((_f) => _f.fid === f.fid)?.extSuggestions ?? [];
         let colType: IColStateType | undefined = undefined;
@@ -323,11 +326,13 @@ const DataTable: React.FC = (props) => {
                 colType = 'source';
             }
         }
-        const col: ArtColumn = {
+        const col: RathColumn<IRow> = {
+            key: f.fid,
             name: f.name || f.fid,
-            code: f.fid,
-            width: 220,
-            title: (
+            fieldName: f.fid,
+            minWidth: 204,
+            maxWidth: 204,
+            onRenderHeader: () => (
                 <HeaderCell
                     disable={Boolean(f.disable)}
                     name={f.name || f.fid}
@@ -341,7 +346,8 @@ const DataTable: React.FC = (props) => {
                 />
             ),
         };
-        col.render = (value: any) => {
+        col.onRender = (row) => {
+            const value = row[f.fid];
             const text: string = `${value}`;
             const hasActiveSelection = textSelectList.length > 0 && textSelectList[0].fid === f.fid;
             const isExcluded = hasActiveSelection && textNegativeList.some((n) => n.fid === f.fid && n.str === text);
@@ -424,16 +430,12 @@ const DataTable: React.FC = (props) => {
         return col;
     });
 
-    const rowPropsCallback = useCallback(
+    const rowStyle = useCallback(
         (record: IRow) => {
             const hasEmpty = fields.some((f) => {
                 return !f.disable && (record[f.fid] === null || record[f.fid] === undefined || record[f.fid] === '');
             });
-            return {
-                style: {
-                    backgroundColor: hasEmpty ? '#fff2e8' : 'rgba(0,0,0,0)',
-                },
-            };
+            return { backgroundColor: hasEmpty ? '#fff2e8' : 'rgba(0,0,0,0)' };
         },
         [fields]
     );
@@ -446,54 +448,40 @@ const DataTable: React.FC = (props) => {
     return (
         <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
-                <MessageBar
-                    messageBarType={MessageBarType.warning}
-                    isMultiline={false}
-                    styles={{
-                        root: {
-                            boxSizing: 'border-box',
-                            width: 'unset',
-                            margin: '2px 0 0 0',
-                        },
-                    }}
-                >
+                <Alert className="my-[2px] mb-0 box-border w-auto">
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
-                </MessageBar>
+                </Alert>
             )}
             {textSelectList.length > 0 && !hasPattern && (
-                <MessageBar
-                    messageBarType={MessageBarType.info}
-                    isMultiline={false}
-                    styles={{
-                        root: {
-                            boxSizing: 'border-box',
-                            width: 'unset',
-                            margin: '2px 0 0 0',
-                        },
-                    }}
-                    actions={
+                <Alert className="my-[2px] mb-0 flex box-border w-auto items-center justify-between gap-2">
+                    <span>{intl.get('dataSource.textPattern.noPatternFound')}</span>
+                    {
                         activeNegatives.length > 0 ? (
                             <div>
                                 <MiniButton text={intl.get('dataSource.textPattern.clearExcluded')} onClick={clearNegatives} />
                             </div>
-                        ) : undefined
+                        ) : null
                     }
-                >
-                    <span>{intl.get('dataSource.textPattern.noPatternFound')}</span>
-                </MessageBar>
+                </Alert>
             )}
             <div style={{ display: 'flex' }}>
                 {columns.length > 0 && (
-                    <CustomBaseTable
-                        useVirtual={true}
-                        getRowProps={rowPropsCallback}
-                        style={DATA_TABLE_STYLE_CONFIG.TABLE_INNER_STYLE}
-                        dataSource={filteredData}
-                        columns={columns}
-                    />
+                    <DataSourceTableContainer>
+                        <RathDataTable
+                            items={filteredData}
+                            columns={columns}
+                            rowStyle={rowStyle}
+                            virtualized
+                            horizontalVirtualized
+                            maxHeight={DATA_TABLE_STYLE_CONFIG.TABLE_INNER_STYLE.height}
+                            estimatedRowHeight={38}
+                        />
+                    </DataSourceTableContainer>
                 )}
                 <NestPanel show={hasPattern} onClose={() => {}}>
-                    <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
+                    <Button type="button" variant="ghost" size="icon" className="float-right" onClick={clearTextSelect}>
+                        <RathIcon name="Cancel" />
+                    </Button>
                     <Label>{intl.get('common.suggestions')}</Label>
                     {activeNegatives.length > 0 ? (
                         <div style={{ fontSize: 12, color: '#8c8c8c', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -540,7 +528,7 @@ const DataTable: React.FC = (props) => {
                                         })}
                                     </div>
                                 )}
-                                <Stack tokens={{ childrenGap: 4 }}>
+                                <div className="flex flex-col gap-[4px]">
                                     <MiniButton
                                         text={intl.get(`common.${tpPos.index === ti && tpPos.groupKey === groupKey ? 'applied' : 'apply'}`)}
                                         disabled={tpPos.index === ti && tpPos.groupKey === groupKey}
@@ -571,7 +559,7 @@ const DataTable: React.FC = (props) => {
                                             }}
                                         />
                                     )}
-                                </Stack>
+                                </div>
                                 {tpPos.index === ti && tpPos.groupKey === groupKey && editTP && (
                                     <TPRegexEditor
                                         tp={tp}

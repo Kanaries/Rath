@@ -1,8 +1,12 @@
 import intl from 'react-intl-universal';
-import { ChoiceGroup, DefaultButton, Label, Modal, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
+import { Button } from '../../../components/ui/button';
+import { Label } from '../../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../../components/ui/radio-group';
+import { RathIcon } from '../../../components/icons';
 import { notify } from '../../../components/error';
 import { useGlobalStore } from '../../../store';
 
@@ -17,11 +21,10 @@ const ModelStorage: FC = () => {
     const [showModels, setShowModels] = useState<boolean>(false);
     return (
         <Fragment>
-            <DefaultButton
-                text={intl.get('causal.actions.save_model')}
-                iconProps={{ iconName: 'Save' }}
+            <Button
+                variant="outline"
                 onClick={() => {
-                    causalStore.save().then(ok => {
+                    causalStore.save().then((ok) => {
                         if (ok) {
                             notify({
                                 title: 'Causal Model Saved',
@@ -37,50 +40,51 @@ const ModelStorage: FC = () => {
                         }
                     });
                 }}
-            />
-            <DefaultButton
-                text={intl.get('causal.actions.load_model')}
-                iconProps={{ iconName: 'CloudDownload' }}
+            >
+                <RathIcon name="Save" />
+                {intl.get('causal.actions.save_model')}
+            </Button>
+            <Button
+                variant="outline"
                 onClick={() => {
                     setShowModels(true);
                     causalStore.updateSaveKeys();
                 }}
-            />
-            <Modal
-                isOpen={showModels}
-                onDismiss={() => {
-                    setShowModels(false);
-                }}
             >
-                <ModalInnerContainer>
-                    <Stack tokens={{ childrenGap: 10 }}>
-                        <Label>{intl.get('causal.analyze.my_models')}</Label>
-                        <ChoiceGroup
-                            label={intl.get('causal.analyze.model_list')}
-                            value={selectedModelKey}
-                            options={saveKeys.map((key) => {
-                                return {
-                                    key,
-                                    text: key,
-                                };
-                            })}
-                            onChange={(e, op) => {
-                                op && setSelectedModelKey(op.key);
-                            }}
-                        />
-                        <PrimaryButton
-                            disabled={selectedModelKey === undefined}
-                            text={intl.get('common.apply')}
-                            onClick={() => {
-                                if (selectedModelKey) {
-                                    causalStore.checkout(selectedModelKey);
-                                }
-                                setShowModels(false);
-                            }}
-                        />
-                    </Stack>
-                </ModalInnerContainer>
-            </Modal>
+                <RathIcon name="CloudDownload" />
+                {intl.get('causal.actions.load_model')}
+            </Button>
+            <Dialog open={showModels} onOpenChange={setShowModels}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{intl.get('causal.analyze.my_models')}</DialogTitle>
+                    </DialogHeader>
+                    <ModalInnerContainer>
+                        <div className="grid gap-2.5">
+                            <Label>{intl.get('causal.analyze.model_list')}</Label>
+                            <RadioGroup value={selectedModelKey} onValueChange={setSelectedModelKey}>
+                                {saveKeys.map((key) => (
+                                    <div className="flex items-center gap-2" key={key}>
+                                        <RadioGroupItem id={`causal-model-${key}`} value={key} />
+                                        <Label htmlFor={`causal-model-${key}`}>{key}</Label>
+                                    </div>
+                                ))}
+                            </RadioGroup>
+                            <Button
+                                disabled={selectedModelKey === undefined}
+                                onClick={() => {
+                                    if (selectedModelKey) {
+                                        causalStore.checkout(selectedModelKey);
+                                    }
+                                    setShowModels(false);
+                                }}
+                            >
+                                {intl.get('common.apply')}
+                            </Button>
+                        </div>
+                    </ModalInnerContainer>
+                </DialogContent>
+            </Dialog>
         </Fragment>
     );
 };

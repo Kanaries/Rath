@@ -1,15 +1,17 @@
-import { Dropdown, IDropdownOption, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import type { FC } from 'react';
 import { useGlobalStore } from '../../../store';
+import { RathSelect, RathSelectOption } from '../../../components/rath-ui/rath-select';
+import { Label } from '../../../components/ui/label';
+import { Switch } from '../../../components/ui/switch';
 import VisThemeEditor from './visThemeEditor';
 
 const DesignSegment: FC = () => {
     const { commonStore } = useGlobalStore();
     const { vizTheme, useCustomTheme } = commonStore;
     const { themes } = commonStore;
-    const themeOptions: IDropdownOption[] = Object.keys(themes).map<IDropdownOption>(k => {
+    const themeOptions: RathSelectOption[] = Object.keys(themes).map<RathSelectOption>((k) => {
         return {
             key: k,
             text: k,
@@ -17,26 +19,25 @@ const DesignSegment: FC = () => {
     });
     return (
         <div>
-            <Dropdown
+            <RathSelect
                 options={themeOptions}
                 label={intl.get('common.vistheme')}
                 selectedKey={vizTheme}
-                onChange={(e, op) => {
-                    op && commonStore.applyPreBuildTheme(op.key as string);
+                onChange={(key) => {
+                    commonStore.applyPreBuildTheme(key as string);
                 }}
             />
-            <div>
-                <Toggle
-                    label={intl.get('login.design.useCustomTheme')}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <Switch
+                    id="login-design-use-custom-theme"
                     checked={useCustomTheme}
-                    onChange={(e, checked) => {
+                    onCheckedChange={(checked) => {
                         commonStore.setUseCustomeTheme(Boolean(checked));
                     }}
                 />
+                <Label htmlFor="login-design-use-custom-theme">{intl.get('login.design.useCustomTheme')}</Label>
             </div>
-            {
-                useCustomTheme && <VisThemeEditor />
-            }
+            {useCustomTheme && <VisThemeEditor />}
         </div>
     );
 };

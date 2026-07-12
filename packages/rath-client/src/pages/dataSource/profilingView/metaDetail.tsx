@@ -1,4 +1,3 @@
-import { DefaultButton, Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { applyFilters, IFilter, IRow } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -11,6 +10,9 @@ import { IFieldMeta } from '../../../interfaces';
 import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
 import FieldFilter from '../../../components/fieldFilter';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { RathSelect, RathSelectOption } from '../../../components/rath-ui/rath-select';
 import { getRange } from '../../../utils';
 import { RATH_THEME_CONFIG } from '../../../theme';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
@@ -18,7 +20,6 @@ import DetailTable from './detailTable';
 import FullDistViz from './fullDistViz';
 import StatTable from './statTable';
 import { patchFilterTemporalRange } from './utils';
-
 
 const DetailContainer = styled.div`
     flex-grow: 1;
@@ -57,10 +58,10 @@ const DetailContainer = styled.div`
         background-color: ${RATH_THEME_CONFIG.dimensionColor};
     }
     .measure {
-        background-color: ${RATH_THEME_CONFIG.measureColor}
+        background-color: ${RATH_THEME_CONFIG.measureColor};
     }
     .disable {
-        background-color: ${RATH_THEME_CONFIG.disableColor}
+        background-color: ${RATH_THEME_CONFIG.disableColor};
     }
 `;
 
@@ -131,12 +132,12 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
         return features;
     }, [field, filteredData, filters]);
 
-    const ANALYTIC_TYPE_CHOICES_LANG: IDropdownOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
+    const ANALYTIC_TYPE_CHOICES_LANG: RathSelectOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
         text: intl.get(`common.${ch.key}`),
     }));
 
-    const SEMANTIC_TYPE_CHOICES_LANG: IDropdownOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
+    const SEMANTIC_TYPE_CHOICES_LANG: RathSelectOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
         text: intl.get(`common.semanticType.${ch.key}`),
     }));
@@ -161,10 +162,9 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                 semanticType={field.semanticType}
                 onSelect={onSelectionChange}
             />
-            <Stack horizontal tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }} verticalAlign="center">
-                <DefaultButton
-                    text={intl.get('dataSource.statViewInfo.explore')}
-                    iconProps={{ iconName: 'Lightbulb' }}
+            <div className="mt-[1em] flex flex-row items-center gap-[10px]">
+                <Button
+                    variant="outline"
                     onClick={() => {
                         runInAction(() => {
                             commonStore.setAppKey(PIVOT_KEYS.semiAuto);
@@ -175,38 +175,33 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                             });
                         });
                     }}
-                />
-                <Dropdown
+                >
+                    <RathIcon name="Lightbulb" className="mr-1" />
+                    {intl.get('dataSource.statViewInfo.explore')}
+                </Button>
+                <RathSelect
                     options={ANALYTIC_TYPE_CHOICES_LANG}
                     selectedKey={field.analyticType}
-                    onChange={(ev, option) => {
-                        option && dataSourceStore.updateFieldInfo(field.fid, 'analyticType', option.key);
+                    onChange={(key) => {
+                        dataSourceStore.updateFieldInfo(field.fid, 'analyticType', key);
                     }}
                 />
-                <Dropdown
+                <RathSelect
                     options={SEMANTIC_TYPE_CHOICES_LANG}
                     selectedKey={field.semanticType}
-                    onChange={(ev, option) => {
-                        option && dataSourceStore.updateFieldInfo(field.fid, 'semanticType', option.key);
+                    onChange={(key) => {
+                        dataSourceStore.updateFieldInfo(field.fid, 'semanticType', key);
                     }}
                 />
                 <FieldFilter fid={field.fid} />
-            </Stack>
+            </div>
             <hr style={{ margin: '1em' }} />
-            <Stack horizontal tokens={{ childrenGap: '3em' }}>
-                <StatTable
-                    title={intl.get('dataSource.statViewInfo.originStatTable')}
-                    features={field.features}
-                    semanticType={field.semanticType}
-                />
+            <div className="flex flex-row gap-[3em]">
+                <StatTable title={intl.get('dataSource.statViewInfo.originStatTable')} features={field.features} semanticType={field.semanticType} />
                 {filters.length > 0 && (
-                    <StatTable
-                        title={intl.get('dataSource.statViewInfo.selectionStatTable')}
-                        features={features}
-                        semanticType={field.semanticType}
-                    />
+                    <StatTable title={intl.get('dataSource.statViewInfo.selectionStatTable')} features={features} semanticType={field.semanticType} />
                 )}
-            </Stack>
+            </div>
             {filters.length > 0 && <DetailTable data={filteredData} />}
         </DetailContainer>
     );

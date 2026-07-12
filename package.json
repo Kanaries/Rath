@@ -9,6 +9,12 @@
     "build:renderer": "yarn workspace vega-painter-renderer build",
     "build:client": "yarn workspace rath-client build",
     "build": "npm run build:utils && npm run build:scenegraph && npm run build:renderer && npm run build:client",
+    "build:report": "node scripts/frontend-build-report.mjs",
+    "audit:tailwind4": "node scripts/audit-tailwind-v4.mjs",
+    "audit:react19": "node scripts/audit-react19-readiness.mjs",
+    "audit:react19:gate": "node scripts/audit-react19-readiness.mjs --react19-gate",
+    "test:smoke": "playwright test",
+    "test:smoke:install": "playwright install chromium",
     "test": "yarn workspace rath-client test",
     "ui": "npm run test && npm run build && node start.js",
     "devfront": "yarn workspace rath-client start",
@@ -25,6 +31,10 @@
     "data analysis"
   ],
   "author": "Observed Observer",
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": "24.x"
+  },
   "bugs": {
     "url": "https://github.com/Kanaries/Rath/issues"
   },
@@ -42,13 +52,15 @@
     ]
   },
   "resolutions": {
-    "@types/react": "^17.x",
-    "@types/react-dom": "^17.x",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
     "vega-scenegraph": "4.10.1-kanaries-patch"
   },
   "homepage": "https://github.com/Kanaries/Rath#readme",
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "concurrently": "^4.1.2",
+    "semver": "6.3.0",
     "yarn": "^1.19.0"
   },
   "dependencies": {}

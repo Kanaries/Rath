@@ -1,6 +1,6 @@
 import React from 'react';
-import { Icon } from '@fluentui/react';
 import styled from 'styled-components';
+import { RathIcon } from '../icons';
 import { callTerminator, cancelTerminator, IErrorInfo } from './store';
 interface MessageProps extends IErrorInfo {
     onClose: () => void;
@@ -83,12 +83,12 @@ const MessageCard: React.FC<MessageProps> = props => {
         onMouseEnter={() => {
             cancelTerminator()
         }}>
-            <Icon iconName="Cancel" className="cancel-icon" onClick={onClose} />
+            <RathIcon name="Cancel" className="cancel-icon" onClick={onClose} />
             <div>
-                {type === 'error' && <Icon iconName="ErrorBadge" className="text-red-500 text-2xl" />}
-                {type === 'warning' && <Icon iconName="Blocked2" className="text-yellow-500 text-2xl" />}
-                {type === 'success' && <Icon iconName="Completed" className="text-green-500 text-2xl" />}
-                {type === 'info' && <Icon iconName="Info" className="text-blue-500 text-2xl" />}
+                {type === 'error' && <RathIcon name="ErrorBadge" size={24} className="text-red-500 text-2xl" />}
+                {type === 'warning' && <RathIcon name="Blocked2" size={24} className="text-yellow-500 text-2xl" />}
+                {type === 'success' && <RathIcon name="Completed" size={24} className="text-green-500 text-2xl" />}
+                {type === 'info' && <RathIcon name="Info" size={24} className="text-blue-500 text-2xl" />}
             </div>
         <div className="span-5-content">
             <h1>{title}</h1>

@@ -17,10 +17,10 @@ const Cont = styled.div`
     }
 `;
 
-interface StackProps {
+interface ErrorStackProps {
 
 }
-const Stack: React.FC<StackProps> = props => {
+const ErrorStack: React.FC<ErrorStackProps> = props => {
     const store = getErrorStore();
     const { queue } = store;
     return <Cont>
@@ -37,4 +37,4 @@ const Stack: React.FC<StackProps> = props => {
     </Cont>
 }
 
-export default observer(Stack);
+export default observer(ErrorStack);

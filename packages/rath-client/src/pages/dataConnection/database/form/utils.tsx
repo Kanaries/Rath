@@ -1,6 +1,6 @@
-import { Icon } from '@fluentui/react';
 import produce from 'immer';
 import type { Dispatch } from 'react';
+import { RathIcon } from '../../../../components/icons';
 import type { DatabaseLevelType } from '../options';
 import { INestedListItem } from '../components/nested-list-item';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableDetail, fetchTableList } from '../service';
@@ -50,7 +50,7 @@ export const fetchListAsNodes = async (
                     key: database,
                     text: database,
                     isUnloaded: hasNextLevelThen,
-                    icon: <Icon iconName="Database" />,
+                    icon: <RathIcon name="Database" />,
                 }));
             }
             case 'schema': {
@@ -60,7 +60,7 @@ export const fetchListAsNodes = async (
                     key: schema,
                     text: schema,
                     isUnloaded: hasNextLevelThen,
-                    icon: <Icon iconName="TableGroup" />,
+                    icon: <RathIcon name="TableGroup" />,
                 }));
             }
             case 'table': {
@@ -69,7 +69,7 @@ export const fetchListAsNodes = async (
                     group: 'table',
                     key: table.name,
                     text: table.name,
-                    icon: <Icon iconName="Table" />,
+                    icon: <RathIcon name="Table" />,
                     isUnloaded: false,
                     children: table.meta.map(col => ({
                         group: 'column',
@@ -78,8 +78,8 @@ export const fetchListAsNodes = async (
                         text: col.key,
                         isUnloaded: false,
                         icon: (
-                            <Icon
-                                iconName={
+                            <RathIcon
+                                name={
                                     col.dataType?.match(/(Int|Double|Float|Decimal)/) ? 'NumberField'
                                         : col.dataType?.match(/(String|Char|VarChar)/i) ? 'TextField'
                                         : 'FieldEmpty'

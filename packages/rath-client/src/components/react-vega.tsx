@@ -26,7 +26,7 @@ export interface IReactVegaHandler {
 const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVega (props, ref) {
     const { spec, dataSource, signalHandler = {}, actions, config } = props;
     const container = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<View>();
+    const viewRef = useRef<View | undefined>(undefined);
     const exportOptRef = useRef<ImageExportDialogHandler>(null);
     useImperativeHandle(ref, () => ({
         async getSVGData() {

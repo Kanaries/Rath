@@ -1,14 +1,13 @@
 import intl from 'react-intl-universal';
-import { Pivot, PivotItem } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import type { IFieldMeta } from "../../../../interfaces";
-import { useGlobalStore } from "../../../../store";
-import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { PredictAlgorithm } from "../../predict";
-import ConfigPanel from "./configPanel";
-import ResultPanel from "./resultPanel";
-
+import { observer } from 'mobx-react-lite';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '../../../../components/ui/tabs';
+import type { IFieldMeta } from '../../../../interfaces';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import { PredictAlgorithm } from '../../predict';
+import ConfigPanel from './configPanel';
+import ResultPanel from './resultPanel';
 
 const TabList: FC<{
     algo: PredictAlgorithm;
@@ -20,10 +19,7 @@ const TabList: FC<{
         features: IFieldMeta[];
         targets: IFieldMeta[];
     };
-    setPredictInput: (predictInput: {
-        features: IFieldMeta[];
-        targets: IFieldMeta[];
-    }) => void;
+    setPredictInput: (predictInput: { features: IFieldMeta[]; targets: IFieldMeta[] }) => void;
 }> = ({ algo, setAlgo, tab, setTab, running, predictInput, setPredictInput }) => {
     const { dataSourceStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
@@ -42,11 +38,11 @@ const TabList: FC<{
     const [comparison, setComparison] = useState<null | [string] | [string, string]>(null);
 
     useEffect(() => {
-        setComparison(group => {
+        setComparison((group) => {
             if (!group) {
                 return null;
             }
-            const next = group.filter(id => predictCache.some(rec => rec.id === id));
+            const next = group.filter((id) => predictCache.some((rec) => rec.id === id));
             if (next.length === 0) {
                 return null;
             }
@@ -56,8 +52,8 @@ const TabList: FC<{
 
     const diff = useMemo(() => {
         if (comparison?.length === 2) {
-            const before = sortedResults.find(res => res.id === comparison[0]);
-            const after = sortedResults.find(res => res.id === comparison[1]);
+            const before = sortedResults.find((res) => res.id === comparison[0]);
+            const after = sortedResults.find((res) => res.id === comparison[1]);
             if (before && after) {
                 const temp: unknown[] = [];
                 for (let i = 0; i < before.data.result.length; i += 1) {
@@ -65,10 +61,9 @@ const TabList: FC<{
                     const prev = before.data.result[i][1];
                     const next = after.data.result[i][1];
                     if (next === 1 && prev === 0) {
-                        temp.push(Object.fromEntries(Object.entries(row).map(([k, v]) => [
-                            allFieldsRef.current.find(f => f.fid === k)?.name ?? k,
-                            v,
-                        ])));
+                        temp.push(
+                            Object.fromEntries(Object.entries(row).map(([k, v]) => [allFieldsRef.current.find((f) => f.fid === k)?.name ?? k, v]))
+                        );
                     }
                 }
                 return temp;
@@ -86,25 +81,30 @@ const TabList: FC<{
 
     return (
         <>
-            <Pivot
-                selectedKey={tab}
-                onLinkClick={(item) => {
-                    item && setTab(item.props.itemKey as typeof tab);
-                }}
-                style={{ marginTop: '0.5em' }}
-            >
-                <PivotItem itemKey="config" headerText={intl.get('causal.analyze.model_config')} />
-                <PivotItem itemKey="result" headerText={intl.get('causal.analyze.predict_result')} />
-            </Pivot>
+            <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)} className="mt-2">
+                <TabsList>
+                    <TabsTrigger value="config">{intl.get('causal.analyze.model_config')}</TabsTrigger>
+                    <TabsTrigger value="result">{intl.get('causal.analyze.predict_result')}</TabsTrigger>
+                </TabsList>
+            </Tabs>
             <div className="content">
-                {{
-                    config: <ConfigPanel algo={algo} setAlgo={setAlgo} running={running} predictInput={predictInput} setPredictInput={setPredictInput} />,
-                    result: <ResultPanel />
-                }[tab]}
+                {
+                    {
+                        config: (
+                            <ConfigPanel
+                                algo={algo}
+                                setAlgo={setAlgo}
+                                running={running}
+                                predictInput={predictInput}
+                                setPredictInput={setPredictInput}
+                            />
+                        ),
+                        result: <ResultPanel />,
+                    }[tab]
+                }
             </div>
         </>
     );
 };
-
 
 export default observer(TabList);

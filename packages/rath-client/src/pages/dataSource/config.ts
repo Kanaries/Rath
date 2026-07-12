@@ -1,57 +1,60 @@
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { publicAssetUrl, runtimeEnv } from 'runtime-env';
 import { IDataSourceType } from "../../global";
+import type { LegacyIconName } from '../../components/icons';
 
+export interface DataSourceTypeOption {
+    key: IDataSourceType;
+    text: string;
+    icon: LegacyIconName;
+    disabled?: boolean;
+}
 
-export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
+export const useDataSourceTypeOptions = function (): DataSourceTypeOption[] {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`);
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
     const historyText = intl.get('common.history');
 
-    const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
+    const options = useMemo<DataSourceTypeOption[]>(() => {
         return [
             {
                 key: IDataSourceType.LOCAL,
                 text: historyText,
-                iconProps: { iconName: "History" },
+                icon: 'History',
             },
             {
                 key: IDataSourceType.FILE,
                 text: fileText,
-                iconProps: { iconName: "FabricUserFolder" },
+                icon: 'FabricUserFolder',
             },
             {
                 key: IDataSourceType.DEMO,
                 text: demoText,
-                iconProps: { iconName: "FileTemplate" },
+                icon: 'FileTemplate',
             },
-            // {
-            //     key: IDataSourceType.CLOUD,
-            //     text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
-            //     iconProps: { iconName: "CloudDownload" },
-            // },
             {
                 key: IDataSourceType.DATABASE,
                 text: dbText,
-                iconProps: { iconName: "Database" }
+                icon: 'Database',
             },
             {
                 key: IDataSourceType.AIRTABLE,
                 text: 'AirTable',
-                iconProps: { iconName: 'Table' },
+                icon: 'Table',
                 disabled: false
             },
             {
                 key: IDataSourceType.RESTFUL,
                 text: restfulText,
-                iconProps: { iconName: "Cloud" },
+                icon: 'Cloud',
             },
             {
                 key: IDataSourceType.OLAP,
                 text: 'OLAP',
-                iconProps: { iconName: "TripleColumn" },
+                icon: 'TripleColumn',
                 disabled: true,
             }
         ];
@@ -59,7 +62,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     return options;
 };
 
-export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
+export const DemoDataAssets = runtimeEnv.isProduction ? {
     CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
@@ -71,17 +74,17 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     BIKE_SHARING_DC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/bike_dc-dataset-service.json'
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
-    CARS: "/datasets/ds-cars-service.json",
+    CARS: publicAssetUrl('datasets/ds-cars-service.json'),
     // CARS: "/datasets/test.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
-    STUDENTS: "/datasets/ds-students-service.json",
-    BTC_GOLD: "/datasets/ds_btc_gold_service.json",
-    BIKE_SHARING: '/datasets/ds-bikesharing-service.json',
-    CAR_SALES: '/datasets/ds-carsales-service.json',
-    COLLAGE: '/datasets/ds-collage-service.json',
-    TITANIC: '/datasets/ds-titanic-service.json',
-    KEPLER: '/datasets/ds-kelper-service.json',
-    BIKE_SHARING_DC: '/datasets/bike_dc-dataset-service.json'
+    STUDENTS: publicAssetUrl('datasets/ds-students-service.json'),
+    BTC_GOLD: publicAssetUrl('datasets/ds_btc_gold_service.json'),
+    BIKE_SHARING: publicAssetUrl('datasets/ds-bikesharing-service.json'),
+    CAR_SALES: publicAssetUrl('datasets/ds-carsales-service.json'),
+    COLLAGE: publicAssetUrl('datasets/ds-collage-service.json'),
+    TITANIC: publicAssetUrl('datasets/ds-titanic-service.json'),
+    KEPLER: publicAssetUrl('datasets/ds-kelper-service.json'),
+    BIKE_SHARING_DC: publicAssetUrl('datasets/bike_dc-dataset-service.json')
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;

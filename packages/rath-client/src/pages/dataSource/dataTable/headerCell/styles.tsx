@@ -21,18 +21,18 @@ export const HEADER_CELL_STYLE_CONFIG = {
         transform: 'scale(0.75)',
         margin: '-4px -18px',
         flexShrink: 0,
-    },
-    DELETE_BUTTON: {
-        iconName: 'Delete',
-        style: {
-            color: '#c50f1f',
-        },
     }
 } as const;
 
 export const HeaderCellContainer = styled.div`
+    width: 100%;
+    min-width: 0;
+
     .others {
         position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
         padding: 12px;
     }
     .bottom-bar {
@@ -61,19 +61,22 @@ export const HeaderCellContainer = styled.div`
     .header-row {
         display: flex;
         flex-wrap: nowrap;
+        width: 100%;
+        min-width: 0;
         .header {
             margin-top: 0px;
             margin-bottom: 0px;
             font-size: 18px;
-            font-weight: 500;
+            font-weight: 400;
             line-height: 36px;
-            flex-grow: 1;
-            max-width: 160px;
+            flex: 1 1 auto;
+            min-width: 0;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
         }
         .edit-icon {
+            display: flex;
             flex-shrink: 0;
             flex-grow: 0;
         }

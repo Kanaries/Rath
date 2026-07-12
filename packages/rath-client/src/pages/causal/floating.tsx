@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
-import styled, { StyledComponentProps } from "styled-components";
+import { forwardRef, type ComponentPropsWithoutRef, type JSX } from "react";
+import styled from "styled-components";
 
 
 const AsideWidth = '2em';
@@ -38,13 +38,15 @@ const Content = styled.div`
     flex: 1;
 `;
 
-const Floating = forwardRef<HTMLDivElement, StyledComponentProps<'div', {}, {
+type FloatingProps = ComponentPropsWithoutRef<'div'> & {
     /** @default 'fixed' */
     position?: 'absolute' | 'fixed';
     /** @default 'end' */
     direction?: 'start' | 'end';
     onRenderAside?: () => JSX.Element;
-}, never>>(function Floating (
+};
+
+const Floating = forwardRef<HTMLDivElement, FloatingProps>(function Floating (
     { children, position = 'fixed', direction = 'end', onRenderAside = () => direction === 'end' ? '<' : '>', ...props }, ref
 ) {
     return (

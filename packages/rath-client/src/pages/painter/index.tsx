@@ -3,16 +3,6 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { Specification } from 'visual-insights';
-import {
-    DefaultButton,
-    Slider,
-    Stack,
-    SwatchColorPicker,
-    ChoiceGroup,
-    Pivot,
-    PivotItem,
-    Toggle,
-} from '@fluentui/react';
 import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed from 'vega-embed';
@@ -23,9 +13,17 @@ import { PainterModule, paint, startPaint, stopPaint } from 'vega-painter-render
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
+import { cn } from '../../utils/cn';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { viewSampling } from '../../lib/stat/sampling';
 import { Card } from '../../components/card';
+import { RathIcon } from '../../components/icons';
+import { Button } from '../../components/ui/button';
+import { Label } from '../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Slider } from '../../components/ui/slider';
+import { Switch } from '../../components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { isContinuous, clearAggregation, debounceShouldNeverBeUsed, labelingData, VegaViewChanges, debounce } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
@@ -63,7 +61,7 @@ const Painter: React.FC = (props) => {
     const isPainting = useRef(false);
     const { dataSourceStore, painterStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { painterView, painterViewData } = painterStore
+    const { painterView, painterViewData } = painterStore;
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
@@ -79,7 +77,7 @@ const Painter: React.FC = (props) => {
         if (painterView.spec === null) return null;
         if (!clearAgg) return painterView.spec;
         return clearAggregation(toJS(painterView.spec));
-    }, [painterView.spec, clearAgg])
+    }, [painterView.spec, clearAgg]);
 
     const initValue = mutFeatValues[0];
 
@@ -116,11 +114,18 @@ const Painter: React.FC = (props) => {
     }, [painterViewData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const linkNearViz = useCallback(debounceShouldNeverBeUsed(() => {
-        painterStore.setPaintingForTrigger(true);
-    }, () => {
-        painterStore.pullTrigger()
-    }, 800), [painterStore])
+    const linkNearViz = useCallback(
+        debounceShouldNeverBeUsed(
+            () => {
+                painterStore.setPaintingForTrigger(true);
+            },
+            () => {
+                painterStore.pullTrigger();
+            },
+            800
+        ),
+        [painterStore]
+    );
 
     const noViz = viewData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
     const axisResizable = painterMode === PAINTER_MODE.MOVE;
@@ -158,16 +163,18 @@ const Painter: React.FC = (props) => {
     const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec !== null && container.current) {
-
             // @ts-ignore
             embed(container.current, painterSpec, {
                 actions: painterMode === PAINTER_MODE.MOVE,
                 renderer: 'painter',
             }).then((res) => {
                 const viewChanges = new VegaViewChanges(res.view, 'dataSource', LABEL_INDEX);
-                viewChanges.insert(viewData).runAsync().then(viewChanges => {
-                    // if (testConfig.printLog) { window.console.log("changes =", changes); }
-                });
+                viewChanges
+                    .insert(viewData)
+                    .runAsync()
+                    .then((viewChanges) => {
+                        // if (testConfig.printLog) { window.console.log("changes =", changes); }
+                    });
 
                 setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
@@ -176,7 +183,8 @@ const Painter: React.FC = (props) => {
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;
                 const yFieldType = painterSpec.encoding.y.type as ISemanticType;
-                const isContX = isContinuous(xFieldType), isContY = isContinuous(yFieldType);
+                const isContX = isContinuous(xFieldType),
+                    isContY = isContinuous(yFieldType);
                 const limitFields: string[] = [];
                 if (painterSpec.encoding.column) limitFields.push(painterSpec.encoding.column.field);
                 if (painterSpec.encoding.row) limitFields.push(painterSpec.encoding.row.field);
@@ -211,7 +219,7 @@ const Painter: React.FC = (props) => {
                                 limits: limits,
                                 groupValue: mutFeatValues[mutFeatIndex],
                                 indexKey: LABEL_INDEX,
-                                newColor:  COLOR_CELLS[mutFeatIndex].color,
+                                newColor: COLOR_CELLS[mutFeatIndex].color,
                             });
                             /** mutIndices: tupleid */
                             const { mutIndices, mutValues, view } = result;
@@ -268,8 +276,8 @@ const Painter: React.FC = (props) => {
                     viewChanges.runAsync().then((removedIds: Set<number>) => {
                         linkNearViz();
                         maintainViewDataRemove((r: any) => removedIds.has(r[LABEL_INDEX]));
-                    })
-                }
+                    });
+                };
                 /** No need to remove the event listeners here, because the res.view object is created by `embed` function
                  * and will be destroyed when the component is unmounted.  */
                 res.view.addEventListener('mouseup', endup);
@@ -283,17 +291,7 @@ const Painter: React.FC = (props) => {
                 res.view.runAsync();
             });
         }
-    }, [
-        viewData,
-        mutFeatValues,
-        mutFeatIndex,
-        painting,
-        painterSize,
-        painterMode,
-        maintainViewDataRemove,
-        linkNearViz,
-        painterSpec
-    ]);
+    }, [viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode, maintainViewDataRemove, linkNearViz, painterSpec]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {
         return fieldMetas
@@ -319,8 +317,8 @@ const Painter: React.FC = (props) => {
     }, [painterSpec]);
 
     const [showCursorPreview, setShowCursorPreview] = useState(false);
-    
-    const currentColor = COLOR_CELLS.find(f => f.id === mutFeatValues[mutFeatIndex])?.color;
+
+    const currentColor = COLOR_CELLS.find((f) => f.id === mutFeatValues[mutFeatIndex])?.color;
     const painterColor = currentColor && painterMode === PAINTER_MODE.COLOR ? currentColor : '#8888';
 
     useEffect(() => {
@@ -343,13 +341,16 @@ const Painter: React.FC = (props) => {
     }
     return (
         <Cont style={{ padding: '1em' }}>
-            <div className="cursor rounded"></div>
+            <div className="cursor rounded-sm"></div>
             <Card>
                 <PainterContainer>
-                    <div className="vis-segment" onTouchMove={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                    }}>
+                    <div
+                        className="vis-segment"
+                        onTouchMove={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }}
+                    >
                         <CanvasContainer
                             showTrack={painterMode === PAINTER_MODE.COLOR || painterMode === PAINTER_MODE.ERASE}
                             color={painterColor}
@@ -361,116 +362,135 @@ const Painter: React.FC = (props) => {
                         <Operations />
                     </div>
                     <div className="operation-segment">
-                        <Stack tokens={{ childrenGap: 18 }}>
-                            <Stack.Item>
-                                <ChoiceGroup
-                                    selectedKey={painterMode}
-                                    onChange={(e, op) => {
-                                        op && setPainterMode(op.key as PAINTER_MODE);
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                            <div>
+                                <RadioGroup
+                                    value={painterMode}
+                                    onValueChange={(value) => {
+                                        setPainterMode(value as PAINTER_MODE);
                                     }}
-                                    options={PAINTER_MODE_LIST.map(r => ({
-                                        ...r,
-                                        text: intl.get(`painter.tools.${r.key}`)
-                                    }))}
-                                />
-                            </Stack.Item>
+                                >
+                                    {PAINTER_MODE_LIST.map((r) => (
+                                        <Label
+                                            key={r.key}
+                                            className={cn(r.disabled && 'opacity-50')}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                                        >
+                                            <RadioGroupItem value={r.key} disabled={r.disabled} />
+                                            <span>{intl.get(`painter.tools.${r.key}`)}</span>
+                                        </Label>
+                                    ))}
+                                </RadioGroup>
+                            </div>
                             {painterMode === PAINTER_MODE.COLOR && (
-                                <Stack.Item>
-                                    <SwatchColorPicker
-                        styles={{ root: { margin: '0.5em 1.2em' } }}
-                                        selectedId={mutFeatValues[mutFeatIndex]}
-                                        columnCount={5}
-                                        cellShape={'circle'}
-                                        colorCells={COLOR_CELLS}
-                                        onChange={(e, id) => {
-                                            if (id) {
-                                                const targetIndex = COLOR_CELLS.findIndex((f) => f.id === id);
-                                                targetIndex > -1 && setMutFeatIndex(targetIndex);
-                                            }
-                                        }}
-                                    />
-                                </Stack.Item>
+                                <div>
+                                    <div className="mx-[1.2em] my-2 grid grid-cols-5 gap-2" role="radiogroup" aria-label="Painter colors">
+                                        {COLOR_CELLS.map((cell, index) => {
+                                            const selected = mutFeatValues[mutFeatIndex] === cell.id;
+                                            return (
+                                                <button
+                                                    key={cell.id}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={selected}
+                                                    className={cn(
+                                                        'h-7 w-7 rounded-full border border-border transition-transform focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                                        selected ? 'scale-105 ring-2 ring-ring ring-offset-2' : 'hover:scale-105'
+                                                    )}
+                                                    style={{ backgroundColor: cell.color }}
+                                                    onClick={() => {
+                                                        setMutFeatIndex(index);
+                                                    }}
+                                                >
+                                                    <span className="sr-only">{cell.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             )}
-                            <Stack.Item>
+                            <div style={{ display: 'grid', gap: 8, minWidth: 220 }}>
+                                <Label>{intl.get('painter.samplePercent')}</Label>
                                 <Slider
                                     min={0.01}
                                     max={1}
                                     step={0.01}
-                                    value={samplePercent}
-                                    label={intl.get('painter.samplePercent')}
-                                    onChange={(s, v) => {
-                                        setSamplePercent(s);
+                                    value={[samplePercent]}
+                                    onValueChange={([value]) => {
+                                        setSamplePercent(value);
                                     }}
                                 />
-                            </Stack.Item>
-                            <Stack.Item>
+                            </div>
+                            <div style={{ display: 'grid', gap: 8, minWidth: 220 }}>
+                                <Label>{intl.get('painter.brushSize')}</Label>
                                 <Slider
                                     min={0.01}
                                     max={1}
                                     step={0.01}
-                                    value={painterSize}
-                                    label={intl.get('painter.brushSize')}
-                                    onChange={(s, v) => {
-                                        setPainterSize(s);
+                                    value={[painterSize]}
+                                    onValueChange={([value]) => {
+                                        setPainterSize(value);
                                     }}
                                 />
-                            </Stack.Item>
-                            <Stack.Item>
-                                <Toggle label={intl.get('painter.useOriginalDist')} inlineLabel checked={clearAgg} onChange={(e, checked) => {
-                                    setClearAgg(Boolean(checked))
-                                }} />
-                            </Stack.Item>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Switch
+                                    id="painter-use-original-dist"
+                                    checked={clearAgg}
+                                    onCheckedChange={(checked) => {
+                                        setClearAgg(Boolean(checked));
+                                    }}
+                                />
+                                <Label htmlFor="painter-use-original-dist">{intl.get('painter.useOriginalDist')}</Label>
+                            </div>
                             {painterMode === PAINTER_MODE.COLOR && (
-                                <Stack.Item>
-                                    <DefaultButton
+                                <div>
+                                    <Button
+                                        variant="outline"
                                         disabled
-                                        text={intl.get('painter.addLabel')}
                                         onClick={() => {
                                             setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
                                         }}
-                                    />
-                                </Stack.Item>
+                                    >
+                                        {intl.get('painter.addLabel')}
+                                    </Button>
+                                </div>
                             )}
-                        </Stack>
+                        </div>
                     </div>
                 </PainterContainer>
                 <div>
-                    <Stack horizontal tokens={{ childrenGap: 10 }}>
-                        <DefaultButton
-                            iconProps={{ iconName: 'Trash' }}
-                            text={intl.get('painter.clearPainting')}
-                            onClick={clearPainting}
-                        />
-                        <DefaultButton
-                            iconProps={{ iconName: 'Sync' }}
-                            text={intl.get('painter.syncData')}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        <Button variant="outline" onClick={clearPainting}>
+                            <RathIcon name="Trash" />
+                            {intl.get('painter.clearPainting')}
+                        </Button>
+                        <Button
+                            variant="outline"
                             onClick={() => {
-                                setGWTrigger(v => !v)
+                                setGWTrigger((v) => !v);
                             }}
-                        />
-                    </Stack>
+                        >
+                            <RathIcon name="Sync" />
+                            {intl.get('painter.syncData')}
+                        </Button>
+                    </div>
                 </div>
                 <hr style={{ margin: '1em' }} />
-                <Pivot
-                    selectedKey={pivotKey}
-                    onLinkClick={(item) => {
-                        item && setPivotKey(item.props.itemKey as PIVOT_TAB_KEYS);
-                    }}
-                    style={{ marginTop: '1em' }}
-                >
-                    <PivotItem headerText={intl.get('painter.search')} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search" />
-                    <PivotItem
-                        headerText={intl.get('painter.explore')}
-                        itemKey={PIVOT_TAB_KEYS.EXPLORE}
-                        itemIcon="BarChartVerticalEdit"
-                    />
-                </Pivot>
+                <Tabs value={pivotKey} onValueChange={(value) => setPivotKey(value as PIVOT_TAB_KEYS)} className="mt-4">
+                    <TabsList>
+                        <TabsTrigger value={PIVOT_TAB_KEYS.SEARCH}>
+                            <RathIcon name="Search" className="mr-1" />
+                            {intl.get('painter.search')}
+                        </TabsTrigger>
+                        <TabsTrigger value={PIVOT_TAB_KEYS.EXPLORE}>
+                            <RathIcon name="BarChartVerticalEdit" className="mr-1" />
+                            {intl.get('painter.explore')}
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
             </Card>
-            {pivotKey === PIVOT_TAB_KEYS.SEARCH && <NeighborAutoLink
-                vizSpec={vizSpec}
-                dataSource={viewData}
-                fieldMetas={fieldMetas}
-            />}
+            {pivotKey === PIVOT_TAB_KEYS.SEARCH && <NeighborAutoLink vizSpec={vizSpec} dataSource={viewData} fieldMetas={fieldMetas} />}
             {pivotKey === PIVOT_TAB_KEYS.EXPLORE && (
                 <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} i18nLang={langStore.lang} />
             )}

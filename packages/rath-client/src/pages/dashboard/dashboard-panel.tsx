@@ -1,13 +1,14 @@
-import { ActionButton, ChoiceGroup, DefaultButton, IChoiceGroupOption, Pivot, PivotItem, Stack, Text, TextField } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import {
-    DashboardCardAppearance,
-    DashboardCardState,
-    DashboardDocument,
-    DashboardDocumentOperators,
-} from '../../store/dashboardStore';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Textarea } from '../../components/ui/textarea';
+import { RathIcon } from '../../components/icons';
+import { DashboardCardAppearance, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from '../../store/dashboardStore';
 import { useGlobalStore } from '../../store';
 import SourcePanel from './source-panel';
 import FilterList from './filter-list';
@@ -80,147 +81,90 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
     const { dashboardStore } = useGlobalStore();
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
-    const themeOptions = useCallback(
-        (mode: 'single' | 'global') =>
-            CardThemes.map<IChoiceGroupOption>((thm) => ({
-                key: thm,
-                text: thm,
-                onRenderField: (option, origin) => {
-                    const applyToAll = () => {
-                        const key = option?.key ?? '';
-                        if ((CardThemes as string[]).includes(key)) {
-                            dashboardStore.runInAction(() => {
-                                page.cards.forEach((c) => (c.config.appearance = key as DashboardCardAppearance));
-                            });
-                        }
-                    };
-                    return option ? (
-                        mode === 'single' ? (
-                            <OptionContainer>
-                                {origin?.(option)}
-                                <ActionButton onClick={applyToAll}>Apply to all</ActionButton>
-                            </OptionContainer>
-                        ) : (
-                            <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
-                                {option.text}
-                            </ActionButton>
-                        )
-                    ) : null;
-                },
-            })),
+    const applyThemeToAll = useCallback(
+        (key: DashboardCardAppearance) => {
+            dashboardStore.runInAction(() => {
+                page.cards.forEach((c) => (c.config.appearance = key));
+            });
+        },
         [page, dashboardStore]
     );
 
-    // Temporarily use column layout only
-    // const layoutOptions = useCallback((mode: 'single' | 'global') => CardAlignTypes.map<IChoiceGroupOption>(alg => ({
-    //     key: CardAlignName[alg],
-    //     text: CardAlignName[alg],
-    //     onRenderField: (option, origin) => {
-    //         const applyToAll = () => {
-    //             const key = {
-    //                 Auto: DashboardCardInsetLayout.Auto,
-    //                 Column: DashboardCardInsetLayout.Column,
-    //                 Row: DashboardCardInsetLayout.Row,
-    //             }[option?.key ?? ''];
-    //             if (typeof key === 'number') {
-    //                 dashboardStore.runInAction(() => {
-    //                     page.cards.forEach(c => c.config.align = key);
-    //                 });
-    //             }
-    //         };
-    //         return option ? mode === 'single' ? (
-    //             <OptionContainer>
-    //                 {origin?.(option)}
-    //                 <ActionButton onClick={applyToAll}>
-    //                     Apply to all
-    //                 </ActionButton>
-    //             </OptionContainer>
-    //         ) : (
-    //             <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
-    //                 {option.text}
-    //             </ActionButton>
-    //         ) : null;
-    //     },
-    // })), [page, dashboardStore]);
-
     return (
         <Panel onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-            <Stack>
+            <div className="grid gap-3">
                 {card ? (
                     <>
-                        <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
-                            Common
-                        </Text>
-                        <TextField
-                            label="Title"
-                            value={card.content.title ?? ''}
-                            onChange={(_, d) =>
-                                dashboardStore.runInAction(() => {
-                                    card.content.title = d || undefined;
-                                })
-                            }
-                        />
-                        <TextField
-                            label="Description"
-                            value={card.content.text ?? ''}
-                            onChange={(_, d) =>
-                                dashboardStore.runInAction(() => {
-                                    card.content.text = d || undefined;
-                                })
-                            }
-                            multiline
-                            autoAdjustHeight
-                            resizable={false}
-                        />
-                        <ChoiceGroup
-                            label="Theme"
-                            selectedKey={card.config.appearance}
-                            options={themeOptions('single')}
-                            onChange={(_, option) =>
-                                dashboardStore.runInAction(() => {
-                                    const key = option?.key ?? '';
-                                    if ((CardThemes as string[]).includes(key)) {
-                                        card.config.appearance = key as DashboardCardAppearance;
-                                    }
-                                })
-                            }
-                        />
-                        {/* <ChoiceGroup
-                            label="Layout"
-                            selectedKey={CardAlignName[card.config.align]}
-                            options={layoutOptions('single')}
-                            onChange={(_, option) => dashboardStore.runInAction(() => {
-                                const key = {
-                                    Auto: DashboardCardInsetLayout.Auto,
-                                    Column: DashboardCardInsetLayout.Column,
-                                    Row: DashboardCardInsetLayout.Row,
-                                }[option?.key ?? ''];
-                                if (typeof key === 'number') {
-                                    card.config.align = key;
+                        <h2 style={{ margin: '0 0 0.5em' }}>Common</h2>
+                        <div className="grid gap-2">
+                            <Label>Title</Label>
+                            <Input
+                                value={card.content.title ?? ''}
+                                onChange={(e) =>
+                                    dashboardStore.runInAction(() => {
+                                        card.content.title = e.target.value || undefined;
+                                    })
                                 }
-                            })}
-                        /> */}
-                        <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
-                            Chart
-                        </Text>
-                        <DefaultButton
-                            iconProps={{ iconName: 'Delete' }}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Description</Label>
+                            <Textarea
+                                value={card.content.text ?? ''}
+                                onChange={(e) =>
+                                    dashboardStore.runInAction(() => {
+                                        card.content.text = e.target.value || undefined;
+                                    })
+                                }
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Theme</Label>
+                            <RadioGroup
+                                value={card.config.appearance}
+                                onValueChange={(key) =>
+                                    dashboardStore.runInAction(() => {
+                                        if ((CardThemes as string[]).includes(key)) {
+                                            card.config.appearance = key as DashboardCardAppearance;
+                                        }
+                                    })
+                                }
+                            >
+                                {CardThemes.map((theme) => (
+                                    <OptionContainer key={theme}>
+                                        <div className="flex items-center gap-2">
+                                            <RadioGroupItem id={`dashboard-card-theme-${theme}`} value={theme} />
+                                            <Label htmlFor={`dashboard-card-theme-${theme}`}>{theme}</Label>
+                                        </div>
+                                        <Button variant="ghost" onClick={() => applyThemeToAll(theme)}>
+                                            Apply to all
+                                        </Button>
+                                    </OptionContainer>
+                                ))}
+                            </RadioGroup>
+                        </div>
+                        <h2 style={{ margin: '1.5em 0 0.5em' }}>Chart</h2>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Delete chart"
                             onClick={() =>
                                 dashboardStore.runInAction(() => {
                                     card.content.chart = undefined;
                                 })
                             }
-                        />
-                        <Pivot
-                            selectedKey={tab}
-                            onLinkClick={(item) => {
-                                item && setTab(item.props.itemKey as typeof tab);
-                            }}
                         >
-                            {SupportedTabs.map((key) => (
-                                <PivotItem key={key} itemKey={key} headerText={key} />
-                            ))}
-                        </Pivot>
+                            <RathIcon name="Delete" />
+                        </Button>
+                        <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
+                            <TabsList>
+                                {SupportedTabs.map((key) => (
+                                    <TabsTrigger key={key} value={key}>
+                                        {key}
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </Tabs>
                         <div role="tabpanel">
                             {
                                 (
@@ -236,21 +180,22 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                     </>
                 ) : (
                     <>
-                        <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
-                            Global
-                        </Text>
-                        <ChoiceGroup label="Theme" options={themeOptions('global')} />
-                        {/* <ChoiceGroup
-                            label="Layout"
-                            options={layoutOptions('global')}
-                        /> */}
-                        <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
-                            Filters
-                        </Text>
+                        <h2 style={{ margin: '0 0 0.5em' }}>Global</h2>
+                        <div className="grid gap-2">
+                            <Label>Theme</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {CardThemes.map((theme) => (
+                                    <Button key={theme} variant="ghost" style={{ height: 'unset' }} onClick={() => applyThemeToAll(theme)}>
+                                        {theme}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                        <h2 style={{ margin: '1.5em 0 0.5em' }}>Filters</h2>
                         <FilterList page={page} operators={operators} />
                     </>
                 )}
-            </Stack>
+            </div>
         </Panel>
     );
 };

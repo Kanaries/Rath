@@ -1,14 +1,16 @@
 import intl from 'react-intl-universal';
-import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
+import { Button } from '../../../components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
+import { Spinner } from '../../../components/ui/spinner';
+import { RathIcon } from '../../../components/icons';
 import { useGlobalStore } from '../../../store';
 import type { IFunctionalDep } from '../config';
 import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
-
 
 const Mask = styled.div`
     position: fixed;
@@ -40,11 +42,7 @@ enum BatchUpdateMode {
     FULLY_REPLACE = 'fully replace',
 }
 
-const batchUpdateModes = [
-    BatchUpdateMode.OVERWRITE_ONLY,
-    BatchUpdateMode.FILL_ONLY,
-    BatchUpdateMode.FULLY_REPLACE,
-] as const;
+const batchUpdateModes = [BatchUpdateMode.OVERWRITE_ONLY, BatchUpdateMode.FILL_ONLY, BatchUpdateMode.FULLY_REPLACE] as const;
 
 const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
@@ -56,7 +54,7 @@ const FDBatch: FC = () => {
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
 
     const dropdownOptions = useMemo<{ key: BatchUpdateMode; text: string }[]>(() => {
-        return batchUpdateModes.map(key => ({
+        return batchUpdateModes.map((key) => ({
             key,
             text: intl.get(`causal.analyze.${key}`),
         }));
@@ -74,27 +72,29 @@ const FDBatch: FC = () => {
         setDisplayPreview(true);
     }, [causalStore]);
 
-    const pendingRef = useRef<Promise<unknown>>();
+    const pendingRef = useRef<Promise<unknown> | undefined>(undefined);
     useEffect(() => {
         if (!displayPreview) {
             pendingRef.current = undefined;
         }
     }, [displayPreview]);
     const generateFDFromAutoDetection = useCallback(() => {
-        const p = sample.getAll().then(data => getGeneratedFDFromAutoDetection(data));
+        const p = sample.getAll().then((data) => getGeneratedFDFromAutoDetection(data));
         pendingRef.current = p;
-        p.then(res => {
+        p.then((res) => {
             if (p === pendingRef.current) {
                 setPreview(res);
             }
-        }).catch(err => {
-            if (p === pendingRef.current) {
-                setPreview([]);
-            }
-            console.warn(err);
-        }).finally(() => {
-            pendingRef.current = undefined;
-        });
+        })
+            .catch((err) => {
+                if (p === pendingRef.current) {
+                    setPreview([]);
+                }
+                console.warn(err);
+            })
+            .finally(() => {
+                pendingRef.current = undefined;
+            });
         setDisplayPreview(true);
     }, [sample]);
 
@@ -107,9 +107,9 @@ const FDBatch: FC = () => {
             switch (mode) {
                 case BatchUpdateMode.OVERWRITE_ONLY: {
                     return preview.reduce<IFunctionalDep[]>((deps, dep) => {
-                        const overloadIdx = deps.findIndex(which => which.fid === dep.fid);
+                        const overloadIdx = deps.findIndex((which) => which.fid === dep.fid);
                         if (overloadIdx !== -1) {
-                            return produce(deps, draft => {
+                            return produce(deps, (draft) => {
                                 draft.splice(overloadIdx, 1, dep);
                             });
                         }
@@ -118,12 +118,12 @@ const FDBatch: FC = () => {
                 }
                 case BatchUpdateMode.FILL_ONLY: {
                     return preview.reduce<IFunctionalDep[]>((deps, dep) => {
-                        const overloadIdx = deps.findIndex(which => which.fid === dep.fid);
+                        const overloadIdx = deps.findIndex((which) => which.fid === dep.fid);
                         if (overloadIdx !== -1) {
-                            return produce(deps, draft => {
+                            return produce(deps, (draft) => {
                                 const overload = draft[overloadIdx];
                                 for (const prm of dep.params) {
-                                    if (!overload.params.some(p => p.fid === prm.fid)) {
+                                    if (!overload.params.some((p) => p.fid === prm.fid)) {
                                         overload.params.push(prm);
                                     }
                                 }
@@ -143,7 +143,7 @@ const FDBatch: FC = () => {
             return functionalDependencies.slice(0);
         }
     }, [preview, functionalDependencies, mode]);
-    
+
     const handleSubmit = useCallback(() => {
         causalStore.model.updateFunctionalDependencies(submittable);
         setDisplayPreview(false);
@@ -158,26 +158,29 @@ const FDBatch: FC = () => {
     return (
         <>
             <h3>{intl.get('causal.actions.one_click')}</h3>
-            <Stack tokens={{ childrenGap: 10 }} horizontal>
-                <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={handleClear}>
+                    <RathIcon name="Delete" />
                     {intl.get('causal.analyze.clear_all')}
-                </ActionButton>
-                <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
+                </Button>
+                <Button variant="ghost" onClick={generateFDFromExtInfo}>
+                    <RathIcon name="EngineeringGroup" />
                     {intl.get('causal.actions.use_ext_diagram')}
-                </ActionButton>
-                {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
-                    {intl.get('causal.actions.import_effect')}
-                </ActionButton> */}
-                <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
+                </Button>
+                <Button variant="ghost" onClick={generateFDFromAutoDetection}>
+                    <RathIcon name="HintText" />
                     {intl.get('causal.actions.auto_detect')}
-                </ActionButton>
-            </Stack>
+                </Button>
+            </div>
             {displayPreview && (
                 <Mask>
                     <div>
                         <div className="container">
                             {isPending ? (
-                                <Spinner label="computing" />
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Spinner aria-hidden="true" />
+                                    <span>computing</span>
+                                </div>
                             ) : (
                                 <FDEditor
                                     title={intl.get('causal.actions.preview')}
@@ -186,26 +189,35 @@ const FDBatch: FC = () => {
                                 />
                             )}
                         </div>
-                        <Stack tokens={{ childrenGap: 20 }} horizontal style={{ justifyContent: 'center' }}>
-                            <DefaultButton
-                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? intl.get('common.apply')}
-                                onClick={handleSubmit}
-                                primary
-                                split
-                                menuProps={{
-                                    items: dropdownOptions,
-                                    onItemClick: (_e, item) => {
-                                        if (item) {
-                                            setMode(item.key as BatchUpdateMode);
-                                        }
-                                    },
-                                }}
-                            />
-                            <DefaultButton
-                                text={intl.get('common.cancel')}
-                                onClick={handleCancel}
-                            />
-                        </Stack>
+                        <div className="flex justify-center gap-5">
+                            <div className="inline-flex">
+                                <Button type="button" className="rounded-r-none" onClick={handleSubmit}>
+                                    {dropdownOptions.find((opt) => opt.key === mode)?.text ?? intl.get('common.apply')}
+                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button type="button" size="icon" className="rounded-l-none border-l border-primary-foreground/25 px-0">
+                                            <RathIcon name="CaretSolidDown" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start">
+                                        {dropdownOptions.map((option) => (
+                                            <DropdownMenuItem
+                                                key={option.key}
+                                                onSelect={() => {
+                                                    setMode(option.key);
+                                                }}
+                                            >
+                                                {option.text}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <Button variant="outline" onClick={handleCancel}>
+                                {intl.get('common.cancel')}
+                            </Button>
+                        </div>
                     </div>
                 </Mask>
             )}

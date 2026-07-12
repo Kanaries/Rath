@@ -1,8 +1,9 @@
-import { Icon, SearchBox } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { Input } from '../../components/ui/input';
+import { RathIcon } from '../../components/icons';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { searchFilterView } from '../../utils';
@@ -65,7 +66,15 @@ const VizPagination: React.FC = (props) => {
 
     return (
         <div>
-            <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
+            <div className="relative max-w-xs">
+                <RathIcon className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" name="Search" />
+                <Input
+                    className="pl-8"
+                    value={searchContent}
+                    onChange={(e) => setSearchContent(e.target.value)}
+                    placeholder={intl.get('common.search.searchViews')}
+                />
+            </div>
             <VizCardContainer>
                 {searchedInsightViews.length > 0 &&
                     items.map(({ page, type, selected, ...item }, index) => {
@@ -84,8 +93,8 @@ const VizPagination: React.FC = (props) => {
                                 </div>
                             );
                         } else {
-                            if (type === 'next') children = <Icon style={{ fontSize: '1em', fontWeight: 600 }} iconName="ChevronRight" />;
-                            if (type === 'previous') children = <Icon style={{ fontSize: '1em', fontWeight: 600 }} iconName="ChevronLeft" />;
+                            if (type === 'next') children = <RathIcon style={{ fontSize: '1em', fontWeight: 600 }} name="ChevronRight" />;
+                            if (type === 'previous') children = <RathIcon style={{ fontSize: '1em', fontWeight: 600 }} name="ChevronLeft" />;
                         }
                         return (
                             <VizCard {...item} selected={selected} key={index}>

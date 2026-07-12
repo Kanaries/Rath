@@ -2,7 +2,9 @@ import intl from 'react-intl-universal';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
-import { IconButton, Spinner, useTheme } from '@fluentui/react';
+import { RathIcon } from '../../../../components/icons';
+import { Button } from '../../../../components/ui/button';
+import { Spinner } from '../../../../components/ui/spinner';
 import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../interfaces';
 import databaseOptions from '../options';
 import NestedList from '../components/nested-list';
@@ -45,7 +47,6 @@ const emptyMenu: MenuType = { title: '', items: [], isUnloaded: false };
 const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(function QueryOptions ({
     ready, server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit, children,
 }, handlerRef) {
-    const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
     const [pages, setPages] = useState<PageType[]>([]);
@@ -231,7 +232,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
 
     if (!ready) {
         return (
-            <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}></QueryContainer>
+            <QueryContainer ref={containerRef} style={{ width: w }}></QueryContainer>
         );
     }
 
@@ -241,18 +242,20 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     const isOpenedPage = Boolean(pageIdx >= 0 && page);
 
     return (
-        <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
+        <QueryContainer ref={containerRef} style={{ width: w }}>
             <QueryBrowserHeader>
                 <span className="title">{intl.get('dataSource.explorer')}</span>
                 <SyncButton
-                    iconProps={{ iconName: 'SyncOccurence' }}
+                    type="button"
                     disabled={busy || !config || disabled}
                     busy={busy}
                     onClick={reload}
-                    style={{ animation: busy ? undefined : 'none' }}
-                />
+                    aria-label={intl.get('common.refresh') || 'Refresh'}
+                >
+                    <RathIcon name="SyncOccurence" />
+                </SyncButton>
             </QueryBrowserHeader>
-            <PivotList theme={theme}>
+            <PivotList>
                 <PivotHeader
                     primary
                     role="tab"
@@ -290,10 +293,14 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                         onClick={() => setPageIdx(i)}
                     >
                         <span>{page.path.at(-1)?.text}</span>
-                        <IconButton
-                            iconProps={{ iconName: 'ChromeClose' }}
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setPages(pages => produce(pages, draft => { draft.splice(i, 1) }))}
-                        />
+                        >
+                            <RathIcon name="ChromeClose" />
+                        </Button>
                     </PivotHeader>
                 ))}
             </PivotList>
@@ -305,7 +312,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                 isFailed={menu.isFailed}
                 onItemClick={handleItemClick}
             />
-            <QueryViewBody theme={theme}>
+            <QueryViewBody>
                 {config && !disabled && (
                     <>
                         {pageIdx === EditorKey.Monaco && (

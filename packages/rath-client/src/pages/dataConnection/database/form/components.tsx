@@ -1,8 +1,6 @@
 import styled from 'styled-components';
-import { IconButton, Theme } from '@fluentui/react';
 
-
-export const QueryContainer = styled.div<{ theme: Theme }>`
+export const QueryContainer = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 0%;
@@ -12,7 +10,7 @@ export const QueryContainer = styled.div<{ theme: Theme }>`
     display: grid;
     grid-template-columns: 16em 1fr;
     grid-template-rows: max-content 1fr;
-    border: 1px solid ${({ theme }) => theme.palette.neutralLight};
+    border: 1px solid #edebe9;
     font-size: 0.8rem;
 `;
 
@@ -30,20 +28,33 @@ export const QueryBrowserHeader = styled.header`
     }
 `;
 
-export const QueryViewBody = styled.div<{ theme: Theme }>`
+export const QueryViewBody = styled.div`
     display: flex;
     align-items: stretch;
     justify-content: stretch;
     overflow: auto;
     position: relative;
-    border-left: 1px solid ${({ theme }) => theme.palette.neutralLight};
+    border-left: 1px solid #edebe9;
 `;
 
-export const SyncButton = styled(IconButton)<{ busy: boolean }>`
+export const SyncButton = styled.button<{ busy: boolean }>`
     width: 24px;
     height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
-    i {
+    border: 0;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+    :disabled {
+        cursor: default;
+        opacity: 0.5;
+    }
+    svg {
+        width: 0.8rem;
+        height: 0.8rem;
         font-size: 0.7rem;
         animation: rotating 2.4s linear infinite;
         ${({ busy }) => busy ? '' : 'animation: none;'}
@@ -58,13 +69,13 @@ export const SyncButton = styled(IconButton)<{ busy: boolean }>`
     }
 `;
 
-export const PivotList = styled.div<{ theme: Theme }>`
+export const PivotList = styled.div`
     display: flex;
     flex-direction: row;
     align-items: stretch;
     overflow: auto hidden;
     background-color: #fcfcfc;
-    border-left: 1px solid ${({ theme }) => theme.palette.neutralLight};
+    border-left: 1px solid #edebe9;
     > * {
         flex-grow: 0;
         flex-shrink: 0;

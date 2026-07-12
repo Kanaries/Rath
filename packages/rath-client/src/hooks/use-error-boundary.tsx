@@ -1,4 +1,5 @@
-import { FC, PureComponent, useCallback, useRef } from "react";
+import { FC, PureComponent, ReactNode, useCallback, useRef, type JSX } from "react";
+import { runtimeEnv } from 'runtime-env';
 
 
 interface ErrorBoundaryProps<D extends any[]> {
@@ -6,6 +7,7 @@ interface ErrorBoundaryProps<D extends any[]> {
     /** retry when any dependency changes */
     deps: Readonly<D>;
     shouldHandlerRetry?: (prevDeps: Readonly<D>, nextDeps: Readonly<D>) => boolean;
+    children?: ReactNode;
 }
 
 interface ErrorBoundaryState<D extends any[]> {
@@ -33,7 +35,7 @@ class ErrorBoundary<D extends any[] = any[]> extends PureComponent<ErrorBoundary
 
     static getDerivedStateFromProps<D extends any[]>(nextProps: ErrorBoundaryProps<D>, prevState: ErrorBoundaryState<D>): Partial<ErrorBoundaryState<D>> {
         if (nextProps.deps.length !== prevState.deps.length) {
-            if (process.env.NODE_ENV !== 'production') {
+            if (!runtimeEnv.isProduction) {
                 console.error(new Error('Length of dependency list changed, retrial is disabled.'));
             }
             return {};
@@ -66,14 +68,14 @@ const useErrorBoundary = <D extends any[]>(
     fallback: ErrorBoundaryProps<D>['fallback'],
     deps: ErrorBoundaryProps<D>['deps'],
     shouldHandlerRetry?: ErrorBoundaryProps<D>['shouldHandlerRetry'],
-): FC => {
+): FC<{ children?: ReactNode }> => {
     const fallbackRef = useRef(fallback);
     fallbackRef.current = fallback;
     const depsRef = useRef(deps);
     depsRef.current = deps;
     const shouldHandlerRetryRef = useRef(shouldHandlerRetry);
     shouldHandlerRetryRef.current = shouldHandlerRetry;
-    return useCallback<FC>(function ErrorBoundaryRoot ({ children }) {
+    return useCallback<FC<{ children?: ReactNode }>>(function ErrorBoundaryRoot ({ children }) {
         return (
             <ErrorBoundary fallback={fallbackRef.current} deps={depsRef.current} shouldHandlerRetry={shouldHandlerRetryRef.current}>
                 {children}

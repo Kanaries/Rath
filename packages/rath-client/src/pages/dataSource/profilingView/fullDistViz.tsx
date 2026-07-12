@@ -52,7 +52,7 @@ interface FullDistVizProps {
 const FullDistViz: React.FC<FullDistVizProps> = (props) => {
     const chart = useRef<HTMLDivElement>(null);
     const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 1000, onSelect } = props;
-    const [view, setView] = useState<Result['view']>();
+    const [view, setView] = useState<Result['view'] | undefined>(undefined);
     // 是否有分箱的ordinal列
     const hasBinIndex = useMemo(() => {
         return dataSource.some(member => {

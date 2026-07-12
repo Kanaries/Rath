@@ -2,7 +2,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Spinner } from '@fluentui/react';
+import { Spinner } from '../../../components/ui/spinner';
 import { useGlobalStore } from '../../../store';
 import { getInsightExpl } from '../../../services/insights';
 
@@ -96,8 +96,9 @@ const Narrative: React.FC = (props) => {
                         </InsightDesc>
                     ))}
             {explainLoading && (
-                <div>
-                    <Spinner label="explain loading..." />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Spinner aria-hidden="true" />
+                    <span>explain loading...</span>
                 </div>
             )}
         </InsightContainer>

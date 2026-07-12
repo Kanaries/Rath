@@ -1,8 +1,10 @@
-import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import { unstable_batchedUpdates } from 'react-dom';
 import { FC, useCallback, useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
 import { ITextPattern, ITextSelection } from '../../../../lib/textPattern';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
 
 export interface IFieldTextSelection extends ITextSelection {
     fid: string;
@@ -60,41 +62,48 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
     }, [tp.fid, tp.selectionType, tp.score, ph, pe, sl, onSubmit, validate])
 
     return (
-        <Stack>
-            <TextField
-                label="before"
-                value={ph}
-                onChange={(e, newValue) => {
-                    setPh(`${newValue}`);
-                    setError(null);
-                }}
-            />
-            <TextField
-                label="selection"
-                value={sl}
-                onChange={(e, newValue) => {
-                    setSl(`${newValue}`);
-                    setError(null);
-                }}
-            />
-            <TextField
-                label="after"
-                value={pe}
-                onChange={(e, newValue) => {
-                    setPe(`${newValue}`);
-                    setError(null);
-                }}
-            />
+        <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`tp-regex-before-${tp.fid}`}>before</Label>
+                <Input
+                    id={`tp-regex-before-${tp.fid}`}
+                    value={ph}
+                    onChange={(e) => {
+                        setPh(e.target.value);
+                        setError(null);
+                    }}
+                />
+            </div>
+            <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`tp-regex-selection-${tp.fid}`}>selection</Label>
+                <Input
+                    id={`tp-regex-selection-${tp.fid}`}
+                    value={sl}
+                    onChange={(e) => {
+                        setSl(e.target.value);
+                        setError(null);
+                    }}
+                />
+            </div>
+            <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`tp-regex-after-${tp.fid}`}>after</Label>
+                <Input
+                    id={`tp-regex-after-${tp.fid}`}
+                    value={pe}
+                    onChange={(e) => {
+                        setPe(e.target.value);
+                        setError(null);
+                    }}
+                />
+            </div>
             {error !== null && (
                 <span style={{ color: '#a4262c', fontSize: 12, margin: '4px 0' }}>{error}</span>
             )}
-            <Stack.Item>
-                <Stack horizontal>
-                <PrimaryButton text={intl.get('common.submit')} onClick={submit}  />
-                <DefaultButton text={intl.get('common.cancel')} onClick={onCancel} />
-                </Stack>
-            </Stack.Item>
-        </Stack>
+            <div className="flex gap-2">
+                <Button type="button" onClick={submit}>{intl.get('common.submit')}</Button>
+                <Button type="button" variant="outline" onClick={onCancel}>{intl.get('common.cancel')}</Button>
+            </div>
+        </div>
     );
 };
 

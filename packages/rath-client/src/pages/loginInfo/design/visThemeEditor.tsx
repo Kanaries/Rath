@@ -4,8 +4,10 @@ import { debounce } from 'vega';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor, { ChangeHandler } from 'react-monaco-editor';
-import { ActionButton, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
+import { RathIcon } from '../../../components/icons';
+import { Alert } from '../../../components/ui/alert';
+import { Button } from '../../../components/ui/button';
 
 const Cont = styled.div`
     margin-top: 1em;
@@ -39,18 +41,18 @@ const VisThemeEditor: React.FC = (props) => {
     }, [customThemeConfig]);
     return (
         <Cont>
-            <Stack horizontal>
-                <ActionButton
-                    iconProps={{ iconName: 'Copy' }}
-                    text={intl.get('login.design.syncFromSelectedTheme')}
+            <div style={{ display: 'flex' }}>
+                <Button
+                    variant="ghost"
                     onClick={() => {
                         commonStore.resetCustomThemeConfigByThemeKey(vizTheme);
                     }}
-                />
-            </Stack>
-            <div className="hint-container">
-                {!isValidConfig && <MessageBar messageBarType={MessageBarType.error}>Not valid json format.</MessageBar>}
+                >
+                    <RathIcon name="Copy" />
+                    {intl.get('login.design.syncFromSelectedTheme')}
+                </Button>
             </div>
+            <div className="hint-container">{!isValidConfig && <Alert variant="destructive">Not valid json format.</Alert>}</div>
             <MonacoEditor width="400" height="300" language="json" theme="vs" value={code} options={options} onChange={onValueChange} />
         </Cont>
     );

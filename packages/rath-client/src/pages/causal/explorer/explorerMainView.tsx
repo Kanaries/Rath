@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
-import styled, { StyledComponentProps } from "styled-components";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
+import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import type { Subtree } from "../exploration";
@@ -17,7 +17,7 @@ const Container = styled.div`
     justify-content: stretch;
 `;
 
-export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
+export type ExplorerMainViewProps = Omit<ComponentPropsWithoutRef<'div'> & {
     /** @default 0 */
     cutThreshold?: number;
     limit: number;
@@ -30,7 +30,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     allowZoom: boolean;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
-}, never>, 'onChange' | 'ref'>;
+}, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     cutThreshold = 0,

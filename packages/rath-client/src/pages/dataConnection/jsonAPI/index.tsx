@@ -13,15 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DefaultButton, Dropdown, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor from 'react-monaco-editor';
 import { unstable_batchedUpdates } from 'react-dom';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
-import { logDataImport } from '../../../loggers/dataImport';
 import { DataSourceTag } from '../../../utils/storage';
+import { RathIcon } from '../../../components/icons';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { RathSelect } from '../../../components/rath-ui/rath-select';
 import { IJSONAPIFormat, getFullData, getPreviewData, jsonDataFormatChecker, requestJSONAPIData } from './utils';
 
 // const EXAMPLE_DATA: IDatasetBase = {
@@ -75,13 +78,6 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
         const { dataSource, fields, error } = await getFullData(rawData, detectedDataStruct);
         if (typeof error === 'undefined') {
             onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
-            logDataImport({
-                dataType: 'JSON API',
-                name: api,
-                fields,
-                dataSource: dataSource.slice(0, 20),
-                size: dataSource.length,
-            });
         }
         onClose();
     }
@@ -93,37 +89,36 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
 
     return (
         <Cont>
-            <Stack tokens={{ childrenGap: 12 }} horizontal horizontalAlign="end" verticalAlign="end">
-                <Stack.Item grow={1}>
-                    <TextField
-                        label="API"
+            <div className="flex items-end gap-3">
+                <div className="flex grow flex-col gap-1.5">
+                    <Label htmlFor="connection-json-api-url">API</Label>
+                    <Input
+                        id="connection-json-api-url"
                         value={api}
-                        onChange={(e, val) => {
-                            setAPI(`${val}`);
+                        onChange={(e) => {
+                            setAPI(e.target.value);
                         }}
                     />
-                </Stack.Item>
-                <Stack.Item>
-                    <PrimaryButton
-                        iconProps={{ iconName: 'CloudDownload' }}
-                        text={`${intl.get('dataSource.importData.restful.requestData')}`}
-                        onClick={loadData}
-                    />
-                </Stack.Item>
-                <Stack.Item>
-                    <DefaultButton
-                        iconProps={{ iconName: 'History' }}
-                        text={`${intl.get('dataSource.importData.restful.loadHistoryAPI')}`}
-                        onClick={() => {
-                            setAPI(historyAPI || '');
-                        }}
-                        disabled={!historyAPI}
-                    />
-                </Stack.Item>
-            </Stack>
+                </div>
+                <Button type="button" onClick={loadData}>
+                    <RathIcon name="CloudDownload" />
+                    {intl.get('dataSource.importData.restful.requestData')}
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                        setAPI(historyAPI || '');
+                    }}
+                    disabled={!historyAPI}
+                >
+                    <RathIcon name="History" />
+                    {intl.get('dataSource.importData.restful.loadHistoryAPI')}
+                </Button>
+            </div>
             {/* <h1>{intl.get('dataSource.importData.restful.exampleDataStruct')}</h1> */}
-            <Stack horizontal tokens={{ childrenGap: 12 }} style={{ marginTop: '1em' }} verticalAlign="end">
-                <Dropdown
+            <div className="mt-4 flex items-end gap-3">
+                <RathSelect
                     label={intl.get('dataSource.importData.restful.detectedDataStruct')}
                     options={[
                         { key: 'array', text: intl.get('dataSource.importData.restful.format.array') },
@@ -131,29 +126,30 @@ const JSONAPI: React.FC<JSONAPIProps> = (props) => {
                         { key: 'others', text: intl.get('dataSource.importData.restful.format.others') },
                     ]}
                     selectedKey={detectedDataStruct}
-                    onChange={(e, op) => {
-                        op && setDetectedDataStruct(op.key as IJSONAPIFormat);
+                    onChange={(key) => {
+                        setDetectedDataStruct(key as IJSONAPIFormat);
                     }}
                 />
-            </Stack>
+            </div>
             <hr style={{ margin: '1em 0em' }} />
             <MonacoEditor width="600" height="300" language="json" theme="vs" value={JSON.stringify(previewData, null, 2)} />
-            <Stack horizontal tokens={{ childrenGap: 12 }} style={{ marginTop: '1em' }}>
-                <PrimaryButton
-                    iconProps={{ iconName: 'CheckMark' }}
-                    text={`${intl.get('dataSource.importData.restful.confirm')}`}
-                    onClick={confirmData}
-                    disabled={detectedDataStruct === undefined || detectedDataStruct === 'others'}
-                />
-                <DefaultButton
-                    iconProps={{ iconName: 'Delete' }}
-                    text={`${intl.get('dataSource.importData.restful.clear')}`}
+            <div className="mt-4 flex gap-3">
+                <Button type="button" onClick={confirmData} disabled={detectedDataStruct === undefined || detectedDataStruct === 'others'}>
+                    <RathIcon name="CheckMark" />
+                    {intl.get('dataSource.importData.restful.confirm')}
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
                         setDetectedDataStruct('others');
                         setRawData(undefined);
                     }}
-                />
-            </Stack>
+                >
+                    <RathIcon name="Delete" />
+                    {intl.get('dataSource.importData.restful.clear')}
+                </Button>
+            </div>
         </Cont>
     );
 };

@@ -1,6 +1,6 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
-import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
+import { createContext, FC, ReactNode, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
@@ -264,7 +264,7 @@ class CausalViewStore {
 
 const CausalViewContext = createContext<CausalViewStore | null>(null);
 
-export const useCausalViewProvider = (causalStore: CausalStore): FC => {
+export const useCausalViewProvider = (causalStore: CausalStore): FC<{ children?: ReactNode }> => {
     const context = useMemo(() => new CausalViewStore(causalStore), [causalStore]);
 
     useEffect(() => {
@@ -274,7 +274,7 @@ export const useCausalViewProvider = (causalStore: CausalStore): FC => {
         };
     }, [context]);
 
-    return useCallback(function CausalViewProvider ({ children }) {
+    return useCallback(function CausalViewProvider ({ children }: { children?: ReactNode }) {
         return createElement(CausalViewContext.Provider, { value: context }, children);
     }, [context]);
 };

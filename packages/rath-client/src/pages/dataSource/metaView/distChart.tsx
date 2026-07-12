@@ -55,7 +55,7 @@ const theme: VegaGlobalConfig = {
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     const chart = useRef<HTMLDivElement>(null);
     const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10, label = true } = props;
-    const [view, setView] = useState<Result['view']>();
+    const [view, setView] = useState<Result['view'] | undefined>(undefined);
     // 是否有分箱的ordinal列
     const hasBinIndex = useMemo(() => {
         return dataSource.some(member => {

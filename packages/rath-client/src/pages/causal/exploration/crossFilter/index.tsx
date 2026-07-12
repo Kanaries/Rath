@@ -1,6 +1,7 @@
-import { IconButton } from '@fluentui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { Button } from '../../../../components/ui/button';
+import { RathIcon } from '../../../../components/icons';
 import { IFieldMeta, IRow } from '../../../../interfaces';
 import ColDist, { IBrushSignalStore } from './colDist';
 
@@ -29,11 +30,11 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
     const { fields, dataSource, onVizClue, onVizEdit, onVizDelete } = props;
     // const [brushes, setBrushes] = useState<(IBrush | null)[]>(fields.map((f) => null));
     const [brushSignal, setBrushSignal] = useState<IBrushSignalStore[] | null>(null);
-    const [brushIndex, setBrushIndex] = useState<number>(-1)
+    const [brushIndex, setBrushIndex] = useState<number>(-1);
     // const [mergedBrushes, setMergedBrushes] = useState<({ [key: string]: any[] } | null)[]>(fields.map((f) => null));
     useEffect(() => {
         setBrushSignal(null);
-        setBrushIndex(-1)
+        setBrushIndex(-1);
     }, [fields]);
 
     const handleFilter = useCallback((index: number, data: IBrushSignalStore[] | null) => {
@@ -52,25 +53,19 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
                     <VizCard key={field.fid}>
                         <div className="action-bar">
                             {onVizEdit && (
-                                <IconButton
-                                    text="Edit"
-                                    iconProps={{ iconName: 'Edit' }}
-                                    onClick={() => onVizEdit(field.fid)}
-                                />
+                                <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => onVizEdit(field.fid)}>
+                                    <RathIcon name="Edit" />
+                                </Button>
                             )}
                             {onVizClue && (
-                                <IconButton
-                                    text="Clues"
-                                    iconProps={{ iconName: 'Lightbulb' }}
-                                    onClick={() => onVizClue(field.fid)}
-                                />
+                                <Button variant="ghost" size="icon" aria-label="Clues" onClick={() => onVizClue(field.fid)}>
+                                    <RathIcon name="Lightbulb" />
+                                </Button>
                             )}
                             {onVizDelete && (
-                                <IconButton
-                                    text="Delete"
-                                    iconProps={{ iconName: 'Delete' }}
-                                    onClick={() => onVizDelete(field.fid)}
-                                />
+                                <Button variant="ghost" size="icon" aria-label="Delete" onClick={() => onVizDelete(field.fid)}>
+                                    <RathIcon name="Delete" />
+                                </Button>
                             )}
                         </div>
                         <ColDist

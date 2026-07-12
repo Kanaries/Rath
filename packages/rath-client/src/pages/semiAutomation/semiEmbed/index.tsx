@@ -1,8 +1,10 @@
-import { ActionButton, Panel, PanelType } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import React, { useEffect } from 'react';
 import intl from 'react-intl-universal';
+import { Button } from '../../../components/ui/button';
+import { RathIcon } from '../../../components/icons';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../../../components/ui/sheet';
 import { useGlobalStore } from '../../../store';
 import LiteFocusZone from './liteFocusZone';
 import LitePredictZone from './litePredictZone';
@@ -29,27 +31,23 @@ const SemiEmbed: React.FC<IProps> = (props) => {
 
     return (
         <div>
-            <ActionButton
-                iconProps={{
-                    iconName: 'Lightbulb',
-                }}
-                text={intl.get('semiAuto.embed.insight_discovery')}
+            <Button
                 onClick={() => {
                     toggleShow && toggleShow(!show);
                 }}
-            />
-            <Panel
-                type={PanelType.medium}
-                headerText={intl.get('semiAuto.embed.insights')}
-                isOpen={show}
-                isBlocking={false}
-                onDismiss={() => {
-                    toggleShow && toggleShow(false);
-                }}
             >
-                <LiteFocusZone />
-                <LitePredictZone />
-            </Panel>
+                <RathIcon name="Lightbulb" />
+                {intl.get('semiAuto.embed.insight_discovery')}
+            </Button>
+            <Sheet open={show} onOpenChange={(open) => !open && toggleShow && toggleShow(false)}>
+                <SheetContent className="w-[592px] overflow-y-auto sm:max-w-none">
+                    <SheetHeader>
+                        <SheetTitle>{intl.get('semiAuto.embed.insights')}</SheetTitle>
+                    </SheetHeader>
+                    <LiteFocusZone />
+                    <LitePredictZone />
+                </SheetContent>
+            </Sheet>
         </div>
     );
 };

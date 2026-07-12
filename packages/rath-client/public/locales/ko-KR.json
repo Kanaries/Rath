@@ -1,0 +1,823 @@
+{
+    "common": {
+        "dimension": "차원",
+        "measure": "측정",
+        "name": "이름",
+        "home": "홈",
+        "settings": "설정",
+        "history": "히스토리",
+        "hide": "숨기기",
+        "expand": "확장",
+        "filter": "필터",
+        "preview": "미리보기",
+        "source": "소스",
+        "submit": "제출",
+        "cancel": "취소",
+        "apply": "적용",
+        "applied": "적용됨",
+        "run": "실행",
+        "edit": "편집",
+        "suggestions": "제안",
+        "showMore": "더 보기",
+        "return": "돌아가기",
+        "semanticType": {
+            "nominal": "명목형",
+            "ordinal": "서열형",
+            "temporal": "시간적",
+            "quantitative": "양적"
+        },
+        "analyticType": {
+            "dimension": "차원",
+            "measure": "측정"
+        },
+        "vistheme": "시각화 테마",
+        "addVar": "변수 추가",
+        "addFilter": "필터 추가",
+        "addEncode": "계산 추가",
+        "field": "필드",
+        "star": "별표",
+        "stat": {
+            "unique": "고유",
+            "min": "최솟값",
+            "max": "최댓값",
+            "mean": "평균",
+            "median": "중앙값",
+            "stdev": "표준 편차",
+            "count": "개수",
+            "sum": "합계",
+            "qt_25": "제1사분위수",
+            "qt_75": "제3사분위수",
+            "qt_50": "중앙값"
+        },
+        "search": {
+            "searchViews": "검색 보기",
+            "searchFields": "필드 / 변수 검색",
+            "notFound": "검색 결과 없음"
+        },
+        "list": "리스트",
+        "gallery": "갤러리"
+    },
+    "menu": {
+        "dataSource": "데이터 소스",
+        "eda": "탐색",
+        "editor": "인터랙티브 파이프라인",
+        "vizPipe": "지원",
+        "support": "데이터 자동 조종",
+        "megaAuto": "데이터 공동 조종",
+        "semiAuto": "인사이더(α)",
+        "devCollection": "대시보드 디자이너",
+        "dashBoardDesigner": "데이터 페인터",
+        "painter": "컬렉션",
+        "collection": "대시보드",
+        "dashboard": "인과적인",
+        "causal": "데이터 연결",
+        "connection": "선호"
+    },
+    "preference": {
+        "title": "설정",
+        "config": "지원 방법"
+    },
+    "support": {
+        "title": "https://www.yuque.com/docs/share /65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》",
+        "link": "계산 엔진"
+    },
+    "config": {
+        "computationEngine": {
+            "title": "분석 작업이 실행될 위치를 정의하십시오. 데이터 집합이 작은 경우 (< 100MB), 웹 워커 모드를 권장합니다. 그렇지 않으면 ClickHouse 모드를 시도하십시오.",
+            "desc": "ClickHouse",
+            "clickhouse": "브라우저(웹 워커)",
+            "webworker": "데이터 소스와 호환되지 않음",
+            "notCompatible": "분석 설정"
+        },
+        "analysisConfig": "큐브 저장소 관리 모드",
+        "cubeStorageManageMode": {
+            "title": "큐브가 큐브이드를 저장하는 방법입니다.",
+            "desc": "확인"
+        }
+    },
+    "function": {
+        "confirm": "취소",
+        "cancel": "분석 시작",
+        "analysis": {
+            "start": "이전 결과 확인",
+            "checkResult": "반자동 탐색",
+            "pattern": "수동 탐색",
+            "manual": "인과 분석",
+            "causal": "히스토리 저장 파일 가져오기"
+        },
+        "importStorage": {
+            "title": "Rath에서 내보내진 분석 기록을 담은 Rath 저장 파일을 가져옵니다.",
+            "desc": "파일",
+            "type": {
+                "file": "로컬 저장소",
+                "indexdb": "이름"
+            },
+            "storageColumns": {
+                "name": "생성 시간",
+                "createTime": "크기",
+                "size": "조작",
+                "operation": "Rath 저장 파일 내보내기"
+            }
+        },
+        "exportStorage": {
+            "title": "파일",
+            "type": {
+                "file": "인덱스 DB",
+                "indexdb": "저장"
+            }
+        },
+        "save": {
+            "title": "업로드"
+        },
+        "upload": "데이터 소스 유형"
+    },
+    "dataSource": {
+        "dataSourceConnection": {
+            "types": "인사이트 분석"
+        },
+        "extractInsight": "인사이트 분석(디버그)",
+        "extractInsightOld": "청소 방법",
+        "cleanMethod": "사용 필드",
+        "useField": "보기 모드",
+        "viewMode": "메타",
+        "metaView": "테이블",
+        "dataView": "통계",
+        "statView": "문자 인코딩",
+        "charset": "구분 기호",
+        "separator": "데이터베이스 선택",
+        "databaseType": "연결 URI",
+        "connectUri": "데이터베이스",
+        "databaseName": "스키마",
+        "schemaName": "테이블",
+        "tableName": "이름 편집",
+        "editName": "데이터 미리보기",
+        "preview": "SQL 쿼리",
+        "query": "커넥터 설정",
+        "connectorConfig": "커넥터 서비스 URL(옵션)",
+        "connectorService": "커넥터가 오프라인입니다. 다시 시도하거나 다른 서비스를 선택하세요.",
+        "connectorOffline": "유효한 커넥터가 설정되지 않았습니다.",
+        "connectorEmpty": "요청 실패",
+        "req_err": "쿼리",
+        "query_monaco": "다이어그램",
+        "query_diagram": "탐색기",
+        "explorer": "적용 및 테스트",
+        "apply": "지식",
+        "textPattern": {
+            "knowledge": "일반화",
+            "generalize": "매치 추출",
+            "specific": "의미론",
+            "nlp": "현재 패턴",
+            "currentPattern": "통계 보기"
+        },
+        "statViewInfo": {
+            "title": "통계 보기는 데이터에 대한 감을 빠르게 파악하는 방법입니다. 데이터 세트의 각 필드의 분포를 보여줍니다. 필드 이름을 클릭하여 필드의 분포를 자세히 볼 수 있습니다.",
+            "desc": "데이터셋에서 탐색하기",
+            "explore": "원본 데이터 통계",
+            "originStatTable": "선택한 데이터 통계",
+            "selectionStatTable": "{nCols}개의 필드, {nRows}개의 행"
+        },
+        "sizeInfo": "자동차",
+        "demoDataset": {
+            "CARS": { "title": "자동차의 원산지와 제품명 및 물리적 특성입니다.", "description": "학생" },
+            "STUDENTS": { "title": "시험 성적에 영향을 미치는 요인은 무엇일까요?", "description": "BTC - 골드" },
+            "BTC_GOLD": { "title": "비트코인과 골드 가격의 이력 데이터입니다.", "description": "자동차 판매" },
+            "CAR_SALES": { "title": "자동차의 판매 데이터입니다.", "description": "대학" },
+            "COLLAGE": { "title": "대학의 공공 지표입니다.", "description": "타이타닉" },
+            "TITANIC": { "title": "타이타닉 해난사고입니다.", "description": "케플러" },
+            "KEPLER": { "title": "케플러 망원경 데이터입니다.", "description": "자전거 공유" },
+            "BIKE_SHARING_DC": { "title": "자전거 대여 데이터입니다.", "description": "이 테이블 로드 (최대 100개 행)" }
+        },
+        "btn": {
+            "use_table": "연결",
+            "connect": "뒤로 가기 및 재설정",
+            "reset": "연결에 실패했습니다",
+            "connectFailed": "쿼리 제출",
+            "query": "엔터를 누르거나 플러스 버튼을 클릭하여 새로운 연결을 추가하여 사용할 수 있습니다.",
+            "new_connector": "데이터의 부족"
+        },
+        "advice": {
+            "lackData": "데이터 집합에 치수가 없는 것 같습니다. (메가 자동화 기능의 일부가 영향을 미칠 수 있습니다.)",
+            "lackDimension": "데이터 집합에 측정치가 없는 것 같습니다. (메가 자동화 기능의 일부가 영향을 미칠 수 있습니다.)",
+            "lackMeasure": "샘플 크기가 충분하지 않아 추천의 신뢰도에 영향을 미칠 수 있습니다.",
+            "smallSample": "포스 분석",
+            "forceAnalysis": "이 파일은 너무 큽니다. 더 작은 서브셋을 사용하거나 CSV 파일로 변환하여 샘플링을 적용하십시오.",
+            "upload_file_too_large": "고유값"
+        },
+        "meta": {
+            "uniqueValue": "분석 유형",
+            "analyticType": "시맨틱 유형",
+            "semanticType": "컬럼 비활성화",
+            "disable": {
+                "title": "활성",
+                "on": "비활성",
+                "off": "데이터 가져오기"
+            }
+        },
+        "importData": {
+            "buttonName": "데이터 로드",
+            "load": "파일",
+            "type": {
+                "file": "URL에서",
+                "restful": "MySQL",
+                "mysql": "데모",
+                "demo": "데이터베이스",
+                "database": "클라우드",
+                "kanaries_cloud": "파일"
+            },
+            "sources": {
+                "file": {
+                    "name": "데이터 로드를 위해 파일을 업로드하세요. 지원되는 파일 형식: CSV, JSON 및 Excel.",
+                    "desc": "URL에서"
+                },
+                "restful": {
+                    "name": "JSON 형식의 URL에서 데이터 로드.",
+                    "desc": "데이터베이스"
+                },
+                "database": {
+                    "name": "데이터 로드를 위해 데이터베이스에 연결하세요. 지원되는 데이터베이스: MySQL, PostgreSQL, Oracle, SQL Server, SQLite.",
+                    "desc": "데모"
+                },
+                "demo": {
+                    "name": "시작하기 위해 데모 데이터셋을 로드하세요. 이것은 RATH의 특징과 작업 흐름을 익히는데 도움이 됩니다.",
+                    "desc": "클라우드"
+                },
+                "kanaries_cloud": {
+                    "name": "Kanaries Cloud에서 데이터 로드.",
+                    "desc": "Airtable"
+                },
+                "airtable": {
+                    "name": "Airtable에서 테이블 로드.",
+                    "desc": "기록"
+                },
+                "local": {
+                    "name": "분석 기록에서 데이터 로드.",
+                    "desc": "OLAP"
+                },
+                "olap": {
+                    "name": "OLAP에서 데이터 로드.",
+                    "desc": "Notebook"
+
+                }
+            },
+            "cloud": {
+                "notebook": "데이터셋",
+                "dataset": "대시보드",
+                "dashboard": "대시보드 템플릿",
+                "dashboard_template": "전체",
+                "total": "사용 가능한 데이터셋"
+            },
+            "demo": {
+                "available": "데이터 요청"
+            },
+            "restful": {
+                "requestData": "예제 데이터 구조",
+                "exampleDataStruct": "이력 로드",
+                "loadHistoryAPI": "구문 분석 규칙(자동으로 감지)",
+                "detectedDataStruct": "확인",
+                "confirm": "지우기",
+                "clear": "배열",
+                "format": {
+                    "array": "메타 데이터가 있는 배열",
+                    "array_with_meta": "기타",
+                    "others": "필드 이름 편집"
+                }
+            }
+        },
+        "table": {
+            "edit": "필드 이름",
+            "fieldName": "없음"
+        },
+        "sampling": {
+            "none": "고정된 샘플 크기",
+            "reservoir": "null 값을 포함한 행 삭제"
+        },
+        "methods": {
+            "dropNull": "null 값을 최빈값으로 대체",
+            "useMode": "0 또는 null 사용",
+            "simpleClean": "없음(원본 데이터 사용)",
+            "none": "분석 전에 필드 유형 및 데이터 정제 전략을 수정해야합니다."
+        },
+        "tip": "레코드 수 {count}",
+        "recordCount": "원본: {originCols} 열 × {origin} 행 / 선택: {selectCols} 열 × {select} 행 / 정제 : {clean} 행",
+        "rowsInViews": "빠른 선택 구성",
+        "selection": {
+            "title": "데이터의 주요 부분을 얻기 위해 분위수에 기반한 필터링",
+            "desc": "동기화 모드",
+            "syncMode": "데이터 연결"
+        },
+        "upload": {
+            "title": "Excel 통합 문서 및 텍스트 기반 파일(예: JSON, CSV)이 지원됩니다.",
+            "fileTypes": "필드에 고유 ID 추가",
+            "uniqueIdIssue": "더 많은 옵션",
+            "show_more": "샘플링",
+            "sampling": "샘플 크기(행)",
+            "percentSize": "셀 범위",
+            "excel_range": "업로드",
+            "upload": "찾아보기",
+            "change": "최근 열린 항목",
+            "lastOpen": "처음 생성된 날짜",
+            "firstOpen": "최근에 열린 항목",
+            "history": "오늘",
+            "history_time": {
+                "1d": "지난 주",
+                "1w": "지난 달",
+                "1mo": "지난 3개월",
+                "3mo": "지난 6개월",
+                "6mo": "지난 1년",
+                "1yr": "새 파일"
+            },
+            "new": "시트",
+            "sheet": "미리보기",
+            "preview_parsed": "전체",
+            "preview_full": "원시",
+            "preview_raw": "이 데이터셋은 비어 있습니다",
+            "data_is_empty": "쉼표",
+            "separator": {
+                "comma": "세미콜론",
+                "semicolon": "탭",
+                "tab": "기타...",
+                "other": "탐색 모드"
+            }
+        },
+        "exploreMode": {
+            "title": "데이터를 처음 만나는 경우",
+            "firstTime": "데이터에 익숙해지기",
+            "familiar": "포괄적인",
+            "comprehensive": "구체적인 목적을 가진 매뉴얼",
+            "manual": "빠른 선택"
+        },
+        "fastSelection": {
+            "title": "데이터 내보내기"
+        },
+        "downloadData": {
+            "title": "CSV 다운로드",
+            "downloadCSV": "JSON 다운로드",
+            "downloadJSON": "메타 정보가 포함된 JSON 다운로드",
+            "downloadJSONMeta": "RATH의 데이터셋 다운로드",
+            "downloadRATHDS": "정보 확장"
+        },
+        "extend": {
+            "title": "사용자 정의 계산",
+            "manual": "편집기",
+            "editor": "{ count }개의 기존 필드에서 더 많은 필드를 생성하여 분석 및 탐색을 개선할 수 있습니다.",
+            "autoExtend": "{ count }개의 필드가 결정되지 않았습니다.",
+            "notDecided": "다음 항목 찾기",
+            "findThem": "체크",
+            "checkThem": "열이 내보내지지 않았습니다.",
+            "empty": "적용",
+            "apply": "취소",
+            "cancel": "변환",
+            "auto": "패턴 검색 및 추출 | 텍스트 필드에서 패턴을 추출하고 추출된 패턴과 일치하는 새로운 필드를 생성합니다.",
+            "suggestion": {
+                "regex_selection": "시간 단위로 날짜 및 시간 그룹화 | 시계열은 연도와 월과 같은 다양한 척도로 시간 속성을 그룹화하면 규칙적이거나 상관 관계가 더 많을 수 있습니다.",
+                "dateTimeExpand": "범주형 필드를 위한 원-핫 인코딩. | 원-핫 인코딩은 이진 벡터로 범주형 변수를 표현하는 방법입니다. 이를 통해 범주형 데이터의 표현이 더욱 풍부해집니다.",
+                "oneHot": "텍스트 필드에서 단어 추출 (스코어 : tf-idf). | TF-IDF는 코퍼스나 컬렉션 내 문서에서 단어가 문서에 얼마나 중요한지를 반영하려고하는 수치 통계학적인 기법입니다.",
+                "wordTFIDF": "텍스트 필드에서 단어 추출 (스코어 : tf). | 문서에서 최상위 빈도로 사용되는 용어를 사용합니다. ",
+                "wordTF": "빈도별 재그룹화. | 빈도별로 필드를 재그룹화하며 최고 빈도 값만 유지합니다. ",
+                "reGroupByFreq": "이상치(분리 포리스트)별 재그룹화. | 아웃라이어에 의해 필드를 다시 그룹화하며, 이상치로 구성된 그룹과 일반적인 값으로 구성된 그룹을 생성합니다. 아웃라이어 감지 알고리즘으로 분리 포리스트가 사용됩니다. ",
+                "outlierIForest": "필터 구성"
+            }
+        },
+        "filter": {
+            "title": "필터",
+            "active": "활성화됨",
+            "enabled": "비활성화됨",
+            "disabled": "값 범위로 필터링",
+            "key": "값 집합으로 필터링",
+            "range": "제출",
+            "set": "취소",
+            "submit": "작업",
+            "cancel": "모든 필드 활성화",
+            "reset": "모든 필드 비활성화"
+        },
+        "operations": {
+            "title": "모든 필드 비활성화",
+            "selectAll": "클라우드에 저장",
+            "disableAll": "클라우드에 저장",
+            "backup": "모드의 백업."
+        }
+    },
+    "storage": {
+        "upload": "원시 데이터 ({size} 행)",
+        "upload_desc": "메타데이터 ({size} 필드)",
+        "components": {
+            "data": "컬렉션 ({size} 항목)",
+            "meta": "원인 모델",
+            "collection": "대시 보드 ({size} 문서)",
+            "causal": "로드",
+            "dashboard": "생성 일시"
+        },
+        "download": "새로 고침",
+        "createdAt": "{mode} 이름",
+        "refresh": "Rath {mode} {date}",
+        "name": "{mode} 설명",
+        "default_name": "데이터 소스 이름",
+        "desc": "데이터 소스 바인딩",
+        "data_source_name": "커버",
+        "upload_data_source": "데이터셋과 연결",
+        "cover": "필드 설명",
+        "bind_dataset": "크기",
+        "field_desc": "업로드",
+        "size": "공개",
+        "apply": "템플릿 게시",
+        "public": "덮어쓰기",
+        "publish_template": "자동 저장",
+        "overwrite": "메타 구성",
+        "auto_save": "저장"
+    },
+    "meta": {
+        "title": "차원",
+        "save": "척도",
+        "dimension": "자동 분석",
+        "measure": "작업 다시 실행"
+    },
+    "megaAuto": {
+        "autoAnalysis": "자동 분석",
+        "reRun": "작업 다시 실행",
+        "computing": "계산 중",
+        "emptyTitle": "아직 인사이트가 없습니다",
+        "emptyDescription": "분석 작업을 실행하여 이 데이터셋의 패턴과 시각적 인사이트를 찾아보세요.",
+        "title": "시각적 인사이트",
+        "hintMain": "RATH가 발견한 흥미로운 패턴과 인사이트입니다. 차트 편집으로 세부 내용을 확인하거나 연계 기능으로 관련 인사이트를 탐색해 보세요.",
+        "summary": "분석",
+        "associate": "관련 척도",
+        "analysis": "관련 차원",
+        "asso": {
+            "T1": "관련 척도는 차원을 유사하게 유지하고 상관 척도를 찾습니다. 관련 차원은 측정값을 유사하게 유지하고 관련 차원을 찾습니다.",
+            "T2": "분석 사용자 정의",
+            "hint": "편집기에서 나가기"
+        },
+        "bring": "데이터 페인터",
+        "exitEditor": "차트 편집",
+        "commandBar": {
+            "painting": "사용자 지정된 분석",
+            "editing": "편집기에서 편집",
+            "editInGW": "관련된 뷰 연계",
+            "editInEditor": "분석 제약조건",
+            "associate": "차트 내보내기",
+            "constraints": "내보내기",
+            "download": "다음 형식으로 내보내기",
+            "export": "크기",
+            "export_as": "고정 화면 비율",
+            "export_size": "배경 색상",
+            "lock_aspect": "크기는 {min}~{max} 사이어야 합니다.",
+            "export_bg": "제외할 필드",
+            "err_msg_invalid_size": "존재하는 인사이트 포함"
+        },
+        "constraints": {
+            "exclude": "강제 포함",
+            "auto": "통계",
+            "include": "하위 인사이트"
+        },
+        "commonVis": {
+            "text": "결과 정렬 기준"
+        },
+        "subinsights": "기본값",
+        "orderBy": {
+            "title": "필드 번호",
+            "default": "Cardinality",
+            "field_num": "debug",
+            "cardinality": "interactive"
+        },
+        "operation": {
+            "debug": "resize mode",
+            "zoom": "resizable",
+            "resize": "none",
+            "resizeMode": {
+                "resizable": "exclude scale zero",
+                "none": "Main View"
+            },
+            "excludeScaleZero": "related patterns"
+        }
+    },
+    "semiAuto": {
+        "main": {
+            "mainView": "related features",
+            "relatePatterns": "explain diff",
+            "relateFeatures": "related subsets",
+            "explainDiff": "neighbor views",
+            "pointInterests": "related insights",
+            "neighbors": "compare",
+            "pin": "visualization recommend system",
+            "compare": "Lite mode(fast)",
+            "vizsys": {
+                "title": "Strict mode",
+                "lite": "load more",
+                "strict": "Associated Patterns"
+            },
+            "loadMore": "Associated Features",
+            "associate": {
+                "patterns": "Associated Subsets",
+                "features": "Associated Neighbors",
+                "filters": "Patterns",
+                "neighbors": "Features"
+            },
+            "associateShorthand": {
+                "patterns": "Subsets",
+                "features": "Neighbors",
+                "filters": "Insight Discovery",
+                "neighbors": "Insights"
+            }
+        },
+        "embed": {
+            "insight_discovery": "Pattern in {measures} by {dimensions} where {filters}.",
+            "insights": "Collection"
+        }
+    },
+    "desc": {
+        "dataViewInfo": "This is a collection of your favorite views in all segments."
+    },
+    "collection": {
+        "title": "컬렉션",
+        "desc": "여러 탐색 화면에서 저장한 즐겨찾기 보기를 모아 둔 곳입니다.",
+        "emptyTitle": "저장된 보기가 없습니다",
+        "emptyDescription": "탐색 페이지에서 보기를 저장하면 여기에 표시됩니다.",
+        "searchEmpty": "일치하는 보기가 없습니다",
+        "searchEmptyDescription": "다른 검색어를 사용해 보세요.",
+        "viewMode": {
+            "card": "카드",
+            "list": "목록"
+        }
+    },
+    "painter": {
+        "samplePercent": "Use original distribution",
+        "brushSize": "Clear Painting",
+        "useOriginalDist": "Sync Data",
+        "clearPainting": "Search",
+        "syncData": "Explore",
+        "search": "Auto Search",
+        "explore": "Last",
+        "autoSearch": "Next",
+        "last": "Add Label",
+        "next": "Paint Field",
+        "addLabel": "Move",
+        "newField": "Color",
+        "tools": {
+            "move": "Erase",
+            "color": "Create",
+            "clean": "keyword",
+            "create": "operator"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "field",
+            "operator": "Append field to data.",
+            "fid": "Transforms a field to ordinals as a new column."
+        },
+        "keyword": {
+            "out": "Transforms a field to calculative numbers as a new column."
+        },
+        "op": {
+            "$set": "Transforms a field to strings as a new column.",
+            "$vec": "Transforms a field to 0 or 1 as a new column.",
+            "$text": "Generates an automatically incrementing id field, starting from 1.",
+            "$bool": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
+            "$id": "대상 문자열 필드를 기준으로 정렬된 데이터의 순위 인덱스를 1에서 시작으로 반환합니다.",
+            "$order": "숫자를 문자열로 변환합니다. 숫자가 NaN이면 문자열 '1'로, 아니면 문자열 '0'으로 새 열을 만듭니다.",
+            "$dict": "숫자를 문자열로 변환합니다. 숫자가 0이면 문자열 '1'로, 아니면 문자열 '0'으로 새 열을 만듭니다.",
+            "$isNaN": "시간 단위로 잘릴 수 있는 실행 가능한 날짜 객체로 필드를 변환합니다.",
+            "$isZero": "유효한 Date 객체이면 문자열 '1', 아니면 문자열 '0'으로 새 열을 만듭니다.",
+            "$toDate": "필드를 정규화하여 새 열을 만듭니다.",
+            "$isValidDate": "필드를 범위 -1 ~ +1로 스케일링하여 새 열을 만듭니다.",
+            "$normalize": "필드를 범위 0 ~ 1로 스케일링하여 새 열을 만듭니다.",
+            "$inset": "x -> log(x)으로 필드를 프로젝션하여 새 열을 만듭니다 (대상이 E인 경우).",
+            "$bound": "x -> log[2](x)으로 필드를 프로젝션하여 새 열을 만듭니다.",
+            "$log": "x -> log(x + 1)으로 필드를 프로젝션하여 새 열을 만듭니다.",
+            "$log2": "x -> log[10](x)으로 필드를 프로젝션하여 새 열을 만듭니다.",
+            "$log1p": "각 값을 새 열의 동일한 유형의 새 값으로 매핑합니다.",
+            "$log10": "각 값을 0(false) 또는 1(true)로 매핑하여 새 열을 만듭니다.",
+            "$map": "x -> max(0, x)로 필드를 프로젝션하여 새 열을 만듭니다.",
+            "$test": "정규식을 사용하여 각 텍스트 콘텐츠의 일치하는 부분을 찾아 새 열로 만듭니다.",
+            "$ReLU": "정규식을 사용하여 일치하는 부분을 새 열로 대체합니다.",
+            "$match": "모든 필드의 두 개 이상의 텍스트 내용을 새 열로 병합합니다.",
+            "$replace": "x -> (1 + e^-x)^-1으로 필드를 프로젝션하여 새 열로 만듭니다.",
+            "$concat": "박스 플롯으로 인한 값의 오버플로우를 도메인으로 매핑하여 새 열로 만듭니다.",
+            "$sigmoid": "주어진 도메인으로 인한 값의 오버플로우를 모든 다른 값의 평균으로 매핑하여 새 열로 만듭니다.",
+            "$boxClip": "주어진 도메인으로 인한 값의 오버플로우를 도메인으로 매핑하여 새 열로 만듭니다.",
+            "$meanClip": "무한대 또는 NaN을 0으로 매핑하여 새 열로 만듭니다.",
+            "$nearestClip": "무한대 또는 NaN을 모든 다른 값의 평균으로 매핑하여 새 열로 만듭니다.",
+            "$zeroFill": "부울 표현식으로 각 값을 분리하여 두 개의 새 열로 만듭니다.",
+            "$meanFill": "링크 형식",
+            "$partition": "연관 없음"
+        }
+    },
+    "causal_direction": {
+        "_": "직접 링크",
+        "none": "시작점 링크",
+        "directed": "약한 직접 링크",
+        "reversed": "약한 시작점 링크",
+        "weakDirected": "방향 없는 관계 ",
+        "weakReversed": "약한 방향 없는 관계",
+        "undirected": "양방향 링크",
+        "weakUndirected": "A가 B와 관련이 없습니다.",
+        "bidirected": "A가 B에 영향을 미칩니다."
+    },
+    "causal_direction_desc": {
+        "none": "A는 B에 영향을 받습니다.",
+        "directed": "일부 경우에는 A가 B에 영향을 미칩니다.",
+        "reversed": "일부 경우에는 A가 B에 영향을 받습니다.",
+        "weakDirected": "A는 B와 관련이 있지만 방향은 결정되지 않았습니다.",
+        "weakReversed": "다른 경우에서는 A 또는 B가 서로에게 관련이 있습니다.",
+        "undirected": "A와 B가 서로에게 영향을 미칩니다.",
+        "weakUndirected": "ko-KR",
+        "bidirected": "%x, %X"
+    },
+    "time_format": {
+        "langKey": "%Y/%m/%d",
+        "dateTime": "%p%-I:%M:%S",
+        "date": "%-m/%-d/%Y",
+        "time": "%-I:%M:%S %p",
+        "periods": ["오전", "오후"],
+        "days": ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"],
+        "shortDays": ["일", "월", "화", "수", "목", "금", "토"],
+        "months": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+        "shortMonths": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+    },
+    "login": {
+        "configKeys": {
+            "basic": "기본",
+            "design": "디자인",
+            "analysis": "데이터 분석"
+        },
+        "design": {
+            "createCustomTheme": "커스텀 테마 생성",
+            "syncFromSelectedTheme": "선택된 테마에서 동기화",
+            "useCustomTheme": "커스텀 테마 사용"
+        },
+        "clickLogin": "로그인",
+        "haveSent": "이미 전송함",
+        "signIn": "회원 가입",
+        "signOut": "로그아웃",
+        "my_account": "내 계정",
+        "preferences": "환경 설정",
+        "phoneCert": "전화번호",
+        "emailCert": "이메일",
+        "passwordLog": "비밀번호",
+        "account": "계정",
+        "header": "프로필 사진",
+        "info": "정보",
+        "setting": "설정",
+        "login": "로그인",
+        "loginAndRegister": "로그인/회원가입",
+        "getCertCode": "인증 코드 보내기",
+        "upload": "커스텀 아바타 업로드",
+        "AvatarImage": "아바타 이미지",
+        "phone": {
+            "phoneNo": "전화번호",
+            "certCode": "인증 코드"
+        },
+        "email": {
+            "title": "이메일",
+            "certCode": "인증 코드",
+            "errEmail": "이메일 유형 지원하지 않음"
+        },
+        "password": {
+            "userName": "사용자 이름",
+            "password": "비밀번호"
+        }
+    },
+    "user": {
+        "organization": "조직",
+        "workspace": "작업 공간"
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "이메일이 성공적으로 전송되었습니다",
+                "content": "이메일이 {email}로 전송되었습니다. 확인 코드를 받으려면 이메일을 확인하세요."
+            },
+            "error": {
+                "title": "이메일 전송 실패"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "SMS가 성공적으로 전송되었습니다",
+                "content": "SMS가 {phone}로 전송되었습니다. 확인 코드를 받으려면 휴대폰을 확인하세요."
+            },
+            "error": {
+                "title": "SMS 전송 실패"
+            }
+        }
+    },
+    "causal": {
+        "dataset": {
+			"extend": "확장 중",
+			"field": "필드",
+			"extInfo": "확장 정보",
+			"distinct_count": "고유한 수",
+			"no_filter": "(필터 없음)",
+			"origin_size": "원래 크기: {size} 개의 행, ",
+			"filtered_size": "서브셋 크기: {size} 개의 행",
+			"sample_rate": "샘플링 비율",
+			"sample_size": "샘플 크기: {size} 개의 행",
+			"choose_fields": "분석할 필드 선택",
+			"dist": "분포도",
+			"stat": "통계"
+		},
+		"actions": {
+			"clear_fields": "모든 필드 지우기",
+			"causal_discover": "인과관계 발견",
+			"relayout": "다시 레이아웃",
+			"zoom_canvas": "캔버스 줌",
+			"modify_constraints": "제약 사항 수정",
+			"display_limit": "연결 표시 제한",
+			"filter_by_weights": "가중치로 필터링",
+			"one_click": "한 번 클릭",
+			"use_ext_diagram": "필드 확장 정보에서 생성",
+			"import_effect": "제약 사항 가져오기",
+			"auto_detect": "자동 감지",
+			"preview": "미리보기",
+			"edit_view": "보기 편집",
+			"compute": "계산",
+			"export_diagram": "다이어그램으로 내보내기",
+			"save_model": "인과 모델 저장",
+			"load_model": "인과 모델 불러오기",
+			"prev_step": "이전 단계",
+			"continue": "다음 단계"
+		},
+		"analyze": {
+			"cause": "원인",
+			"corr": "상관관계",
+			"effect": "결과",
+			"corr_atoms": "관련 필드",
+			"vis": "시각화",
+			"single_dim": "단일 필드 분석",
+			"main_field": "주요 필드",
+			"service": "서비스 환경",
+			"diff_mode": "차이 모드",
+			"other": "기타",
+			"full": "전체",
+			"diff_two": "두 그룹",
+			"index_key": "인덱스 키",
+			"not_chosen": "없음",
+			"aggregation_type": "집합 유형",
+			"foreground_group": "전경 그룹",
+			"background_group": "배경 그룹",
+			"insight": "인사이트",
+			"why_query": "왜 질문",
+			"no_more_hints": "더 이상 힌트가 없습니다.",
+			"normalize_stack": "정규화 스택",
+			"global_dist": "전역 분포",
+			"diff_dist": "차이 분포",
+			"feature": "특징",
+			"target": "대상",
+			"name": "이름",
+			"model": "모델",
+			"analyze_space": "분석 공간",
+			"prediction": "예측",
+			"diff_title": "차이",
+			"run_idx": "ID",
+			"accuracy": "정확도",
+			"clear_records": "기록 지우기",
+			"model_config": "모델 구성",
+			"predict_result": "예측 결과",
+			"clear_all": "모두 지우기",
+			"link_mode": "링크 생성",
+			"def_to_effect": "영향",
+			"def_to_not_effect": "영향 없음",
+			"def_to_be_relevant": "연관됨",
+			"def_to_be_not_relevant": "연관되지 않음",
+			"click_link_mode": "링크를 클릭하여",
+			"forbid_link": "금지",
+			"delete_link": "삭제",
+			"dbl_click_node_mode": "노드를 두 번 클릭하여",
+			"def_forbid_as_cause": "원인으로 설정 금지",
+			"def_forbid_as_effect": "결과로 설정 금지",
+			"overwrite-only": "우선 대체",
+			"fill-only": "빈칸만 채우기",
+			"fully replace": "전체 대체",
+			"mutual_info": "상호 정보",
+			"conditional_mutual_info": "조건부 상호 정보",
+			"causal_discover": "인과관계 발견",
+			"matrix": "행렬",
+			"diagram": "다이어그램",
+			"circle": "원형",
+			"square": "사각형",
+			"view": "보기 유형",
+			"mark": "마크 유형",
+			"my_models": "내 모델",
+			"model_list": "모델 목록",
+			"dataset_config": {
+				"title": "데이터셋 구성",
+				"help": "분석할 데이터 서브셋과 필드를 전체 데이터셋에서 선택하세요."
+			},
+			"fd_config": {
+				"title": "기능적 의존성 정의",
+				"help": "배경 지식을 기반으로 기능적 의존성을 설정하세요."
+			},
+			"causal_model": {
+				"title": "인과 모델",
+				"help": "알고리즘을 사용하여 인과 관계를 발견하고 인과 다이어그램을 수정하여 결과를 도출하세요."
+			}
+		},
+		"exploration": {
+			"AutoVis": "AutoVis",
+			"CrossFilter": "CrossFilter",
+			"CausalInsight": "CausalInsight",
+			"GraphicWalker": "GraphicWalker",
+			"predict": "predict"
+		}
+    }
+}

@@ -1,7 +1,4 @@
 import { IRow } from 'visual-insights';
-/* eslint import/no-webpack-loader-syntax:0 */
-// @ts-ignore
-// eslint-disable-next-line
 import fieldMetaWorker from '../workers/fieldMeta.worker?worker';
 import { IFieldMeta, IRawField } from '../interfaces';
 import { workerService } from './base';

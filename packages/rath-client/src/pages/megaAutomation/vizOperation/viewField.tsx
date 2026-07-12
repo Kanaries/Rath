@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Icon } from '@fluentui/react';
+import { RathIcon } from '../../../components/icons';
 import { IFieldMeta } from '../../../interfaces';
 
 const COLORS = {
@@ -84,8 +84,7 @@ interface ViewFieldProps {
 const ViewField: React.FC<ViewFieldProps> = props => {
     const { onRemove, text, mode = 'real', type, onDoubleClick } = props;
     return <Pill mode={mode} colType={type} onDoubleClick={onDoubleClick}>
-        {onRemove && <Icon className="cancel-icon" iconName="Cancel" onClick={onRemove} />}
-        {/* <IconButton iconProps={{ iconName: 'Cancel', style: { fontSize: '8px' } }} /> */}
+        {onRemove && <RathIcon className="cancel-icon" name="Cancel" onClick={onRemove} />}
         {text}
     </Pill>
 }
