@@ -162,12 +162,21 @@ const Painter: React.FC = (props) => {
     }, [vizSpec, mutFeatValues, noViz, axisResizable]);
     const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
-        if (painterSpec !== null && container.current) {
-            // @ts-ignore
-            embed(container.current, painterSpec, {
-                actions: painterMode === PAINTER_MODE.MOVE,
-                renderer: 'painter',
-            }).then((res) => {
+        if (painterSpec === null || !container.current) return;
+
+        let disposed = false;
+        let embeddedResult: Awaited<ReturnType<typeof embed>> | null = null;
+        // @ts-ignore
+        void embed(container.current, painterSpec, {
+            actions: painterMode === PAINTER_MODE.MOVE,
+            renderer: 'painter',
+        })
+            .then((res) => {
+                if (disposed) {
+                    res.view.finalize();
+                    return;
+                }
+                embeddedResult = res;
                 const viewChanges = new VegaViewChanges(res.view, 'dataSource', LABEL_INDEX);
                 viewChanges
                     .insert(viewData)
@@ -176,7 +185,7 @@ const Painter: React.FC = (props) => {
                         // if (testConfig.printLog) { window.console.log("changes =", changes); }
                     });
 
-                setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
+                if (!disposed) setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
 
                 const xField = painterSpec.encoding.x.field;
@@ -271,15 +280,15 @@ const Painter: React.FC = (props) => {
                     startPaint(res.view);
                 });
                 const endup = () => {
+                    if (disposed) return;
                     isPainting.current = false;
                     stopPaint(res.view);
                     viewChanges.runAsync().then((removedIds: Set<number>) => {
+                        if (disposed) return;
                         linkNearViz();
                         maintainViewDataRemove((r: any) => removedIds.has(r[LABEL_INDEX]));
                     });
                 };
-                /** No need to remove the event listeners here, because the res.view object is created by `embed` function
-                 * and will be destroyed when the component is unmounted.  */
                 res.view.addEventListener('mouseup', endup);
                 res.view.addEventListener('touchend', debounce(endup, 200));
                 // TODO: use renderer to check nearest points
@@ -289,8 +298,15 @@ const Painter: React.FC = (props) => {
                 res.view.addEventListener('touchmove', hdr);
                 res.view.resize();
                 res.view.runAsync();
+            })
+            .catch((error) => {
+                if (!disposed) console.error(error);
             });
-        }
+
+        return () => {
+            disposed = true;
+            embeddedResult?.view.finalize();
+        };
     }, [viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode, maintainViewDataRemove, linkNearViz, painterSpec]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {

@@ -1,5 +1,5 @@
 import { IFieldEncode, IPattern } from '@kanaries/loa';
-import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
+import { makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import produce from 'immer';
 import { STORAGE_FILE_SUFFIX } from '../constants';
@@ -66,7 +66,9 @@ export class MegaAutomationStore {
             details: observable.ref,
             assoListT1: observable.ref,
             assoListT2: observable.ref,
-            insightSpaces: computed,
+            // Read the pipeline observable directly. A cached cross-store computed
+            // can stay stale while React hands observers between lazy pages.
+            insightSpaces: false,
             mainView: observable.shallow,
             // @ts-expect-error private field
             ltsPipeLineStore: false

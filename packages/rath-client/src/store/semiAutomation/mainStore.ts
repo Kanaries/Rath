@@ -1,12 +1,12 @@
 import produce from "immer";
 import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
-import { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
-import { Specification } from "visual-insights";
-import { IResizeMode, IRow, ISpecSourceType, IVisView } from "../../interfaces";
+import type { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
+import type { Specification } from "visual-insights";
+import { IResizeMode, type IRow, type ISpecSourceType, type IVisView } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVisService, loaEngineService } from "../../services/index";
-import { DataSourceStore } from "../dataSourceStore";
-import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
+import type { DataSourceStore } from "../dataSourceStore";
+import { type IAssoViews, type IMainVizSetting, type IRenderViewKey, type ISetting, makeInitAssoViews } from "./localTypes";
 import { autoVis } from "./autoVis";
 
 const RENDER_BATCH_SIZE = 5;
@@ -68,6 +68,7 @@ export class SemiAutomationStore {
         });
     }
     public init () {
+        this.clearStore();
         this.mainViewSpecSource = 'default';
         this.mainView = {
             dataViewQuery: null,
