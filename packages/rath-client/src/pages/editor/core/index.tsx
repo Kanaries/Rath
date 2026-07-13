@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { FC, ReactNode, useEffect, useState } from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from '../../../components/themed-monaco-editor';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';

@@ -1,18 +1,18 @@
 .content-container{
   /* padding: 1em 9% 0px 9%; */
   padding: 1em;
-  min-height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 .header-bar{
   position: relative;
   top: 0px;
   left: 0px;
   right: 0px;
-  background-color: #fff;
+  background-color: var(--background);
   min-height: 60px;
 }
 .logo{
@@ -25,7 +25,7 @@
   width: 100%;
 }
 h2, h3 {
-  color: #323130;
+  color: var(--foreground);
   font-weight: 500;
 }
 .state-header{
@@ -35,25 +35,25 @@ h2, h3 {
   margin-block-end: 0.83em;
   margin-inline-start: 0px;
   margin-inline-end: 0px;
-  color: #323130;
+  color: var(--foreground);
   font-weight: 500;
 }
 .state-description{
   margin-top: 10px;
   font-weight: 360;
   font-size: 12px;
-  color: #8a8886;
+  color: var(--muted-foreground);
 }
 
 .pure-card{
-  background-color: #fff;
+  background-color: var(--card);
   padding: 1em;
   border-radius: 2px;
   /* box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08); */
   margin-bottom: 1em;
 }
 .card{
-  background-color: #fff;
+  background-color: var(--card);
   padding: 1em;
   border-radius: 2px;
   /* box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08); */
@@ -84,7 +84,7 @@ h2, h3 {
   margin: 0;
   font-size: 21px;
   font-weight: 100;
-  color: #323130;
+  color: var(--foreground);
   font-weight: 300;
 }
 .vi-callout-inner{
@@ -95,7 +95,7 @@ h2, h3 {
   margin: 0;
   font-size: 12px;
   font-weight: 400;
-  color: #323130;
+  color: var(--foreground);
   font-weight: 300;
 }
 .vi-callout-actions{
@@ -136,7 +136,7 @@ h2, h3 {
   bottom: 4px;
   font-size: 12px;
   left: 50%;
-  color: #3e3e3e;
+  color: var(--muted-foreground);
   transform: translateX(-50%);
 }
 .kanaries-copy-right-footer>a{
@@ -145,7 +145,7 @@ h2, h3 {
 
 hr{
   border: none;
-  border-top: 1px solid #efefef;
+  border-top: 1px solid var(--border);
 }
 
 h1 {

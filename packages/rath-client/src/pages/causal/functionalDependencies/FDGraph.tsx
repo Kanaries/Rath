@@ -12,6 +12,7 @@ import { useReactiveGraph } from '../explorer/graph-helper';
 import { transformFuncDepsToPag } from '../../../store/causalStore/pag';
 import type { IFunctionalDep } from '../config';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
+import { useAppearance } from '../../../appearance';
 
 const Container = styled.div`
     height: 600px;
@@ -40,6 +41,7 @@ const FDGraph: React.FC<{
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
 }> = ({ functionalDependencies, setFunctionalDependencies }) => {
+    const { resolvedAppearance } = useAppearance();
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const functionalDependenciesAsPag = transformFuncDepsToPag(functionalDependencies);
@@ -107,12 +109,14 @@ const FDGraph: React.FC<{
         fields,
         PAG: functionalDependenciesAsPag,
         renderNode: onRenderNode,
+        resolvedAppearance,
     });
     const cfg = useGraphOptions({
         width,
         fields,
         handleLink: onLinkTogether,
         graphRef,
+        resolvedAppearance,
     });
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
@@ -127,6 +131,7 @@ const FDGraph: React.FC<{
         handleEdgeClick: onRemoveLink,
         fields,
         allowZoom: false,
+        resolvedAppearance,
     });
 
     useEffect(() => {

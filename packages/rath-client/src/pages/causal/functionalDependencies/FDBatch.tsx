@@ -22,10 +22,10 @@ const Mask = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fff8;
+    background-color: color-mix(in srgb, var(--card) 53%, transparent);
     > div {
         box-shadow: 0 0 12px rgba(0, 0, 0, 0.15), 0 0 8px rgba(0, 0, 0, 0.03);
-        background-color: #fff;
+        background-color: var(--card);
         padding: 2em;
         > div.container {
             width: 600px;

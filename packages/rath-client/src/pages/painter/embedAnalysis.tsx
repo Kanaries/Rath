@@ -3,6 +3,7 @@ import { GraphicWalker } from '../../components/graphic-walker';
 import { Specification } from 'visual-insights';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { IRow } from '../../interfaces';
+import { useAppearance } from '../../appearance';
 
 interface EmbedAnalysisProps {
     dataSource: IRow[];
@@ -14,6 +15,7 @@ interface EmbedAnalysisProps {
 
 const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
     const { dataSource, fields, spec, trigger, i18nLang } = props;
+    const { resolvedAppearance } = useAppearance();
 
     const triggerFields = useMemo(() => {
         return [...fields]
@@ -25,7 +27,7 @@ const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
         spec={spec}
         i18nLang={i18nLang}
         keepAlive
-        dark="light"
+        dark={resolvedAppearance}
         fieldKeyGuard={false}
     />
 }

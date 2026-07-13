@@ -6,6 +6,8 @@ import { IRow } from '../../../interfaces';
 import { shallowCopyArray } from '../../../utils/deepcopy';
 import { getVegaTimeFormatRules } from '../../../utils';
 import { VegaGlobalConfig } from '../../../queries/themes/config';
+import { useAppearance } from '../../../appearance';
+import { mergeVegaAppearanceConfig } from '../../../visualization/appearance';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
 const markColor = '#3371D7';
@@ -50,6 +52,7 @@ interface FullDistVizProps {
     onSelect: (values: IRow[]) => void;
 }
 const FullDistViz: React.FC<FullDistVizProps> = (props) => {
+    const { resolvedAppearance } = useAppearance();
     const chart = useRef<HTMLDivElement>(null);
     const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 1000, onSelect } = props;
     const [view, setView] = useState<Result['view'] | undefined>(undefined);
@@ -135,7 +138,7 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
             }, {
                 actions: false,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
-                config: theme
+                config: mergeVegaAppearanceConfig(theme, resolvedAppearance)
             }).then(res => {
                 setView(res.view);
                 res.view.addSignalListener('brush', (name, value) => {
@@ -151,7 +154,7 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                 }).catch(console.error)
             }
         }
-    }, [x, y, sortBy, semanticType, width, height, maxItemInView, onSelect])
+    }, [x, y, sortBy, semanticType, width, height, maxItemInView, onSelect, resolvedAppearance])
     useEffect(() => {
         if (view) {
             try {

@@ -11,8 +11,8 @@ const COLORS = {
     // measure: 'rgb(232, 149, 72)',
     dimension: '#00b7c3',
     measure: '#00ad56',
-    black: '#000',
-    white: '#fff'
+    black: 'var(--foreground)',
+    white: 'var(--card)'
 }
 
 export const Pill = styled.div<{colType: IFieldMeta['analyticType'], mode: 'real' | 'wildcard'}>`

@@ -97,7 +97,7 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
                 />
             </div>
             {error !== null && (
-                <span style={{ color: '#a4262c', fontSize: 12, margin: '4px 0' }}>{error}</span>
+                <span style={{ color: 'var(--message-blocked-icon)', fontSize: 12, margin: '4px 0' }}>{error}</span>
             )}
             <div className="flex gap-2">
                 <Button type="button" onClick={submit}>{intl.get('common.submit')}</Button>

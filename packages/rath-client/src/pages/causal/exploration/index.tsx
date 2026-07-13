@@ -17,6 +17,7 @@ import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
 import AutoVis from './autoVis';
+import { useAppearance } from '../../../appearance';
 // import CausalBlame from './causalBlame';
 
 const Container = styled.div`
@@ -50,6 +51,7 @@ const Exploration = forwardRef<
     },
     {}
 >(function ManualAnalyzer(_, ref) {
+    const { resolvedAppearance } = useAppearance();
     const { dataSourceStore, langStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const [showSemiClue, setShowSemiClue] = useState(false);
@@ -215,7 +217,7 @@ const Exploration = forwardRef<
                                     spec={initialSpec}
                                     i18nLang={langStore.lang}
                                     keepAlive={false}
-                                    dark="light"
+                                    dark={resolvedAppearance}
                                     fieldKeyGuard={false}
                                 />
                             ),

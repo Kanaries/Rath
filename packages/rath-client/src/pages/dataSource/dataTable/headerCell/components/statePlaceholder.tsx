@@ -8,12 +8,12 @@ export type IColStateType = 'preview' | 'source';
 
 function getCellColor(colType?: IColStateType): string {
     if (colType === 'preview') {
-        return 'rgb(255, 244, 206)';
+        return 'var(--warning-subtle)';
     }
     if (colType === 'source') {
-        return '#bae0ff';
+        return 'var(--data-source-subtle)';
     }
-    return '#fff';
+    return 'var(--card)';
 }
 
 const Cont = styled.div<{ stateType?: IColStateType }>`
@@ -33,6 +33,7 @@ const Cont = styled.div<{ stateType?: IColStateType }>`
         padding: 0 0.8em;
     }
     background-color: ${(props) => getCellColor(props.stateType)};
+    color: ${(props) => (props.stateType === 'preview' ? 'var(--warning-subtle-foreground)' : props.stateType === 'source' ? 'var(--data-source-subtle-foreground)' : 'var(--foreground)')};
 `;
 
 interface StatePlaceholderProps {
@@ -52,7 +53,7 @@ const StatePlaceholder: FC<StatePlaceholderProps> = (props) => {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="text-[#c50f1f]"
+                            className="text-[var(--positive-subtle-foreground)]"
                             onClick={onAcceptExtField}
                         >
                             <RathIcon name="CompletedSolid" />
@@ -61,7 +62,7 @@ const StatePlaceholder: FC<StatePlaceholderProps> = (props) => {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="text-[#c50f1f]"
+                            className="text-message-blocked-icon"
                             onClick={onRejectExtField}
                         >
                             <RathIcon name="Delete" />

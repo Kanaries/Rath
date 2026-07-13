@@ -7,7 +7,7 @@ const StyledCont = styled.div`
     left: 0px;
     right: 0px;
     height: 200px;
-    background-color: #fff;
+    background-color: var(--card);
     z-index: 100;
     .idea-actions{
         padding: 5px;

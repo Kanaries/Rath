@@ -356,7 +356,10 @@ const DataTable: React.FC = (props) => {
                     <span
                         className="cell-content"
                         title={intl.get('dataSource.textPattern.excludedHint')}
-                        style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.EXCLUDE_COLOR }}
+                        style={{
+                            backgroundColor: DATA_TABLE_STYLE_CONFIG.EXCLUDE_COLOR,
+                            color: DATA_TABLE_STYLE_CONFIG.EXCLUDE_FOREGROUND,
+                        }}
                         onMouseUp={(e) => {
                             if (isExcludeModifier(e)) onNegativeToggle(f.fid, text);
                         }}
@@ -391,7 +394,14 @@ const DataTable: React.FC = (props) => {
                             }}
                         >
                             <span>{textBeforeSelection}</span>
-                            <span style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.SELECT_COLOR }}>{matchedText}</span>
+                            <span
+                                style={{
+                                    backgroundColor: DATA_TABLE_STYLE_CONFIG.SELECT_COLOR,
+                                    color: DATA_TABLE_STYLE_CONFIG.SELECT_FOREGROUND,
+                                }}
+                            >
+                                {matchedText}
+                            </span>
                             <span>{textAfterSelection}</span>
                             <ExcludeToggleButton
                                 excluded={false}
@@ -435,7 +445,9 @@ const DataTable: React.FC = (props) => {
             const hasEmpty = fields.some((f) => {
                 return !f.disable && (record[f.fid] === null || record[f.fid] === undefined || record[f.fid] === '');
             });
-            return { backgroundColor: hasEmpty ? '#fff2e8' : 'rgba(0,0,0,0)' };
+            return hasEmpty
+                ? { backgroundColor: 'var(--negative-subtle)', color: 'var(--negative-subtle-foreground)' }
+                : { backgroundColor: 'transparent' };
         },
         [fields]
     );
@@ -448,12 +460,12 @@ const DataTable: React.FC = (props) => {
     return (
         <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
-                <Alert className="my-[2px] mb-0 box-border w-auto">
+                <Alert className="my-[2px] mb-0 box-border w-auto" variant="warning">
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </Alert>
             )}
             {textSelectList.length > 0 && !hasPattern && (
-                <Alert className="my-[2px] mb-0 flex box-border w-auto items-center justify-between gap-2">
+                <Alert className="my-[2px] mb-0 flex box-border w-auto items-center justify-between gap-2" variant="warning">
                     <span>{intl.get('dataSource.textPattern.noPatternFound')}</span>
                     {
                         activeNegatives.length > 0 ? (
@@ -484,12 +496,12 @@ const DataTable: React.FC = (props) => {
                     </Button>
                     <Label>{intl.get('common.suggestions')}</Label>
                     {activeNegatives.length > 0 ? (
-                        <div style={{ fontSize: 12, color: '#8c8c8c', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span>{intl.get('dataSource.textPattern.excludedCount', { count: activeNegatives.length })}</span>
                             <MiniButton text={intl.get('dataSource.textPattern.clearExcluded')} onClick={clearNegatives} />
                         </div>
                     ) : (
-                        <div style={{ fontSize: 12, color: '#8c8c8c', margin: '0 0 8px 0' }}>
+                        <div style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: '0 0 8px 0' }}>
                             {intl.get('dataSource.textPattern.excludeUsage')}
                         </div>
                     )}
@@ -513,13 +525,13 @@ const DataTable: React.FC = (props) => {
                                     tp.selectionType === 'nlp' && <div style={{ margin: '12px 0px'}}>
                                         {
                                             tp.selection.source.split('|').map((s, i) => {
-                                                return <Tag color='#14532d' bgColor='#dcfce7' key={i}>{s}</Tag>;
+                                                return <Tag color="var(--positive-subtle-foreground)" bgColor="var(--positive-subtle)" key={i}>{s}</Tag>;
                                             })
                                         }
                                     </div>
                                 }
                                 {tp.stats && (
-                                    <div style={{ fontSize: 12, color: '#8c8c8c', margin: '4px 0' }}>
+                                    <div style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: '4px 0' }}>
                                         {intl.get('dataSource.textPattern.matchStats', {
                                             rate: Math.round(tp.stats.matchRate * 100),
                                             matched: tp.stats.matched,

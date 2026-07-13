@@ -187,7 +187,7 @@ export const CausalStepPager = observer(function CausalStepPager() {
                                                 style={{
                                                     background: skipFDEdit
                                                         ? undefined
-                                                        : 'linear-gradient(135deg, transparent 47%, #000 47%, #000 53%, transparent 53%)',
+                                                        : 'linear-gradient(135deg, transparent 47%, var(--foreground) 47%, var(--foreground) 53%, transparent 53%)',
                                                     border: '1px solid',
                                                     borderRadius: '50%',
                                                 }}

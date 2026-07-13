@@ -20,7 +20,7 @@ const LiteTable = styled.table`
         height: revert;
         border: none;
         border-right: revert;
-        border-top-color: #f8f8f8 !important;
+        border-top-color: var(--muted) !important;
         border-bottom: revert;
     }
 `;

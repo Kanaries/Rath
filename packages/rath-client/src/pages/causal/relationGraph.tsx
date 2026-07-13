@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
 import { IFieldMeta } from '../../interfaces';
+import { useAppearance } from '../../appearance';
+import { getVegaAppearanceConfig } from '../../visualization/appearance';
 interface RelationGraphProps {
     matrix: number[][];
     fields: IFieldMeta[]
@@ -15,6 +17,8 @@ interface INode {
     [key: string]: any
 }
 const RelationGraph: React.FC<RelationGraphProps> = props => {
+    const { resolvedAppearance } = useAppearance();
+    const foregroundColor = resolvedAppearance === 'dark' ? '#e0e0e0' : '#323130';
     const { matrix, fields } = props;
     const container = useRef<HTMLDivElement>(null);
     const nodes = useMemo<INode[]>(() => {
@@ -186,10 +190,10 @@ const RelationGraph: React.FC<RelationGraphProps> = props => {
                                     { value: null },
                                 ],
                                 fill: [
-                                    { test: 'datum.id === active', value: 'black' },
+                                    { test: 'datum.id === active', value: foregroundColor },
                                     { test: "indata('selected', 'source', datum.id)", signal: 'colorIn' },
                                     { test: "indata('selected', 'target', datum.id)", signal: 'colorOut' },
-                                    { value: 'black' },
+                                    { value: foregroundColor },
                                 ],
                             },
                         },
@@ -266,9 +270,9 @@ const RelationGraph: React.FC<RelationGraphProps> = props => {
                         symbolType: 'stroke',
                     },
                 ],
-            });
+            }, { config: getVegaAppearanceConfig(resolvedAppearance) });
         }
-    }, [nodes, edges]);
+    }, [nodes, edges, resolvedAppearance]);
     return <div ref={container}></div>;
 };
 

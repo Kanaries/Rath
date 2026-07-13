@@ -6,7 +6,7 @@ export const MainCardContainer = styled.div`
         font-weight: 500;
     }
     .seg-desc{
-        color: #333;
+        color: var(--foreground);
         margin-bottom: 1em;
     }
 `

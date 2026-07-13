@@ -8,6 +8,8 @@ import { RathIcon } from '../../../components/icons';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../components/ui/tooltip';
 import type { IFieldMeta, IRow } from '../../../interfaces';
 import { CausalLinkDirection, describeDirection, stringifyDirection } from '../../../utils/resolve-causal';
+import { useAppearance } from '../../../appearance';
+import { getVegaAppearanceConfig } from '../../../visualization/appearance';
 
 interface Props {
     mark: 'circle' | 'square';
@@ -64,6 +66,7 @@ const tooltipContent = (
 );
 
 const DirectionMatrix: React.FC<Props> = (props) => {
+    const { resolvedAppearance } = useAppearance();
     const { data, fields, onSelect, mark } = props;
     const selectHandlerRef = useRef(onSelect);
     selectHandlerRef.current = onSelect;
@@ -116,7 +119,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
                         axis: { grid: true, tickBand: 'extent' },
                     },
                 },
-                { actions: !runtimeEnv.isProduction }
+                { actions: !runtimeEnv.isProduction, config: getVegaAppearanceConfig(resolvedAppearance) }
             ).then((res) => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
@@ -125,7 +128,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
                 });
             });
         }
-    }, [values, mark, linkTypeName]);
+    }, [values, mark, linkTypeName, resolvedAppearance]);
 
     return (
         <Container>

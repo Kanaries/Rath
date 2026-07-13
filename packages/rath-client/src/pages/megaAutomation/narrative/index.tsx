@@ -28,7 +28,7 @@ const InsightDesc = styled.div`
         .type-score {
             margin-left: 1em;
             padding-left: 1em;
-            border-left: 1px solid #bfbfbf;
+            border-left: 1px solid var(--border);
         }
     }
     .type-label {

@@ -6,6 +6,8 @@ import { getVegaTimeFormatRules } from '../utils';
 import { VegaGlobalConfig } from '../queries/themes/config';
 import ImageExportDialog, { ImageExportDialogHandler } from './image-export-dialog';
 import type { ImageExportInfo } from './image-export-dialog/export-image';
+import { useAppearance } from '../appearance';
+import { mergeVegaAppearanceConfig } from '../visualization/appearance';
 
 interface ReactVegaProps {
     dataSource: readonly any[];
@@ -25,6 +27,7 @@ export interface IReactVegaHandler {
 
 const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVega (props, ref) {
     const { spec, dataSource, signalHandler = {}, actions, config } = props;
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View | undefined>(undefined);
     const exportOptRef = useRef<ImageExportDialogHandler>(null);
@@ -79,9 +82,9 @@ const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVe
         return {
             timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
             actions,
-            config
+            config: mergeVegaAppearanceConfig(config, resolvedAppearance),
         };
-    }, [actions, config]);
+    }, [actions, config, resolvedAppearance]);
     useEffect(() => {
         if (container.current) {
             embed(container.current, vegaSpec, vegaOpts).then((res) => {

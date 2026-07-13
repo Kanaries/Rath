@@ -3,12 +3,12 @@ import styled from 'styled-components';
 export const AssoContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
-    background-color: #eee;
+    background-color: var(--border);
     margin-top: 1em;
     padding: 4px;
     .asso-segment{
         flex-grow: 1;
-        background-color: #fff;
+        background-color: var(--card);
         /* max-width: 400px; */
         max-height: 400px;
         overflow: auto;
@@ -27,7 +27,7 @@ export const AssoContainer = styled.div`
 export const LoadingLayer = styled.div`
     position: absolute;
     z-index: 99;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: color-mix(in srgb, var(--card) 80%, transparent);
     top: 0px;
     left: 0px;
     right: 0px;
@@ -68,7 +68,7 @@ export const InsightDesc = styled.div`
     font-size: 12px;
     max-width: 600px;
     overflow-y: auto;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: color-mix(in srgb, var(--card) 90%, transparent);
     .insight-header{
         display: flex;
         font-size: 14px;
@@ -80,7 +80,7 @@ export const InsightDesc = styled.div`
         .type-score{
             margin-left: 1em;
             padding-left: 1em;
-            border-left: 1px solid #bfbfbf;
+            border-left: 1px solid var(--border);
         }
     }
     .type-label{
@@ -95,7 +95,7 @@ export const InsightDesc = styled.div`
 
 export const FloatingOver = styled.div`
     background-color: transparent;
-    color:#ffffff;
+    color:var(--card);
     opacity: 30%;
     z-index: 9999;
     position: fixed;

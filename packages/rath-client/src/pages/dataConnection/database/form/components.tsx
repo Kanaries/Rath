@@ -88,13 +88,13 @@ export const PivotHeader = styled.div<{ primary?: boolean }>`
     align-items: center;
     min-width: 6em;
     padding-inline: 1em 0.6em;
-    background-color: #f8f8f8;
+    background-color: var(--muted);
     font-weight: ${({ primary }) => primary ? 600 : 400};
     cursor: pointer;
     outline: none;
     position: relative;
     :hover:not([aria-disabled="true"]) {
-        background-color: #f2f2f2;
+        background-color: var(--muted);
         > button {
             opacity: 1;
         }

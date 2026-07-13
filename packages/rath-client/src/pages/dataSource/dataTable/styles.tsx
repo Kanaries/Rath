@@ -18,8 +18,10 @@ import styled from "styled-components";
 import { Button, ButtonProps } from '../../../components/ui/button';
 
 export const DATA_TABLE_STYLE_CONFIG = {
-    SELECT_COLOR: '#b7eb8f',
-    EXCLUDE_COLOR: '#ffccc7',
+    SELECT_COLOR: 'var(--positive-subtle)',
+    SELECT_FOREGROUND: 'var(--positive-subtle-foreground)',
+    EXCLUDE_COLOR: 'var(--negative-subtle)',
+    EXCLUDE_FOREGROUND: 'var(--negative-subtle-foreground)',
     TABLE_INNER_STYLE: {
         height: 600,
         overflow: 'auto',
@@ -31,13 +33,13 @@ export const DataSourceTableContainer = styled.div`
     flex: 1 1 auto;
 
     table {
-        border-color: #f2f2f2;
+        border-color: var(--border);
         background-color: transparent;
     }
     thead th {
         position: relative;
         vertical-align: top;
-        background-color: #fff;
+        background-color: var(--background);
         padding: 0px 0px 8px 0px;
     }
     td {
@@ -46,7 +48,8 @@ export const DataSourceTableContainer = styled.div`
         .tp-exclude-btn {
             opacity: 0;
             border: none;
-            background-color: rgba(0, 0, 0, 0.06);
+            color: var(--muted-foreground);
+            background-color: var(--muted);
             border-radius: 3px;
             cursor: pointer;
             font-size: 11px;
@@ -57,7 +60,8 @@ export const DataSourceTableContainer = styled.div`
             user-select: none;
             transition: opacity 0.12s;
             &:hover {
-                background-color: rgba(0, 0, 0, 0.14);
+                color: var(--foreground);
+                background-color: var(--accent);
             }
         }
         /* content lives in ::after so the button never contributes a text node:
@@ -78,8 +82,8 @@ export const Tag = styled.div<{color?: string; bgColor?: string}>`
     display: inline-block;
     padding: 0px 8px;
     border-radius: 2px;
-    background-color: ${props => props.bgColor || '#f3f3f3'};
-    color: ${props => props.color || '#000000'};
+    background-color: ${props => props.bgColor || 'var(--muted)'};
+    color: ${props => props.color || 'var(--foreground)'};
     font-size: 12px;
     margin-right: 4px;
     border-radius: 12px;
@@ -87,14 +91,14 @@ export const Tag = styled.div<{color?: string; bgColor?: string}>`
 
 export const TextPatternCard = styled.div`
     padding: 8px;
-    border: 1px solid #f3f3f3;
+    border: 1px solid var(--border);
     border-radius: 2px;
     overflow: hidden;
     margin: 8px 0px;
     > .tp-content {
         margin: 1em 0em;
         > span {
-            border: 1px solid #f3f3f3;
+            border: 1px solid var(--border);
             display: inline-block;
             overflow-wrap: break-all;
             word-break: break-all;
@@ -106,7 +110,7 @@ export const TextPatternCard = styled.div`
     }
     .ph-text,
     .pe-text {
-        background-color: #fed7aa;
+        background-color: var(--warning-subtle);
     }
 `;
 interface MiniButtonProps extends Omit<ButtonProps, 'children'> {

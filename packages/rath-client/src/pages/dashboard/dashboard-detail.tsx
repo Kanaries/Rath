@@ -19,7 +19,7 @@ const PageLayout = styled.div`
 const Header = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: #fff;
+    background-color: var(--card);
     border-radius: 2px;
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
     margin-bottom: 0.6em;

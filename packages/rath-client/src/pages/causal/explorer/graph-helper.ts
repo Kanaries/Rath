@@ -5,6 +5,7 @@ import type { Subtree } from "../exploration";
 import { PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
+import type { ResolvedAppearance } from '../../../appearance';
 
 
 export interface IReactiveGraphProps {
@@ -20,6 +21,7 @@ export interface IReactiveGraphProps {
     fields: readonly IFieldMeta[];
     allowZoom: boolean;
     handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined;
+    resolvedAppearance: ResolvedAppearance;
 }
 
 export interface IReactiveGraphHandler {
@@ -39,6 +41,7 @@ export const useReactiveGraph = ({
     fields,
     allowZoom,
     handleSubtreeSelected,
+    resolvedAppearance,
 }: IReactiveGraphProps): IReactiveGraphHandler => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -69,8 +72,14 @@ export const useReactiveGraph = ({
                 ...cfg,
                 container,
             });
+            const labelColor = resolvedAppearance === 'dark' ? '#e0e0e0' : '#323130';
             graph.node(node => ({
                 label: node.description ?? node.id,
+                labelCfg: {
+                    style: {
+                        fill: labelColor,
+                    },
+                },
             }));
             graph.data(dataRef.current);
             graph.render();
@@ -113,7 +122,7 @@ export const useReactiveGraph = ({
                 container.innerHTML = '';
             };
         }
-    }, [containerRef, graphRef]);
+    }, [containerRef, graphRef, resolvedAppearance]);
 
     useEffect(() => {
         if (graphRef.current) {

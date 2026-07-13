@@ -17,7 +17,7 @@ const Container = styled.div<{ dragging: boolean }>`
     border: 1px solid #8888;
     cursor: move;
     color: #0078d4;
-    background-color: #ffffff;
+    background-color: var(--card);
     opacity: ${({ dragging }) => dragging ? 1 : 0.6};
     :hover {
         opacity: 1;

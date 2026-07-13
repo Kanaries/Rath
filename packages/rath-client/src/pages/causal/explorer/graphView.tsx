@@ -12,6 +12,7 @@ import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import { useGlobalStore } from '../../../store';
 import { useGraphOptions, useRenderData } from './graph-utils';
 import { useReactiveGraph } from './graph-helper';
+import { useAppearance } from '../../../appearance';
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
     return matrix.map((vec) => vec.map((n) => 2 / (1 + Math.exp(-n)) - 1));
@@ -70,6 +71,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(
         },
         ref
     ) => {
+        const { resolvedAppearance } = useAppearance();
         const { causalStore } = useGlobalStore();
         const { fields } = causalStore;
         const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
@@ -120,6 +122,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(
             cutThreshold,
             limit,
             renderNode: onRenderNode,
+            resolvedAppearance,
         });
         const cfg = useGraphOptions({
             width,
@@ -127,6 +130,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(
             handleLasso,
             handleLink: handleLinkTogether,
             graphRef,
+            resolvedAppearance,
         });
         const cfgRef = useRef(cfg);
         cfgRef.current = cfg;
@@ -181,6 +185,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(
             fields,
             allowZoom,
             handleSubtreeSelected,
+            resolvedAppearance,
         });
 
         useEffect(() => {

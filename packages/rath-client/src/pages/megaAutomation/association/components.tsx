@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const AssociationContainer = styled.div`
-    border: solid 1px #bfbfbf;
+    border: solid 1px var(--border);
     margin-top: 2em;
     background-color: #e7e7e7;
     .asso-content-container{
@@ -11,7 +11,7 @@ export const AssociationContainer = styled.div`
     }
 `
 export const AssoViewContainer = styled.div`
-    background-color: #fff;
+    background-color: var(--card);
     margin: 3px;
     padding: 10px;
     flex-grow: 1;

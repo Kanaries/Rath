@@ -13,13 +13,25 @@ const VizCard = styled.div<{ selected?: boolean }>`
     overflow: hidden;
     padding: 12px;
     margin: 12px 2px 2px 2px;
-    border: 1px solid ${(props) => (props.selected ? '#faad14' : 'rgba(0, 0, 0, 0.23)')};
-    color: #434343;
+    border: 1px solid ${(props) => (props.selected ? 'var(--ring)' : 'var(--border)')};
+    background-color: ${(props) => (props.selected ? 'var(--accent)' : 'transparent')};
+    color: ${(props) => (props.selected ? 'var(--foreground)' : 'var(--muted-foreground)')};
     border-radius: 4px;
     display: flex;
     cursor: pointer;
     justify-content: center;
     align-items: center;
+    transition: background-color 120ms, border-color 120ms, color 120ms;
+
+    &:hover {
+        background-color: var(--accent);
+        color: var(--accent-foreground);
+    }
+
+    &[aria-disabled='true'] {
+        cursor: default;
+        opacity: 0.5;
+    }
 `;
 
 const VizCardContainer = styled.div`

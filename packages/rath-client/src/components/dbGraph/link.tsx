@@ -77,7 +77,7 @@ const SVGDropdown = <T extends string = string>({ cx, cy, dx = 0, options, curId
                 y={y}
                 width={OPTION_WIDTH}
                 height={OPTION_HEIGHT}
-                fill="#fff"
+                fill="var(--card)"
                 stroke="#0027b4"
                 strokeWidth="1"
             />
@@ -98,8 +98,8 @@ const SVGDropdown = <T extends string = string>({ cx, cy, dx = 0, options, curId
                         y={y + (i + 1) * OPTION_HEIGHT + 1}
                         width={OPTION_WIDTH}
                         height={OPTION_HEIGHT}
-                        fill="#fff"
-                        stroke="#888"
+                        fill="var(--card)"
+                        stroke="var(--muted-foreground)"
                         strokeWidth="1"
                         onClick={e => {
                             e.stopPropagation();
@@ -139,7 +139,7 @@ const SVGDropdown = <T extends string = string>({ cx, cy, dx = 0, options, curId
                         y={y - (i + 1) * OPTION_HEIGHT}
                         textAnchor="middle"
                         stroke="none"
-                        fill="#fff"
+                        fill="var(--card)"
                     >
                         {action.text}
                     </text>

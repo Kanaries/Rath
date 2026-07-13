@@ -12,7 +12,7 @@ const ToolGroup = styled.div`
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
     flex-direction: column;
-    background-color: #fff;
+    background-color: var(--card);
     overflow: hidden;
     > *:not(:last-child) {
         margin-bottom: 1em;
@@ -59,7 +59,8 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
 
                 canvas.width = width;
                 canvas.height = height;
-                ctx.fillStyle = '#fff';
+                const rootStyle = getComputedStyle(document.documentElement);
+                ctx.fillStyle = rootStyle.getPropertyValue('--card').trim();
                 ctx.fillRect(CANVAS_PADDING * size, CANVAS_PADDING * size, (x2 - x1) * size, (y2 - y1) * size);
 
                 items.forEach((div) => {
@@ -73,7 +74,7 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
                     }
                 });
 
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = rootStyle.getPropertyValue('--foreground').trim();
                 ctx.fillRect(0, 0, width, CANVAS_PADDING * size);
                 ctx.fillRect(0, 0, CANVAS_PADDING * size, height);
                 ctx.fillRect(width - CANVAS_PADDING * size, 0, CANVAS_PADDING * size, height);
@@ -116,7 +117,7 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
                 <RathIcon
                     name="DeleteTable"
                     style={{
-                        color: '#fff',
+                        color: 'var(--card)',
                         backgroundColor: '#c50f1f',
                         padding: '6px',
                         boxSizing: 'content-box',
@@ -129,7 +130,7 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
                 <RathIcon
                     name="OpenInNewWindow"
                     style={{
-                        color: items.length === 0 ? '#666' : '#fff',
+                        color: items.length === 0 ? 'var(--muted-foreground)' : 'var(--card)',
                         backgroundColor: items.length === 0 ? 'unset' : '#4f6bed',
                         padding: '6px',
                         boxSizing: 'content-box',
@@ -141,7 +142,7 @@ const Tools = forwardRef<HTMLDivElement, ToolsProps>(({ items, clearPage }, ref)
                 <RathIcon
                     name="PhotoCollection"
                     style={{
-                        color: items.length === 0 ? '#666' : '#fff',
+                        color: items.length === 0 ? 'var(--muted-foreground)' : 'var(--card)',
                         backgroundColor: items.length === 0 ? 'unset' : '#546fd2',
                         padding: '6px',
                         boxSizing: 'content-box',

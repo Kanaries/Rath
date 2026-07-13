@@ -44,7 +44,7 @@ const LiteFocusZone: React.FC = (props) => {
         <MainViewContainer>
             {dataViewQuery && showMiniFloatView && <MiniFloatCanvas pined={dataViewQuery} />}
             <div className="vis-container">
-                <div style={{ borderRight: '1px solid #eee' }}>
+                <div style={{ borderRight: '1px solid var(--border)' }}>
                     <Button
                         variant="ghost"
                         size="icon"

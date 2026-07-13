@@ -10,7 +10,7 @@ const Cont = styled.div<{border?: boolean}>`
     min-height: 24px;
     position: relative;
     font-size: 12px;
-    color: #333;
+    color: var(--foreground);
     > select {
         background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2218%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M5.8%207.3l3.5%204.6c.1.1.2.1.3%200l3.6-4.6c.1-.2%200-.3-.2-.3H6c-.2%200-.3.1-.2.3z%22%2F%3E%3C%2Fsvg%3E") !important;
         padding-right: 25px;
@@ -20,7 +20,7 @@ const Cont = styled.div<{border?: boolean}>`
             background: transparent no-repeat right center;
             border: none;
             border-radius: 0;
-            color: #333;
+            color: var(--foreground);
             cursor: inherit;
             font-family: inherit;
             font-size: inherit;
@@ -40,7 +40,7 @@ const Cont = styled.div<{border?: boolean}>`
         background: transparent no-repeat right center;
         border: none;
         border-radius: 0;
-        color: #333;
+        color: var(--foreground);
         cursor: inherit;
         font-family: inherit;
         font-size: inherit;

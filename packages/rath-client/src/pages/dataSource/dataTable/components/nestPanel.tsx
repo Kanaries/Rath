@@ -4,9 +4,9 @@ import intl from 'react-intl-universal';
 import { Button } from '../../../../components/ui/button';
 
 const Cont = styled.div`
-    background-color: #fff;
+    background-color: var(--card);
     min-width: 260px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--muted);
     flex-shrink: 0;
     flex-grow: 0;
     position: relative;
@@ -26,7 +26,7 @@ const Cont = styled.div`
         padding: 10px;
         left: 0px;
         right: 0px;
-        background-color: #fff;
+        background-color: var(--card);
     }
 `
 

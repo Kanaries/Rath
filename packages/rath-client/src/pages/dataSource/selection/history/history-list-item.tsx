@@ -48,12 +48,12 @@ const ListItem = styled.div`
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 overflow: hidden;
-                color: #111;
+                color: var(--foreground);
             }
             > span {
                 font-size: 0.6rem;
                 line-height: 1.2em;
-                color: #555;
+                color: var(--muted-foreground);
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 overflow: hidden;
@@ -62,7 +62,7 @@ const ListItem = styled.div`
     }
     .time {
         font-size: 0.5rem;
-        color: #888;
+        color: var(--muted-foreground);
     }
     > .delete-button {
         position: absolute;
@@ -73,7 +73,7 @@ const ListItem = styled.div`
         font-size: 12px;
         background-color: #d13438 !important;
         border-radius: 50%;
-        color: #fff !important;
+        color: var(--card) !important;
         width: 1.2em;
         height: 1.2em;
         i {
@@ -129,7 +129,7 @@ const UserTagGroupContainer = styled.div`
         }
         > * {
             pointer-events: none;
-            filter: drop-shadow(0.8px 1px 0.6px #888);
+            filter: drop-shadow(0.8px 1px 0.6px var(--muted-foreground));
         }
         :not(:first-child) {
             margin-left: ${-0.2 * UserTagGroupSize - UserTagGroupPadding}px;

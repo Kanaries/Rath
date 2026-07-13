@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="shortcut icon" href="./kanaries.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="apple-touch-icon" href="./kanaries.ico" />
     <link rel="manifest" href="./manifest.json" />
     <title>RATH | the next generation of data analysis software</title>
@@ -15,6 +15,21 @@
     <meta content="https://kanaries.net/assets/kanaries-slice.svg" property="twitter:image" />
   </head>
   <body>
+    <script>
+      (() => {
+        let stored = null;
+        try { stored = localStorage.getItem('rath:appearance'); } catch {}
+        const appearance = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+        const resolved = appearance === 'system'
+          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : appearance;
+        document.documentElement.classList.toggle('dark', resolved === 'dark');
+        document.documentElement.dataset.appearance = appearance;
+        document.documentElement.dataset.theme = resolved;
+        document.documentElement.style.colorScheme = resolved;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', resolved === 'dark' ? '#0f0f0f' : '#ffffff');
+      })();
+    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/monaco/vite.ts"></script>

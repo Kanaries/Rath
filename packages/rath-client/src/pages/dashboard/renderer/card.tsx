@@ -81,7 +81,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     box-sizing: border-box;
     user-select: none;
     position: absolute;
-    background-color: #fff;
+    background-color: var(--card);
     border: calc(1px * var(--ratio)) solid transparent;
     padding: calc(var(--padding) * var(--ratio));
     ${({ appearance }: { appearance: DashboardCardAppearance }) =>
@@ -91,7 +91,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
             border-color: transparent;
         `,
                 outline: `
-            border-color: #888;
+            border-color: var(--muted-foreground);
         `,
                 dropping: `
             border: none;
@@ -106,7 +106,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
             border-radius: var(--padding);
             background-image: linear-gradient(145deg, #00000008, #00000004, #00000002);
             box-shadow:  6px 6px 12px #bebebe,
-                -6px -6px 12px #ffffff;
+                -6px -6px 12px var(--card);
         `,
             } as const
         )[appearance])}

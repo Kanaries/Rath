@@ -77,10 +77,10 @@ const MetaView: React.FC = props => {
                     top: 0,
                     zIndex: 1,
                     // padding: '22px 1em 1em',
-                    backgroundColor: '#fff',
+                    backgroundColor: 'var(--background)',
                 }}
             >
-                <Alert className="box-border w-auto border-transparent bg-[rgba(0,120,212,0.12)] text-[#0078d4]">
+                <Alert className="box-border w-auto" variant="info">
                     <div className="flex items-center gap-2">
                         <RathIcon name="AutoEnhanceOn" className="shrink-0 font-extrabold" />
                         <span className="grow">
@@ -107,7 +107,7 @@ const MetaView: React.FC = props => {
             </div>
         )}
         {fieldsNotDecided.length > 0 && (
-            <Alert className="my-[2px] mb-[1em] box-border w-auto">
+            <Alert className="my-[2px] mb-[1em] box-border w-auto" variant="warning">
                 <span>
                     {intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}
                 </span>

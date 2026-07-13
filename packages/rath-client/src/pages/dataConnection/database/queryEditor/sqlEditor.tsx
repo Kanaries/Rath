@@ -1,7 +1,8 @@
 import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import MonacoEditor, { ChangeHandler, EditorWillMount } from 'react-monaco-editor';
+import { ChangeHandler, EditorWillMount } from 'react-monaco-editor';
+import MonacoEditor from '../../../../components/themed-monaco-editor';
 import { IRange, languages } from 'monaco-editor';
 import { Button } from '../../../../components/ui/button';
 import { Spinner } from '../../../../components/ui/spinner';
@@ -28,7 +29,7 @@ const Container = styled.div`
 `;
 
 const Editor = styled.div`
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     overflow: hidden;

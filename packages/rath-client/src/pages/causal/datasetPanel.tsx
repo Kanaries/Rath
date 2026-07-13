@@ -227,7 +227,7 @@ const DatasetPanel: FC = () => {
                         })}
                     </div>
                 )}
-                <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
+                <small style={{ color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center' }}>
                     {intl.get('causal.dataset.origin_size', { size: cleanedData.length })}
                     {filters.length ? intl.get('causal.dataset.filtered_size', { size: filteredDataSize }) : intl.get('causal.dataset.no_filter')}
                 </small>
@@ -247,7 +247,7 @@ const DatasetPanel: FC = () => {
                     />
                     <span>{`${(sampleRate * 100).toFixed(0)}%`}</span>
                 </div>
-                <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
+                <small style={{ padding: '0.2em 0', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center' }}>
                     {intl.get('causal.dataset.sample_size', { size: sampleSize })}
                 </small>
             </div>

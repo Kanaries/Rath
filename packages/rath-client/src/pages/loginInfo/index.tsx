@@ -24,15 +24,15 @@ const Container = styled.div`
     display: flex;
     > .nav-menu {
         flex-grow: 0;
-        border: 1px solid #e9ebf0;
+        border: 1px solid var(--border);
     }
     > .nav-content {
         padding: 1em;
         flex-grow: 1;
         flex-shrink: 1;
-        border-top: 1px solid #e9ebf0;
-        border-right: 1px solid #e9ebf0;
-        border-bottom: 1px solid #e9ebf0;
+        border-top: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
     }
 `;
 

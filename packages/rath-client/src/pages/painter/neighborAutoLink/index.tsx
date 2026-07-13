@@ -18,7 +18,7 @@ import { RathIcon } from '../../../components/icons';
 const LoadingLayer = styled.div`
     position: absolute;
     z-index: 99;
-    background-color: rgba(255, 255, 255, 0.88);
+    background-color: color-mix(in srgb, var(--card) 88%, transparent);
     top: 0px;
     left: 0px;
     right: 0px;

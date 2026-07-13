@@ -16,7 +16,7 @@ const Resizer = styled.div`
     overflow: hidden;
     border: 1px solid #8888;
     cursor: nwse-resize;
-    background-color: #ffffff;
+    background-color: var(--card);
 `;
 
 // const Adjuster = styled.div`
@@ -27,7 +27,7 @@ const Resizer = styled.div`
 //     align-items: center;
 //     justify-content: center;
 //     overflow: hidden;
-//     background-color: #888;
+//     background-color: var(--muted-foreground);
 // `;
 
 const Outline = styled.div`

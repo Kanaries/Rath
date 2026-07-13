@@ -6,6 +6,8 @@ import embed from 'vega-embed';
 // import { EDITOR_URL } from '../../../../constants';
 import type { IFieldMeta, IRow } from '../../../../interfaces';
 import { getVegaTimeFormatRules } from '../../../../utils';
+import { useAppearance } from '../../../../appearance';
+import { getVegaAppearanceConfig } from '../../../../visualization/appearance';
 
 
 interface DiffChartProps {
@@ -22,6 +24,7 @@ const DiffGroup1Key = '__diff_group_1__';
 const DiffGroup2Key = '__diff_group_2__';
 
 const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField, mainFieldAggregation, dimension, mode }) => {
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View | undefined>(undefined);
 
@@ -200,6 +203,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                 // editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions: false,
+                config: getVegaAppearanceConfig(resolvedAppearance),
             }).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
@@ -211,7 +215,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, title, mainFieldAggregation, mode, dimension]);
+    }, [mainField, title, mainFieldAggregation, mode, dimension, resolvedAppearance]);
 
     useEffect(() => {
         viewRef.current?.change(

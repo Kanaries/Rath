@@ -26,6 +26,8 @@ import { Switch } from '../../components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { isContinuous, clearAggregation, debounceShouldNeverBeUsed, labelingData, VegaViewChanges, debounce } from './utils';
 import EmbedAnalysis from './embedAnalysis';
+import { useAppearance } from '../../appearance';
+import { getVegaAppearanceConfig, mergeVegaAppearanceConfig } from '../../visualization/appearance';
 import { useViewData } from './viewDataHook';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
@@ -57,6 +59,7 @@ enum PIVOT_TAB_KEYS {
 }
 
 const Painter: React.FC = (props) => {
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const isPainting = useRef(false);
     const { dataSourceStore, painterStore, langStore } = useGlobalStore();
@@ -133,11 +136,13 @@ const Painter: React.FC = (props) => {
         if (!noViz) {
             const mvd: any = {
                 ...deepcopy(vizSpec),
+                background: resolvedAppearance === 'dark' ? '#1a1a1a' : '#ffffff',
                 data: {
                     name: 'dataSource',
                     // values: mutData
                 },
             };
+            mvd.config = mergeVegaAppearanceConfig(mvd.config, resolvedAppearance);
             mvd.encoding.color = {
                 field: LABEL_FIELD_KEY,
                 type: 'nominal',
@@ -159,7 +164,7 @@ const Painter: React.FC = (props) => {
             return mvd;
         }
         return null;
-    }, [vizSpec, mutFeatValues, noViz, axisResizable]);
+    }, [vizSpec, mutFeatValues, noViz, axisResizable, resolvedAppearance]);
     const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec === null || !container.current) return;
@@ -170,6 +175,7 @@ const Painter: React.FC = (props) => {
         void embed(container.current, painterSpec, {
             actions: painterMode === PAINTER_MODE.MOVE,
             renderer: 'painter',
+            config: getVegaAppearanceConfig(resolvedAppearance),
         })
             .then((res) => {
                 if (disposed) {
@@ -307,7 +313,7 @@ const Painter: React.FC = (props) => {
             disposed = true;
             embeddedResult?.view.finalize();
         };
-    }, [viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode, maintainViewDataRemove, linkNearViz, painterSpec]);
+    }, [viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode, maintainViewDataRemove, linkNearViz, painterSpec, resolvedAppearance]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {
         return fieldMetas

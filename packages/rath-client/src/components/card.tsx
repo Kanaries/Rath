@@ -6,7 +6,7 @@ interface CardProps {
     stretchChildren?: boolean;
 }
 export const Card = styled.div<CardProps>`
-    background-color: ${(props) => props.backgroundColor || '#fff'};
+    background-color: ${(props) => props.backgroundColor || 'var(--card)'};
     flex-grow: ${({ fitContainer }) => fitContainer ? 1 : 'unset'};
     flex-shrink: ${({ fitContainer }) => fitContainer ? 1 : 'unset'};
     height: ${({ fitContainer }) => fitContainer ? '100%' : 'unset'};
@@ -19,7 +19,7 @@ export const Card = styled.div<CardProps>`
     padding: 1.5em;
     border-radius: 2px;
     /* box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08); */
-    border: 1px solid #e9ebf0;
+    border: 1px solid var(--border);
     margin-bottom: 28px;
     animation-duration: 0.5s;
     animation-name: showCard;

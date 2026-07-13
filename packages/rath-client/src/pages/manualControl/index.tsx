@@ -4,12 +4,14 @@ import { GraphicWalker } from '../../components/graphic-walker';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { useGlobalStore } from '../../store';
 import '@kanaries/graphic-walker/dist/style.css';
+import { useAppearance } from '../../appearance';
 import { Spinner } from '../../components/ui/spinner';
 
 const VisualInterface: React.FC = (props) => {
     const { dataSourceStore, commonStore, langStore } = useGlobalStore();
     const { cleanedData, fields } = dataSourceStore;
     const { graphicWalkerSpec } = commonStore;
+    const { resolvedAppearance } = useAppearance();
     const containerRef = useRef<HTMLDivElement>(null);
     const [walkerReady, setWalkerReady] = useState(false);
     const gwRawFields = useMemo<IMutField[]>(() => {
@@ -58,7 +60,7 @@ const VisualInterface: React.FC = (props) => {
                 spec={graphicWalkerSpec}
                 i18nLang={langStore.lang}
                 keepAlive
-                dark="light"
+                dark={resolvedAppearance}
                 fieldKeyGuard={false}
                 themeKey="g2"
             />

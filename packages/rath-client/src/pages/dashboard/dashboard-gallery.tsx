@@ -10,7 +10,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    background-color: #f8f8f8;
+    background-color: var(--muted);
     > * {
         flex-grow: 0;
         flex-shrink: 0;
@@ -20,7 +20,7 @@ const Container = styled.div`
 
 const Preview = styled.div`
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--card);
     padding: 10px;
     width: 260px;
     display: flex;

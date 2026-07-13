@@ -1,6 +1,6 @@
 import React from 'react';
 import intl from 'react-intl-universal';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from '../../../components/themed-monaco-editor';
 import styled from 'styled-components';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 

@@ -28,7 +28,7 @@ const MetaContainer = styled.div`
 const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     overflow: hidden;
     position: relative;
-    color: #333;
+    color: var(--foreground);
     .bottom-bar {
         position: absolute;
         display: flex;
@@ -42,7 +42,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         top: 0px;
         margin: 0px ${({ isPreview }) => (isPreview ? '0px' : '1px')};
         padding: 0 0.8em;
-        color: #fff;
+        color: var(--foreground);
         font-weight: 600;
 
         > div {
@@ -61,21 +61,22 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     }
     .preview {
         background-color: ${RATH_THEME_CONFIG.previewColor};
+        color: var(--data-preview-foreground);
     }
     h1 {
         font-weight: 500;
         font-size: 26px;
-        color: #333;
+        color: var(--foreground);
     }
     .fid {
         font-size: 12px;
         font-weight: 400;
-        color: rgb(89, 89, 89);
+        color: var(--muted-foreground);
     }
     .comment {
         font-size: 12px;
         font-weight: 400;
-        color: rgb(68, 68, 68);
+        color: var(--muted-foreground);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -95,7 +96,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     .operation-column {
         margin-left: 1em;
         padding: 0em 1em;
-        border-left: 1px solid rgb(229, 231, 235);
+        border-left: 1px solid var(--border);
     }
     .dist-graphics {
         flex-grow: 0;
@@ -108,10 +109,10 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
             background-color: transparent;
         }
         5% {
-            background-color: rgb(255, 244, 206);
+            background-color: var(--warning-subtle);
         }
         20% {
-            background-color: rgb(255, 244, 206);
+            background-color: var(--warning-subtle);
         }
         to {
             background-color: transparent;
@@ -143,7 +144,7 @@ const IndicatorCard = styled.div`
         font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
         font-size: 14px;
         font-weight: 600;
-        color: rgb(50, 49, 48);
+        color: var(--muted-foreground);
         box-sizing: border-box;
     }
     .ind-value {
@@ -159,8 +160,8 @@ export const LiveContainer = styled.div({
         position: 'absolute',
         right: 0,
         top: 0,
-        backgroundColor: 'rgb(223, 246, 221)',
-        color: 'rgb(16, 124, 16)',
+        backgroundColor: 'var(--positive-subtle)',
+        color: 'var(--positive-subtle-foreground)',
         width: '16px',
         height: '16px',
         fontSize: '12px',
@@ -249,10 +250,10 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
                         <span>{intl.get('dataSource.preview')}</span>
                         <div>
                             <Button type="button" variant="ghost" size="icon" onClick={() => dataSourceStore.settleExtField(colKey)}>
-                                <RathIcon name="CompletedSolid" style={{ color: '#003a8c' }} />
+                                <RathIcon name="CompletedSolid" className="text-[var(--positive-subtle-foreground)]" />
                             </Button>
                             <Button type="button" variant="ghost" size="icon" onClick={() => dataSourceStore.deleteExtField(colKey)}>
-                                <RathIcon name="Delete" style={{ color: '#c50f1f' }} />
+                                <RathIcon name="Delete" className="text-message-blocked-icon" />
                             </Button>
                         </div>
                     </>

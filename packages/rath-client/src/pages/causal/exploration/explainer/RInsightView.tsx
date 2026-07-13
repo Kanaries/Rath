@@ -56,7 +56,7 @@ const TabList = styled.div<{ light?: boolean }>`
         flex-wrap: wrap;
         padding: 0.5em 1em;
         border-top: ${({ light }) => (light ? 'none' : '1px solid #8888')};
-        background-color: #fff;
+        background-color: var(--card);
         position: relative;
         z-index: 10;
         :first-child {
@@ -70,7 +70,7 @@ const TabList = styled.div<{ light?: boolean }>`
             flex-shrink: 1;
         }
         &[aria-selected='true'] {
-            background-color: #fffe;
+            background-color: color-mix(in srgb, var(--card) 93%, transparent);
             position: sticky;
             top: 0;
             bottom: 0;
@@ -128,7 +128,7 @@ const ExploreQueue = styled.div`
         padding: 0 0.24em;
         height: 100%;
         z-index: 2;
-        background-color: #fffd;
+        background-color: color-mix(in srgb, var(--card) 87%, transparent);
     }
 `;
 

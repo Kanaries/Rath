@@ -54,7 +54,7 @@ const ActionGroup = styled.div`
     > p {
         font-size: 0.9rem;
         margin: 0.6em 1.2em;
-        color: #666;
+        color: var(--muted-foreground);
         user-select: none;
     }
     > div {
@@ -84,7 +84,7 @@ const ActionGroup = styled.div`
             & p {
                 font-size: 0.8rem;
                 margin: 0.6em 1.2em;
-                color: #555;
+                color: var(--muted-foreground);
                 user-select: none;
             }
         }
@@ -143,13 +143,13 @@ const FileOutput = styled.div`
                 line-height: 1.2em;
                 font-weight: 550;
                 white-space: nowrap;
-                color: #111;
+                color: var(--foreground);
             }
             > span {
                 font-size: 0.6rem;
                 line-height: 1.2em;
                 margin: 0.6em 0;
-                color: #555;
+                color: var(--muted-foreground);
             }
         }
     }

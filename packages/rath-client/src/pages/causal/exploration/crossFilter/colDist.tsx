@@ -4,6 +4,8 @@ import { View } from 'vega';
 import embed from 'vega-embed';
 import { IRow } from '../../../../interfaces';
 import { throttle } from '../../../../utils';
+import { useAppearance } from '../../../../appearance';
+import { getVegaAppearanceConfig } from '../../../../visualization/appearance';
 
 export const SELECT_SIGNAL_NAME = '__select__';
 export interface IBrushSignalStore {
@@ -45,6 +47,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
         actions = false,
         onlyTicks = false,
     } = props;
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
@@ -117,7 +120,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                     },
                 ],
             },
-                { actions: false }
+                { actions: false, config: getVegaAppearanceConfig(resolvedAppearance) }
             ).then((res) => {
                 view.current = res.view;
                 const handler = (name: string, value: any) => {
@@ -136,7 +139,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks, filterType]);
+    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks, filterType, resolvedAppearance]);
 
     useEffect(() => {
         if (view.current) {

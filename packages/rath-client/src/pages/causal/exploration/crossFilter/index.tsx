@@ -11,7 +11,7 @@ const VizContainer = styled.div`
 `;
 
 const VizCard = styled.div`
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     margin: 5px;
     padding: 5px;
     .action-bar {

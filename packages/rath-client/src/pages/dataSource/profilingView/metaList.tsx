@@ -4,11 +4,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import DistributionChart from '../metaView/distChart';
+import { RATH_THEME_CONFIG } from '../../../theme';
 
 const ColumnItem = styled.div`
     padding: 2px;
     margin: 0px 2px 2px 2px;
-    /* border-bottom: 1px solid #dedede; */
+    /* border-bottom: 1px solid var(--border); */
     cursor: pointer;
     canvas {
         cursor: pointer;
@@ -24,13 +25,13 @@ const ColumnItem = styled.div`
         margin: 0px 1px;
     }
     .dimension {
-        background-color: #1890ff;
+        background-color: ${RATH_THEME_CONFIG.dimensionColor};
     }
     .measure {
-        background-color: #13c2c2;
+        background-color: ${RATH_THEME_CONFIG.measureColor};
     }
     .disable {
-        background-color: #9e9e9e;
+        background-color: ${RATH_THEME_CONFIG.disableColor};
     }
 `;
 
@@ -39,7 +40,7 @@ const MetaContainer = styled.div`
     flex-shrink: 0;
     overflow-y: auto;
     max-height: 600px;
-    border-right: 1px solid #dedede;
+    border-right: 1px solid var(--border);
 `;
 
 interface MetaListProps {

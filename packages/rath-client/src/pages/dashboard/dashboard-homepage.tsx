@@ -18,7 +18,7 @@ const PageLayout = styled.div`
     flex-direction: column;
     overflow: hidden;
     > div {
-        background-color: #fff;
+        background-color: var(--card);
         margin-inline: 2em;
         padding-block: 1.5em;
         padding-inline: 3em;
@@ -59,7 +59,7 @@ const WorkspaceDesc = styled.div`
     line-height: 1.6em;
     height: 1.6em;
     margin-bottom: 1.5em;
-    color: #888;
+    color: var(--muted-foreground);
     position: relative;
 `;
 

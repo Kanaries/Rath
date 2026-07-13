@@ -19,8 +19,8 @@ const Button = styled.div({
     position: 'absolute',
     width: '10px',
     height: '10px',
-    backgroundColor: '#fff',
-    border: '1px solid #888',
+    backgroundColor: 'var(--card)',
+    border: '1px solid var(--muted-foreground)',
     cursor: 'alias',
 });
 

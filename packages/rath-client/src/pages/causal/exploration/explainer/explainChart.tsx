@@ -8,6 +8,8 @@ import { Subject, throttleTime } from 'rxjs';
 import type { IFieldMeta, IRow, IFilter } from '../../../../interfaces';
 import { getRange, getVegaTimeFormatRules } from '../../../../utils';
 import { SelectedFlag } from './RExplainer';
+import { useAppearance } from '../../../../appearance';
+import { getVegaAppearanceConfig } from '../../../../visualization/appearance';
 
 interface ExplainChartProps {
     title?: string;
@@ -27,6 +29,7 @@ const SUBSPACE_KEY = '__subspace__';
 const ExplainChart: React.FC<ExplainChartProps> = ({
     title, data, mainField, mainFieldAggregation, indexKey, subspace, interactive, handleFilter, normalize,
 }) => {
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View | undefined>(undefined);
     const handleFilterRef = useRef(handleFilter);
@@ -165,6 +168,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 // editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions: false,
+                config: getVegaAppearanceConfig(resolvedAppearance),
             }).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
@@ -222,7 +226,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 viewRef.current = undefined;
             }
         };
-    }, [title, mainField, mainFieldAggregation, filterType, interactive, indexKey, normalize, subspace]);
+    }, [title, mainField, mainFieldAggregation, filterType, interactive, indexKey, normalize, subspace, resolvedAppearance]);
 
     useEffect(() => {
         viewRef.current?.change(

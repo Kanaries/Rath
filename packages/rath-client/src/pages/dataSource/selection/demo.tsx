@@ -115,7 +115,7 @@ const ListItem = styled.button`
                 font-size: 0.8rem;
                 line-height: 1.2em;
                 font-weight: 550;
-                color: #111;
+                color: var(--foreground);
                 margin-bottom: 0.4em;
             }
             > span {

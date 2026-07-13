@@ -52,7 +52,7 @@ const ItemHeader = styled.div<{ isRoot?: boolean }>`
     }
     cursor: ${({ isRoot }) => isRoot ? 'default' : 'pointer'};
     :hover {
-        background-color: ${({ isRoot }) => isRoot ? 'none' : '#f3f3f3'};
+        background-color: ${({ isRoot }) => isRoot ? 'none' : 'var(--muted)'};
     }
 `;
 

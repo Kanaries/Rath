@@ -9,7 +9,7 @@ const Cont = styled.div`
     display: flex;
     width: 100%;
     overflow-x: auto;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border);
     margin-top: 8px;
 `;
 

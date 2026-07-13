@@ -86,7 +86,7 @@ export const HeaderCellContainer = styled.div`
         overflow: hidden;
         text-overflow: ellipsis;
         font-size: 12px;
-        color: #666666aa;
+        color: var(--muted-foreground);
         line-height: 1.5em;
         height: 1.5em;
         padding-inline: 0.1em;

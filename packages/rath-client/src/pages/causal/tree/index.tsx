@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
 import { IFieldMeta } from '../../../interfaces';
+import { useAppearance } from '../../../appearance';
+import { getVegaAppearanceConfig } from '../../../visualization/appearance';
 
 interface RelationTreeProps {
     matrix: number[][];
@@ -49,6 +51,9 @@ function matrix2Tree(mat: number[][], fields: IFieldMeta[], focusIndex: number):
     return nodes;
 }
 const RelationTree: React.FC<RelationTreeProps> = (props) => {
+    const { resolvedAppearance } = useAppearance();
+    const neutralBorder = resolvedAppearance === 'dark' ? '#525252' : '#dedbd8';
+    const surfaceColor = resolvedAppearance === 'dark' ? '#1a1a1a' : '#ffffff';
     const { matrix, fields, focusIndex, onFocusChange } = props;
     const container = useRef<HTMLDivElement>(null);
     // const [focusNodeIndex, setFocusNodeIndex] = useState<number>(0);
@@ -131,7 +136,7 @@ const RelationTree: React.FC<RelationTreeProps> = (props) => {
                         encode: {
                             update: {
                                 path: { field: 'path' },
-                                stroke: { value: '#ccc' },
+                                stroke: { value: neutralBorder },
                             },
                         },
                     },
@@ -141,7 +146,7 @@ const RelationTree: React.FC<RelationTreeProps> = (props) => {
                         encode: {
                             enter: {
                                 size: { value: 100 },
-                                stroke: { value: '#fff' },
+                                stroke: { value: surfaceColor },
                             },
                             update: {
                                 x: { field: 'x' },
@@ -169,7 +174,7 @@ const RelationTree: React.FC<RelationTreeProps> = (props) => {
                         },
                     },
                 ],
-            }).then(res => {
+            }, { config: getVegaAppearanceConfig(resolvedAppearance) }).then(res => {
                 res.view.addEventListener('click', (e, item) => {
                     if (item && item.datum) {
                         onFocusChange(fields.findIndex(f => f.fid === item.datum.id))
@@ -178,7 +183,7 @@ const RelationTree: React.FC<RelationTreeProps> = (props) => {
             })
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodes, fields]);
+    }, [nodes, fields, resolvedAppearance]);
     return <div ref={container}></div>;
 };
 

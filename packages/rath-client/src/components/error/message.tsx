@@ -9,11 +9,13 @@ interface MessageProps extends IErrorInfo {
 const Cont = styled.div`
     box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
     min-width: 360px;
-    background-color: #ffffff;
+    background-color: var(--card);
+    color: var(--foreground);
     padding: 1rem;
     z-index: 100;
     margin-top: 1rem;
-    border: 1px solid #f6f6f6;
+    border: 1px solid var(--border);
+    border-left-width: 3px;
     position: relative;
     display: grid;
     grid-template-columns: repeat(6,minmax(0,1fr));
@@ -60,7 +62,7 @@ const Cont = styled.div`
         color: #3B82F6;
     }
     .text-gray-600{
-        color: #4b5563;
+        color: var(--muted-foreground);
     }
     .text-2xl{
         font-size: 1.5rem;
@@ -71,12 +73,30 @@ const Cont = styled.div`
         white-space: pre-line;
         font-size: 12px;
     }
+
+    &[data-type='error'] {
+        background-color: var(--message-blocked);
+        border-left-color: var(--message-blocked-icon);
+    }
+    &[data-type='warning'] {
+        background-color: var(--message-warning);
+        border-left-color: #f59e0b;
+    }
+    &[data-type='success'] {
+        background-color: var(--positive-subtle);
+        border-left-color: var(--positive-subtle-foreground);
+    }
+    &[data-type='info'] {
+        background-color: var(--message-info);
+        border-left-color: var(--message-icon);
+    }
 `
 
 const MessageCard: React.FC<MessageProps> = props => {
     const { title, content, type, onClose } = props;
 
     return <Cont
+        data-type={type}
         onMouseLeave={() => {
             callTerminator();
         }}

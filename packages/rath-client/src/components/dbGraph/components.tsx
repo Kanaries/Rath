@@ -8,7 +8,7 @@ export const DBBox = styled.span`
     padding: 0 0.5em;
     overflow: hidden;
     text-overflow: ellipsis;
-    background-color: #fff;
+    background-color: var(--card);
     border: 1px solid #cfcfcf;
     border-radius: 2px;
     text-align: center;
@@ -17,7 +17,7 @@ export const DBBox = styled.span`
     font-weight: bold;
     cursor: pointer;
     &:hover {
-        background-color: #f3f3f3;
+        background-color: var(--muted);
     }
 `;
 

@@ -38,7 +38,7 @@ const Corner = styled.span`
     top: 0;
     padding-top: 4px;
     font-weight: 600;
-    background-color: #fff;
+    background-color: var(--card);
 `;
 
 const TableHeader = styled.label`
@@ -46,12 +46,12 @@ const TableHeader = styled.label`
     top: 0;
     padding-top: 4px;
     font-weight: 600;
-    background-color: #fff;
+    background-color: var(--card);
     padding-inline: 0.8em;
 `;
 
 const TableCell = styled.div`
-    background-color: #f8f8f8;
+    background-color: var(--muted);
     min-width: 2em;
     padding-inline: 0.8em;
     line-height: 1.5em;
@@ -85,7 +85,7 @@ const ButtonContainer = styled.div`
 const RowIndex = styled.span`
     color: rgb(108, 113, 196);
     letter-spacing: 0.5px;
-    background-color: #fff;
+    background-color: var(--card);
     padding-inline: 0.8em;
     text-align: end;
 `;

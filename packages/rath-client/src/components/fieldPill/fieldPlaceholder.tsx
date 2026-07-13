@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '../ui/input';
 
 export const PillPlaceholder = styled.div`
-    color: #000;
+    color: var(--foreground);
     -ms-user-select: none;
     -webkit-user-select: none;
     border-color: rgb(229, 231, 235);

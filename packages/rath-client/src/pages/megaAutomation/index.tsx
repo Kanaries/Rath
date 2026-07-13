@@ -31,7 +31,7 @@ const InsightContainer = styled.div`
     .ope-container {
         margin: 1em 0em;
         padding-bottom: 1em;
-        border-bottom: 1px solid #f5f5f5;
+        border-bottom: 1px solid var(--muted);
     }
     .flex-container {
         display: flex;
@@ -56,7 +56,7 @@ const InsightContainer = styled.div`
             flex-shrink: 1;
             flex-wrap: wrap;
             padding: 0em 1em;
-            border-left: 1px solid #f5f5f5;
+            border-left: 1px solid var(--muted);
             overflow: auto;
         }
     }

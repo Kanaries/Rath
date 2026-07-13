@@ -14,7 +14,7 @@ const FloatingWindow = styled.div`
   }
   font-size: 10px;
   padding: 0.8em;
-  background-color: #fff;
+  background-color: var(--card);
   width: 20em;
   > p {
     user-select: none;

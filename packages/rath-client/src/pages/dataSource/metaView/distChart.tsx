@@ -6,6 +6,8 @@ import { IRow } from '../../../interfaces';
 import { getRange, getVegaTimeFormatRules } from '../../../utils';
 import { shallowCopyArray } from '../../../utils/deepcopy';
 import { VegaGlobalConfig } from '../../../queries/themes/config';
+import { useAppearance } from '../../../appearance';
+import { mergeVegaAppearanceConfig } from '../../../visualization/appearance';
 
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
@@ -53,6 +55,7 @@ const theme: VegaGlobalConfig = {
 }
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
+    const { resolvedAppearance } = useAppearance();
     const chart = useRef<HTMLDivElement>(null);
     const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10, label = true } = props;
     const [view, setView] = useState<Result['view'] | undefined>(undefined);
@@ -137,7 +140,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             }, {
                 actions: false,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
-                config: theme
+                config: mergeVegaAppearanceConfig(theme, resolvedAppearance)
             }).then(res => {
                 setView(res.view);
                 return res
@@ -150,7 +153,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }).catch(console.error)
             }
         }
-    }, [x, y, sortBy, semanticType, width, height, maxItemInView, label])
+    }, [x, y, sortBy, semanticType, width, height, maxItemInView, label, resolvedAppearance])
     useEffect(() => {
         if (view) {
             try {

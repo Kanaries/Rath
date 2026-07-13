@@ -18,7 +18,7 @@ const Panel = styled.div`
     position: relative;
     width: 33%;
     min-width: 360px;
-    background-color: #fff;
+    background-color: var(--card);
     border-radius: 2px;
     margin-block: 10px;
     padding: 1em;

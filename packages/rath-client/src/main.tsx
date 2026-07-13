@@ -2,12 +2,24 @@ import { Fragment } from 'react';
 import { createRoot } from 'react-dom/client';
 import { inject } from '@vercel/analytics';
 import isPropValid from '@emotion/is-prop-valid';
-import { StyleSheetManager } from 'styled-components';
+import { StyleSheetManager, ThemeProvider as StyledThemeProvider } from 'styled-components';
 
 import './index.css';
 import App from './App';
 import { TooltipProvider } from './components/ui/tooltip';
 import type { RathBootstrapPlugin } from './bootstrap';
+import { AppearanceProvider, useAppearance } from './appearance';
+
+function ThemedApplication() {
+    const appearance = useAppearance();
+    return (
+        <StyledThemeProvider theme={appearance}>
+            <TooltipProvider>
+                <App />
+            </TooltipProvider>
+        </StyledThemeProvider>
+    );
+}
 
 export function mountRathApplication(plugin?: RathBootstrapPlugin): void {
     inject();
@@ -21,9 +33,9 @@ export function mountRathApplication(plugin?: RathBootstrapPlugin): void {
     root.render(
         <Providers>
             <StyleSheetManager shouldForwardProp={(prop, target) => typeof target !== 'string' || isPropValid(prop)}>
-                <TooltipProvider>
-                    <App />
-                </TooltipProvider>
+                <AppearanceProvider>
+                    <ThemedApplication />
+                </AppearanceProvider>
             </StyleSheetManager>
         </Providers>
     );

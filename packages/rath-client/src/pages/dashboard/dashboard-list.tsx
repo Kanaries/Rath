@@ -33,7 +33,7 @@ const PreviewPopup = styled.div`
     pointer-events: none;
     position: fixed;
     transform: translate(-50%, calc(-100% - 4px));
-    --bg-color: #fff;
+    --bg-color: var(--card);
     background-color: var(--bg-color);
     display: block;
     width: max-content;

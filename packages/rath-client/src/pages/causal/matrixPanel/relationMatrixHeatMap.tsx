@@ -5,6 +5,8 @@ import embed from 'vega-embed';
 import { Button } from '../../../components/ui/button';
 import { RathIcon } from '../../../components/icons';
 import { IFieldMeta, IRow } from '../../../interfaces';
+import { useAppearance } from '../../../appearance';
+import { getVegaAppearanceConfig } from '../../../visualization/appearance';
 
 interface Props {
     data: DeepReadonly<number[][]>;
@@ -63,6 +65,7 @@ const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
 };
 
 const RelationMatrixHeatMap: React.FC<Props> = (props) => {
+    const { resolvedAppearance } = useAppearance();
     const { data, fields, absolute, onSelect, mark = 'circle' } = props;
     const container = useRef<HTMLDivElement>(null);
     const values = useMemo<IRow[]>(() => {
@@ -98,7 +101,7 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
                         axis: { grid: true, tickBand: 'extent' },
                     },
                 },
-                { actions: true }
+                { actions: true, config: getVegaAppearanceConfig(resolvedAppearance) }
             ).then((res) => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
@@ -108,7 +111,7 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values, absolute, mark]);
+    }, [values, absolute, mark, resolvedAppearance]);
     return (
         <>
             <div ref={container}></div>

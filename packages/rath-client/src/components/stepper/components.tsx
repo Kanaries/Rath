@@ -55,8 +55,8 @@ const Label = styled.span`
             border-radius: 50%;
             overflow: hidden;
             background-color: #a2a2a2;
-            fill: #fff;
-            color: #fff;
+            fill: var(--card);
+            color: var(--card);
             display: none;
             &.uncompleted {
                 display: inline-flex;
@@ -81,7 +81,7 @@ const Label = styled.span`
     }
     > .label {
         width: 100%;
-        color: #000000aa;
+        color: var(--muted-foreground);
         > span {
             text-align: center;
             margin-top: 1.2em;
@@ -93,11 +93,11 @@ const Label = styled.span`
         }
     }
     *.active > & > .label > span {
-        color: #000000d4;
+        color: var(--foreground);
         font-weight: 600 !important;
     }
     *.completed > & > .label > span {
-        color: #000000d4;
+        color: var(--foreground);
         font-weight: 500;
     }
 `;

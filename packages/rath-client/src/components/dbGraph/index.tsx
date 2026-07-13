@@ -26,7 +26,7 @@ const Container = styled.div`
         margin: 0;
         padding: 0;
     }
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border);
 `;
 
 const Output = styled.div`

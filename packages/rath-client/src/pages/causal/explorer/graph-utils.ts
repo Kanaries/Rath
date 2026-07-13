@@ -2,6 +2,7 @@ import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
 import { PagLink, PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
+import type { ResolvedAppearance } from '../../../appearance';
 
 
 export const GRAPH_HEIGHT = 500;
@@ -77,6 +78,7 @@ export interface IRenderDataProps {
     /** @default Infinity */
     limit?: number;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
+    resolvedAppearance: ResolvedAppearance;
 }
 
 export const useRenderData = ({
@@ -87,7 +89,9 @@ export const useRenderData = ({
     cutThreshold = 0,
     limit = Infinity,
     renderNode,
+    resolvedAppearance,
 }: IRenderDataProps) => {
+    const labelColor = resolvedAppearance === 'dark' ? '#e0e0e0' : '#323130';
     return useMemo<GraphData>(() => ({
         nodes: fields.map((f) => {
             return {
@@ -121,6 +125,7 @@ export const useRenderData = ({
                 labelCfg: {
                     style: {
                         opacity: 0,
+                        fill: labelColor,
                     },
                 },
             };
@@ -150,7 +155,7 @@ export const useRenderData = ({
                 type: isForbiddenType ? ForbiddenEdgeType : undefined,
             };
         }),
-    }), [fields, mode, PAG, limit, renderNode, weights, cutThreshold]);
+    }), [fields, mode, PAG, limit, renderNode, weights, cutThreshold, labelColor]);
 };
 
 export interface IGraphOptions {
@@ -159,6 +164,7 @@ export interface IGraphOptions {
     handleLasso?: ((fields: IFieldMeta[]) => void) | undefined;
     handleLink?: (srcFid: string, tarFid: string) => void | undefined;
     graphRef: { current: Graph | undefined };
+    resolvedAppearance: ResolvedAppearance;
 }
 
 export const useGraphOptions = ({
@@ -167,6 +173,7 @@ export const useGraphOptions = ({
     handleLasso,
     handleLink,
     graphRef,
+    resolvedAppearance,
 }: IGraphOptions) => {
     const widthRef = useRef(width);
     widthRef.current = width;
@@ -178,6 +185,10 @@ export const useGraphOptions = ({
     handleLinkRef.current = handleLink;
 
     return useMemo<Omit<GraphOptions, 'container'>>(() => {
+        const dark = resolvedAppearance === 'dark';
+        const foreground = dark ? '#e0e0e0' : '#323130';
+        const mutedForeground = dark ? '#b8b8b8' : '#666462';
+        const surface = dark ? '#1a1a1a' : '#ffffff';
         let createEdgeFrom: string | null = null;
         const exploreMode = ['drag-canvas', 'drag-node', {
             type: 'lasso-select',
@@ -250,6 +261,12 @@ export const useGraphOptions = ({
                 size: 20,
                 style: {
                     lineWidth: 1,
+                    fill: surface,
+                },
+                labelCfg: {
+                    style: {
+                        fill: foreground,
+                    },
                 },
             },
             nodeStateStyles: {
@@ -270,6 +287,11 @@ export const useGraphOptions = ({
                 size: 1,
                 color: '#F6BD16',
                 opacity: 0.9,
+                labelCfg: {
+                    style: {
+                        fill: mutedForeground,
+                    },
+                },
             },
             edgeStateStyles: {
                 highlighted: {
@@ -284,5 +306,5 @@ export const useGraphOptions = ({
             },
         };
         return cfg;
-    }, [graphRef]);
+    }, [graphRef, resolvedAppearance]);
 };

@@ -15,7 +15,7 @@ const Container = styled.div`
     overflow: hidden;
     border: 1px solid #8888;
     cursor: pointer;
-    background-color: #ffffff;
+    background-color: var(--card);
     > button {
         color: #da3b01;
         :hover {

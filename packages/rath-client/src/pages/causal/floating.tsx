@@ -8,7 +8,7 @@ const Container = styled.div<{ position: 'absolute' | 'fixed'; direction: 'start
     position: ${({ position }) => position};
     ${({ direction }) => direction === 'start' ? 'left' : 'right'}: 0;
     top: 50%;
-    background-color: #fff;
+    background-color: var(--card);
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
     transition: transform 400ms, margin 400ms;
     margin-left: ${AsideWidth};

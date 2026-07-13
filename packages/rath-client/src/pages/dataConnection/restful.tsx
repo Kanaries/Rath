@@ -16,7 +16,7 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from '../../components/themed-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag } from '../../utils/storage';

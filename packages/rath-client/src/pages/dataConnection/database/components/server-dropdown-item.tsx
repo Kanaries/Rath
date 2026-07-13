@@ -11,11 +11,11 @@ const ServerItem = styled.div`
     user-select: none;
     padding: 4px 8px;
     :hover {
-        background-color: #eee;
+        background-color: var(--border);
     }
     &[aria-selected='true'] {
         cursor: default;
-        background-color: #f3f3f3;
+        background-color: var(--muted);
     }
     & * {
         cursor: inherit;
@@ -47,7 +47,7 @@ const LagText = styled.span`
     min-width: 2em;
     width: max-content;
     text-align: center;
-    color: #666;
+    color: var(--muted-foreground);
 `;
 
 const TipsText = styled.div`

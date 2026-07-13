@@ -23,7 +23,7 @@ const Cont = styled.div`
         overflow-y: auto;
     }
     .operation-container {
-        border-top: 1px solid #eee;
+        border-top: 1px solid var(--border);
         padding-top: 1em;
         max-height: 350px;
         overflow-y: auto;
@@ -33,7 +33,7 @@ const Cont = styled.div`
     }
     padding: 0.5em;
     margin: 0.25em;
-    background-color: #fff;
+    background-color: var(--card);
     flex-grow: 1;
 `;
 
