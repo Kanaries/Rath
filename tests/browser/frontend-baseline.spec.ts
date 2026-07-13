@@ -190,8 +190,16 @@ test('DataSource table preserves virtual scrolling, styling and text-pattern int
     await expect.poll(() => dataHeaders.locator('.checkbox-container').count()).toBe(0);
     await expect.poll(() => rows.first().evaluate((row) => row.getBoundingClientRect().height)).toBe(38);
 
+    const negativeSubtleColor = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.style.backgroundColor = 'var(--negative-subtle)';
+        document.body.appendChild(probe);
+        const color = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return color;
+    });
     const rowColors = await rows.evaluateAll((elements) => elements.map((row) => getComputedStyle(row).backgroundColor));
-    expect(rowColors).toContain('rgb(255, 242, 232)');
+    expect(rowColors).toContain(negativeSubtleColor);
     expect(rowColors).toContain('rgba(0, 0, 0, 0)');
 
     const initialHeader = await table.locator(':scope > thead').innerText();
