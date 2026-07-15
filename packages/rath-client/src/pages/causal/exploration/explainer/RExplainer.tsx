@@ -10,6 +10,7 @@ import { Switch } from '../../../../components/ui/switch';
 import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
+import { CAUSAL_SERVICE_MODE_OPTIONS, type CausalServiceMode } from '../../config';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../../services/r-insight';
 import ChartItem from './explainChart';
@@ -43,7 +44,7 @@ const RExplainer: FC = () => {
     }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
-    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
+    const [serviceMode, setServiceMode] = useState<CausalServiceMode>('worker');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult> | undefined>(undefined);
 
@@ -98,7 +99,9 @@ const RExplainer: FC = () => {
                 viewContext?.setLocalWeights(res);
             }
         }).finally(() => {
-            pendingRef.current = undefined;
+            if (pendingRef.current === p) {
+                pendingRef.current = undefined;
+            }
         });
     }, [aggr, mainField, sample, fields, subspaces, mergedPag, serviceMode, functionalDependencies, viewContext]);
 
@@ -207,10 +210,7 @@ const RExplainer: FC = () => {
                         <RathSelect
                             label={intl.get('causal.analyze.service')}
                             selectedKey={serviceMode}
-                            options={[
-                                { key: 'worker', text: 'worker' },
-                                { key: 'server', text: 'server' },
-                            ]}
+                            options={CAUSAL_SERVICE_MODE_OPTIONS}
                             onChange={(key) => {
                                 setServiceMode(key as typeof serviceMode);
                             }}

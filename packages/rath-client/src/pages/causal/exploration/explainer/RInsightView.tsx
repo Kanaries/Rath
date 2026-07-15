@@ -11,6 +11,7 @@ import { RathIcon } from '../../../../components/icons';
 import { useGlobalStore } from '../../../../store';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../../services/r-insight';
+import type { CausalServiceMode } from '../../config';
 import DiffChart from './diffChart';
 import ExplainChart from './explainChart';
 import VisText, { IVisTextProps } from './visText';
@@ -24,7 +25,7 @@ export interface IRInsightViewProps {
     indices: [number[], number[]];
     subspaces: [IRInsightExplainSubspace, IRInsightExplainSubspace];
     aggr: 'sum' | 'mean' | 'count' | null;
-    serviceMode: 'worker' | 'server';
+    serviceMode: CausalServiceMode;
 }
 
 const Container = styled.div`
@@ -217,7 +218,9 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, entryDi
                 );
             }
         }).finally(() => {
-            pendingRef.current = undefined;
+            if (pendingRef.current === p) {
+                pendingRef.current = undefined;
+            }
         });
     };
 

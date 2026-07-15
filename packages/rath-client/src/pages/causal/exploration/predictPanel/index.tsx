@@ -38,7 +38,7 @@ const ModeOptions = [
     { key: 'regression', text: 'Regression' },
 ] as const;
 
-const TRAIN_RATE = 0.2;
+const TEST_RATE = 0.2;
 
 const PredictPanel = forwardRef<
     {
@@ -79,7 +79,7 @@ const PredictPanel = forwardRef<
 
     const [running, setRunning] = useState(false);
 
-    const canExecute = predictInput.features.length > 0 && predictInput.targets.length > 0;
+    const canExecute = predictInput.features.length > 0 && predictInput.targets.length > 0 && cleanedData.length > 1;
     const pendingRef = useRef<Promise<unknown> | undefined>(undefined);
 
     useEffect(() => {
@@ -96,13 +96,14 @@ const PredictPanel = forwardRef<
 
     const trainTestSplitIndices = useMemo<TrainTestSplitFlag[]>(() => {
         const indices = cleanedData.map((_, i) => i);
-        const trainSetIndices = new Map<number, 1>();
-        const trainSetTargetSize = Math.floor(cleanedData.length * TRAIN_RATE);
-        while (trainSetIndices.size < trainSetTargetSize && indices.length) {
+        const testSetIndices = new Set<number>();
+        const testSetTargetSize =
+            cleanedData.length > 1 ? Math.min(cleanedData.length - 1, Math.max(1, Math.floor(cleanedData.length * TEST_RATE))) : 0;
+        while (testSetIndices.size < testSetTargetSize && indices.length) {
             const [index] = indices.splice(Math.floor(indices.length * Math.random()), 1);
-            trainSetIndices.set(index, 1);
+            testSetIndices.add(index);
         }
-        return cleanedData.map((_, i) => (trainSetIndices.has(i) ? TrainTestSplitFlag.train : TrainTestSplitFlag.test));
+        return cleanedData.map((_, i) => (testSetIndices.has(i) ? TrainTestSplitFlag.test : TrainTestSplitFlag.train));
     }, [cleanedData]);
 
     const trainTestSplitIndicesRef = useRef(trainTestSplitIndices);
@@ -136,8 +137,10 @@ const PredictPanel = forwardRef<
                 setTab('result');
             }
         }).finally(() => {
-            pendingRef.current = undefined;
-            setRunning(false);
+            if (task === pendingRef.current) {
+                pendingRef.current = undefined;
+                setRunning(false);
+            }
         });
     }, [predictInput, algo, mode, viewContext]);
 
@@ -159,7 +162,12 @@ const PredictPanel = forwardRef<
                 </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button type="button" size="icon" disabled={!canExecute || running} className="rounded-l-none border-l border-primary-foreground/25 px-0">
+                        <Button
+                            type="button"
+                            size="icon"
+                            disabled={!canExecute || running}
+                            className="rounded-l-none border-l border-primary-foreground/25 px-0"
+                        >
                             <RathIcon name="CaretSolidDown" />
                         </Button>
                     </DropdownMenuTrigger>

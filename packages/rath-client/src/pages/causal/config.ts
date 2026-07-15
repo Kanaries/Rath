@@ -2,6 +2,13 @@ import type { RathSelectOption } from '../../components/rath-ui/rath-select';
 import type { IFieldMeta } from '../../interfaces';
 import PC_PARAMS from './pc_params.json';
 
+export type CausalServiceMode = 'worker' | 'server';
+
+export const CAUSAL_SERVICE_MODE_OPTIONS: Array<{ key: CausalServiceMode; text: string }> = [
+    { key: 'worker', text: 'worker' },
+    { key: 'server', text: 'server' },
+];
+
 export interface IFormItem {
     title: string;
     key: string;

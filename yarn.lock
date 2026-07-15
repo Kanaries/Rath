@@ -2173,10 +2173,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/causal@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.npmjs.org/@kanaries/causal/-/causal-0.1.1.tgz#e78af18061782ffea6a0b49667faa7d6632f627a"
-  integrity sha512-hkYUFLwSn+JVZIpfmtnvcbdNjS4SfR3Yw0eaVgEHM8tL/hs0hElcAFGaNZZOs8ER6nGapGghQFMRkWEWA3n/gQ==
+"@kanaries/causal@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@kanaries/causal/-/causal-0.2.1.tgz#432f0f3339c00499bec19a9a2b28f3440ba6efce"
+  integrity sha512-TbmNYrPFPZsnDuMYNPML6cYBt1FyLECGpG/qAWoZwpoRlKNuv3uo0bJxYInIbhMVUJsBfIdK9cJ1C/zmkz2xcA==
 
 "@kanaries/graphic-walker@0.5.2":
   version "0.5.2"
@@ -2257,6 +2257,11 @@
   version "0.0.16"
   resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.16.tgz#53af7fd1d8c8f21063b5bfed1f5eda296ab8dd6f"
   integrity sha512-kI0xme/oz5i0LjTfaurwnjelOf1ux93DHpoaL83sXWRd3/ElS7FbWvvv9sZ/EejhPGe79f4bWbi9R//M3KZjtw==
+
+"@kanaries/ml@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@kanaries/ml/-/ml-1.0.1.tgz#30defccb8fc3f38d10b88ba5d25a3998b45678ec"
+  integrity sha512-6uwWlbz1Bzn8H+kkri0o4LMGhabhd2LwvzaMWwGQutMgauAKT5Be4sQpQd96e9aR6R7OWCGOqhWT4vk++uV0eg==
 
 "@kanaries/react-beautiful-dnd@0.2.1":
   version "0.2.1"

@@ -2,9 +2,9 @@ import RInsightWorker from '../workers/insight/r-insight.worker?worker';
 import type { IRInsightExplainProps, IRInsightExplainResult } from '../workers/insight/r-insight.worker';
 import { getGlobalStore } from '../store';
 import { workerService } from './base';
+import type { CausalServiceMode } from '../pages/causal/config';
 
-
-export const RInsightService = async (props: IRInsightExplainProps, mode: 'worker' | 'server'): Promise<IRInsightExplainResult> => {
+export const RInsightService = async (props: IRInsightExplainProps, mode: CausalServiceMode = 'worker'): Promise<IRInsightExplainResult> => {
     const { causalStore } = getGlobalStore();
 
     if (mode === 'server') {
@@ -24,11 +24,14 @@ export const RInsightService = async (props: IRInsightExplainProps, mode: 'worke
         }
     }
     const worker = new RInsightWorker();
-    const result = await workerService<IRInsightExplainResult, IRInsightExplainProps>(worker, props);
-    worker.terminate();
-    if (result.success) {
-        return result.data;
-    } else {
-        throw new Error('[RInsight worker]' + result.message);
+    try {
+        const result = await workerService<IRInsightExplainResult, IRInsightExplainProps>(worker, props);
+        if (result.success) {
+            return result.data;
+        } else {
+            throw new Error('[RInsight worker]' + result.message);
+        }
+    } finally {
+        worker.terminate();
     }
 };

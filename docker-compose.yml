@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 
 services:
   base:
@@ -14,11 +14,4 @@ services:
     network_mode: service:base
     build:
       context: ./services/connector
-      dockerfile: Dockerfile
-  
-  prediction-api:
-    restart: always
-    network_mode: service:base
-    build:
-      context: ./services/prediction
       dockerfile: Dockerfile

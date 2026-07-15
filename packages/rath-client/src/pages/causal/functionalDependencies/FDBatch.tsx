@@ -4,11 +4,12 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
 import { Button } from '../../../components/ui/button';
+import { RathSelect } from '../../../components/rath-ui/rath-select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
 import { Spinner } from '../../../components/ui/spinner';
 import { RathIcon } from '../../../components/icons';
 import { useGlobalStore } from '../../../store';
-import type { IFunctionalDep } from '../config';
+import { CAUSAL_SERVICE_MODE_OPTIONS, type CausalServiceMode, type IFunctionalDep } from '../config';
 import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
 
@@ -52,6 +53,7 @@ const FDBatch: FC = () => {
     const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
+    const [serviceMode, setServiceMode] = useState<CausalServiceMode>('worker');
 
     const dropdownOptions = useMemo<{ key: BatchUpdateMode; text: string }[]>(() => {
         return batchUpdateModes.map((key) => ({
@@ -79,7 +81,7 @@ const FDBatch: FC = () => {
         }
     }, [displayPreview]);
     const generateFDFromAutoDetection = useCallback(() => {
-        const p = sample.getAll().then((data) => getGeneratedFDFromAutoDetection(data));
+        const p = sample.getAll().then((data) => getGeneratedFDFromAutoDetection(data, serviceMode));
         pendingRef.current = p;
         p.then((res) => {
             if (p === pendingRef.current) {
@@ -93,10 +95,12 @@ const FDBatch: FC = () => {
                 console.warn(err);
             })
             .finally(() => {
-                pendingRef.current = undefined;
+                if (p === pendingRef.current) {
+                    pendingRef.current = undefined;
+                }
             });
         setDisplayPreview(true);
-    }, [sample]);
+    }, [sample, serviceMode]);
 
     const handleClear = useCallback(() => {
         causalStore.model.updateFunctionalDependencies([]);
@@ -171,6 +175,13 @@ const FDBatch: FC = () => {
                     <RathIcon name="HintText" />
                     {intl.get('causal.actions.auto_detect')}
                 </Button>
+                <RathSelect
+                    label={intl.get('causal.analyze.service')}
+                    selectedKey={serviceMode}
+                    options={CAUSAL_SERVICE_MODE_OPTIONS}
+                    onChange={(key) => setServiceMode(key as CausalServiceMode)}
+                    className="w-[7em]"
+                />
             </div>
             {displayPreview && (
                 <Mask>
