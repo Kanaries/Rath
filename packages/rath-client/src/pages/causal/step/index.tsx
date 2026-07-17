@@ -2,6 +2,7 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { cn } from 'utils/cn';
 import { Button } from '../../../components/ui/button';
 import { RathIcon } from '../../../components/icons';
 import CausalDatasetConfig from './datasetConfig';
@@ -14,27 +15,26 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    > h2 {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
 `;
 
 const StepHeader = styled.div`
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 1rem;
-    padding: 1em 0 0;
+    padding: 0.5em 0;
+    border-bottom: 1px solid var(--border);
 `;
 
 const StepHint = styled.p<{ isCurrentStep: boolean }>`
     font-size: 0.8rem;
     opacity: ${({ isCurrentStep }) => (isCurrentStep ? 0.8 : 0.6)};
-    padding: 1em 0;
-    > i {
-        margin: 0 2px;
-    }
+    padding: 0.6em 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    flex-grow: 0;
+    flex-shrink: 0;
 `;
 
 const StepList = styled.div`
@@ -44,36 +44,17 @@ const StepList = styled.div`
     justify-content: center;
     min-width: 0;
     overflow-x: auto;
-    > span {
-        margin: 0 0.75em;
-        user-select: none;
-        pointer-events: none;
-        opacity: 0.3;
-    }
 `;
 
-const StepItem = styled.div<{ active: boolean; completed: boolean }>`
-    padding: 0 0.5em;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    white-space: nowrap;
-    cursor: ${({ active }) => (active ? 'default' : 'pointer')};
-    font-weight: ${({ active }) => (active ? 500 : 400)};
-    opacity: ${({ active, completed }) => (active || completed ? 1 : 0.5)};
-    :hover {
-        opacity: ${({ active, completed }) => (active || completed ? 1 : 0.75)};
-    }
-    position: relative;
-`;
-
-const Badge = styled.div`
-    display: inline-flex;
-    align-items: center;
+const StepConnector = styled.span`
+    width: 28px;
+    height: 1px;
+    flex: none;
+    background: var(--border);
+    margin: 0 0.25em;
 `;
 
 const StepPanel = styled.div`
-    margin-block: 0.5em;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
@@ -114,103 +95,79 @@ export const CausalStepPager = observer(function CausalStepPager() {
     const curStep = useMemo(() => CausalSteps.find((s) => s.key === stepKey)!, [CausalSteps, stepKey]);
     const hintStep = useMemo(() => CausalSteps.find((s) => s.key === showHelp)!, [CausalSteps, showHelp]);
 
-    const [skipFDEdit, setSkipFDEdit] = useState(true);
+    const curStepIndex = allCausalSteps.indexOf(curStep.key);
 
-    const goPreviousStep = useMemo(() => {
-        switch (curStep.key) {
-            case CausalStep.DATASET_CONFIG: {
-                return undefined;
-            }
-            case CausalStep.FD_CONFIG: {
-                return () => setStepKey(CausalStep.DATASET_CONFIG);
-            }
-            case CausalStep.CAUSAL_MODEL: {
-                return () => setStepKey(CausalStep.FD_CONFIG);
-            }
-            default: {
-                return undefined;
-            }
-        }
-    }, [curStep]);
-
-    const goNextStep = useMemo(() => {
-        switch (curStep.key) {
-            case CausalStep.DATASET_CONFIG: {
-                return () => setStepKey(skipFDEdit ? CausalStep.CAUSAL_MODEL : CausalStep.FD_CONFIG);
-            }
-            case CausalStep.FD_CONFIG: {
-                return () => setStepKey(CausalStep.CAUSAL_MODEL);
-            }
-            case CausalStep.CAUSAL_MODEL: {
-                return undefined;
-            }
-            default: {
-                return undefined;
-            }
-        }
-    }, [curStep, skipFDEdit]);
+    const goPreviousStep = curStepIndex > 0 ? () => setStepKey(allCausalSteps[curStepIndex - 1]) : undefined;
+    const goNextStep =
+        curStep.key === CausalStep.DATASET_CONFIG
+            ? () => setStepKey(CausalStep.CAUSAL_MODEL)
+            : curStepIndex < allCausalSteps.length - 1
+            ? () => setStepKey(allCausalSteps[curStepIndex + 1])
+            : undefined;
 
     return (
         <Container>
             <StepHeader>
-                <Button className="gap-1.5" variant="outline" disabled={!goPreviousStep} onClick={goPreviousStep}>
-                    <RathIcon name="Previous" />
-                    {intl.get('causal.actions.prev_step')}
-                </Button>
-                <StepList>
-                    {CausalSteps.map((step, i, arr) => {
+                <h1 className="text-base font-semibold">{intl.get('menu.causal')}</h1>
+                <StepList role="list">
+                    {CausalSteps.map((step, i) => {
                         const active = step.key === stepKey;
-                        const completed = arr.slice(i + 1).some((opt) => opt.key === stepKey);
+                        const completed = i < curStepIndex;
                         return (
                             <Fragment key={step.key}>
-                                {i !== 0 && <span>{'>'}</span>}
-                                <StepItem
-                                    active={active}
-                                    completed={completed}
+                                {i !== 0 && <StepConnector aria-hidden="true" />}
+                                <div
+                                    role="listitem"
+                                    aria-current={active ? 'step' : undefined}
+                                    tabIndex={active ? undefined : 0}
+                                    className={cn(
+                                        'flex items-center gap-2 whitespace-nowrap rounded-md px-2 py-1 text-sm',
+                                        active ? 'font-semibold' : 'cursor-pointer text-muted-foreground hover:bg-accent hover:text-foreground'
+                                    )}
                                     onClick={() => active || setStepKey(step.key)}
+                                    onKeyDown={(e) => {
+                                        if (!active && (e.key === 'Enter' || e.key === ' ')) {
+                                            e.preventDefault();
+                                            setStepKey(step.key);
+                                        }
+                                    }}
                                     onMouseOver={() => active || setShowHelp(step.key)}
                                     onMouseOut={() => setShowHelp(stepKey)}
                                 >
+                                    <span
+                                        aria-hidden="true"
+                                        className={cn(
+                                            'inline-flex h-5 w-5 flex-none items-center justify-center rounded-full text-[11px] font-semibold',
+                                            active
+                                                ? 'bg-foreground text-background'
+                                                : completed
+                                                ? 'bg-primary/15 text-primary'
+                                                : 'border-[1.5px] border-border text-muted-foreground'
+                                        )}
+                                    >
+                                        {completed ? <RathIcon name="CheckMark" size={11} strokeWidth={3} /> : i + 1}
+                                    </span>
                                     <span>{step.title}</span>
-                                    {step.key === CausalStep.FD_CONFIG && (
-                                        <Badge>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6 rounded-full border"
-                                                title="Bypass"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSkipFDEdit(!skipFDEdit);
-                                                }}
-                                                aria-pressed={skipFDEdit}
-                                                style={{
-                                                    background: skipFDEdit
-                                                        ? undefined
-                                                        : 'linear-gradient(135deg, transparent 47%, var(--foreground) 47%, var(--foreground) 53%, transparent 53%)',
-                                                    border: '1px solid',
-                                                    borderRadius: '50%',
-                                                }}
-                                            >
-                                                <RathIcon name="DoubleChevronRight" style={{ fontWeight: 'bold' }} />
-                                            </Button>
-                                        </Badge>
-                                    )}
-                                </StepItem>
+                                </div>
                             </Fragment>
                         );
                     })}
                 </StepList>
-                <Button className="gap-1.5" disabled={!goNextStep} onClick={goNextStep}>
-                    <RathIcon name="Next" />
-                    {intl.get('causal.actions.continue')}
-                </Button>
+                <div className="flex justify-end gap-2">
+                    <Button className="gap-1.5" variant="outline" disabled={!goPreviousStep} onClick={goPreviousStep}>
+                        <RathIcon name="ChevronLeft" />
+                        {intl.get('causal.actions.prev_step')}
+                    </Button>
+                    <Button className="gap-1.5" disabled={!goNextStep} onClick={goNextStep}>
+                        {intl.get('causal.actions.continue')}
+                        <RathIcon name="ChevronRight" />
+                    </Button>
+                </div>
             </StepHeader>
             <StepHint isCurrentStep={hintStep.key === stepKey}>
                 <RathIcon name={hintStep.key === stepKey ? 'Info' : 'InfoSolid'} />
                 {hintStep.help}
             </StepHint>
-            <hr className="card-line" />
             <StepPanel>
                 {
                     {

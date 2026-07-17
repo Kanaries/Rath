@@ -1,4 +1,3 @@
-import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -14,10 +13,6 @@ const Main = styled(Card)`
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    > h1 {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
 `;
 
 const CausalPage: FC = () => {
@@ -45,8 +40,6 @@ const CausalPage: FC = () => {
         <div className="content-container">
             <ViewContextProvider>
                 <Main>
-                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>{intl.get('menu.causal')}</h1>
-                    <hr className="card-line" />
                     <CausalStepPager />
                 </Main>
             </ViewContextProvider>

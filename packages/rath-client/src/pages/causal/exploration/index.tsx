@@ -5,6 +5,7 @@ import { GraphicWalker } from '../../../components/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
 import type { Specification } from 'visual-insights';
+import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs';
 import { RathIcon } from '../../../components/icons';
@@ -26,11 +27,12 @@ const Container = styled.div`
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 0 1em;
     & .body {
         flex-grow: 1;
         flex-shrink: 1;
         overflow: auto;
-        margin-top: 1em;
+        margin-top: 0.5em;
         display: flex;
         flex-direction: column;
     }
@@ -44,6 +46,17 @@ export interface Subtree {
         neighborType: PAG_NODE;
     }[];
 }
+
+/** exploration modes that consume the node selection made on the causal graph */
+const SELECTION_DRIVEN = [ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT];
+
+const EmptyGuide = () => (
+    <div className="mx-1 my-4 flex flex-col items-center rounded-lg border-2 border-dashed px-6 py-9 text-center">
+        <RathIcon name="Relationship" size={26} className="mb-2.5 text-muted-foreground/60" />
+        <p className="text-sm font-medium">{intl.get('causal.exploration.empty_title')}</p>
+        <span className="mt-1 text-xs text-muted-foreground">{intl.get('causal.exploration.empty_desc')}</span>
+    </div>
+);
 
 const Exploration = forwardRef<
     {
@@ -149,84 +162,111 @@ const Exploration = forwardRef<
         }));
     }, []);
 
+    if (!viewContext) {
+        return null;
+    }
+
+    const selectionAware = SELECTION_DRIVEN.includes(viewContext.explorationKey);
+
     return (
-        viewContext && (
-            <Container>
-                <Tabs
-                    value={viewContext.explorationKey}
-                    onValueChange={(value) => viewContext.setExplorationKey(value as ExplorationKey)}
-                    className="mb-1"
-                >
-                    <TabsList>
-                        {ExplorationOptions.map((mode) => (
-                            <TabsTrigger key={mode.key} value={mode.key}>
-                                {mode.text}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
-                <div className="flex items-center gap-2">
-                    {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
-                        <SemiEmbed
-                            view={clueView}
-                            show={showSemiClue}
-                            toggleShow={() => {
-                                setShowSemiClue((v) => !v);
-                            }}
-                            neighborKeys={clueView ? clueView.fields.slice(0, 1).map((f) => f.fid) : []}
-                        />
-                    )}
-                    {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
-                        <Button variant="ghost" disabled={selectedFieldGroup.length === 0} onClick={clearFieldGroup}>
-                            <RathIcon name="Delete" />
-                            {intl.get('causal.actions.clear_fields')}
-                        </Button>
-                    )}
-                </div>
-                <div className="body">
+        <Container>
+            <Tabs
+                value={viewContext.explorationKey}
+                onValueChange={(value) => viewContext.setExplorationKey(value as ExplorationKey)}
+                className="flex-none"
+            >
+                <TabsList className="h-auto w-full justify-start gap-0.5 rounded-none border-b bg-transparent p-0">
+                    {ExplorationOptions.map((mode) => (
+                        <TabsTrigger
+                            key={mode.key}
+                            value={mode.key}
+                            className="-mb-px rounded-none border-b-2 border-transparent bg-transparent px-2.5 py-1.5 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                        >
+                            {mode.text}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </Tabs>
+            <div className="mt-2 flex flex-none flex-wrap items-center gap-1.5">
+                <span className="mr-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+                    {intl.get('causal.analyze.selection')}
+                </span>
+                {selectedFieldGroup.map((f) => (
+                    <Badge key={f.fid} variant="secondary" className="gap-1 pr-1 font-normal">
+                        {f.name || f.fid}
+                        <button
+                            type="button"
+                            aria-label={`${intl.get('causal.actions.clear')} ${f.name || f.fid}`}
+                            className="rounded-full p-0.5 opacity-60 hover:bg-foreground/10 hover:opacity-100"
+                            onClick={() => removeSelectedField(f.fid)}
+                        >
+                            <RathIcon name="ChromeClose" size={9} />
+                        </button>
+                    </Badge>
+                ))}
+                {selectedFieldGroup.length > 0 ? (
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground" onClick={clearFieldGroup}>
+                        {intl.get('causal.actions.clear')}
+                    </Button>
+                ) : (
+                    <span className="text-xs text-muted-foreground/70">{intl.get('causal.exploration.empty_title')}</span>
+                )}
+                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
+                    <SemiEmbed
+                        view={clueView}
+                        show={showSemiClue}
+                        toggleShow={() => {
+                            setShowSemiClue((v) => !v);
+                        }}
+                        neighborKeys={clueView ? clueView.fields.slice(0, 1).map((f) => f.fid) : []}
+                    />
+                )}
+            </div>
+            <div className="body">
+                {selectionAware && selectedFieldGroup.length === 0 ? (
+                    <EmptyGuide />
+                ) : (
                     {
-                        {
-                            // [ExplorationKey.CAUSAL_BLAME]: (
-                            //     <CausalBlame />
-                            // ),
-                            [ExplorationKey.AUTO_VIS]: <AutoVis />,
-                            [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
-                                <CrossFilter
-                                    fields={selectedFieldGroup}
-                                    dataSource={visSample}
-                                    onVizClue={(fid) => {
-                                        const field = fields.find((f) => f.fid === fid);
-                                        if (field) {
-                                            setClueView({
-                                                fields: [field],
-                                                filters: [...filters],
-                                                imp: 0,
-                                            });
-                                            setShowSemiClue(true);
-                                        }
-                                    }}
-                                    onVizDelete={removeSelectedField}
-                                />
-                            ),
-                            [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && <RExplainer />,
-                            [ExplorationKey.GRAPHIC_WALKER]: (
-                                /* 小心这里的内存占用 */
-                                <GraphicWalker
-                                    dataSource={visSample.slice(0)}
-                                    rawFields={fieldMetas}
-                                    spec={initialSpec}
-                                    i18nLang={langStore.lang}
-                                    keepAlive={false}
-                                    dark={resolvedAppearance}
-                                    fieldKeyGuard={false}
-                                />
-                            ),
-                            [ExplorationKey.PREDICT]: <PredictPanel ref={predictPanelRef} />,
-                        }[viewContext.explorationKey]
-                    }
-                </div>
-            </Container>
-        )
+                        // [ExplorationKey.CAUSAL_BLAME]: (
+                        //     <CausalBlame />
+                        // ),
+                        [ExplorationKey.AUTO_VIS]: <AutoVis />,
+                        [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
+                            <CrossFilter
+                                fields={selectedFieldGroup}
+                                dataSource={visSample}
+                                onVizClue={(fid) => {
+                                    const field = fields.find((f) => f.fid === fid);
+                                    if (field) {
+                                        setClueView({
+                                            fields: [field],
+                                            filters: [...filters],
+                                            imp: 0,
+                                        });
+                                        setShowSemiClue(true);
+                                    }
+                                }}
+                                onVizDelete={removeSelectedField}
+                            />
+                        ),
+                        [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && <RExplainer />,
+                        [ExplorationKey.GRAPHIC_WALKER]: (
+                            /* 小心这里的内存占用 */
+                            <GraphicWalker
+                                dataSource={visSample.slice(0)}
+                                rawFields={fieldMetas}
+                                spec={initialSpec}
+                                i18nLang={langStore.lang}
+                                keepAlive={false}
+                                dark={resolvedAppearance}
+                                fieldKeyGuard={false}
+                            />
+                        ),
+                        [ExplorationKey.PREDICT]: <PredictPanel ref={predictPanelRef} />,
+                    }[viewContext.explorationKey]
+                )}
+            </div>
+        </Container>
     );
 });
 

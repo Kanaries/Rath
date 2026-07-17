@@ -651,6 +651,18 @@
         }
     },
     "causal": {
+        "status": {
+            "computing": "计算中…",
+            "result": "{algorithm} · {fields} 个字段 · {edges} 条边",
+            "no_result": "尚未生成因果模型，点击「运行因果发现」开始",
+            "no_algorithm": "当前数据集没有可用的算法。",
+            "no_saved_model": "该数据集还没有已保存的模型。"
+        },
+        "legend": {
+            "directed": "有向边",
+            "undirected": "无向 / 弱关系",
+            "edges": "边 {shown} / {total}"
+        },
         "dataset": {
             "extend": "数据增强",
             "field": "因素",
@@ -667,6 +679,10 @@
         },
         "actions": {
             "clear_fields": "清除全部选择字段",
+            "run": "运行因果发现",
+            "params": "算法参数",
+            "model": "模型",
+            "clear": "清空",
             "causal_discover": "因果发现",
             "relayout": "重新布局",
             "zoom_canvas": "画布缩放",
@@ -739,6 +755,11 @@
             "fully replace": "完全覆盖",
             "mutual_info": "关联信息",
             "conditional_mutual_info": "条件关联信息",
+            "algorithm": "算法",
+            "graph": "关系图",
+            "source": "数据源",
+            "selection": "已选字段",
+            "canvas_tools": "画布工具",
             "causal_discover": "因果发现",
             "matrix": "矩阵",
             "diagram": "图",
@@ -762,6 +783,8 @@
             }
         },
         "exploration": {
+            "empty_title": "未选择字段",
+            "empty_desc": "在因果图上点选节点或用套索框选区域，即可在这里探索它们的关系。",
             "AutoVis": "变量概览",
             "CrossFilter": "因果验证",
             "CausalInsight": "可解释探索",

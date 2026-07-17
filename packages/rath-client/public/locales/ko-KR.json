@@ -711,6 +711,18 @@
         }
     },
     "causal": {
+        "status": {
+            "computing": "계산 중…",
+            "result": "{algorithm} · 필드 {fields}개 · 엣지 {edges}개",
+            "no_result": "아직 인과 모델이 없습니다. “인과 탐색 실행”으로 시작하세요",
+            "no_algorithm": "현재 데이터셋에서 사용할 수 있는 알고리즘이 없습니다.",
+            "no_saved_model": "이 데이터셋에 저장된 모델이 아직 없습니다."
+        },
+        "legend": {
+            "directed": "방향 있음",
+            "undirected": "무방향 / 약한 관계",
+            "edges": "엣지 {shown} / {total}"
+        },
         "dataset": {
 			"extend": "확장 중",
 			"field": "필드",
@@ -727,6 +739,10 @@
 		},
 		"actions": {
 			"clear_fields": "모든 필드 지우기",
+			"run": "인과 탐색 실행",
+			"params": "알고리즘 매개변수",
+			"model": "모델",
+			"clear": "지우기",
 			"causal_discover": "인과관계 발견",
 			"relayout": "다시 레이아웃",
 			"zoom_canvas": "캔버스 줌",
@@ -799,6 +815,11 @@
 			"fully replace": "전체 대체",
 			"mutual_info": "상호 정보",
 			"conditional_mutual_info": "조건부 상호 정보",
+			"algorithm": "알고리즘",
+			"graph": "그래프",
+			"source": "소스",
+			"selection": "선택됨",
+			"canvas_tools": "캔버스 도구",
 			"causal_discover": "인과관계 발견",
 			"matrix": "행렬",
 			"diagram": "다이어그램",
@@ -822,6 +843,8 @@
 			}
 		},
 		"exploration": {
+			"empty_title": "선택된 필드 없음",
+			"empty_desc": "인과 그래프에서 노드를 클릭하거나 올가미로 영역을 선택하면 여기서 관계를 탐색할 수 있습니다.",
 			"AutoVis": "AutoVis",
 			"CrossFilter": "CrossFilter",
 			"CausalInsight": "CausalInsight",

@@ -711,6 +711,18 @@
         }
     },
     "causal": {
+        "status": {
+            "computing": "計算中…",
+            "result": "{algorithm} · {fields} フィールド · {edges} エッジ",
+            "no_result": "因果モデルはまだありません。「因果探索を実行」で開始してください",
+            "no_algorithm": "現在のデータセットで利用できるアルゴリズムがありません。",
+            "no_saved_model": "このデータセットには保存済みモデルがまだありません。"
+        },
+        "legend": {
+            "directed": "有向",
+            "undirected": "無向 / 弱い関係",
+            "edges": "エッジ {shown} / {total}"
+        },
         "dataset": {
             "extend": "拡張",
             "field": "フィールド",
@@ -727,6 +739,10 @@
         },
         "actions": {
             "clear_fields": "すべてのフィールドのクリア",
+            "run": "因果探索を実行",
+            "params": "アルゴリズム設定",
+            "model": "モデル",
+            "clear": "クリア",
             "causal_discover": "因果関係の発見",
             "relayout": "リレイアウト",
             "zoom_canvas": "キャンバスのズーム",
@@ -799,6 +815,11 @@
             "fully replace": "完全に置換する",
             "mutual_info": "相互情報量",
             "conditional_mutual_info": "条件付き相互情報量",
+            "algorithm": "アルゴリズム",
+            "graph": "グラフ",
+            "source": "ソース",
+            "selection": "選択中",
+            "canvas_tools": "キャンバスツール",
             "causal_discover": "因果関係の発見",
             "matrix": "行列",
             "diagram": "ダイアグラム",
@@ -822,6 +843,8 @@
             }
         },
         "exploration": {
+            "empty_title": "フィールドが未選択です",
+            "empty_desc": "因果グラフ上のノードをクリック、または投げ縄で範囲選択すると、ここで関係を探索できます。",
             "AutoVis": "AutoVis",
             "CrossFilter": "CrossFilter",
             "CausalInsight": "CausalInsight",

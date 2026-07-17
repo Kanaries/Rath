@@ -675,6 +675,18 @@
         }
     },
     "causal": {
+        "status": {
+            "computing": "Computing…",
+            "result": "{algorithm} · {edges} edges on {fields} fields",
+            "no_result": "No causal model yet — run discovery to begin",
+            "no_algorithm": "No algorithm available for the current dataset.",
+            "no_saved_model": "No saved model for this dataset yet."
+        },
+        "legend": {
+            "directed": "directed",
+            "undirected": "undirected / weak",
+            "edges": "Edges {shown} / {total}"
+        },
         "dataset": {
             "extend": "Extending",
             "field": "Field",
@@ -691,6 +703,10 @@
         },
         "actions": {
             "clear_fields": "Clear All Fields",
+            "run": "Run Discovery",
+            "params": "Algorithm Parameters",
+            "model": "Model",
+            "clear": "Clear",
             "causal_discover": "Causal Discover",
             "relayout": "Relayout",
             "zoom_canvas": "Zoom Canvas",
@@ -763,6 +779,11 @@
             "fully replace": "Fully Replace",
             "mutual_info": "Mutual Info",
             "conditional_mutual_info": "Conditional Mutual Info",
+            "algorithm": "Algorithm",
+            "graph": "Graph",
+            "source": "Source",
+            "selection": "Selection",
+            "canvas_tools": "Canvas tools",
             "causal_discover": "Causal Discover",
             "matrix": "Matrix",
             "diagram": "Diagram",
@@ -786,6 +807,8 @@
             }
         },
         "exploration": {
+            "empty_title": "No fields selected",
+            "empty_desc": "Click nodes in the causal graph, or lasso a region, to explore their relationships here.",
             "AutoVis": "AutoVis",
             "CrossFilter": "CrossFilter",
             "CausalInsight": "CausalInsight",

@@ -2,17 +2,18 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { cn } from 'utils/cn';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
+import { Separator } from '../../../components/ui/separator';
 import { Slider } from '../../../components/ui/slider';
-import { Switch } from '../../../components/ui/switch';
 import { RathIcon } from '../../../components/icons';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import type { EdgeAssert } from '../../../store/causalStore/modelStore';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import type { Subtree } from '../exploration';
-import Floating from '../floating';
 import ExplorerMainView from './explorerMainView';
 
 export type CausalNode = {
@@ -38,54 +39,46 @@ export interface ExplorerProps {
 
 const Container = styled.div`
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    height: 100%;
     position: relative;
-`;
-
-const Tools = styled.div`
-    width: 250px;
-    flex-grow: 0;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 1em 1em;
-    align-items: flex-start;
-    user-select: none;
-    > * {
-        flex-grow: 0;
-        flex-shrink: 0;
-        margin: 0.3em 0;
-    }
-    > *:not(:first-child) {
-        width: 100%;
-    }
-`;
-
-const MainView = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
-    /* height: 46vh; */
     overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: stretch;
-    border: 1px solid #e3e2e2;
-    /* padding: 1em; */
-    > * {
-        height: 100%;
-        flex-grow: 1;
-        flex-shrink: 1;
+    > .main-view {
+        position: absolute;
+        inset: 0;
     }
 `;
+
+const LegendLine = styled.span<{ dashed?: boolean }>`
+    display: inline-block;
+    width: 18px;
+    border-top: 2px ${({ dashed }) => (dashed ? 'dashed' : 'solid')} #f6bd16;
+    opacity: ${({ dashed }) => (dashed ? 0.7 : 1)};
+`;
+
+const ToolButton: FC<{
+    icon: string;
+    label: string;
+    pressed?: boolean;
+    onClick?: () => void;
+}> = ({ icon, label, pressed, onClick }) => (
+    <Button
+        variant="ghost"
+        size="icon"
+        className={cn('h-7 w-7 text-muted-foreground hover:text-foreground', pressed && 'bg-accent text-accent-foreground')}
+        title={label}
+        aria-label={label}
+        aria-pressed={pressed}
+        onClick={onClick}
+    >
+        <RathIcon name={icon} size={14} />
+    </Button>
+);
 
 const Explorer: FC<ExplorerProps> = ({ allowEdit, onLinkTogether, onRevertLink, onRemoveLink, handleLasso, handleSubTreeSelected }) => {
     const { causalStore } = useGlobalStore();
     const { causality } = causalStore.model;
 
-    const [cutThreshold, setCutThreshold] = useState(0);
+    const [cutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
 
     const [allowZoom, setAllowZoom] = useState(false);
@@ -120,24 +113,12 @@ const Explorer: FC<ExplorerProps> = ({ allowEdit, onLinkTogether, onRevertLink, 
         setMode('explore');
     }, [allowEdit]);
 
+    const totalEdges = (causality ?? []).length;
+    const shownEdges = Math.min(limit, totalEdges);
+
     return (
         <Container>
-            <div style={{ display: 'flex', margin: '0 0 0.6em' }}>
-                <Button
-                    variant="outline"
-                    style={{
-                        flexGrow: 0,
-                        flexShrink: 0,
-                        flexBasis: 'max-content',
-                        padding: '0.4em 0',
-                    }}
-                    onClick={forceLayout}
-                >
-                    <RathIcon name="Play" />
-                    {intl.get('causal.actions.relayout')}
-                </Button>
-            </div>
-            <MainView>
+            <div className="main-view">
                 <ExplorerMainView
                     forceRelayoutRef={forceRelayoutRef}
                     limit={limit}
@@ -155,47 +136,70 @@ const Explorer: FC<ExplorerProps> = ({ allowEdit, onLinkTogether, onRevertLink, 
                         height: '100%',
                     }}
                 />
-            </MainView>
-            <Floating position="absolute" direction="start" onRenderAside={() => <RathIcon name="Waffle" />}>
-                <Tools>
-                    <div className="flex items-center justify-between gap-4">
-                        <Label htmlFor="causal-zoom-canvas">{intl.get('causal.actions.zoom_canvas')}</Label>
-                        <Switch id="causal-zoom-canvas" checked={allowZoom} onCheckedChange={(checked) => setAllowZoom(Boolean(checked))} />
-                    </div>
-                    {allowEdit && (
-                        <div className="flex items-center justify-between gap-4">
-                            <Label htmlFor="causal-modify-constraints">{intl.get('causal.actions.modify_constraints')}</Label>
-                            <Switch
-                                id="causal-modify-constraints"
-                                checked={mode === 'edit'}
-                                onCheckedChange={(checked) => setMode(checked ? 'edit' : 'explore')}
-                            />
-                        </div>
-                    )}
-                    <div className="grid gap-2">
-                        <div className="flex items-center justify-between gap-4">
-                            <Label>{intl.get('causal.actions.display_limit')}</Label>
-                            <span className="text-sm text-muted-foreground">{limit}</span>
-                        </div>
-                        <Slider
-                            min={1}
-                            max={Math.max((causality ?? []).length, limit, 10)}
-                            value={[limit]}
-                            onValueChange={(value) => setLimit(value[0])}
+            </div>
+            <div
+                role="toolbar"
+                aria-label={intl.get('causal.analyze.canvas_tools')}
+                className="absolute right-2.5 top-2.5 flex items-center gap-0.5 rounded-lg border bg-background p-0.5 shadow-sm"
+            >
+                <ToolButton icon="Refresh" label={intl.get('causal.actions.relayout')} onClick={forceLayout} />
+                <ToolButton
+                    icon="Search"
+                    label={intl.get('causal.actions.zoom_canvas')}
+                    pressed={allowZoom}
+                    onClick={() => setAllowZoom((v) => !v)}
+                />
+                {allowEdit && (
+                    <>
+                        <Separator orientation="vertical" className="mx-0.5 h-4" />
+                        <ToolButton
+                            icon="Edit"
+                            label={intl.get('causal.actions.modify_constraints')}
+                            pressed={mode === 'edit'}
+                            onClick={() => setMode((m) => (m === 'edit' ? 'explore' : 'edit'))}
                         />
-                    </div>
-                    {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
-                    {false && (
+                    </>
+                )}
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                            title={intl.get('causal.actions.display_limit')}
+                            aria-label={intl.get('causal.actions.display_limit')}
+                        >
+                            <RathIcon name="BulletedList" size={14} />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-64">
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-4">
-                                <Label>{intl.get('causal.actions.filter_by_weights')}</Label>
-                                <span className="text-sm text-muted-foreground">{cutThreshold}</span>
+                                <Label>{intl.get('causal.actions.display_limit')}</Label>
+                                <span className="text-sm text-muted-foreground">{limit}</span>
                             </div>
-                            <Slider min={0} max={1} step={0.01} value={[cutThreshold]} onValueChange={(d) => setCutThreshold(d[0])} />
+                            <Slider
+                                min={1}
+                                max={Math.max(totalEdges, limit, 10)}
+                                value={[limit]}
+                                onValueChange={(value) => setLimit(value[0])}
+                            />
                         </div>
-                    )}
-                </Tools>
-            </Floating>
+                    </PopoverContent>
+                </Popover>
+            </div>
+            <div className="absolute bottom-2.5 left-2.5 flex items-center gap-3.5 rounded-lg border bg-background/85 px-3 py-1.5 text-[11px] text-muted-foreground backdrop-blur-sm">
+                <span className="inline-flex items-center gap-1.5">
+                    <LegendLine /> {intl.get('causal.legend.directed')}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <LegendLine dashed /> {intl.get('causal.legend.undirected')}
+                </span>
+                <span className="text-muted-foreground/70">
+                    {intl.get('causal.legend.edges', { shown: shownEdges, total: totalEdges })}
+                </span>
+                {mode === 'edit' && <span className="font-medium text-primary">{intl.get('causal.actions.modify_constraints')}</span>}
+            </div>
         </Container>
     );
 };

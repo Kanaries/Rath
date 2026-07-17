@@ -84,6 +84,12 @@ export const useReactiveGraph = ({
             graph.data(dataRef.current);
             graph.render();
 
+            graph.on('afterlayout', () => {
+                if (graph.getNodes().length > 0) {
+                    graph.fitView(24);
+                }
+            });
+
             graph.on('node:click', (e: any) => {
                 const fid = e.item._cfg.id;
                 if (typeof fid === 'string') {
@@ -267,7 +273,12 @@ export const useReactiveGraph = ({
 
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {
-            graphRef.current?.read(dataRef.current);
+            const { current: graph } = graphRef;
+            if (graph) {
+                graph.read(dataRef.current);
+                // fruchterman finishes synchronously; fit once the frame settles
+                setTimeout(() => graphRef.current?.fitView(24), 0);
+            }
         },
     }), [graphRef]);
 };

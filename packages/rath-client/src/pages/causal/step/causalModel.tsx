@@ -1,34 +1,45 @@
 import { observer } from 'mobx-react-lite';
-import { FC, RefObject, useCallback, useRef } from 'react';
+import { FC, RefObject, useCallback, useMemo, useRef } from 'react';
+import { Resizable } from 're-resizable';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import type { EdgeAssert } from '../../../store/causalStore/modelStore';
 import Explorer from '../explorer';
-import Params from '../params';
-import ModelStorage from '../modelStorage';
 import Exploration, { Subtree } from '../exploration';
-import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
+import CausalCanvas, { MATRIX_TYPE } from '../canvas';
+import CommandBar from './commandBar';
 
 const Container = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     overflow: hidden;
-    > div {
-        height: 100%;
-        flex-grow: 1;
-        flex-shrink: 1;
-        flex-basis: 0;
-        overflow: auto;
-        padding: 0 1em;
-        :not(:first-child) {
-            border-left: 1px solid #8882;
-        }
-    }
 `;
+
+const WorkBench = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    overflow: hidden;
+`;
+
+const CanvasArea = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 1em;
+`;
+
+const INSPECTOR_WIDTH_KEY = 'rath-causal-inspector-width';
 
 export const CausalExplorer = observer<{
     allowEdit: boolean;
@@ -110,38 +121,57 @@ const CausalModal: FC = () => {
 
     const listenerRef = useRef<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>({});
 
+    const handleCompute = useCallback(
+        (matKey: MATRIX_TYPE) => {
+            if (causalStore.operator.busy) {
+                return;
+            }
+            switch (matKey) {
+                case MATRIX_TYPE.conditionalMutualInfo:
+                    causalStore.computeCondMutualMatrix();
+                    break;
+                case MATRIX_TYPE.causal:
+                    causalStore.run();
+                    break;
+                case MATRIX_TYPE.mutualInfo:
+                default:
+                    causalStore.computeMutualMatrix();
+                    break;
+            }
+        },
+        [causalStore]
+    );
+
+    const defaultInspectorWidth = useMemo(() => {
+        const stored = Number(localStorage.getItem(INSPECTOR_WIDTH_KEY));
+        return Number.isFinite(stored) && stored >= 320 ? stored : undefined;
+    }, []);
+
     return (
         <Container>
-            <div>
-                <div style={{ display: 'flex', gap: '1em', marginTop: '1em' }}>
-                    <ModelStorage />
-                    <Params />
-                </div>
-                <MatrixPanel
-                    onMatrixPointClick={onFieldGroupSelect}
-                    onCompute={(matKey) => {
-                        if (causalStore.operator.busy) {
-                            return;
-                        }
-                        switch (matKey) {
-                            case MATRIX_TYPE.conditionalMutualInfo:
-                                causalStore.computeCondMutualMatrix();
-                                break;
-                            case MATRIX_TYPE.causal:
-                                causalStore.run();
-                                break;
-                            case MATRIX_TYPE.mutualInfo:
-                            default:
-                                causalStore.computeMutualMatrix();
-                                break;
-                        }
+            <CommandBar />
+            <WorkBench>
+                <CanvasArea>
+                    <CausalCanvas
+                        onMatrixPointClick={onFieldGroupSelect}
+                        onCompute={handleCompute}
+                        diagram={<CausalExplorer allowEdit listenerRef={listenerRef} />}
+                    />
+                </CanvasArea>
+                <Resizable
+                    defaultSize={{ width: defaultInspectorWidth ?? '40%', height: '100%' }}
+                    minWidth={320}
+                    maxWidth="65%"
+                    enable={{ left: true }}
+                    handleStyles={{ left: { width: 5, left: -2 } }}
+                    onResizeStop={(_e, _dir, el) => {
+                        localStorage.setItem(INSPECTOR_WIDTH_KEY, String(el.getBoundingClientRect().width));
                     }}
-                    diagram={<CausalExplorer allowEdit listenerRef={listenerRef} />}
-                />
-            </div>
-            <div style={{ flexGrow: 1.4, display: 'flex', flexDirection: 'column' }}>
-                <Exploration ref={listenerRef} />
-            </div>
+                    className="flex flex-col overflow-hidden border-l"
+                >
+                    <Exploration ref={listenerRef} />
+                </Resizable>
+            </WorkBench>
         </Container>
     );
 };
