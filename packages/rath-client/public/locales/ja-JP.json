@@ -851,5 +851,38 @@
             "GraphicWalker": "GraphicWalker",
             "predict": "predict"
         }
+    },
+    "dashboardDesigner": {
+        "title": "スマートダッシュボード",
+        "desc": "気になるチャートを固定すると、残りのチャートは既存の内容に基づいて自動的に推薦・補完されます。",
+        "computing": "フィールド間の関係を分析中…",
+        "quality": "関連度",
+        "autoOption": "自動推薦 (*)",
+        "reason": "{field}：{anchor} との関連度 {score}",
+        "unfilled": "{count} 個の空きスロットに適切な推薦がありません",
+        "emptyView": "推薦結果がありません。設定からフィールドを手動で選択してください。",
+        "status": {
+            "pinned": "固定済み",
+            "suggested": "推薦"
+        },
+        "actions": {
+            "pin": "このチャートを固定",
+            "unpin": "固定を解除",
+            "shuffle": "別の推薦に切り替え",
+            "edit": "フィールドを設定",
+            "delete": "ビューを削除",
+            "addView": "ビューを追加",
+            "acceptAll": "すべて固定",
+            "reset": "キャンバスをリセット",
+            "addField": "フィールドを追加",
+            "removeField": "フィールドを削除",
+            "adopt": "この推薦フィールドを採用"
+        },
+        "fieldSlot": "フィールド {index}",
+        "empty": {
+            "title": "利用可能なデータがありません",
+            "desc": "まずデータを接続してください。フィールド間の関係に基づいてダッシュボードを段階的に生成します。",
+            "goConnect": "データを接続"
+        }
     }
 }

@@ -815,5 +815,38 @@
             "GraphicWalker": "GraphicWalker",
             "predict": "predict"
         }
+    },
+    "dashboardDesigner": {
+        "title": "Dashboard Designer",
+        "desc": "Pin the charts you care about; the rest are recommended and completed automatically based on what you have.",
+        "computing": "Analyzing field relations…",
+        "quality": "Relevance",
+        "autoOption": "Auto suggest (*)",
+        "reason": "{field}: related to {anchor} with strength {score}",
+        "unfilled": "{count} empty slot(s) have no suitable suggestion",
+        "emptyView": "No recommendation yet. Open settings to pick fields manually.",
+        "status": {
+            "pinned": "Pinned",
+            "suggested": "Suggested"
+        },
+        "actions": {
+            "pin": "Pin this chart",
+            "unpin": "Unpin",
+            "shuffle": "Shuffle suggestions",
+            "edit": "Configure fields",
+            "delete": "Delete view",
+            "addView": "Add view",
+            "acceptAll": "Pin all",
+            "reset": "Reset canvas",
+            "addField": "Add field",
+            "removeField": "Remove field",
+            "adopt": "Adopt this suggested field"
+        },
+        "fieldSlot": "Field {index}",
+        "empty": {
+            "title": "No data available yet",
+            "desc": "Connect a dataset first. Dashboard Designer will progressively build a dashboard from field relations.",
+            "goConnect": "Connect data"
+        }
     }
 }

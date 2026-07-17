@@ -111,7 +111,7 @@ class TestCore extends NextVICore {
 }
 
 export interface ILoaProps {
-    task: 'univar' | 'patterns' | 'featureSelection' | 'comparison' | 'filterSelection' | 'neighbors';
+    task: 'univar' | 'patterns' | 'featureSelection' | 'comparison' | 'filterSelection' | 'neighbors' | 'relationMatrix';
     props?: any;
     dataSource: IRow[];
     fields: IFieldMeta[];
@@ -125,6 +125,7 @@ export function serviceHandler(reqProps: ILoaProps) {
         if (task === 'comparison') return featureForComparison(dataSource, fields, props);
         if (task === 'filterSelection') return filterSelection(dataSource, fields, props);
         if (task === 'neighbors') return replaceFields(dataSource, fields, props);
+        if (task === 'relationMatrix') return relationMatrixService(dataSource, fields);
     } catch (error: any) {
         throw new Error(`[loa engine][${task}]${error}\n${error.stack}`);
     }
@@ -165,4 +166,17 @@ function replaceFields (dataSource: IRow[], fields: IFieldMeta[], props: ILoaDat
     const core = new TestCore(dataSource, fields);
     const ans = core.replaceFields(dataSource, fields, props);
     return ans;
+}
+
+function relationMatrixService (dataSource: IRow[], fields: IFieldMeta[]): number[][] {
+    const size = fields.length;
+    const matrix: number[][] = new Array(size).fill(0).map(() => new Array(size).fill(0));
+    for (let i = 0; i < size; i++) {
+        matrix[i][i] = 1;
+        for (let j = 0; j < size; j++) {
+            if (i === j) continue;
+            matrix[i][j] = getFieldRelation(dataSource, fields[i], fields[j]);
+        }
+    }
+    return matrix;
 }

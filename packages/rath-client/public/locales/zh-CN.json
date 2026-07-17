@@ -791,5 +791,38 @@
             "GraphicWalker": "可视化自助分析",
             "predict": "模型预测"
         }
+    },
+    "dashboardDesigner": {
+        "title": "智能报表",
+        "desc": "先固定你关心的图表，剩下的图表会根据已有内容自动推荐补全。",
+        "computing": "正在分析字段关系…",
+        "quality": "关联度",
+        "autoOption": "自动推荐 (*)",
+        "reason": "{field}：与 {anchor} 关联度 {score}",
+        "unfilled": "{count} 个空位暂无合适推荐",
+        "emptyView": "暂无推荐结果，点击设置手动选择字段",
+        "status": {
+            "pinned": "已固定",
+            "suggested": "推荐"
+        },
+        "actions": {
+            "pin": "固定这张图",
+            "unpin": "取消固定",
+            "shuffle": "换一批推荐",
+            "edit": "配置字段",
+            "delete": "删除视图",
+            "addView": "添加视图",
+            "acceptAll": "全部固定",
+            "reset": "重置画布",
+            "addField": "添加字段",
+            "removeField": "移除字段",
+            "adopt": "采纳这个推荐字段"
+        },
+        "fieldSlot": "字段 {index}",
+        "empty": {
+            "title": "还没有可用的数据",
+            "desc": "先连接一份数据，智能报表会基于字段间的关系为你逐步生成仪表盘。",
+            "goConnect": "去连接数据"
+        }
     }
 }
