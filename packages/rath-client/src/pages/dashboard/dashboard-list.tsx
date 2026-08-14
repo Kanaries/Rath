@@ -7,17 +7,15 @@ import { RathColumn, RathDataTable } from '../../components/rath-ui/rath-data-ta
 import { Button } from '../../components/ui/button';
 import { RathIcon } from '../../components/icons';
 import { useGlobalStore } from '../../store';
-import type { DashboardDocument } from '../../store/dashboardStore';
 import DocumentPreview from './document-preview';
-import { EditableCell } from './dashboard-homepage';
+import { EditableCell, type DashboardPageItem } from './dashboard-homepage';
 
 const TableContainer = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
     min-height: 0;
     overflow: hidden;
-    margin-block: 1em;
-    padding-bottom: 1em;
+    margin-top: 16px;
 `;
 
 const ButtonGroup = styled.div`
@@ -55,16 +53,16 @@ const PreviewPopup = styled.div`
 
 export type FlatDocumentInfo = {
     index: number;
-    name: DashboardDocument['info']['name'];
-    description: DashboardDocument['info']['description'];
-    source: DashboardDocument['data']['source'];
-    createTime: DashboardDocument['info']['createTime'];
-    lastModifyTime: DashboardDocument['info']['lastModifyTime'];
+    name: DashboardPageItem['page']['info']['name'];
+    description: DashboardPageItem['page']['info']['description'];
+    source: DashboardPageItem['page']['data']['source'];
+    createTime: DashboardPageItem['page']['info']['createTime'];
+    lastModifyTime: DashboardPageItem['page']['info']['lastModifyTime'];
 };
 
 export interface DashboardListProps {
     openDocument: (index: number) => void;
-    pages: DashboardDocument[];
+    pages: DashboardPageItem[];
 }
 
 const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
@@ -83,18 +81,14 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
         position: [number, number];
     } | null>(null);
 
-    const items = useMemo(
-        () =>
-            pages.map<FlatDocumentInfo>((p, i) => ({
-                index: i,
-                name: p.info.name,
-                source: p.data.source,
-                description: p.info.description,
-                createTime: p.info.createTime,
-                lastModifyTime: p.info.lastModifyTime,
-            })),
-        [pages]
-    );
+    const items = pages.map<FlatDocumentInfo>(({ page, index }) => ({
+        index,
+        name: page.info.name,
+        source: page.data.source,
+        description: page.info.description,
+        createTime: page.info.createTime,
+        lastModifyTime: page.info.lastModifyTime,
+    }));
 
     const openDocumentRef = useRef(openDocument);
     openDocumentRef.current = openDocument;
@@ -112,15 +106,15 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="Edit"
+                                aria-label={`Open ${item.name}`}
                                 onClick={() => openDocumentRef.current((item as FlatDocumentInfo).index)}
                             >
                                 <RathIcon name="BarChartVerticalEdit" />
                             </Button>
-                            <Button variant="ghost" size="icon" aria-label="Copy" onClick={operators.copy}>
+                            <Button variant="ghost" size="icon" aria-label={`Duplicate ${item.name}`} onClick={operators.copy}>
                                 <RathIcon name="Copy" />
                             </Button>
-                            <Button variant="ghost" size="icon" aria-label="Delete" onClick={operators.remove}>
+                            <Button variant="ghost" size="icon" aria-label={`Delete ${item.name}`} onClick={operators.remove}>
                                 <RathIcon name="Delete" style={{ color: '#f21044' }} />
                             </Button>
                         </ButtonGroup>
@@ -129,7 +123,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
             },
             {
                 key: 'source',
-                name: 'source' || intl.get(''),
+                name: intl.get('common.source'),
                 fieldName: 'source',
                 minWidth: 100,
                 isSortable: true,
@@ -139,7 +133,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
             },
             {
                 key: 'name',
-                name: 'name' || intl.get(''),
+                name: intl.get('common.name'),
                 fieldName: 'name',
                 minWidth: 180,
                 isSortable: true,
@@ -148,23 +142,37 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 isSortedDescending: sortMode.direction === 'descending',
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
-                    return <EditableCell value={item['name']} placeholder="(name)" onChange={operators.setName} />;
+                    return (
+                        <EditableCell
+                            value={item.name}
+                            placeholder="Untitled dashboard"
+                            onChange={operators.setName}
+                            editLabel={`Edit ${item.name} name`}
+                        />
+                    );
                 },
             },
             {
                 key: 'description',
-                name: 'description' || intl.get(''),
+                name: 'Description',
                 fieldName: 'description',
                 minWidth: 200,
                 isResizable: true,
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
-                    return <EditableCell value={item['description']} placeholder="(description)" onChange={operators.setDesc} />;
+                    return (
+                        <EditableCell
+                            value={item.description}
+                            placeholder="Add a description"
+                            onChange={operators.setDesc}
+                            editLabel={`Edit ${item.name} description`}
+                        />
+                    );
                 },
             },
             {
                 key: 'createTime',
-                name: 'createTime' || intl.get(''),
+                name: 'Created',
                 fieldName: 'createTime',
                 minWidth: 120,
                 maxWidth: 120,
@@ -177,7 +185,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
             },
             {
                 key: 'lastModifyTime',
-                name: 'lastModifyTime' || intl.get(''),
+                name: 'Last updated',
                 fieldName: 'lastModifyTime',
                 minWidth: 120,
                 maxWidth: 120,
@@ -194,7 +202,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
     const sortedItems = useMemo<typeof items>(() => {
         const flag = sortMode.direction === 'descending' ? -1 : 1;
 
-        return items.sort((ar, br) => {
+        return [...items].sort((ar, br) => {
             const a = ar[sortMode.key];
             const b = br[sortMode.key];
 
@@ -245,6 +253,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                     onScroll={() => setPreviewSource(null)}
                     onColumnHeaderClick={(col) => toggleSort(col.key as typeof sortMode.key)}
                     rowClassName={() => 'group'}
+                    onRowClick={(item) => openDocumentRef.current(item.index)}
                     onRowMouseEnter={(item, _index, event) => {
                         const { y } = event.currentTarget.getBoundingClientRect();
                         setPreviewSource({
@@ -256,7 +265,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 />
             </TableContainer>
             {previewSource &&
-                pages.length > previewSource.source &&
+                dashboardStore.pages.length > previewSource.source &&
                 createPortal(
                     <PreviewPopup style={popupLayout}>
                         <DocumentPreview index={previewSource.source} />

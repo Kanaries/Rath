@@ -61,8 +61,7 @@ const getCellValue = <T,>(item: T, column: RathColumn<T>) => {
 
 const CELL_INLINE_PADDING = 16;
 
-const withCellPadding = (width: number | undefined): number | undefined =>
-    width === undefined ? undefined : width + CELL_INLINE_PADDING;
+const withCellPadding = (width: number | undefined): number | undefined => (width === undefined ? undefined : width + CELL_INLINE_PADDING);
 
 const getColumnStyle = <T,>(column: RathColumn<T>, resizedWidth?: number): React.CSSProperties => {
     if (resizedWidth !== undefined) {
@@ -125,8 +124,7 @@ export function RathDataTable<T>({
     const virtualItems = shouldVirtualize ? rowVirtualizer.getVirtualItems() : [];
     const visibleIndices = shouldVirtualize && virtualItems.length > 0 ? virtualItems.map((row) => row.index) : items.map((_, index) => index);
     const paddingTop = shouldVirtualize && virtualItems.length > 0 ? virtualItems[0].start : 0;
-    const paddingBottom =
-        shouldVirtualize && virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end : 0;
+    const paddingBottom = shouldVirtualize && virtualItems.length > 0 ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end : 0;
     const canVirtualizeColumns = columns.length > 0 && columns.every((column) => getColumnSize(column, columnWidths[column.key]) !== undefined);
     const shouldVirtualizeColumns = horizontalVirtualized && !selection && canVirtualizeColumns;
     const columnVirtualizer = useVirtualizer({
@@ -139,18 +137,13 @@ export function RathDataTable<T>({
     });
     const virtualColumns = shouldVirtualizeColumns ? columnVirtualizer.getVirtualItems() : [];
     const visibleColumns =
-        shouldVirtualizeColumns && virtualColumns.length > 0
-            ? virtualColumns.map((virtualColumn) => columns[virtualColumn.index])
-            : columns;
+        shouldVirtualizeColumns && virtualColumns.length > 0 ? virtualColumns.map((virtualColumn) => columns[virtualColumn.index]) : columns;
     const paddingLeft = shouldVirtualizeColumns && virtualColumns.length > 0 ? virtualColumns[0].start : 0;
     const paddingRight =
-        shouldVirtualizeColumns && virtualColumns.length > 0
-            ? columnVirtualizer.getTotalSize() - virtualColumns[virtualColumns.length - 1].end
-            : 0;
+        shouldVirtualizeColumns && virtualColumns.length > 0 ? columnVirtualizer.getTotalSize() - virtualColumns[virtualColumns.length - 1].end : 0;
     const renderedColumnCount = visibleColumns.length + (selection ? 1 : 0) + (paddingLeft > 0 ? 1 : 0) + (paddingRight > 0 ? 1 : 0);
     const minimumTableWidth = React.useMemo(
-        () =>
-            columns.reduce((total, column) => total + (withCellPadding(column.minWidth) ?? 0), selection ? 32 : 0),
+        () => columns.reduce((total, column) => total + (withCellPadding(column.minWidth) ?? 0), selection ? 32 : 0),
         [columns, selection]
     );
 
@@ -312,10 +305,7 @@ export function RathDataTable<T>({
                 <TableBody>
                     {items.length === 0 ? (
                         <TableRow>
-                            <TableCell
-                                colSpan={renderedColumnCount}
-                                className={cn('text-center text-muted-foreground', compact ? 'p-2' : 'p-4')}
-                            >
+                            <TableCell colSpan={renderedColumnCount} className={cn('text-center text-muted-foreground', compact ? 'p-2' : 'p-4')}>
                                 {emptyMessage}
                             </TableCell>
                         </TableRow>
@@ -349,7 +339,7 @@ export function RathDataTable<T>({
                                         onKeyDown={
                                             rowInteractive
                                                 ? (event) => {
-                                                      if (event.key === 'Enter' || event.key === ' ') {
+                                                      if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
                                                           event.preventDefault();
                                                           handleRowAction();
                                                       }
